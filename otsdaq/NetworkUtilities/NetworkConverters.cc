@@ -6,13 +6,13 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 NetworkConverters::NetworkConverters() {}
 
-//========================================================================================================================
+//==============================================================================
 NetworkConverters::~NetworkConverters() {}
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::nameToStringIP(const std::string& value)
 {
 	struct sockaddr_in socketAddress;
@@ -21,20 +21,20 @@ std::string NetworkConverters::nameToStringIP(const std::string& value)
 	return networkToStringIP(socketAddress.sin_addr.s_addr);
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::stringToNameIP(const std::string& value)
 {
 	struct sockaddr_in socketAddress;
 	socketAddress.sin_addr.s_addr = stringToNetworkIP(value);
 	return std::string(inet_ntoa(socketAddress.sin_addr));
 }
-//========================================================================================================================
+//==============================================================================
 uint32_t NetworkConverters::stringToNetworkIP(const std::string& value) { return unsignedToNetworkIP(stringToUnsignedIP(value)); }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::networkToStringIP(uint32_t value) { return unsignedToStringIP(networkToUnsignedIP(value)); }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::unsignedToStringIP(uint32_t value)
 {
 	std::string returnValue;
@@ -45,25 +45,25 @@ std::string NetworkConverters::unsignedToStringIP(uint32_t value)
 	return returnValue;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t NetworkConverters::stringToUnsignedIP(const std::string& value)
 {
 	return ((((uint32_t)value[0]) & 0xff) << 24) + ((((uint32_t)value[1]) & 0xff) << 16) + ((((uint32_t)value[2]) & 0xff) << 8) + (((uint32_t)value[3]) & 0xff);
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t NetworkConverters::unsignedToNetworkIP(uint32_t value) { return htonl(value); }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t NetworkConverters::networkToUnsignedIP(uint32_t value) { return ntohl(value); }
 
-//========================================================================================================================
+//==============================================================================
 uint16_t NetworkConverters::stringToNetworkPort(const std::string& value) { return unsignedToNetworkPort(stringToUnsignedPort(value)); }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::networkToStringPort(uint16_t value) { return unsignedToStringPort(networkToUnsignedPort(value)); }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkConverters::unsignedToStringPort(uint16_t value)
 {
 	std::string returnValue;
@@ -72,11 +72,11 @@ std::string NetworkConverters::unsignedToStringPort(uint16_t value)
 	return returnValue;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint16_t NetworkConverters::stringToUnsignedPort(const std::string& value) { return ((((uint32_t)value[0]) & 0xff) << 8) + (((uint32_t)value[1]) & 0xff); }
 
-//========================================================================================================================
+//==============================================================================
 uint16_t NetworkConverters::unsignedToNetworkPort(uint16_t value) { return htons(value); }
 
-//========================================================================================================================
+//==============================================================================
 uint16_t NetworkConverters::networkToUnsignedPort(uint16_t value) { return ntohs(value); }

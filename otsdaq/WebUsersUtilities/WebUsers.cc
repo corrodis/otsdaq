@@ -32,7 +32,7 @@ using namespace ots;
 #define IP_REJECT_FILE 						WEB_LOGIN_DB_PATH + "/ip_reject.dat"
 #define IP_ACCEPT_FILE 						WEB_LOGIN_DB_PATH + "/ip_accept.dat"
 
-#define SILENCE_ALL_TOOLTIPS_FILENAME                   "silenceTooltips"
+#define SILENCE_ALL_TOOLTIPS_FILENAME       "silenceTooltips"
 
 #define HASHES_DB_GLOBAL_STRING 			"hashData"
 #define HASHES_DB_ENTRY_STRING 				"hashEntry"
@@ -76,7 +76,12 @@ const std::string WebUsers::REQ_ALLOW_NO_USER          = "AllowNoUser";
 
 const std::string WebUsers::SECURITY_TYPE_NONE          = "NoSecurity";
 const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentication";
+const std::string WebUsers::SECURITY_TYPE_DEFAULT 		= WebUsers::SECURITY_TYPE_NONE; // default to NO SECURITY
 
+const std::vector<std::string> WebUsers::HashesDatabaseEntryFields_ = {"hash","lastAccessTime"};
+const std::vector<std::string> WebUsers::UsersDatabaseEntryFields_ = {"username","displayName","salt",
+		"uid","permissions","lastLoginAttemptTime","accountCreatedTime",
+		"loginFailureCount","lastModifiedTime","lastModifierUsername","useremail"};
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "WebUsers"
@@ -85,26 +90,28 @@ const std::string WebUsers::SECURITY_TYPE_DIGEST_ACCESS = "DigestAccessAuthentic
 
 WebUsers::WebUsers()
 {
+	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
+
 	// deleteUserData(); //leave for debugging to reset user data
 
 	usersNextUserId_       = 0;   // first UID, default to 0 but get from database
 	usersUsernameWithLock_ = "";  // init to no user with lock
 
-	// define fields
-	HashesDatabaseEntryFields.push_back("hash");
-	HashesDatabaseEntryFields.push_back("lastAccessTime");  // last login month resolution, blurred by 1/2 month
-
-	UsersDatabaseEntryFields.push_back("username");
-	UsersDatabaseEntryFields.push_back("displayName");
-	UsersDatabaseEntryFields.push_back("salt");
-	UsersDatabaseEntryFields.push_back("uid");
-	UsersDatabaseEntryFields.push_back("permissions");
-	UsersDatabaseEntryFields.push_back("lastLoginAttemptTime");
-	UsersDatabaseEntryFields.push_back("accountCreatedTime");
-	UsersDatabaseEntryFields.push_back("loginFailureCount");
-	UsersDatabaseEntryFields.push_back("lastModifiedTime");
-	UsersDatabaseEntryFields.push_back("lastModifierUsername");
-	UsersDatabaseEntryFields.push_back("useremail");
+	// define field labels
+	//	HashesDatabaseEntryFields.push_back("hash");
+	//	HashesDatabaseEntryFields.push_back("lastAccessTime");  // last login month resolution, blurred by 1/2 month
+	//
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("username");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("displayName");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("salt");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("uid");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("permissions");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("lastLoginAttemptTime");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("accountCreatedTime");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("loginFailureCount");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("lastModifiedTime");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("lastModifierUsername");
+	//	WebUsers::UsersDatabaseEntryFields_.push_back("useremail");
 
 	// attempt to make directory structure (just in case)
 	mkdir(((std::string)WEB_LOGIN_DB_PATH).c_str(), 0755);
@@ -124,22 +131,18 @@ WebUsers::WebUsers()
 	std::string user = DEFAULT_ADMIN_USERNAME;
 	if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
 	{
-		__SS__ << "user: " << user << " is not found" << __E__;
+		__SS__ << "user: " << user << " is not found. This should be impossible!" << __E__;
 		__COUT_ERR__ << ss.str();
-		__SS_THROW__;
-		exit(0);  // THIS CAN NOT HAPPEN?! There must be an admin user
+		__SS_THROW__;  // THIS CAN NOT HAPPEN?! There must be an admin user
 	}
-	else if(UsersSaltVector[i] == "" &&  // admin password not setup, so print out NAC to help out
+	else if(Users_[i].salt_ == "" &&  // admin password not setup, so print out NAC to help out
 	        securityType_ == SECURITY_TYPE_DIGEST_ACCESS)
 	{
-		char charTimeStr[10];
-		sprintf(charTimeStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
-		std::string tmpTimeStr = charTimeStr;
-
 		//////////////////////////////////////////////////////////////////////
 		// start thread for notifying the user about the admin new account code
 		// notify for 10 seconds (e.g.)
-		std::thread([](const std::string& nac, const std::string& user) { WebUsers::NACDisplayThread(nac, user); }, tmpTimeStr, user).detach();
+		std::thread([](const std::string& nac, const std::string& user) { WebUsers::NACDisplayThread(nac, user); }, Users_[i].getNewAccountCode(), user)
+		    .detach();
 	}
 
 	// attempt to load persistent user sessions
@@ -152,19 +155,21 @@ WebUsers::WebUsers()
 	srand(time(0));  // seed random for hash salt generation
 
 	__COUT__ << "Done with Web Users initialization!" << __E__;
-}
+}  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 // xmlRequestOnGateway
 //	check the validity of an xml request at the server side, i.e. at the Gateway
 // supervisor, which is the owner 		of the web users instance. 	if false, gateway
 // request code should just return.. out is handled on false; on true, out is untouched
 bool WebUsers::xmlRequestOnGateway(cgicc::Cgicc& cgi, std::ostringstream* out, HttpXmlDocument* xmldoc, WebUsers::RequestUserInfo& userInfo)
 {
+	std::lock_guard<std::mutex> lock(webUserMutex_);
+
 	// initialize user info parameters to failed results
 	WebUsers::initializeRequestUserInfo(cgi, userInfo);
 
-	// tmpUserWithLock_ = "";
+	uint64_t i;
 
 	if(!cookieCodeIsActiveForRequest(userInfo.cookieCode_,
 	                                 &userInfo.groupPermissionLevelMap_,
@@ -180,8 +185,17 @@ bool WebUsers::xmlRequestOnGateway(cgicc::Cgicc& cgi, std::ostringstream* out, H
 
 	// setup userInfo.permissionLevel_ based on userInfo.groupPermissionLevelMap_
 	userInfo.getGroupPermissionLevel();
-	userInfo.username_    = UsersUsernameVector[userInfo.uid_];
-	userInfo.displayName_ = UsersDisplayNameVector[userInfo.uid_];
+
+	i = searchUsersDatabaseForUserId(userInfo.uid_);
+	if(i >= Users_.size())
+	{
+		__SS__ << "Illegal uid encountered in cookie codes!? " << i << __E__;
+		ss << "User size = " << Users_.size() << __E__;
+		__SS_THROW__;
+	}
+
+	userInfo.username_    = Users_[i].username_;
+	userInfo.displayName_ = Users_[i].displayName_;
 
 	if(!WebUsers::checkRequestAccess(cgi, out, xmldoc, userInfo))
 		goto HANDLE_ACCESS_FAILURE;  // return false, access failed
@@ -196,7 +210,7 @@ HANDLE_ACCESS_FAILURE:
 
 }  // end xmlRequestOnGateway()
 
-//========================================================================================================================
+//==============================================================================
 // initializeRequestUserInfo
 //	initialize user info parameters to failed results
 void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUserInfo& userInfo)
@@ -211,7 +225,7 @@ void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUse
 	userInfo.setGroupPermissionLevels("");  // always init to inactive
 }
 
-//========================================================================================================================
+//==============================================================================
 // checkRequestAccess
 //	check user permission parameters based on cookie code, user permission level
 //(extracted previous from group membership) 	Note: assumes
@@ -338,7 +352,7 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
 
 }  // end checkRequestAccess()
 
-//========================================================================================================================
+//==============================================================================
 // saveActiveSessions
 //	save active sessions structure so that they can survive restart
 void WebUsers::saveActiveSessions()
@@ -357,7 +371,7 @@ void WebUsers::saveActiveSessions()
 
 	int version = 0;
 	fprintf(fp, "%d\n", version);
-	for(unsigned int i = 0; i < ActiveSessionCookieCodeVector.size(); ++i)
+	for(unsigned int i = 0; i < ActiveSessions_.size(); ++i)
 	{
 		//		__COUT__ << "SAVE " << ActiveSessionCookieCodeVector[i] << __E__;
 		//		__COUT__ << "SAVE " << ActiveSessionIpVector[i] << __E__;
@@ -365,17 +379,17 @@ void WebUsers::saveActiveSessions()
 		//		__COUT__ << "SAVE " << ActiveSessionIndex[i] << __E__;
 		//		__COUT__ << "SAVE " << ActiveSessionStartTimeVector[i] << __E__;
 
-		fprintf(fp, "%s\n", ActiveSessionCookieCodeVector[i].c_str());
-		fprintf(fp, "%s\n", ActiveSessionIpVector[i].c_str());
-		fprintf(fp, "%lu\n", ActiveSessionUserIdVector[i]);
-		fprintf(fp, "%lu\n", ActiveSessionIndex[i]);
-		fprintf(fp, "%ld\n", ActiveSessionStartTimeVector[i]);
+		fprintf(fp, "%s\n", ActiveSessions_[i].cookieCode_.c_str());
+		fprintf(fp, "%s\n", ActiveSessions_[i].ip_.c_str());
+		fprintf(fp, "%lu\n", ActiveSessions_[i].userId_);
+		fprintf(fp, "%lu\n", ActiveSessions_[i].sessionIndex_);
+		fprintf(fp, "%ld\n", ActiveSessions_[i].startTime_);
 	}
 
-	__COUT__ << "ActiveSessionCookieCodeVector saved with size " << ActiveSessionCookieCodeVector.size() << __E__;
+	__COUT__ << "Active Sessions saved with size " << ActiveSessions_.size() << __E__;
 
 	fclose(fp);
-}
+}  // end saveActiveSessions()
 
 //====================================================================================================================
 // loadActiveSessions
@@ -415,43 +429,36 @@ void WebUsers::loadActiveSessions()
 			fclose(fp);
 			return;
 		}
-		ActiveSessionCookieCodeVector.push_back(line);
+		ActiveSessions_.push_back(ActiveSession());
+		ActiveSessions_.back().cookieCode_ = line;
 
 		fgets(line, LINELEN, fp);
 		if(strlen(line))
 			line[strlen(line) - 1] = '\0';  // remove new line
-		ActiveSessionIpVector.push_back(line);
+		ActiveSessions_.back().ip_ = line;
 
 		fgets(line, LINELEN, fp);
-		ActiveSessionUserIdVector.push_back(uint64_t());
-		sscanf(line, "%lu", &(ActiveSessionUserIdVector[ActiveSessionUserIdVector.size() - 1]));
+		sscanf(line, "%lu", &(ActiveSessions_.back().userId_));
 
 		fgets(line, LINELEN, fp);
-		ActiveSessionIndex.push_back(uint64_t());
-		sscanf(line, "%lu", &(ActiveSessionIndex[ActiveSessionIndex.size() - 1]));
+		sscanf(line, "%lu", &(ActiveSessions_.back().sessionIndex_));
 
 		fgets(line, LINELEN, fp);
-		ActiveSessionStartTimeVector.push_back(time_t());
-		sscanf(line, "%ld", &(ActiveSessionStartTimeVector[ActiveSessionStartTimeVector.size() - 1]));
+		sscanf(line, "%ld", &(ActiveSessions_.back().startTime_));
 
-		//		__COUT__ << "LOAD " << ActiveSessionCookieCodeVector[i] << __E__;
-		//		__COUT__ << "LOAD " << ActiveSessionIpVector[i] << __E__;
-		//		__COUT__ << "LOAD " << ActiveSessionUserIdVector[i] << __E__;
-		//		__COUT__ << "LOAD " << ActiveSessionIndex[i] << __E__;
-		//		__COUT__ << "LOAD " << ActiveSessionStartTimeVector[i] << __E__;
 		++i;
 	}
 
-	__COUT__ << "ActiveSessionCookieCodeVector loaded with size " << ActiveSessionCookieCodeVector.size() << __E__;
+	__COUT__ << "Active Sessions loaded with size " << ActiveSessions_.size() << __E__;
 
 	fclose(fp);
 	// clear file after loading
 	fp = fopen(fn.c_str(), "w");
 	if(fp)
 		fclose(fp);
-}
+}  // end loadActiveSessions()
 
-//========================================================================================================================
+//==============================================================================
 // loadDatabaseFromFile
 //	load Hashes and Users from file
 //	create database if non-existent
@@ -519,15 +526,15 @@ bool WebUsers::loadDatabases()
 
 					f = c / 2 - 1;
 					if(f == 0)  // hash
-						HashesVector.push_back(&line[si]);
-					else if(f == 1)  // lastAccessTime
 					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						HashesAccessTimeVector.push_back(tmpInt64);
+						Hashes_.push_back(Hash());
+						Hashes_.back().hash_ = &line[si];
 					}
+					else if(f == 1)  // lastAccessTime
+						sscanf(&line[si], "%ld", &Hashes_.back().accessTime_);
 				}
 		}
-		__COUT__ << HashesAccessTimeVector.size() << " Hashes found." << __E__;
+		__COUT__ << Hashes_.size() << " Hashes found." << __E__;
 
 		fclose(fp);
 	}
@@ -564,6 +571,7 @@ bool WebUsers::loadDatabases()
 	}
 	else  // extract next user id and user entries if users exists
 	{
+		__COUT__ << "Users database: " << fn << __E__;
 		// for every USERS_DB_ENTRY_STRING, extract to local vector
 		// trusting file construction, assuming fields based >'s and <'s
 
@@ -624,124 +632,93 @@ bool WebUsers::loadDatabases()
 					line[i] = '\0';  // close std::string
 					f       = c / 2 - 1;
 
-					//__COUT__ << "Found Users field " << f << " " << &line[si] << __E__;
+					//__COUT__ << "Found Users[" <<
+					//		Users_.size() << "] field " << f << " " << &line[si] << __E__;
 
 					if(f == 0)  // username
-						UsersUsernameVector.push_back(&line[si]);
-					else if(f == 1)  // displayName
-						UsersDisplayNameVector.push_back(&line[si]);
-					else if(f == 2)  // salt
-						UsersSaltVector.push_back(&line[si]);
-					else if(f == 3)  // uid
 					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						UsersUserIdVector.push_back(tmpInt64);
+						Users_.push_back(User());
+						Users_.back().username_ = &line[si];
 					}
+					else if(f == 1)  // displayName
+						Users_.back().displayName_ = &line[si];
+					else if(f == 2)  // salt
+						Users_.back().salt_ = &line[si];
+					else if(f == 3)  // uid
+						sscanf(&line[si], "%lu", &Users_.back().userId_);
 					else if(f == 4)  // permissions
 					{
-						UsersPermissionsVector.push_back(std::map<std::string, uint8_t>());
-						std::map<std::string, uint8_t>& lastPermissionsMap = UsersPermissionsVector.back();
-						StringMacros::getMapFromString<uint8_t>(&line[si], lastPermissionsMap);
+						std::map<std::string, permissionLevel_t>& lastPermissionsMap = Users_.back().permissions_;
+						StringMacros::getMapFromString<permissionLevel_t>(&line[si], lastPermissionsMap);
 
 						//__COUT__ << "User permission levels:" <<
 						// StringMacros::mapToString(lastPermissionsMap) << __E__;
 
 						// verify 'allUsers' is there
-						//	if not, add it as a diabled user (i.e.
+						//	if not, add it as a disabled user (i.e.
 						// WebUsers::PERMISSION_LEVEL_INACTIVE)
 						if(lastPermissionsMap.find(WebUsers::DEFAULT_USER_GROUP) == lastPermissionsMap.end())
 						{
-							// try to accomplish backwards compatibility to
-							//	allow for the time before group permissions
-							sscanf(&line[si], "%lu", &tmpInt64);
-							tmpInt64 &= 0xFF;
-							if(tmpInt64)  // if not 0
-							{
-								lastPermissionsMap.clear();
-								__COUT_INFO__ << "User '" << UsersUsernameVector.back() << "' is not a member of the default user group '"
-								              << WebUsers::DEFAULT_USER_GROUP
-								              << ".' For backward compatibility, permission level "
-								                 "assumed for default group (permission level := "
-								              << tmpInt64 << ")." << __E__;
-								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::permissionLevel_t(tmpInt64);
-							}
-							else
-							{
-								__MCOUT_INFO__("User '" << UsersUsernameVector.back() << "' is not a member of the default user group '"
-								                        << WebUsers::DEFAULT_USER_GROUP
-								                        << ".' Assuming user account is inactive (permission "
-								                           "level := "
-								                        << WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
-								lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE;  // mark inactive
-							}
+							__MCOUT_INFO__("User '" << Users_.back().username_ << "' is not a member of the default user group '"
+							                        << WebUsers::DEFAULT_USER_GROUP
+							                        << ".' Assuming user account is inactive (permission "
+							                           "level := "
+							                        << WebUsers::PERMISSION_LEVEL_INACTIVE << ")." << __E__);
+							lastPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE;  // mark inactive
+						}
+
+						if(Users_.back().username_ == DEFAULT_ADMIN_USERNAME)
+						{
+							// overwrite admin with full permissions (irregardless of corrupt user db situation), never allow to be inactive for example
+
+							std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> initPermissions = {
+							    {WebUsers::DEFAULT_USER_GROUP, WebUsers::PERMISSION_LEVEL_ADMIN}};
+
+							Users_.back().permissions_ = initPermissions;
 						}
 					}
 					else if(f == 5)  // lastLoginAttemptTime
-					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						UsersLastLoginAttemptVector.push_back(tmpInt64);
-					}
+						sscanf(&line[si], "%ld", &Users_.back().lastLoginAttempt_);
 					else if(f == 6)  // accountCreatedTime
-					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						UsersAccountCreatedTimeVector.push_back(tmpInt64);
-					}
+						sscanf(&line[si], "%ld", &Users_.back().accountCreationTime_);
 					else if(f == 7)  // loginFailureCount
-					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						UsersLoginFailureCountVector.push_back(tmpInt64);
-					}
+						sscanf(&line[si], "%hhu", &Users_.back().loginFailureCount_);
 					else if(f == 8)  // lastModifierTime
-					{
-						sscanf(&line[si], "%lu", &tmpInt64);
-						UsersLastModifiedTimeVector.push_back(tmpInt64);
-					}
+						sscanf(&line[si], "%ld", &Users_.back().accessModifierTime());
 					else if(f == 9)  // lastModifierUsername
-						UsersLastModifierUsernameVector.push_back(&line[si]);
+						Users_.back().loadModifierUsername(&line[si]);
 					else if(f == 10)  // user email
-						UsersUserEmailVector.push_back(&line[si]);
+						Users_.back().email_ = &line[si];
 				}
 
-			// If user found in line, check if all fields found, else auto fill
-			// update in DB fields could cause inconsistencies!
-			if(f && f != UsersDatabaseEntryFields.size() - 1)
-			{
-				if(f != 7 && f != 9)  // original database was size 8, so is ok to not match
-				{
-					__SS__ << "FATAL ERROR - invalid user database found with field number " << f << __E__;
-					fclose(fp);
-					__SS_THROW__;
-					return false;
-				}
-
-				if(f == 7)
-				{
-					// fix here if database size was 8
-					__COUT__ << "Update database to current version - adding fields: " << (UsersDatabaseEntryFields.size() - 1 - f) << __E__;
-					// add db updates -- THIS IS FOR VERSION WITH
-					// UsersDatabaseEntryFields.size() == 10 !!
-					UsersLastModifiedTimeVector.push_back(0);
-					UsersLastModifierUsernameVector.push_back("");
-				}
-				else
-				{
-					UsersUserEmailVector.push_back("");
-				}
-			}
-		}
+		}  // end get line loop
 		fclose(fp);
 	}
 
-	__COUT__ << UsersLastModifiedTimeVector.size() << " Users found." << __E__;
-	for(size_t ii = 0; ii < UsersLastModifiedTimeVector.size(); ++ii)
+	__COUT__ << Users_.size() << " Users found." << __E__;
+	for(size_t ii = 0; ii < Users_.size(); ++ii)
 	{
-		__COUT__ << "User " << UsersUserIdVector[ii] << ": Name: " << UsersUsernameVector[ii] << "\t\tDisplay Name: " << UsersDisplayNameVector[ii]
-		         << "\t\tEmail: " << UsersUserEmailVector[ii] << "\t\tPermissions: " << StringMacros::mapToString(UsersPermissionsVector[ii]) << __E__;
+		std::cout <<  // do not send to message facility
+		    "User [" << Users_[ii].userId_ << "] \tName: " << std::left << std::setfill(' ') << std::setw(20) << Users_[ii].username_
+		          << "\tDisplay Name: " << std::left << std::setfill(' ') << std::setw(30) << Users_[ii].displayName_ << "\tEmail: " << std::left
+		          << std::setfill(' ') << std::setw(30) << Users_[ii].email_ << "\tNAC: " << std::left << std::setfill(' ') << std::setw(5)
+		          << Users_[ii].getNewAccountCode() << "\tFailedCount: " << (int)Users_[ii].loginFailureCount_
+		          << "\tPermissions: " << StringMacros::mapToString(Users_[ii].permissions_) <<
+		    //"\tSalt: " << Users_[ii].salt_.size() << " " <<  Users_[ii].salt_ <<
+		    __E__;
 	}
+	//	__COUT__ << Hashes_.size() << " Hashes found." << __E__;
+	//	for(size_t ii = 0; ii < Hashes_.size(); ++ii)
+	//	{
+	//		std::cout << //do not send to message facility
+	//				"Hash [" << ii <<
+	//				"]: " << Hashes_[ii].hash_ <<
+	//				__E__;
+	//	}
 	return true;
-}
+}  // end loadDatabases()
 
-//========================================================================================================================
+//==============================================================================
 // saveToDatabase
 void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::string& value, uint8_t type, bool addNewLine)
 {
@@ -756,9 +733,9 @@ void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::str
 		fprintf(fp, "<%s>%s%s", field.c_str(), value.c_str(), newLine.c_str());
 	else if(type == DB_SAVE_CLOSE)
 		fprintf(fp, "</%s>%s", field.c_str(), newLine.c_str());
-}
+}  // end saveToDatabase()
 
-//========================================================================================================================
+//==============================================================================
 // saveDatabaseToFile
 //	returns true if saved database successfully
 //		db: DB_USERS or DB_HASHES
@@ -766,7 +743,7 @@ void WebUsers::saveToDatabase(FILE* fp, const std::string& field, const std::str
 
 bool WebUsers::saveDatabaseToFile(uint8_t db)
 {
-	__COUT__ << "Save Database: " << (int)db << __E__;
+	//__COUT__ << "Save Database: " << (int)db << __E__;
 
 	std::string fn = (std::string)WEB_LOGIN_DB_PATH + ((db == DB_USERS) ? (std::string)USERS_DB_FILE : (std::string)HASHES_DB_FILE);
 
@@ -799,58 +776,58 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 		sprintf(fldStr, "%lu", usersNextUserId_);
 		saveToDatabase(fp, USERS_DB_NEXT_UID_STRING, fldStr, DB_SAVE_OPEN_AND_CLOSE);
 
-		__COUT__ << "Saving " << UsersUsernameVector.size() << " Users." << __E__;
+		__COUT__ << "Saving " << Users_.size() << " Users." << __E__;
 
-		for(uint64_t i = 0; i < UsersUsernameVector.size(); ++i)
+		for(uint64_t i = 0; i < Users_.size(); ++i)
 		{
 			//__COUT__ << "Saving User: " << UsersUsernameVector[i] << __E__;
 
 			saveToDatabase(fp, USERS_DB_ENTRY_STRING, "", DB_SAVE_OPEN, false);
 
-			for(unsigned int f = 0; f < UsersDatabaseEntryFields.size(); ++f)
+			for(unsigned int f = 0; f < WebUsers::UsersDatabaseEntryFields_.size(); ++f)
 			{
 				//__COUT__ << "Saving Field: " << f << __E__;
 				if(f == 0)  // username
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], UsersUsernameVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], Users_[i].username_, DB_SAVE_OPEN_AND_CLOSE, false);
 				else if(f == 1)  // displayName
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], UsersDisplayNameVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], Users_[i].displayName_, DB_SAVE_OPEN_AND_CLOSE, false);
 				else if(f == 2)  // salt
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], UsersSaltVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], Users_[i].salt_, DB_SAVE_OPEN_AND_CLOSE, false);
 				else if(f == 3)  // uid
 				{
-					sprintf(fldStr, "%lu", UsersUserIdVector[i]);
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%lu", Users_[i].userId_);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 				else if(f == 4)  // permissions
 					saveToDatabase(fp,
-					               UsersDatabaseEntryFields[f],
-					               StringMacros::mapToString(UsersPermissionsVector[i], "," /*primary delimeter*/, ":" /*secondary delimeter*/),
+					               WebUsers::UsersDatabaseEntryFields_[f],
+					               StringMacros::mapToString(Users_[i].permissions_, "," /*primary delimeter*/, ":" /*secondary delimeter*/),
 					               DB_SAVE_OPEN_AND_CLOSE,
 					               false);
 				else if(f == 5)  // lastLoginAttemptTime
 				{
-					sprintf(fldStr, "%lu", UsersLastLoginAttemptVector[i]);
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%lu", Users_[i].lastLoginAttempt_);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 				else if(f == 6)  // accountCreatedTime
 				{
-					sprintf(fldStr, "%lu", UsersAccountCreatedTimeVector[i]);
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%lu", Users_[i].accountCreationTime_);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 				else if(f == 7)  // loginFailureCount
 				{
-					sprintf(fldStr, "%d", UsersLoginFailureCountVector[i]);
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%hhu", Users_[i].loginFailureCount_);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 				else if(f == 8)  // lastModifierTime
 				{
-					sprintf(fldStr, "%lu", UsersLastModifiedTimeVector[i]);
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%lu", Users_[i].getModifierTime());
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 				else if(f == 9)  // lastModifierUsername
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], UsersLastModifierUsernameVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], Users_[i].getModifierUsername(), DB_SAVE_OPEN_AND_CLOSE, false);
 				else if(f == 10)  // useremail
-					saveToDatabase(fp, UsersDatabaseEntryFields[f], UsersUserEmailVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::UsersDatabaseEntryFields_[f], Users_[i].email_, DB_SAVE_OPEN_AND_CLOSE, false);
 			}
 
 			saveToDatabase(fp, USERS_DB_ENTRY_STRING, "", DB_SAVE_CLOSE);
@@ -862,19 +839,19 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 	{
 		saveToDatabase(fp, HASHES_DB_GLOBAL_STRING, "", DB_SAVE_OPEN);
 
-		__COUT__ << "Saving " << HashesVector.size() << " Hashes." << __E__;
-		for(uint64_t i = 0; i < HashesVector.size(); ++i)
+		__COUT__ << "Saving " << Hashes_.size() << " Hashes." << __E__;
+		for(uint64_t i = 0; i < Hashes_.size(); ++i)
 		{
-			__COUT__ << "Saving " << HashesVector[i] << " Hashes." << __E__;
+			__COUT__ << "Saving " << Hashes_[i].hash_ << " Hash." << __E__;
 			saveToDatabase(fp, HASHES_DB_ENTRY_STRING, "", DB_SAVE_OPEN, false);
-			for(unsigned int f = 0; f < HashesDatabaseEntryFields.size(); ++f)
+			for(unsigned int f = 0; f < WebUsers::HashesDatabaseEntryFields_.size(); ++f)
 			{
 				if(f == 0)  // hash
-					saveToDatabase(fp, HashesDatabaseEntryFields[f], HashesVector[i], DB_SAVE_OPEN_AND_CLOSE, false);
+					saveToDatabase(fp, WebUsers::HashesDatabaseEntryFields_[f], Hashes_[i].hash_, DB_SAVE_OPEN_AND_CLOSE, false);
 				else if(f == 1)  // lastAccessTime
 				{
-					sprintf(fldStr, "%lu", HashesAccessTimeVector[i]);
-					saveToDatabase(fp, HashesDatabaseEntryFields[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
+					sprintf(fldStr, "%lu", Hashes_[i].accessTime_);
+					saveToDatabase(fp, WebUsers::HashesDatabaseEntryFields_[f], fldStr, DB_SAVE_OPEN_AND_CLOSE, false);
 				}
 			}
 			saveToDatabase(fp, HASHES_DB_ENTRY_STRING, "", DB_SAVE_CLOSE);
@@ -885,16 +862,17 @@ bool WebUsers::saveDatabaseToFile(uint8_t db)
 
 	fclose(fp);
 	return true;
-}
+}  // end saveDatabaseToFile()
 
-//========================================================================================================================
+//==============================================================================
 // createNewAccount
 //	adds a new valid user to database
 //		inputs: username and name to display
 //		initializes database entry with minimal permissions
 //			and salt starts as "" until password is set
 //		Special case if first user name!! max permissions given (super user made)
-bool WebUsers::createNewAccount(const std::string& username, const std::string& displayName, const std::string& email)
+// //Note: username, userId, AND displayName must be unique!
+void WebUsers::createNewAccount(const std::string& username, const std::string& displayName, const std::string& email)
 {
 	__COUT__ << "Creating account: " << username << __E__;
 	// check if username already exists
@@ -903,36 +881,49 @@ bool WebUsers::createNewAccount(const std::string& username, const std::string& 
 	   username == WebUsers::DEFAULT_STATECHANGER_USERNAME)  // prevent reserved usernames
 	                                                         // from being created!
 	{
-		__COUT_ERR__ << "Username '" << username << "' already exists" << __E__;
-		return false;
+		__SS__ << "Username '" << username << "' already exists! Please choose a unique username." << __E__;
+		__SS_THROW__;
+	}
+
+	//enforce unique Display Name
+	if((i = searchUsersDatabaseForDisplayName(displayName)) != NOT_FOUND_IN_DATABASE)
+		// from being created!
+	{
+		__SS__ << "Display Name '" << displayName << "' already exists! Please choose a unique display name." << __E__;
+		__SS_THROW__;
 	}
 
 	// create Users database entry
-	UsersUsernameVector.push_back(username);
-	UsersDisplayNameVector.push_back(displayName);
-	UsersUserEmailVector.push_back(email);
-	UsersSaltVector.push_back("");
-	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> initPermissions = {
-	    {WebUsers::DEFAULT_USER_GROUP, (UsersPermissionsVector.size() ? WebUsers::PERMISSION_LEVEL_NOVICE : WebUsers::PERMISSION_LEVEL_ADMIN)}};
-	UsersPermissionsVector.push_back(initPermissions);  // max permissions if first user
+	Users_.push_back(User());
 
-	UsersUserIdVector.push_back(usersNextUserId_++);
-	if(usersNextUserId_ == (uint64_t)-1)  // error wrap around case
+	Users_.back().username_    = username;
+	Users_.back().displayName_ = displayName;
+	Users_.back().email_       = email;
+
+	// first user is admin always!
+	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> initPermissions = {
+	    {WebUsers::DEFAULT_USER_GROUP, (Users_.size() ? WebUsers::PERMISSION_LEVEL_NOVICE : WebUsers::PERMISSION_LEVEL_ADMIN)}};
+
+	Users_.back().permissions_ = initPermissions;
+	Users_.back().userId_      = usersNextUserId_++;
+	if(usersNextUserId_ >= ACCOUNT_ERROR_THRESHOLD)  // error wrap around case
 	{
-		__COUT__ << "usersNextUserId_ wrap around!! Too many users??? Notify Admins." << __E__;
-		usersNextUserId_ = 1;  // for safety to avoid wierd issues at -1 and 0 (if used
+		__SS__ << "usersNextUserId_ wrap around!! Too many users??? Notify Admins." << __E__;
+		__SS_THROW__;
+		usersNextUserId_ = 1;  // for safety to avoid weird issues at -1 and 0 (if used
 		                       // for error indication)
 	}
-	UsersLastLoginAttemptVector.push_back(0);
-	UsersLoginFailureCountVector.push_back(0);
-	UsersAccountCreatedTimeVector.push_back(time(0));
-	UsersLastModifiedTimeVector.push_back(0);
-	UsersLastModifierUsernameVector.push_back("");
 
-	return saveDatabaseToFile(DB_USERS);
-}
+	Users_.back().accountCreationTime_ = time(0);
 
-//========================================================================================================================
+	if(!saveDatabaseToFile(DB_USERS))
+	{
+		__SS__ << "Failed to save User DB!" << __E__;
+		__SS_THROW__;
+	}
+}  // end createNewAccount()
+
+//==============================================================================
 // deleteAccount
 //	private function, deletes user account
 //		inputs: username and name to display
@@ -943,40 +934,30 @@ bool WebUsers::deleteAccount(const std::string& username, const std::string& dis
 	uint64_t i = searchUsersDatabaseForUsername(username);
 	if(i == NOT_FOUND_IN_DATABASE)
 		return false;
-	if(UsersDisplayNameVector[i] != displayName)
+	if(Users_[i].displayName_ != displayName)
 		return false;  // display name does not match
 
-	// delete entry from all user database vectors
+	// delete entry from user database vector
 
-	UsersUsernameVector.erase(UsersUsernameVector.begin() + i);
-	UsersUserEmailVector.erase(UsersUserEmailVector.begin() + i);
-	UsersDisplayNameVector.erase(UsersDisplayNameVector.begin() + i);
-	UsersSaltVector.erase(UsersSaltVector.begin() + i);
-	UsersPermissionsVector.erase(UsersPermissionsVector.begin() + i);
-	UsersUserIdVector.erase(UsersUserIdVector.begin() + i);
-	UsersLastLoginAttemptVector.erase(UsersLastLoginAttemptVector.begin() + i);
-	UsersAccountCreatedTimeVector.erase(UsersAccountCreatedTimeVector.begin() + i);
-	UsersLoginFailureCountVector.erase(UsersLoginFailureCountVector.begin() + i);
-	UsersLastModifierUsernameVector.erase(UsersLastModifierUsernameVector.begin() + i);
-	UsersLastModifiedTimeVector.erase(UsersLastModifiedTimeVector.begin() + i);
+	Users_.erase(Users_.begin() + i);
 
 	// save database
 	return saveDatabaseToFile(DB_USERS);
-}
+}  // end deleteAccount()
 
-//========================================================================================================================
+//==============================================================================
 unsigned int WebUsers::hexByteStrToInt(const char* h)
 {
 	unsigned int rv;
 	char         hs[3] = {h[0], h[1], '\0'};
 	sscanf(hs, "%X", &rv);
 	return rv;
-}
+}  // end hexByteStrToInt()
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::intToHexStr(unsigned char i, char* h) { sprintf(h, "%2.2X", i); }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::attemptActiveSession ---
 //	Attempts login.
 //
@@ -993,7 +974,7 @@ uint64_t WebUsers::attemptActiveSession(
 	if(!checkIpAccess(ip))
 	{
 		__COUT_ERR__ << "rejected ip: " << ip << __E__;
-		return NOT_FOUND_IN_DATABASE;
+		return ACCOUNT_BLACKLISTED;
 	}
 
 	cleanupExpiredEntries();  // remove expired active and login sessions
@@ -1018,11 +999,11 @@ uint64_t WebUsers::attemptActiveSession(
 
 		return NOT_FOUND_IN_DATABASE;
 	}
-	++LoginSessionAttemptsVector[i];
+	++LoginSessions_[i].loginAttempts_;
 
-	std::string user = dejumble(jumbledUser, LoginSessionIdVector[i]);
+	std::string user = dejumble(jumbledUser, LoginSessions_[i].id_);
 	__COUTV__(user);
-	std::string pw = dejumble(jumbledPw, LoginSessionIdVector[i]);
+	std::string pw = dejumble(jumbledPw, LoginSessions_[i].id_);
 
 	// search users for username
 	if((i = searchUsersDatabaseForUsername(user)) == NOT_FOUND_IN_DATABASE)
@@ -1036,24 +1017,21 @@ uint64_t WebUsers::attemptActiveSession(
 	else
 		ipBlacklistCounts_[ip] = 0;  // clear blacklist count
 
-	UsersLastLoginAttemptVector[i] = time(0);
+	Users_[i].lastLoginAttempt_ = time(0);
 
-	if(isInactiveForGroup(UsersPermissionsVector[i]))
+	if(isInactiveForGroup(Users_[i].permissions_))
 	{
 		__MCOUT_ERR__("User '" << user << "' account INACTIVE (could be due to failed logins)" << __E__);
-		return NOT_FOUND_IN_DATABASE;
+		return ACCOUNT_INACTIVE;
 	}
 
-	if(UsersSaltVector[i] == "")  // first login
+	if(Users_[i].salt_ == "")  // first login
 	{
 		__MCOUT__("First login attempt for user: " << user << __E__);
 
-		char charTimeStr[10];
-		sprintf(charTimeStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
-		std::string tmpTimeStr = charTimeStr;
-		if(newAccountCode != tmpTimeStr)
+		if(newAccountCode != Users_[i].getNewAccountCode())
 		{
-			__COUT__ << "New account code did not match: " << tmpTimeStr << " != " << newAccountCode << __E__;
+			__COUT__ << "New account code did not match: " << Users_[i].getNewAccountCode() << " != " << newAccountCode << __E__;
 			saveDatabaseToFile(DB_USERS);  // users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
 		}
@@ -1061,37 +1039,40 @@ uint64_t WebUsers::attemptActiveSession(
 		// initial user account setup
 
 		// add until no collision (should 'never' be a collision)
-		while(!addToHashesDatabase(sha512(user, pw, UsersSaltVector[i])))  // sha256 modifies UsersSaltVector[i]
+		while(!addToHashesDatabase(sha512(user, pw, Users_[i].salt_)))  // sha256 modifies UsersSaltVector[i]
 		{
 			// this should never happen, it would mean the user+pw+saltcontext was the
 			// same
 			// but if it were to happen, try again...
-			UsersSaltVector[i] = "";
+			Users_[i].salt_ = "";
 		}
 
-		__COUT__ << "\tHash added: " << HashesVector[HashesVector.size() - 1] << __E__;
+		__COUT__ << "\tHash added: " << Hashes_.back().hash_ << __E__;
 	}
 	else
 	{
-		std::string salt = UsersSaltVector[i];  // don't want to modify saved salt
-		//__COUT__ << salt << " " << i << __E__;
+		std::string salt = Users_[i].salt_;  // don't want to modify saved salt
+		//__COUT__ << salt.size() << " " << salt << " " << i << __E__;
 		if(searchHashesDatabaseForHash(sha512(user, pw, salt)) == NOT_FOUND_IN_DATABASE)
 		{
-			__COUT__ << "Failed login for " << user << " with permissions " << StringMacros::mapToString(UsersPermissionsVector[i]) << __E__;
+			__COUT__ << "Failed login for " << user << " with permissions " << StringMacros::mapToString(Users_[i].permissions_) << __E__;
 
-			++UsersLoginFailureCountVector[i];
-			if(UsersLoginFailureCountVector[i] >= USERS_MAX_LOGIN_FAILURES)
-				UsersPermissionsVector[i][WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE;  // Lock account
+			// do not allow wrap around
+			if(++Users_[i].loginFailureCount_ != (unsigned char)-1)
+				++Users_[i].loginFailureCount_;
 
-			__COUT_INFO__ << "User/pw for user '" << user << "' was not correct (Failed Attempt #" << (int)UsersLoginFailureCountVector[i] << " of "
-			              << (int)USERS_MAX_LOGIN_FAILURES << ")." << __E__;
+			if(Users_[i].loginFailureCount_ >= USERS_MAX_LOGIN_FAILURES)
+				Users_[i].permissions_[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE;  // Lock account
 
-			__COUTV__(isInactiveForGroup(UsersPermissionsVector[i]));
-			if(isInactiveForGroup(UsersPermissionsVector[i]))
+			__COUT_INFO__ << "User/pw for user '" << user << "' was not correct (Failed Attempt #" << (int)Users_[i].loginFailureCount_ << " of "
+			              << (int)USERS_MAX_LOGIN_FAILURES << " allowed)." << __E__;
+
+			__COUTV__(isInactiveForGroup(Users_[i].permissions_));
+			if(isInactiveForGroup(Users_[i].permissions_))
 				__MCOUT_INFO__("Account '" << user
 				                           << "' has been marked inactive due to too many failed "
 				                              "login attempts (Failed Attempt #"
-				                           << (int)UsersLoginFailureCountVector[i] << ")! Note only admins can reactivate accounts." << __E__);
+				                           << (int)Users_[i].loginFailureCount_ << ")! Note only admins can reactivate accounts." << __E__);
 
 			saveDatabaseToFile(DB_USERS);  // users db modified, so save
 			return NOT_FOUND_IN_DATABASE;
@@ -1100,13 +1081,13 @@ uint64_t WebUsers::attemptActiveSession(
 
 	__MCOUT_INFO__("Login successful for: " << user << __E__);
 
-	UsersLoginFailureCountVector[i] = 0;
+	Users_[i].loginFailureCount_ = 0;
 
 	// record to login history for user (h==0) and on global server level (h==1)
 	for(int h = 0; h < 2; ++h)
 	{
-		std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_LOGIN_HISTORY_PATH + (h ? USERS_GLOBAL_HISTORY_FILE : UsersUsernameVector[i]) +
-		                 "." + (std::string)USERS_LOGIN_HISTORY_FILETYPE;
+		std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_LOGIN_HISTORY_PATH + (h ? USERS_GLOBAL_HISTORY_FILE : Users_[i].username_) + "." +
+		                 (std::string)USERS_LOGIN_HISTORY_FILETYPE;
 
 		HttpXmlDocument histXml;
 
@@ -1124,16 +1105,16 @@ uint64_t WebUsers::attemptActiveSession(
 			sprintf(entryStr,
 			        "Time=%lu Username=%s Permissions=%s UID=%lu",
 			        time(0),
-			        UsersUsernameVector[i].c_str(),
-			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(),
-			        UsersUserIdVector[i]);
+			        Users_[i].username_.c_str(),
+			        StringMacros::mapToString(Users_[i].permissions_).c_str(),
+			        Users_[i].userId_);
 		else
 			sprintf(entryStr,
 			        "Time=%lu displayName=%s Permissions=%s UID=%lu",
 			        time(0),
-			        UsersDisplayNameVector[i].c_str(),
-			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(),
-			        UsersUserIdVector[i]);
+			        Users_[i].displayName_.c_str(),
+			        StringMacros::mapToString(Users_[i].permissions_).c_str(),
+			        Users_[i].userId_);
 		histXml.addTextElementToData(PREF_XML_LOGIN_HISTORY_FIELD, entryStr);
 
 		// save file
@@ -1141,14 +1122,22 @@ uint64_t WebUsers::attemptActiveSession(
 	}
 
 	// SUCCESS!!
-	saveDatabaseToFile(DB_USERS);                // users db modified, so save
-	jumbledUser    = UsersDisplayNameVector[i];  // pass by reference displayName
-	newAccountCode = createNewActiveSession(UsersUserIdVector[i],
+	saveDatabaseToFile(DB_USERS);             // users db modified, so save
+	jumbledUser    = Users_[i].displayName_;  // pass by reference displayName
+	newAccountCode = createNewActiveSession(Users_[i].userId_,
 	                                        ip);  // return cookie code by reference
-	return UsersUserIdVector[i];                  // return user Id
-}
 
-//========================================================================================================================
+	if(ActiveSessions_.size() == 1) //if only one user, then attempt to take lock for user friendliness
+	{
+		__COUT__ << "Attempting to auto-lock for first login user '" <<
+				Users_[i].username_ << "'... " << __E__;
+		setUserWithLock(Users_[i].userId_, true /*lock*/, Users_[i].username_);
+	}
+
+	return Users_[i].userId_;                     // return user Id
+}  // end attemptActiveSession()
+
+//==============================================================================
 // WebUsers::attemptActiveSessionWithCert ---
 //	Attempts login using certificate.
 //
@@ -1174,7 +1163,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 
 	if(email == "")
 	{
-		__COUT__ << "Rejecting logon with blank fingerprint" << __E__;
+		__COUT__ << "Rejecting cert logon with blank fingerprint" << __E__;
 
 		incrementIpBlacklistCount(ip);  // increment ip blacklist counter
 
@@ -1193,7 +1182,7 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 
 		return NOT_FOUND_IN_DATABASE;
 	}
-	++LoginSessionAttemptsVector[i];
+	++LoginSessions_[i].loginAttempts_;
 
 	email = getUserEmailFromFingerprint(email);
 	__COUT__ << "DejumbledEmail = " << email << __E__;
@@ -1220,27 +1209,27 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 
 	user = getUsersUsername(i);
 
-	UsersLastLoginAttemptVector[i] = time(0);
-	if(isInactiveForGroup(UsersPermissionsVector[i]))
+	Users_[i].lastLoginAttempt_ = time(0);
+	if(isInactiveForGroup(Users_[i].permissions_))
 	{
 		__MCOUT__("User '" << user << "' account INACTIVE (could be due to failed logins)." << __E__);
 		return NOT_FOUND_IN_DATABASE;
 	}
 
-	if(UsersSaltVector[i] == "")  // Can't be first login
+	if(Users_[i].salt_ == "")  // Can't be first login
 	{
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	__MCOUT__("Login successful for: " << user << __E__);
 
-	UsersLoginFailureCountVector[i] = 0;
+	Users_[i].loginFailureCount_ = 0;
 
 	// record to login history for user (h==0) and on global server level (h==1)
 	for(int h = 0; h < 2; ++h)
 	{
-		std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_LOGIN_HISTORY_PATH + (h ? USERS_GLOBAL_HISTORY_FILE : UsersUsernameVector[i]) +
-		                 "." + (std::string)USERS_LOGIN_HISTORY_FILETYPE;
+		std::string fn = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_LOGIN_HISTORY_PATH + (h ? USERS_GLOBAL_HISTORY_FILE : Users_[i].username_) + "." +
+		                 (std::string)USERS_LOGIN_HISTORY_FILETYPE;
 
 		HttpXmlDocument histXml;
 
@@ -1258,16 +1247,16 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 			sprintf(entryStr,
 			        "Time=%lu Username=%s Permissions=%s UID=%lu",
 			        time(0),
-			        UsersUsernameVector[i].c_str(),
-			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(),
-			        UsersUserIdVector[i]);
+			        Users_[i].username_.c_str(),
+			        StringMacros::mapToString(Users_[i].permissions_).c_str(),
+			        Users_[i].userId_);
 		else
 			sprintf(entryStr,
 			        "Time=%lu displayName=%s Permissions=%s UID=%lu",
 			        time(0),
-			        UsersDisplayNameVector[i].c_str(),
-			        StringMacros::mapToString(UsersPermissionsVector[i]).c_str(),
-			        UsersUserIdVector[i]);
+			        Users_[i].displayName_.c_str(),
+			        StringMacros::mapToString(Users_[i].permissions_).c_str(),
+			        Users_[i].userId_);
 		histXml.addTextElementToData(PREF_XML_LOGIN_HISTORY_FIELD, entryStr);
 
 		// save file
@@ -1275,26 +1264,26 @@ uint64_t WebUsers::attemptActiveSessionWithCert(const std::string& uuid, std::st
 	}
 
 	// SUCCESS!!
-	saveDatabaseToFile(DB_USERS);            // users db modified, so save
-	email      = UsersDisplayNameVector[i];  // pass by reference displayName
-	cookieCode = createNewActiveSession(UsersUserIdVector[i],
+	saveDatabaseToFile(DB_USERS);         // users db modified, so save
+	email      = Users_[i].displayName_;  // pass by reference displayName
+	cookieCode = createNewActiveSession(Users_[i].userId_,
 	                                    ip);  // return cookie code by reference
-	return UsersUserIdVector[i];              // return user Id
-}
+	return Users_[i].userId_;                 // return user Id
+}  // end attemptActiveSessionWithCert()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchActiveSessionDatabaseForUID ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchActiveSessionDatabaseForCookie(const std::string& cookieCode) const
 {
 	uint64_t i = 0;
-	for(; i < ActiveSessionCookieCodeVector.size(); ++i)
-		if(ActiveSessionCookieCodeVector[i] == cookieCode)
+	for(; i < ActiveSessions_.size(); ++i)
+		if(ActiveSessions_[i].cookieCode_ == cookieCode)
 			break;
-	return (i == ActiveSessionCookieCodeVector.size()) ? NOT_FOUND_IN_DATABASE : i;
+	return (i == ActiveSessions_.size()) ? NOT_FOUND_IN_DATABASE : i;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isUsernameActive ---
 //	returns true if found, else false
 bool WebUsers::isUsernameActive(const std::string& username) const
@@ -1302,91 +1291,104 @@ bool WebUsers::isUsernameActive(const std::string& username) const
 	uint64_t u;
 	if((u = searchUsersDatabaseForUsername(username)) == NOT_FOUND_IN_DATABASE)
 		return false;
-	return isUserIdActive(UsersUserIdVector[u]);
+	return isUserIdActive(Users_[u].userId_);
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isUserIdActive ---
 //	returns true if found, else false
 bool WebUsers::isUserIdActive(uint64_t uid) const
 {
 	uint64_t i = 0;
-	for(; i < ActiveSessionUserIdVector.size(); ++i)
-		if(ActiveSessionUserIdVector[i] == uid)
+	for(; i < ActiveSessions_.size(); ++i)
+		if(ActiveSessions_[i].userId_ == uid)
 			return true;
 	return false;
-}
+}  // end isUserIdActive()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUsername ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUsername(const std::string& username) const
 {
 	uint64_t i = 0;
-	for(; i < UsersUsernameVector.size(); ++i)
-		if(UsersUsernameVector[i] == username)
+	for(; i < Users_.size(); ++i)
+		if(Users_[i].username_ == username)
 			break;
-	return (i == UsersUsernameVector.size()) ? NOT_FOUND_IN_DATABASE : i;
-}
+	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchUsersDatabaseForUsername()
 
-//========================================================================================================================
+//==============================================================================
+// WebUsers::searchUsersDatabaseForDisplayName ---
+//	returns index if found, else -1
+uint64_t WebUsers::searchUsersDatabaseForDisplayName(const std::string& displayName) const
+{
+	uint64_t i = 0;
+	for(; i < Users_.size(); ++i)
+		if(Users_[i].displayName_ == displayName)
+			break;
+	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchUsersDatabaseForUsername()
+
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUserEmail ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUserEmail(const std::string& useremail) const
 {
 	uint64_t i = 0;
-	for(; i < UsersUserEmailVector.size(); ++i)
-		if(UsersUserEmailVector[i] == useremail)
+	for(; i < Users_.size(); ++i)
+		if(Users_[i].email_ == useremail)
 			break;
-	return (i == UsersUserEmailVector.size()) ? NOT_FOUND_IN_DATABASE : i;
-}
+	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchUsersDatabaseForUserEmail()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchUsersDatabaseForUserId ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchUsersDatabaseForUserId(uint64_t uid) const
 {
 	uint64_t i = 0;
-	for(; i < UsersUserIdVector.size(); ++i)
-		if(UsersUserIdVector[i] == uid)
+	for(; i < Users_.size(); ++i)
+		if(Users_[i].userId_ == uid)
 			break;
-	return (i == UsersUserIdVector.size()) ? NOT_FOUND_IN_DATABASE : i;
-}
+	return (i == Users_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchUsersDatabaseForUserId();
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchLoginSessionDatabaseForUUID ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchLoginSessionDatabaseForUUID(const std::string& uuid) const
 {
 	uint64_t i = 0;
-	for(; i < LoginSessionUUIDVector.size(); ++i)
-		if(LoginSessionUUIDVector[i] == uuid)
+	for(; i < LoginSessions_.size(); ++i)
+		if(LoginSessions_[i].uuid_ == uuid)
 			break;
-	return (i == LoginSessionUUIDVector.size()) ? NOT_FOUND_IN_DATABASE : i;
-}
+	return (i == LoginSessions_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchLoginSessionDatabaseForUUID()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::searchHashesDatabaseForHash ---
 //	returns index if found, else -1
 uint64_t WebUsers::searchHashesDatabaseForHash(const std::string& hash)
 {
 	uint64_t i = 0;
-	//__COUT__ << i << " " << HashesVector.size() << " " << HashesAccessTimeVector.size()
-	//<< 		hash << __E__;
-	for(; i < HashesVector.size(); ++i)
-		if(HashesVector[i] == hash)
+	//__COUT__ << i << " " << Hashes_.size() << " " << hash << __E__;
+	for(; i < Hashes_.size(); ++i)
+		if(Hashes_[i].hash_ == hash)
 			break;
 	// else
 	//	__COUT__ << HashesVector[i] << " ?????? " << __E__;
 	//__COUT__ << i << __E__;
-	if(i < HashesAccessTimeVector.size())  // if found, means login successful, so update access time
-		HashesAccessTimeVector.push_back((time(0) + (rand() % 2 ? 1 : -1) * (rand() % 30 * 24 * 60 * 60)) & 0x0FFFFFFFFFE000000);
+	if(i < Hashes_.size())  // if found, means login successful, so update access time
+		Hashes_[i].accessTime_ = ((time(0) + (rand() % 2 ? 1 : -1) * (rand() % 30 * 24 * 60 * 60)) & 0x0FFFFFFFFFE000000);
+	// else
+	//	__COUT__ << "No matching hash..." << __E__;
 
 	//__COUT__ << i << __E__;
-	return (i == HashesVector.size()) ? NOT_FOUND_IN_DATABASE : i;
-}
+	return (i == Hashes_.size()) ? NOT_FOUND_IN_DATABASE : i;
+}  // end searchHashesDatabaseForHash()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::addToHashesDatabase ---
 //	returns false if hash already exists
 //	else true for success
@@ -1397,14 +1399,15 @@ bool WebUsers::addToHashesDatabase(const std::string& hash)
 		__COUT__ << "Hash collision: " << hash << __E__;
 		return false;
 	}
-	HashesVector.push_back(hash);
-	HashesAccessTimeVector.push_back((time(0) + (rand() % 2 ? 1 : -1) * (rand() % 30 * 24 * 60 * 60)) & 0x0FFFFFFFFFE000000);
+	Hashes_.push_back(Hash());
+	Hashes_.back().hash_       = hash;
+	Hashes_.back().accessTime_ = ((time(0) + (rand() % 2 ? 1 : -1) * (rand() % 30 * 24 * 60 * 60)) & 0x0FFFFFFFFFE000000);
 	// in seconds, blur by month and mask out changes on year time frame: 0xFFFFFFFF
 	// FE000000
 	return saveDatabaseToFile(DB_HASHES);
-}
+}  // end addToHashesDatabase()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::genCookieCode ---
 std::string WebUsers::genCookieCode()
 {
@@ -1416,59 +1419,38 @@ std::string WebUsers::genCookieCode()
 		cc.append(hexStr);
 	}
 	return cc;
-}
+}  // end genCookieCode()
 
-//========================================================================================================================
-// WebUsers::removeLoginSessionEntry ---
-void WebUsers::removeLoginSessionEntry(unsigned int i)
-{
-	LoginSessionIdVector.erase(LoginSessionIdVector.begin() + i);
-	LoginSessionUUIDVector.erase(LoginSessionUUIDVector.begin() + i);
-	LoginSessionIpVector.erase(LoginSessionIpVector.begin() + i);
-	LoginSessionStartTimeVector.erase(LoginSessionStartTimeVector.begin() + i);
-	LoginSessionAttemptsVector.erase(LoginSessionAttemptsVector.begin() + i);
-}
-
-//========================================================================================================================
+//==============================================================================
 // WebUsers::createNewActiveSession ---
 //	if asIndex is not specified (0), new session receives max(ActiveSessionIndex) for user
 //+1.. always skipping 0. 	In this ActiveSessionIndex should link a thread of cookieCodes
 std::string WebUsers::createNewActiveSession(uint64_t uid, const std::string& ip, uint64_t asIndex)
 {
 	//__COUTV__(ip);
-	ActiveSessionCookieCodeVector.push_back(genCookieCode());
-	ActiveSessionIpVector.push_back(ip);
-	ActiveSessionUserIdVector.push_back(uid);
-	ActiveSessionStartTimeVector.push_back(time(0));
+	ActiveSessions_.push_back(ActiveSession());
+	ActiveSessions_.back().cookieCode_ = genCookieCode();
+	ActiveSessions_.back().ip_         = ip;
+	ActiveSessions_.back().userId_     = uid;
+	ActiveSessions_.back().startTime_  = time(0);
 
 	if(asIndex)  // this is a refresh of current active session
-		ActiveSessionIndex.push_back(asIndex);
+		ActiveSessions_.back().sessionIndex_ = asIndex;
 	else
 	{
 		// find max(ActiveSessionIndex)
 		uint64_t max = 0;
-		for(uint64_t j = 0; j < ActiveSessionIndex.size(); ++j)
-			if(ActiveSessionUserIdVector[j] == uid && max < ActiveSessionIndex[j])  // new max
-				max = ActiveSessionIndex[j];
+		for(uint64_t j = 0; j < ActiveSessions_.size(); ++j)
+			if(ActiveSessions_[j].userId_ == uid && max < ActiveSessions_[j].sessionIndex_)  // new max
+				max = ActiveSessions_[j].sessionIndex_;
 
-		ActiveSessionIndex.push_back(max ? max + 1 : 1);  // 0 is illegal
+		ActiveSessions_.back().sessionIndex_ = (max ? max + 1 : 1);  // 0 is illegal
 	}
 
-	return ActiveSessionCookieCodeVector[ActiveSessionCookieCodeVector.size() - 1];
-}
+	return ActiveSessions_.back().cookieCode_;
+}  // end createNewActiveSession()
 
-//========================================================================================================================
-// WebUsers::removeActiveSession ---
-void WebUsers::removeActiveSessionEntry(unsigned int i)
-{
-	ActiveSessionCookieCodeVector.erase(ActiveSessionCookieCodeVector.begin() + i);
-	ActiveSessionIpVector.erase(ActiveSessionIpVector.begin() + i);
-	ActiveSessionUserIdVector.erase(ActiveSessionUserIdVector.begin() + i);
-	ActiveSessionStartTimeVector.erase(ActiveSessionStartTimeVector.begin() + i);
-	ActiveSessionIndex.erase(ActiveSessionIndex.begin() + i);
-}
-
-//========================================================================================================================
+//==============================================================================
 // WebUsers::refreshCookieCode ---
 // Basic idea is to return valid cookieCode to user for future commands
 // There are two issues that arise due to "same user - multiple location":
@@ -1495,33 +1477,33 @@ void WebUsers::removeActiveSessionEntry(unsigned int i)
 std::string WebUsers::refreshCookieCode(unsigned int i, bool enableRefresh)
 {
 	// find most recent cookie for ActiveSessionIndex (should be deepest in vector always)
-	for(uint64_t j = ActiveSessionUserIdVector.size() - 1; j != (uint64_t)-1; --j)  // reverse iterate vector
-		if(ActiveSessionUserIdVector[j] == ActiveSessionUserIdVector[i] &&
-		   ActiveSessionIndex[j] == ActiveSessionIndex[i])  // if uid and asIndex match, found match
+	for(uint64_t j = ActiveSessions_.size() - 1; j != (uint64_t)-1; --j)  // reverse iterate vector
+		if(ActiveSessions_[j].userId_ == ActiveSessions_[i].userId_ &&
+		   ActiveSessions_[j].sessionIndex_ == ActiveSessions_[i].sessionIndex_)  // if uid and asIndex match, found match
 		{
 			// found!
 
 			// If half of expiration time is up, a new cookie is generated as most recent
-			if(enableRefresh && (time(0) - ActiveSessionStartTimeVector[j] > ACTIVE_SESSION_EXPIRATION_TIME / 2))
+			if(enableRefresh && (time(0) - ActiveSessions_[j].startTime_ > ACTIVE_SESSION_EXPIRATION_TIME / 2))
 			{
 				// but previous is maintained and start time is changed to accommodate
 				// overlap time.
-				ActiveSessionStartTimeVector[j] = time(0) - ACTIVE_SESSION_EXPIRATION_TIME + ACTIVE_SESSION_COOKIE_OVERLAP_TIME;  // give time window for stale
-				                                                                                                                  // cookie commands before
-				                                                                                                                  // expiring
+				ActiveSessions_[j].startTime_ = time(0) - ACTIVE_SESSION_EXPIRATION_TIME + ACTIVE_SESSION_COOKIE_OVERLAP_TIME;  // give time window for stale
+				                                                                                                                // cookie commands before
+				                                                                                                                // expiring
 
 				// create new active cookieCode with same ActiveSessionIndex, will now be
 				// found as most recent
-				return createNewActiveSession(ActiveSessionUserIdVector[i], ActiveSessionIpVector[i], ActiveSessionIndex[i]);
+				return createNewActiveSession(ActiveSessions_[i].userId_, ActiveSessions_[i].ip_, ActiveSessions_[i].sessionIndex_);
 			}
 
-			return ActiveSessionCookieCodeVector[j];  // cookieCode is unchanged
+			return ActiveSessions_[j].cookieCode_;  // cookieCode is unchanged
 		}
 
 	return "0";  // failure, should be impossible since i is already validated
-}
+}  // end refreshCookieCode()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::IsCookieActive ---
 //	returns User Id on success, returns by reference refreshed cookieCode and displayName
 // if cookieCode/user combo is still active 	displayName is returned in username
@@ -1535,7 +1517,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 	//	__COUT__ << "I care about
 	// cookies?!?!?!*************************************************" << __E__;
 
-	if(!ActiveSessionStartTimeVector.size())
+	if(!ActiveSessions_.size())
 		return NOT_FOUND_IN_DATABASE;  // no active sessions, so do nothing
 
 	uint64_t i, j;  // used to iterate and search
@@ -1547,7 +1529,7 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 		return NOT_FOUND_IN_DATABASE;
 	}
 
-	username = dejumble(username, LoginSessionIdVector[i]);  // dejumble user for cookie check
+	username = dejumble(username, LoginSessions_[i].id_);  // dejumble user for cookie check
 
 	// search active users for cookie code
 	if((i = searchActiveSessionDatabaseForCookie(cookieCode)) == NOT_FOUND_IN_DATABASE)
@@ -1557,26 +1539,26 @@ uint64_t WebUsers::isCookieCodeActiveForLogin(const std::string& uuid, std::stri
 	}
 
 	// search users for user id
-	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
+	if((j = searchUsersDatabaseForUserId(ActiveSessions_[i].userId_)) == NOT_FOUND_IN_DATABASE)
 	{
 		__COUT__ << "User ID not found" << __E__;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
 	// match username, with one found
-	if(UsersUsernameVector[j] != username)
+	if(Users_[j].username_ != username)
 	{
 		__COUT__ << "cookieCode: " << cookieCode << " was.." << __E__;
 		__COUT__ << "username: " << username << " is not found" << __E__;
 		return NOT_FOUND_IN_DATABASE;
 	}
 
-	username   = UsersDisplayNameVector[j];  // return display name by reference
-	cookieCode = refreshCookieCode(i);       // refresh cookie by reference
-	return UsersUserIdVector[j];             // return user ID
+	username   = Users_[j].displayName_;  // return display name by reference
+	cookieCode = refreshCookieCode(i);    // refresh cookie by reference
+	return Users_[j].userId_;             // return user ID
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getActiveSessionCountForUser ---
 //	Returns count of unique ActiveSessionIndex entries for user's uid
 uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
@@ -1585,29 +1567,29 @@ uint64_t WebUsers::getActiveSessionCountForUser(uint64_t uid)
 	std::vector<uint64_t> uniqueAsi;  // maintain unique as indices for reference
 
 	uint64_t i, j;
-	for(i = 0; i < ActiveSessionUserIdVector.size(); ++i)
-		if(ActiveSessionUserIdVector[i] == uid)  // found active session for user
+	for(i = 0; i < ActiveSessions_.size(); ++i)
+		if(ActiveSessions_[i].userId_ == uid)  // found active session for user
 		{
 			// check if ActiveSessionIndex is unique
 			unique = true;
 
 			for(j = 0; j < uniqueAsi.size(); ++j)
-				if(uniqueAsi[j] == ActiveSessionIndex[i])
+				if(uniqueAsi[j] == ActiveSessions_[i].sessionIndex_)
 				{
 					unique = false;
 					break;
 				}
 
 			if(unique)  // unique! so count and save
-				uniqueAsi.push_back(ActiveSessionIndex[i]);
+				uniqueAsi.push_back(ActiveSessions_[i].sessionIndex_);
 		}
 
 	__COUT__ << "Found " << uniqueAsi.size() << " active sessions for uid " << uid << __E__;
 
 	return uniqueAsi.size();
-}
+}  // end getActiveSessionCountForUser()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::checkIpAccess ---
 //	checks user defined accept,
 //	then checks reject IP file
@@ -1671,9 +1653,9 @@ bool WebUsers::checkIpAccess(const std::string& ip)
 
 	// default to accept if nothing triggered above
 	return true;
-}
+}  // end checkIpAccess()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::incrementIpBlacklistCount ---
 void WebUsers::incrementIpBlacklistCount(const std::string& ip)
 {
@@ -1704,29 +1686,29 @@ void WebUsers::incrementIpBlacklistCount(const std::string& ip)
 			fclose(fp);
 		}
 	}
-}
+}  // end incrementIpBlacklistCount()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUsersDisplayName ---
 std::string WebUsers::getUsersDisplayName(uint64_t uid)
 {
 	uint64_t i;
 	if((i = searchUsersDatabaseForUserId(uid)) == NOT_FOUND_IN_DATABASE)
 		return "";
-	return UsersDisplayNameVector[i];
-}
+	return Users_[i].displayName_;
+}  // end getUsersDisplayName()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUsersUsername ---
 std::string WebUsers::getUsersUsername(uint64_t uid)
 {
 	uint64_t i;
 	if((i = searchUsersDatabaseForUserId(uid)) == NOT_FOUND_IN_DATABASE)
 		return "";
-	return UsersUsernameVector[i];
-}
+	return Users_[i].username_;
+}  // end getUsersUsername()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::cookieCodeLogout ---
 //	Used to logout user based on cookieCode and ActiveSessionIndex
 //		logoutOtherUserSessions true logs out all of user's other sessions by uid
@@ -1754,7 +1736,7 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 		ipBlacklistCounts_[ip] = 0;  // clear blacklist count
 
 	// check ip
-	if(ActiveSessionIpVector[i] != ip)
+	if(ActiveSessions_[i].ip_ != ip)
 	{
 		__COUT__ << "IP does not match active session" << __E__;
 		return NOT_FOUND_IN_DATABASE;
@@ -1766,32 +1748,32 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 	// ActiveSessionIndex[i]  else 	remove active sessions that match
 	// ActiveSessionUserIdVector[i] but not ActiveSessionIndex[i]
 
-	uint64_t asi = ActiveSessionIndex[i];
-	uint64_t uid = ActiveSessionUserIdVector[i];
+	uint64_t asi = ActiveSessions_[i].sessionIndex_;
+	uint64_t uid = ActiveSessions_[i].userId_;
 	if(userId)
 		*userId = uid;  // return uid if requested
 	uint64_t logoutCount = 0;
 
 	i = 0;
-	while(i < ActiveSessionIndex.size())
+	while(i < ActiveSessions_.size())
 	{
-		if((logoutOtherUserSessions && ActiveSessionUserIdVector[i] == uid && ActiveSessionIndex[i] != asi) ||
-		   (!logoutOtherUserSessions && ActiveSessionUserIdVector[i] == uid && ActiveSessionIndex[i] == asi))
+		if((logoutOtherUserSessions && ActiveSessions_[i].userId_ == uid && ActiveSessions_[i].sessionIndex_ != asi) ||
+		   (!logoutOtherUserSessions && ActiveSessions_[i].userId_ == uid && ActiveSessions_[i].sessionIndex_ == asi))
 		{
-			__COUT__ << "Logging out of active session " << ActiveSessionUserIdVector[i] << "-" << ActiveSessionIndex[i] << __E__;
-			removeActiveSessionEntry(i);
+			__COUT__ << "Logging out of active session " << ActiveSessions_[i].userId_ << "-" << ActiveSessions_[i].sessionIndex_ << __E__;
+			ActiveSessions_.erase(ActiveSessions_.begin() + i);
 			++logoutCount;
 		}
-		else  // only increment if no delete
+		else  // only increment if no delete, for effectively erase rewind
 			++i;
-	}
+	} //end cleanup active sessioins loop
 
 	__COUT__ << "Found and removed active session count = " << logoutCount << __E__;
 
 	return logoutCount;
-}
+}  // end cookieCodeLogout()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getUserInfoForCookie ---
 bool WebUsers::getUserInfoForCookie(std::string& cookieCode, std::string* userName, std::string* displayName, uint64_t* activeSessionIndex)
 {
@@ -1822,22 +1804,22 @@ bool WebUsers::getUserInfoForCookie(std::string& cookieCode, std::string* userNa
 	}
 
 	// get Users record
-	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
+	if((j = searchUsersDatabaseForUserId(ActiveSessions_[i].userId_)) == NOT_FOUND_IN_DATABASE)
 	{
-		__COUT__ << "ActiveSessionUserIdVector NOT_FOUND_IN_DATABASE" << __E__;
+		__COUT__ << "ActiveSession UserId NOT_FOUND_IN_DATABASE" << __E__;
 		return false;
 	}
 
 	if(userName)
-		*userName = UsersUsernameVector[j];
+		*userName = Users_[j].username_;
 	if(displayName)
-		*displayName = UsersDisplayNameVector[j];
+		*displayName = Users_[j].displayName_;
 	if(activeSessionIndex)
-		*activeSessionIndex = ActiveSessionIndex[i];
+		*activeSessionIndex = ActiveSessions_[i].sessionIndex_;
 	return true;
-}
+}  // end getUserInfoForCookie()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::isCookieCodeActiveForRequest ---
 //	Used to verify cookie code for all general user requests
 //  cookieCode/ip must be active to pass
@@ -1908,9 +1890,9 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string&                        
 		ipBlacklistCounts_[ip] = 0;  // clear blacklist count
 
 	// check ip
-	if(ip != "0" && ActiveSessionIpVector[i] != ip)
+	if(ip != "0" && ActiveSessions_[i].ip_ != ip)
 	{
-		__COUTV__(ActiveSessionIpVector[i]);
+		__COUTV__(ActiveSessions_[i].ip_);
 		//__COUTV__(ip);
 		__COUT_ERR__ << "IP does not match active session." << __E__;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
@@ -1918,14 +1900,14 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string&                        
 	}
 
 	// get Users record
-	if((j = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) == NOT_FOUND_IN_DATABASE)
+	if((j = searchUsersDatabaseForUserId(ActiveSessions_[i].userId_)) == NOT_FOUND_IN_DATABASE)
 	{
 		__COUT_ERR__ << "User ID not found" << __E__;
 		cookieCode = REQ_NO_LOGIN_RESPONSE;
 		return false;
 	}
 
-	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> tmpPerm = getPermissionsForUser(UsersUserIdVector[j]);
+	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> tmpPerm = getPermissionsForUser(Users_[j].userId_);
 
 	if(isInactiveForGroup(tmpPerm))  // Check for inactive for all requests!
 	{
@@ -1937,18 +1919,18 @@ bool WebUsers::cookieCodeIsActiveForRequest(std::string&                        
 	if(userPermissions)
 		*userPermissions = tmpPerm;
 	if(uid)
-		*uid = UsersUserIdVector[j];
+		*uid = Users_[j].userId_;
 	if(userWithLock)
 		*userWithLock = usersUsernameWithLock_;
 	if(activeUserSessionIndex)
-		*activeUserSessionIndex = ActiveSessionIndex[i];
+		*activeUserSessionIndex = ActiveSessions_[i].sessionIndex_;
 
 	cookieCode = refreshCookieCode(i, refresh);  // refresh cookie by reference
 
 	return true;
 }  // end cookieCodeIsActiveForRequest()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::cleanupExpiredEntries ---
 //	cleanup expired entries form Login Session and Active Session databases
 //	check if usersUsernameWithLock_ is still active
@@ -1968,15 +1950,15 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 	}
 
 	// remove expired entries from Login Session
-	for(i = 0; i < LoginSessionStartTimeVector.size(); ++i)
-		if(LoginSessionStartTimeVector[i] + LOGIN_SESSION_EXPIRATION_TIME < time(0) ||  // expired
-		   LoginSessionAttemptsVector[i] > LOGIN_SESSION_ATTEMPTS_MAX)
+	for(i = 0; i < LoginSessions_.size(); ++i)
+		if(LoginSessions_[i].startTime_ + LOGIN_SESSION_EXPIRATION_TIME < time(0) ||  // expired
+		   LoginSessions_[i].loginAttempts_ > LOGIN_SESSION_ATTEMPTS_MAX)
 		{
-			//__COUT__ << "Found expired userId: " << LoginSessionUUIDVector[i] <<
-			//	" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
-			// LoginSessionAttemptsVector[i] << __E__;
+			__COUT__ << "Found expired login sessions: " << i << " of " << LoginSessions_.size() << __E__;
+				//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
+			 	//LoginSessionAttemptsVector[i] << __E__;
 
-			removeLoginSessionEntry(i);
+			LoginSessions_.erase(LoginSessions_.begin() + i);
 			--i;  // rewind loop
 		}
 
@@ -1989,8 +1971,8 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 	//__COUT__ << "Current time is: " << time(0) << " " << tstr << __E__;
 
 	// remove expired entries from Active Session
-	for(i = 0; i < ActiveSessionStartTimeVector.size(); ++i)
-		if(ActiveSessionStartTimeVector[i] + ACTIVE_SESSION_EXPIRATION_TIME <= time(0))  // expired
+	for(i = 0; i < ActiveSessions_.size(); ++i)
+		if(ActiveSessions_[i].startTime_ + ACTIVE_SESSION_EXPIRATION_TIME <= time(0))  // expired
 		{
 			// timeinfo = localtime (&(tmpt=ActiveSessionStartTimeVector[i]));
 			// sprintf(tstr,"\"%s\"",asctime (timeinfo)); tstr[strlen(tstr)-2] = '\"';
@@ -1998,16 +1980,20 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 			//	" start time " << tstr << " i: " << i << " size: " <<
 			// ActiveSessionStartTimeVector.size()
 			//	<< __E__;
-			tmpUid = ActiveSessionUserIdVector[i];
-			removeActiveSessionEntry(i);
+			
+			
+			__COUT__ << "Found expired active sessions: " << i << " of " << ActiveSessions_.size() << __E__;
+			
+			tmpUid = ActiveSessions_[i].userId_;
+			ActiveSessions_.erase(ActiveSessions_.begin() + i);
 
 			if(!isUserIdActive(tmpUid))  // if uid no longer active, then user was
 			                             // completely logged out
 			{
 				if(loggedOutUsernames)  // return logged out users this time
-					loggedOutUsernames->push_back(UsersUsernameVector[searchUsersDatabaseForUserId(tmpUid)]);
+					loggedOutUsernames->push_back(Users_[searchUsersDatabaseForUserId(tmpUid)].username_);
 				else  // store for next time requested as parameter
-					UsersLoggedOutUsernames_.push_back(UsersUsernameVector[searchUsersDatabaseForUserId(tmpUid)]);
+					UsersLoggedOutUsernames_.push_back(Users_[searchUsersDatabaseForUserId(tmpUid)].username_);
 			}
 
 			--i;  // rewind loop
@@ -2026,13 +2012,12 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 	//
 	//		}
 
-	//__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << " - " <<
-	// userWithLockVerified << __E__;
+	//__COUT__ << "Found usersUsernameWithLock_: " << usersUsernameWithLock_ << __E__;
 	if(CareAboutCookieCodes_ && !isUsernameActive(usersUsernameWithLock_))  // unlock if user no longer logged in
 		usersUsernameWithLock_ = "";
-}
+}  // end cleanupExpiredEntries()
 
-//========================================================================================================================
+//==============================================================================
 // createNewLoginSession
 //	adds a new login session id to database
 //		inputs: UUID
@@ -2045,18 +2030,19 @@ std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::
 	//__COUTV__(ip);
 
 	uint64_t i = 0;
-	for(; i < LoginSessionUUIDVector.size(); ++i)
-		if(LoginSessionUUIDVector[i] == UUID)
+	for(; i < LoginSessions_.size(); ++i)
+		if(LoginSessions_[i].uuid_ == UUID)
 			break;
 
-	if(i != LoginSessionUUIDVector.size())
+	if(i != LoginSessions_.size())
 	{
 		__COUT_ERR__ << "UUID: " << UUID << " is not unique" << __E__;
 		return "";
 	}
 	// else UUID is unique
 
-	LoginSessionUUIDVector.push_back(UUID);
+	LoginSessions_.push_back(LoginSession());
+	LoginSessions_.back().uuid_ = UUID;
 
 	// generate sessionId
 	char        hexStr[3];
@@ -2066,15 +2052,15 @@ std::string WebUsers::createNewLoginSession(const std::string& UUID, const std::
 		intToHexStr(rand(), hexStr);
 		sid.append(hexStr);
 	}
-	LoginSessionIdVector.push_back(sid);
-	LoginSessionIpVector.push_back(ip);
-	LoginSessionStartTimeVector.push_back(time(0));
-	LoginSessionAttemptsVector.push_back(0);
+	LoginSessions_.back().id_            = sid;
+	LoginSessions_.back().ip_            = ip;
+	LoginSessions_.back().startTime_     = time(0);
+	LoginSessions_.back().loginAttempts_ = 0;
 
 	return sid;
-}
+}  // end createNewLoginSession()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::sha512
 //	performs SHA-512 encoding using openssl linux library crypto on context+user+password
 //	if context is empty std::string "", context is generated and returned by reference
@@ -2131,9 +2117,9 @@ std::string WebUsers::sha512(const std::string& user, const std::string& passwor
 	//__COUT__ << salt << __E__;
 
 	return retHash;
-}
+}  // end sha512()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::dejumble
 //	the client sends username and pw jumbled for http transmission
 //	this function dejumbles
@@ -2168,9 +2154,9 @@ std::string WebUsers::dejumble(const std::string& u, const std::string& s)
 	}
 
 	return user;
-}
+}  // end dejumble()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getPermissionForUser
 // return WebUsers::PERMISSION_LEVEL_INACTIVE if invalid index
 std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPermissionsForUser(uint64_t uid)
@@ -2178,17 +2164,19 @@ std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPe
 	//__COUTV__(uid);
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
 	//__COUTV__(userIndex); __COUTV__(UsersPermissionsVector.size());
-	if(userIndex < UsersPermissionsVector.size())
-		return UsersPermissionsVector[userIndex];
+	if(userIndex < Users_.size())
+		return Users_[userIndex].permissions_;
 
 	// else return all user inactive map
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> retErrorMap;
 	retErrorMap[WebUsers::DEFAULT_USER_GROUP] = WebUsers::PERMISSION_LEVEL_INACTIVE;
 	return retErrorMap;
-}
+}  // end getPermissionsForUser()
 
-//========================================================================================================================
-WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+//==============================================================================
+// WebUsers::getPermissionLevelForGroup
+// return WebUsers::PERMISSION_LEVEL_INACTIVE if group not found in permission map
+WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
                                                                  const std::string&                                                groupName)
 {
 	auto it = permissionMap.find(groupName);
@@ -2198,21 +2186,21 @@ WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(std::map<std::s
 		return WebUsers::PERMISSION_LEVEL_INACTIVE;
 	}
 	return it->second;
-}
+}  // end getPermissionLevelForGroup()
 
-//========================================================================================================================
-bool WebUsers::isInactiveForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
+//==============================================================================
+bool WebUsers::isInactiveForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_INACTIVE;
 }
 
-//========================================================================================================================
-bool WebUsers::isAdminForGroup(std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
+//==============================================================================
+bool WebUsers::isAdminForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap, const std::string& groupName)
 {
 	return getPermissionLevelForGroup(permissionMap, groupName) == WebUsers::PERMISSION_LEVEL_ADMIN;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getPermissionForUser
 // return 0 if invalid index
 std::string WebUsers::getTooltipFilename(const std::string& username, const std::string& srcFile, const std::string& srcFunc, const std::string& srcId)
@@ -2255,27 +2243,35 @@ std::string WebUsers::getTooltipFilename(const std::string& username, const std:
 
 std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& fingerprint)
 {
+	__COUT__ << "Checking if user fingerprint " << fingerprint << " is in memory database" << __E__;
+	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
+	
+	__COUT__ << "Going to read credential database " << WEB_LOGIN_CERTDATA_PATH << __E__;
 	std::ifstream f(WEB_LOGIN_CERTDATA_PATH);
-	if(f.is_open())
+	bool open =false;	
+	while(f)
 	{
+		open = true;
 		std::string email;
 		std::string fp;
-		getline(f, email);
-		getline(f, fp);
-		certFingerprints_[email] = fp;
+		f >> email >> fp;
+		if(fp != "NOKEY" && fp != "") {
+		__COUT__ << "Adding user " << email << " to list with fingerprint " << fp << __E__; 
+		certFingerprints_[fp] = email; }
+	}
+	if(open) {
 		f.close();
 		remove(WEB_LOGIN_CERTDATA_PATH.c_str());
 	}
 
-	for(auto fp : certFingerprints_)
-	{
-		if(fp.second == fingerprint)
-			return fp.first;
-	}
+	__COUT__ << "Checking again if fingerprint is in memory database" << __E__;
+	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
+
+	__COUT__ << "Could not match fingerprint, returning null email" << __E__;
 	return "";
 }  // end getUserEmailFromFingerprint()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
@@ -2312,7 +2308,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		__COUT_ERR__ << "Big problem with tooltips! File not accessible: " << filename << __E__;
 }  // end tooltipSetNeverShowForUsername()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::tooltipCheckForUsername
 //	read file for tooltip
 //		if not 1 then never show
@@ -2370,7 +2366,7 @@ void WebUsers::tooltipCheckForUsername(
 
 }  // end tooltipCheckForUsername();
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::resetAllUserTooltips
 void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 {
@@ -2378,7 +2374,7 @@ void WebUsers::resetAllUserTooltips(const std::string& userNeedle)
 	__COUT__ << "Successfully reset Tooltips for user " << userNeedle << __E__;
 }  // end of resetAllUserTooltips()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::silenceAllUserTooltips
 // creates a file
 void WebUsers::silenceAllUserTooltips(const std::string& username)
@@ -2393,7 +2389,7 @@ void WebUsers::silenceAllUserTooltips(const std::string& username)
 
 }  // end of silenceAllUserTooltips()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::insertGetSettingsResponse
 //  add settings to xml document
 //  all active users have permissions of at least 1 so have web preferences:
@@ -2417,15 +2413,15 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 {
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap = getPermissionsForUser(uid);
 
-	__COUTV__(StringMacros::mapToString(permissionMap));
+	//__COUTV__(StringMacros::mapToString(permissionMap));
 	if(isInactiveForGroup(permissionMap))
 		return;  // not an active user
 
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
-	__COUT__ << "Gettings settings for user: " << UsersUsernameVector[userIndex] << __E__;
+	__COUT__ << "Gettings settings for user: " << Users_[userIndex].username_ << __E__;
 
 	std::string fn =
-	    (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + UsersUsernameVector[userIndex] + "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	    (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + Users_[userIndex].username_ + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	HttpXmlDocument prefXml;
 
@@ -2453,29 +2449,30 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 
 		xmldoc->addTextElementToData(PREF_XML_ACCOUNTS_FIELD, "");
 
-		// get all accounts
-		for(uint64_t i = 0; i < UsersUsernameVector.size(); ++i)
+		if(Users_.size() == 0)
 		{
-			xmldoc->addTextElementToParent("username", UsersUsernameVector[i], PREF_XML_ACCOUNTS_FIELD);
-			xmldoc->addTextElementToParent("display_name", UsersDisplayNameVector[i], PREF_XML_ACCOUNTS_FIELD);
+			__COUT__ << "Missing users? Attempting to load database" << __E__;
+			loadDatabases();
+		}
 
-			if(UsersUserEmailVector.size() > i)
+		// get all accounts
+		for(uint64_t i = 0; i < Users_.size(); ++i)
+		{
+			xmldoc->addTextElementToParent("username", Users_[i].username_, PREF_XML_ACCOUNTS_FIELD);
+			xmldoc->addTextElementToParent("display_name", Users_[i].displayName_, PREF_XML_ACCOUNTS_FIELD);
+
+			if(Users_[i].email_.size() > i)
 			{
-				xmldoc->addTextElementToParent("useremail", UsersUserEmailVector[i], PREF_XML_ACCOUNTS_FIELD);
+				xmldoc->addTextElementToParent("useremail", Users_[i].email_, PREF_XML_ACCOUNTS_FIELD);
 			}
 			else
 			{
 				xmldoc->addTextElementToParent("useremail", "", PREF_XML_ACCOUNTS_FIELD);
 			}
 
-			xmldoc->addTextElementToParent("permissions", StringMacros::mapToString(UsersPermissionsVector[i]), PREF_XML_ACCOUNTS_FIELD);
+			xmldoc->addTextElementToParent("permissions", StringMacros::mapToString(Users_[i].permissions_), PREF_XML_ACCOUNTS_FIELD);
 
-			char nacStr[10];
-			if(UsersSaltVector[i] == "")  // only give nac if account has not been activated yet with password
-				sprintf(nacStr, "%d", int(UsersAccountCreatedTimeVector[i] & 0xffff));
-			else
-				nacStr[0] = '\0';
-			xmldoc->addTextElementToParent("nac", nacStr, PREF_XML_ACCOUNTS_FIELD);
+			xmldoc->addTextElementToParent("nac", Users_[i].getNewAccountCode().c_str(), PREF_XML_ACCOUNTS_FIELD);
 		}
 	}
 
@@ -2510,7 +2507,7 @@ void WebUsers::insertSettingsForUser(uint64_t uid, HttpXmlDocument* xmldoc, bool
 
 }  // end insertSettingsForUser()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::setGenericPreference
 //	each generic preference has its own directory, and each user has their own file
 void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceName, const std::string& preferenceValue)
@@ -2530,7 +2527,7 @@ void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceN
 	// attempt to make directory (just in case)
 	mkdir(dir.c_str(), 0755);
 
-	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName + "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	std::string fn = Users_[userIndex].username_ + "_" + safePreferenceName + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	__COUT__ << "Preferences file: " << (dir + fn) << __E__;
 
@@ -2542,9 +2539,9 @@ void WebUsers::setGenericPreference(uint64_t uid, const std::string& preferenceN
 	}
 	else
 		__COUT_ERR__ << "Preferences file could not be opened for writing!" << __E__;
-}
+}  // end setGenericPreference()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::getGenericPreference
 //	each generic preference has its own directory, and each user has their own file
 //	default preference is empty string.
@@ -2562,7 +2559,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 
 	std::string dir = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + "generic_" + safePreferenceName + "/";
 
-	std::string fn = UsersUsernameVector[userIndex] + "_" + safePreferenceName + "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	std::string fn = Users_[userIndex].username_ + "_" + safePreferenceName + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	__COUT__ << "Preferences file: " << (dir + fn) << __E__;
 
@@ -2590,9 +2587,9 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	if(xmldoc)
 		xmldoc->addTextElementToData(safePreferenceName, "");
 	return "";
-}
+}  // end getGenericPreference()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::changeSettingsForUser
 void WebUsers::changeSettingsForUser(
     uint64_t uid, const std::string& bgcolor, const std::string& dbcolor, const std::string& wincolor, const std::string& layout, const std::string& syslayout)
@@ -2602,10 +2599,10 @@ void WebUsers::changeSettingsForUser(
 		return;  // not an active user
 
 	uint64_t userIndex = searchUsersDatabaseForUserId(uid);
-	__COUT__ << "Changing settings for user: " << UsersUsernameVector[userIndex] << __E__;
+	__COUT__ << "Changing settings for user: " << Users_[userIndex].username_ << __E__;
 
 	std::string fn =
-	    (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + UsersUsernameVector[userIndex] + "." + (std::string)USERS_PREFERENCES_FILETYPE;
+	    (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_PREFERENCES_PATH + Users_[userIndex].username_ + "." + (std::string)USERS_PREFERENCES_FILETYPE;
 
 	__COUT__ << "Preferences file: " << fn << __E__;
 
@@ -2629,9 +2626,9 @@ void WebUsers::changeSettingsForUser(
 	sysPrefXml.addTextElementToData(PREF_XML_SYSLAYOUT_FIELD, syslayout);
 
 	sysPrefXml.saveXmlDocument(fn);
-}
+}  // end changeSettingsForUser()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::setUserWithLock
 // if lock is true, set lock user specified
 // if lock is false, attempt to unlock user specified
@@ -2690,9 +2687,9 @@ bool WebUsers::setUserWithLock(uint64_t actingUid, bool lock, const std::string&
 		}
 	}
 	return true;
-}
+}  // end setUserWithLock()
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::modifyAccountSettings
 void WebUsers::modifyAccountSettings(
     uint64_t actingUid, uint8_t cmd_type, const std::string& username, const std::string& displayname, const std::string& email, const std::string& permissions)
@@ -2700,21 +2697,37 @@ void WebUsers::modifyAccountSettings(
 	std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissionMap = getPermissionsForUser(actingUid);
 	if(!isAdminForGroup(permissionMap))
 	{
-		__MCOUT_ERR__("Only admins can modify user settings." << __E__);
-		return;  // not an admin
+		// not an admin
+		__SS__ << "Only admins can modify user settings." << __E__;
+		__SS_THROW__;
 	}
 
+	uint64_t i    = searchUsersDatabaseForUserId(actingUid);
 	uint64_t modi = searchUsersDatabaseForUsername(username);
 	if(modi == 0)
 	{
-		__MCOUT_ERR__("Cannot modify first user" << __E__);
-		return;
+		if(i == 0)
+		{
+			__COUT_INFO__ << "Admin password reset." << __E__;
+			Users_[modi].setModifier(Users_[i].username_);
+			Users_[modi].salt_              = "";
+			Users_[modi].loginFailureCount_ = 0;
+			saveDatabaseToFile(DB_USERS);
+			return;
+		}
+		__SS__ << "Cannot modify first user" << __E__;
+		__SS_THROW__;
 	}
 
-	if(username.length() < USERNAME_LENGTH || displayname.length() < DISPLAY_NAME_LENGTH)
+	if(username.length() < USERNAME_LENGTH)
 	{
-		__MCOUT_ERR__("Invalid Username or Display Name must be length " << USERNAME_LENGTH << " or " << DISPLAY_NAME_LENGTH << __E__);
-		return;
+		__SS__ << "Invalid Username, must be length " << USERNAME_LENGTH << __E__;
+		__SS_THROW__;
+	}
+	if(displayname.length() < DISPLAY_NAME_LENGTH)
+	{
+		__SS__ << "Invalid Display Name; must be length " << DISPLAY_NAME_LENGTH << __E__;
+		__SS_THROW__;
 	}
 
 	__COUT__ << "Input Permissions: " << permissions << __E__;
@@ -2728,78 +2741,124 @@ void WebUsers::modifyAccountSettings(
 
 		if(modi == NOT_FOUND_IN_DATABASE)
 		{
-			__COUT__ << "User not found!? Should not happen." << __E__;
-			return;
+			__SS__ << "User not found!? Should not happen." << __E__;
+			__SS_THROW__;
 		}
 
-		UsersDisplayNameVector[modi] = displayname;
-		UsersUserEmailVector[modi]   = email;
-
-		StringMacros::getMapFromString(permissions, newPermissionsMap);
-
-		// If account is currently inactive and re-activating, then reset fail count and
-		// password. 	Note: this is the account unlock mechanism.
-		if(isInactiveForGroup(UsersPermissionsVector[modi]) &&  // curently inactive
-		   !isInactiveForGroup(newPermissionsMap))              // and re-activating
+		//enforce unique Display Name
 		{
-			UsersLoginFailureCountVector[modi] = 0;
-			UsersSaltVector[modi]              = "";
+			for(uint64_t i=0; i < Users_.size(); ++i)
+				if(i == modi) continue; //skip target user
+				else if(Users_[i].displayName_ == displayname)
+				{
+					__SS__ << "Display Name '" << displayname << "' already exists! Please choose a unique display name." << __E__;
+					__SS_THROW__;
+				}
 		}
-		UsersPermissionsVector[modi] = newPermissionsMap;
+
+		Users_[modi].displayName_ = displayname;
+		Users_[modi].email_       = email;
+
+		{  // handle permissions
+			StringMacros::getMapFromString(permissions, newPermissionsMap);
+			bool wasInactive = isInactiveForGroup(Users_[modi].permissions_);
+
+			// fix permissions_ if missing default user group
+			if(newPermissionsMap.size() == 0)  // default to inactive
+				Users_[modi].permissions_[WebUsers::DEFAULT_USER_GROUP] = std::atoi(permissions.c_str());
+			else if(newPermissionsMap.size() == 1 && newPermissionsMap.find(WebUsers::DEFAULT_USER_GROUP) == newPermissionsMap.end())
+			{
+				if(newPermissionsMap.begin()->first == "")
+					Users_[modi].permissions_[WebUsers::DEFAULT_USER_GROUP] = newPermissionsMap.begin()->second;
+				else  // if a user group attempted, copy settings for default group
+				{
+					newPermissionsMap[WebUsers::DEFAULT_USER_GROUP] = newPermissionsMap.begin()->second;
+					Users_[modi].permissions_                       = newPermissionsMap;
+				}
+			}
+			else
+				Users_[modi].permissions_ = newPermissionsMap;
+
+			// If account was inactive and re-activating, then reset fail count and
+			// password. 	Note: this is the account unlock mechanism.
+			if(wasInactive &&                                   // was inactive
+			   !isInactiveForGroup(Users_[modi].permissions_))  // and re-activating
+			{
+				__COUT__ << "Reactivating " << username << __E__;
+				Users_[modi].loginFailureCount_ = 0;
+				Users_[modi].salt_              = "";
+			}
+		}  // end permissions handling
 
 		// save information about modifier
 		{
-			uint64_t i = searchUsersDatabaseForUserId(actingUid);
 			if(i == NOT_FOUND_IN_DATABASE)
 			{
-				__COUT__ << "Master User not found!? Should not happen." << __E__;
-				return;
+				__SS__ << "Master User not found!? Should not happen." << __E__;
+				__SS_THROW__;
 			}
-			UsersLastModifierUsernameVector[modi] = UsersUsernameVector[i];
-			UsersLastModifiedTimeVector[modi]     = time(0);
+			Users_[modi].setModifier(Users_[i].username_);
 		}
 		break;
 	case MOD_TYPE_ADD:
+		//Note: username, userId, AND displayName must be unique!
+
 		__COUT__ << "MOD_TYPE_ADD " << username << " - " << displayname << __E__;
+
 		createNewAccount(username, displayname, email);
+		// save information about modifier
+		{
+			if(i == NOT_FOUND_IN_DATABASE)
+			{
+				__SS__ << "Master User not found!? Should not happen." << __E__;
+				__SS_THROW__;
+			}
+			Users_.back().setModifier(Users_[i].username_);
+		}
+
+		if(permissions.size())  // apply permissions
+		{
+			modifyAccountSettings(actingUid, MOD_TYPE_UPDATE, username, displayname, email, permissions);
+			return;
+		}
 		break;
 	case MOD_TYPE_DELETE:
 		__COUT__ << "MOD_TYPE_DELETE " << username << " - " << displayname << __E__;
 		deleteAccount(username, displayname);
 		break;
 	default:
-		__COUT__ << "Undefined command - do nothing " << username << __E__;
+		__SS__ << "Undefined command - do nothing " << username << __E__;
+		__SS_THROW__;
 	}
 
 	saveDatabaseToFile(DB_USERS);
-}
-//========================================================================================================================
+}  // end modifyAccountSettings()
+
+//==============================================================================
 // WebUsers::getActiveUsersString
 //	return comma separated list of active Display Names
 std::string WebUsers::getActiveUsersString()
 {
-	std::string ret = "";
-	uint64_t    u;
-	bool        repeat;
-	for(uint64_t i = 0; i < ActiveSessionUserIdVector.size(); ++i)
-	{
-		repeat = false;
-		// check for no repeat
-		for(uint64_t j = 0; j < i; ++j)
-			if(ActiveSessionUserIdVector[i] == ActiveSessionUserIdVector[j])
-			{
-				repeat = true;
-				break;
-			}  // found repeat!
+	std::set<unsigned int>	activeUserIndices;
+	for(uint64_t i = 0; i < ActiveSessions_.size(); ++i)
+		activeUserIndices.emplace(searchUsersDatabaseForUserId(ActiveSessions_[i].userId_));
 
-		if(!repeat && (u = searchUsersDatabaseForUserId(ActiveSessionUserIdVector[i])) != NOT_FOUND_IN_DATABASE)  // if found, add displayName
-			ret += UsersDisplayNameVector[u] + ",";
+	std::string ret = "";
+	bool addComma = false;
+	for(const auto& i:activeUserIndices)
+	{
+		if(i >= Users_.size()) continue; //skip not found
+
+		if(addComma) ret += ",";
+		else addComma = true;
+
+		ret += Users_[i].displayName_;
 	}
-	if(ret.length() > 1)
-		ret.erase(ret.length() - 1);  // get rid of last comma
+	__COUTV__(ret);
 	return ret;
-}
-//========================================================================================================================
+}  // end getActiveUsersString()
+
+//==============================================================================
 // WebUsers::getAdminUserID
 //
 uint64_t WebUsers::getAdminUserID()
@@ -2808,7 +2867,7 @@ uint64_t WebUsers::getAdminUserID()
 	return uid;
 }
 
-//========================================================================================================================
+//==============================================================================
 // WebUsers::loadUserWithLock
 //	//load username with lock from file
 void WebUsers::loadUserWithLock()
@@ -2847,16 +2906,310 @@ void WebUsers::loadUserWithLock()
 		return;
 	}
 	__COUT__ << "Setting lock" << __E__;
-	setUserWithLock(UsersUserIdVector[i], true, username);
-}
+	setUserWithLock(Users_[i].userId_, true, username);
+}  // end loadUserWithLock()
 
-//========================================================================================================================
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void WebUsers::addSystemMessage(const std::string& targetUsersCSV,const std::string& message)
+{
+	addSystemMessage(targetUsersCSV,"" /*subject*/,message,false /*doEmail*/);
+} //end addSystemMessage()
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void WebUsers::addSystemMessage(const std::string& targetUsersCSV, const std::string& subject, const std::string& message, bool doEmail)
+{
+	std::vector<std::string> targetUsers;
+	StringMacros::getVectorFromString(targetUsersCSV,targetUsers);
+	addSystemMessage(targetUsers,subject,message,doEmail);
+} //end addSystemMessage()
+
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
+		const std::string& subject, const std::string& message, bool doEmail)
+{
+	__COUT__ << "Before number of users with system messages: " << systemMessages_.size() << __E__;
+
+	//lock for remainder of scope
+	std::lock_guard<std::mutex> lock(systemMessageLock_);
+
+	systemMessageCleanup();
+
+	std::string fullMessage = StringMacros::encodeURIComponent((subject == ""?"":(subject + ": ")) +
+			message);
+
+	__COUTV__(fullMessage);
+	__COUTV__(StringMacros::vectorToString(targetUsers));
+
+	std::set<std::string> targetEmails;
+
+	for(const auto& targetUser : targetUsers)
+	{
+		// reject if message is a repeat for user
+
+		if(targetUser == "" || (targetUser != "*" && targetUser.size() < 3))
+		{
+			__COUT__ << "Illegal username '" << targetUser << "'" << __E__;
+			continue;
+		}
+		__COUTV__(targetUser);
+		//target user might * or <group name>:<permission threshold> or just <username>
+
+
+		//do special ALL email handling
+		if(doEmail && targetUser == "*")
+		{
+			//for each user, look up email and append
+			for(const auto& user : Users_)
+			{
+				if(user.email_.size() > 5 && //few simple valid email checks
+						user.email_.find('@') != std::string::npos &&
+						user.email_.find('.') != std::string::npos)
+				{
+					__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
+					targetEmails.emplace(user.email_);
+				}
+			} //end add every user loop
+
+		} //end all email handling
+		else if(targetUser.find(':') != std::string::npos)
+		{
+			//special group handling.. convert to individual users
+			__COUT__ << "Treating as group email target: " << targetUser << __E__;
+
+			std::map<std::string, WebUsers::permissionLevel_t> targetGroupMap;
+			StringMacros::getMapFromString(  // re-factor membership string to map
+					targetUser,
+					targetGroupMap);
+
+			__COUTV__(StringMacros::mapToString(targetGroupMap));
+
+			if(targetGroupMap.size() == 1)
+			{
+				//add users to targetUsers, so the loop will catch them at end
+
+				//loop through all users, and add users that match group spec
+				for(const auto& user : Users_)
+				{
+					WebUsers::permissionLevel_t userLevel =
+							getPermissionLevelForGroup(getPermissionsForUser(user.userId_),
+									targetGroupMap.begin()->first);
+
+					__COUTV__(StringMacros::mapToString(getPermissionsForUser(user.userId_)));
+					__COUTV__((int)userLevel);
+					__COUTV__(targetGroupMap.begin()->first);
+
+					if(userLevel != WebUsers::PERMISSION_LEVEL_INACTIVE &&
+							userLevel >= targetGroupMap.begin()->second &&
+							user.email_.size() > 5 && //few simple valid email checks
+							user.email_.find('@') != std::string::npos &&
+							user.email_.find('.') != std::string::npos)
+					{
+						if(doEmail)
+						{
+							targetEmails.emplace(user.email_);
+							__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
+						}
+						addSystemMessageToMap(user.displayName_,fullMessage);
+					}
+				}
+			}
+			else
+				__COUT__ << "target Group Map from '" << targetUser << "' is empty." << __E__;
+
+			continue; //proceed with user loop, do not add group target message
+		}
+
+		//at this point add to system message map (similar to group individual add, but might be '*')
+
+		addSystemMessageToMap(targetUser,fullMessage);
+
+		if(doEmail)//find user for email
+		{
+			for(const auto& user : Users_)
+			{
+				if(user.displayName_ == targetUser)
+				{
+					if(user.email_.size() > 5 && //few simple valid email checks
+							user.email_.find('@') != std::string::npos &&
+							user.email_.find('.') != std::string::npos)
+					{
+						targetEmails.emplace(user.email_);
+						__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
+					}
+					break; //user found, exit search loop
+				}
+			} //end user search loop
+		}
+
+	} //end target user message add loop
+
+	__COUT__ << "After number of users with system messages: " << systemMessages_.size() << __E__;
+	__COUTV__(targetEmails.size());
+
+	if(doEmail && targetEmails.size())
+	{
+		__COUTV__(StringMacros::setToString(targetEmails));
+
+		std::string toList = "";
+		bool addComma = false;
+		for(const auto& email : targetEmails)
+		{
+			if(addComma) toList += ", ";
+			else addComma = true;
+			toList += email;
+		}
+
+		std::string filename = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH + "/.tmp_email.txt";
+		FILE* fp = fopen(filename.c_str(),"w");
+		if(!fp)
+		{
+			__SS__ << "Could not open email file: " << filename << __E__;
+			__SS_THROW__;
+		}
+
+		fprintf(fp,"From: %s\n",(WebUsers::OTS_OWNER==""?"ots":(
+				StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
+		fprintf(fp,"To: %s\n",toList.c_str());
+		fprintf(fp,"Subject: %s\n",subject.c_str());
+		fprintf(fp,"Content-Type: text/html\n");
+		fprintf(fp,"\n<html><pre>%s</pre></html>",message.c_str());
+		fclose(fp);
+
+		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());
+	}
+	else if(doEmail)
+		__COUT_WARN__ << "Do email was attempted, but no target users had email addresses specified!" << __E__;
+
+} //end addSystemMessage()
+
+//==============================================================================
+// addSystemMessageToMap
+// 	Manages map and adds message for user, does not add repeat messages for target user.
+//	targetUser should be display name of user or "*"
+void WebUsers::addSystemMessageToMap(const std::string& targetUser, const std::string& fullMessage)
+{
+	auto it = systemMessages_.find(targetUser);
+
+	//check for repeat messages
+	if(it != systemMessages_.end() &&
+			it->second.size() &&
+			it->second[it->second.size() - 1].message_ == fullMessage)
+		return; //skip user add
+
+	if(it == systemMessages_.end()) //create first message for target user
+	{
+		systemMessages_.emplace(
+				std::pair<std::string /*toUser*/,std::vector<SystemMessage>>(
+						targetUser,
+						std::vector<SystemMessage>({SystemMessage(fullMessage)})
+				));
+		__COUT__ << targetUser << " Current System Messages count = " << 1 << __E__;
+	}
+	else //add message
+	{
+		__COUT__ << __E__;
+		it->second.push_back(SystemMessage(fullMessage));
+		__COUT__ << it->first << " Current System Messages count = " << it->second.size() << __E__;
+	}
+} //end addSystemMessageToMap
+
+//==============================================================================
+// getSystemMessage
+//	Deliver | separated system messages (time | msg | time | msg...etc),
+//		if there is any in vector set for user or for wildcard *
+//	Empty std::string "" returned if no message for targetUser
+//	Note: | is an illegal character and will cause GUI craziness
+// 	Note: targetUser is by display name
+std::string WebUsers::getSystemMessage(const std::string& targetUser)
+{
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+
+	//lock for remainder of scope
+	std::lock_guard<std::mutex> lock(systemMessageLock_);
+
+	// __COUT__ << "Current System Messages: " << targetUser <<
+	// std::endl << std::endl;
+
+	std::string retStr = "";
+	int         cnt    = 0;
+	char        tmp[32];
+
+	//__COUTV__(targetUser);
+	auto it = systemMessages_.find(targetUser);
+	//for(auto systemMessagePair:systemMessages_)
+	//	__COUT__ << systemMessagePair.first << " " << systemMessagePair.second.size() << " "
+	//		<< (systemMessagePair.second.size()?systemMessagePair.second[0].message_:"") << __E__;
+	//if(it != systemMessages_.end())
+	//	__COUTV__(it->second.size());
+
+	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
+	{
+		// deliver user specific system message
+		if(cnt)
+			retStr += "|";
+		sprintf(tmp, "%lu", it->second[i].creationTime_);
+		retStr += std::string(tmp) + "|" + it->second[i].message_;
+
+		it->second[i].delivered_ = true;
+		++cnt;
+	}
+	it = systemMessages_.find("*");
+	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
+	{
+		// deliver "*" system message
+		if(cnt)
+			retStr += "|";
+		sprintf(tmp, "%lu", it->second[i].creationTime_);
+		retStr += std::string(tmp) + "|" + it->second[i].message_;
+
+		++cnt;
+	}
+	//__COUTV__(retStr);
+
+	systemMessageCleanup();
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	return retStr;
+} //end getSystemMessage()
+
+//==============================================================================
+// systemMessageCleanup
+//	Cleanup messages if delivered, and targetUser != wildcard *
+//	For all remaining messages, wait some time before removing (e.g. 30 sec)
+void WebUsers::systemMessageCleanup()
+{
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+	for(auto& userMessagesPair : systemMessages_)
+	{
+		//__COUT__ << userMessagesPair.first << " system messages: " <<
+		//		userMessagesPair.second.size() << __E__;
+
+		for(uint64_t i = 0; i < userMessagesPair.second.size(); ++i)
+			if((userMessagesPair.first != "*" && userMessagesPair.second[i].delivered_) ||  // delivered and != *
+					userMessagesPair.second[i].creationTime_ + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
+			{
+				// remove
+				userMessagesPair.second.erase(userMessagesPair.second.begin() + i);
+				--i;                   // rewind
+			}
+
+		//__COUT__ << userMessagesPair.first << " remaining system messages: " <<
+		//		userMessagesPair.second.size() << __E__;
+	}
+	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
+} //end systemMessageCleanup()
+
+//==============================================================================
 // WebUsers::getSecurity
-//
 std::string WebUsers::getSecurity() { return securityType_; }
-//========================================================================================================================
+//==============================================================================
 // WebUsers::loadSecuritySelection
-//
 void WebUsers::loadSecuritySelection()
 {
 	std::string securityFileName = SECURITY_FILE_NAME;
@@ -2874,7 +3227,7 @@ void WebUsers::loadSecuritySelection()
 	if(strcmp(line, SECURITY_TYPE_NONE.c_str()) == 0 || strcmp(line, SECURITY_TYPE_DIGEST_ACCESS.c_str()) == 0)
 		securityType_ = line;
 	else
-		securityType_ = SECURITY_TYPE_NONE;  // default to NO SECURITY
+		securityType_ = SECURITY_TYPE_DEFAULT;
 
 	__COUT__ << "The current security type is " << securityType_ << __E__;
 
@@ -2887,9 +3240,9 @@ void WebUsers::loadSecuritySelection()
 		CareAboutCookieCodes_ = true;
 
 	__COUT__ << "CareAboutCookieCodes_: " << CareAboutCookieCodes_ << __E__;
-}
+} //end loadSecuritySelection()()
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
@@ -2908,11 +3261,13 @@ void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 	}
-}
+} //end NACDisplayThread()
 
-//========================================================================================================================
+//==============================================================================
 void WebUsers::deleteUserData()
 {
+	__COUT__ << "$$$$$$$$$$$$$$ Deleting ALL service user data... $$$$$$$$$$$$" << __E__;
+
 	// delete Login data
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + HASHES_DB_PATH + "/*").c_str());
 	std::system(("rm -rf " + (std::string)WEB_LOGIN_DB_PATH + USERS_DB_PATH + "/*").c_str());
@@ -2952,5 +3307,5 @@ void WebUsers::deleteUserData()
 	// delete Logbook folders
 	std::system(("rm -rf " + std::string(__ENV__("LOGBOOK_DATA_PATH")) + "/").c_str());
 
-	std::cout << __COUT_HDR_FL__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << __E__;
-}
+	__COUT__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << __E__;
+} //end deleteUserData()

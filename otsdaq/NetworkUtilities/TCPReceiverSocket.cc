@@ -1,18 +1,19 @@
 #include "otsdaq/NetworkUtilities/TCPReceiverSocket.h"
 #include <sys/socket.h>
-#include <unistd.h>  //read
+#include <unistd.h>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
 using namespace ots;
-//========================================================================================================================
+
+//==============================================================================
 TCPReceiverSocket::TCPReceiverSocket(int socketId) : TCPSocket(socketId) { fPacket.reset(); }
 
-//========================================================================================================================
+//==============================================================================
 TCPReceiverSocket::~TCPReceiverSocket(void) {}
 
-//========================================================================================================================
+//==============================================================================
 std::string TCPReceiverSocket::receivePacket(void)
 {
 	while(true)
@@ -24,8 +25,8 @@ std::string TCPReceiverSocket::receivePacket(void)
 	}
 }
 
-//========================================================================================================================
-std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
+//==============================================================================
+std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int timeoutMicroSeconds)
 {
 	// std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " <<
 	// getSocketId() << std::endl;
@@ -33,6 +34,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
 	{
 		throw std::logic_error("Bad socket object (this object was moved)");
 	}
+	// std::cout << __PRETTY_FUNCTION__ << "WAITING: " << std::endl;
 	std::size_t dataRead = ::read(getSocketId(), buffer, bufferSize);
 	if(dataRead == static_cast<std::size_t>(-1))
 	{
@@ -61,14 +63,9 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
 			break;
 		case EAGAIN:
 		{
-			// Temporary error.
-			// Simply retry the read.
-			std::cout << __PRETTY_FUNCTION__
-			          << "Read returned EAGAIN error which means that the read was "
-			             "temporarily broken. If this continues it is a problem because "
-			             "I am in a recursive loop!"
-			          << std::endl;
-			dataRead = receive(buffer, bufferSize);
+			// recv is non blocking so this error is issued every time there are no messages to read
+			// std::cout << __PRETTY_FUNCTION__ << "Couldn't read any data: " << dataRead << std::endl;
+			// std::this_thread::sleep_for (std::chrono::seconds(1));
 			return dataRead;
 		}
 		case ENOTCONN:
@@ -93,4 +90,13 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize)
 	// std::cout << __PRETTY_FUNCTION__ << "Message received with no errors for socket: "
 	// << getSocketId() << std::endl;
 	return dataRead;
+}
+
+//==============================================================================
+void TCPReceiverSocket::setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)
+{
+	struct timeval tv;
+	tv.tv_sec  = timeoutSeconds;
+	tv.tv_usec = timeoutMicroSeconds;
+	setsockopt(getSocketId(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 }

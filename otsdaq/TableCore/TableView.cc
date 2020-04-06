@@ -355,7 +355,7 @@ void TableView::init(void)
 			for(unsigned int groupIdColPos = 0; groupIdColPos < columnsInfo_.size(); ++groupIdColPos)
 				if(columnsInfo_[groupIdColPos].isGroupID())
 				{
-					std::map<std::string /*group name*/, std::pair<unsigned int /*memberCount*/, std::set<std::string /*unique data*/> > > uGroupDataSets;
+					std::map<std::string /*group name*/, std::pair<unsigned int /*memberCount*/, std::set<std::string /*unique data*/>>> uGroupDataSets;
 
 					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 					{
@@ -633,9 +633,10 @@ void TableView::init(void)
 // string specific function
 void TableView::getValue(std::string& value, unsigned int row, unsigned int col, bool doConvertEnvironmentVariables) const
 {
-	if(!(col < columnsInfo_.size() && row < getNumberOfRows()))
+	if(!(row < getNumberOfRows() && col < theDataView_[row].size()))
 	{
-		__SS__ << "Invalid row col requested" << __E__;
+		__SS__ << "Invalid row col requested " << row << "," << col << " vs " << getNumberOfRows() << "," << columnsInfo_.size() << "/"
+		       << theDataView_[row].size() << __E__;
 		__SS_THROW__;
 	}
 
@@ -831,8 +832,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 	//"'"
 	//			         << __E__;
 
-
-	bool		 firstConflict = true;
+	bool         firstConflict = true;
 	int          maxUniqueData = -1;
 	std::string  tmpString     = "";
 	bool         foundAny;
@@ -843,7 +843,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 
 	// find max in rows
 
-	//this->print();
+	// this->print();
 
 	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
 	{
@@ -905,14 +905,12 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 				continue;  // skip max unique number if basestring does not match
 
 			//__COUT__ << "Found unique data base string '" << tmpString << "' and number string '" << numString << "' in last record '" << theDataView_[r][col]
-			 //        << "'" << __E__;
+			//        << "'" << __E__;
 
 			if(firstConflict)
 			{
 				// if baseValueAsString ends in number, then add _ to keep naming similar
-				if(baseValueAsString.size() &&
-						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
-						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+				if(baseValueAsString.size() && baseValueAsString[baseValueAsString.size() - 1] >= '0' && baseValueAsString[baseValueAsString.size() - 1] <= '9')
 					baseValueAsString += '_';
 
 				firstConflict = false;
@@ -934,9 +932,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			if(firstConflict)
 			{
 				// if baseValueAsString ends in number, then add _ to keep naming similar
-				if(baseValueAsString.size() &&
-						baseValueAsString[baseValueAsString.size() - 1] >= '0' &&
-						baseValueAsString[baseValueAsString.size() - 1] <= '9')
+				if(baseValueAsString.size() && baseValueAsString[baseValueAsString.size() - 1] >= '0' && baseValueAsString[baseValueAsString.size() - 1] <= '9')
 					baseValueAsString += '_';
 
 				firstConflict = false;
@@ -965,8 +961,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 			theDataView_[row][col] = baseValueAsString + indexString;
 	}
 
-	__COUT__ << "New unique data entry is data[" << row <<
-			"][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
+	__COUT__ << "New unique data entry is data[" << row << "][" << col << "] = '" << theDataView_[row][col] << "'" << __E__;
 
 	// this->print();
 
@@ -1149,7 +1144,7 @@ void TableView::addRowToGroup(const unsigned int& row,
 		setValue(groupID + " | " + getDataView()[row][col], row, col);
 
 	//__COUT__ << getDataView()[row][col] << __E__;
-} //end addRowToGroup()
+}  // end addRowToGroup()
 
 //==============================================================================
 // getGroupRows
@@ -1158,23 +1153,19 @@ void TableView::addRowToGroup(const unsigned int& row,
 //
 //	Note: empty group id of "" or '*' will return all rows
 std::vector<unsigned int /*group row*/> TableView::getGroupRows(const unsigned int groupIdCol,
-		const std::string& groupID, bool onlyStatusTrue /*=false*/,
-		bool orderedByPriority /*=false*/) const
+                                                                const std::string& groupID,
+                                                                bool               onlyStatusTrue /*=false*/,
+                                                                bool               orderedByPriority /*=false*/) const
 {
-	std::vector<unsigned int /*group row*/>                     retVector;
-	std::vector<std::vector<unsigned int /*group row*/>> groupRowVectors =
-			getGroupRowsInVectors(
-					groupIdCol,
-					groupID,
-					onlyStatusTrue,
-					orderedByPriority);
+	std::vector<unsigned int /*group row*/>              retVector;
+	std::vector<std::vector<unsigned int /*group row*/>> groupRowVectors = getGroupRowsInVectors(groupIdCol, groupID, onlyStatusTrue, orderedByPriority);
 
-	for(const auto& groupRowVector: groupRowVectors)
-		for(const auto& groupRow: groupRowVector)
+	for(const auto& groupRowVector : groupRowVectors)
+		for(const auto& groupRow : groupRowVector)
 			retVector.push_back(groupRow);
 
 	return retVector;
-} //end getGroupRows()
+}  // end getGroupRows()
 
 //==============================================================================
 // getGroupRowsByPriority
@@ -1182,12 +1173,12 @@ std::vector<unsigned int /*group row*/> TableView::getGroupRows(const unsigned i
 //	with consideration for status on/off and priority, if enabled with flags
 //
 //	Note: empty group id of "" or '*' will return all rows
-std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsByPriority(
-		const unsigned int groupIdCol,
-		const std::string& groupID, bool onlyStatusTrue /*=false*/) const
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsByPriority(const unsigned int groupIdCol,
+                                                                                       const std::string& groupID,
+                                                                                       bool               onlyStatusTrue /*=false*/) const
 {
-	return getGroupRowsInVectors(groupIdCol,groupID,onlyStatusTrue,true /*orderedByPriority*/);
-} //end getGroupRowsByPriority()
+	return getGroupRowsInVectors(groupIdCol, groupID, onlyStatusTrue, true /*orderedByPriority*/);
+}  // end getGroupRowsByPriority()
 
 //==============================================================================
 // getGroupRowsInVectors
@@ -1197,23 +1188,21 @@ std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsByPr
 //	with consideration for status on/off and priority, if enabled with flags
 //
 //	Note: empty group id of "" or '*' will return all rows
-std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVectors(
-		const unsigned int groupIdCol,
-		const std::string& groupID, bool onlyStatusTrue,
-		bool orderedByPriority) const
+std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVectors(const unsigned int groupIdCol,
+                                                                                      const std::string& groupID,
+                                                                                      bool               onlyStatusTrue,
+                                                                                      bool               orderedByPriority) const
 {
 	std::map<uint64_t /*priority*/, std::vector<unsigned int /*child row*/>> mapByPriority;
 	std::vector<std::vector<unsigned int /*group row*/>>                     retVector;
-	uint64_t tmpPriority;
-	bool tmpStatus;
+	uint64_t                                                                 tmpPriority;
+	bool                                                                     tmpStatus;
 
-	if(!(orderedByPriority && colPriority_ != INVALID)) //if no priority column, all at same priorty [0]
+	if(!(orderedByPriority && colPriority_ != INVALID))  // if no priority column, all at same priorty [0]
 		retVector.push_back(std::vector<unsigned int /*group row*/>());
 
 	for(unsigned int r = 0; r < getNumberOfRows(); ++r)
-		if(groupID == "" || groupID == "*" ||
-				groupIdCol == INVALID ||
-				isEntryInGroupCol(r, groupIdCol, groupID))
+		if(groupID == "" || groupID == "*" || groupIdCol == INVALID || isEntryInGroupCol(r, groupIdCol, groupID))
 		{
 			// check status if needed
 			if(onlyStatusTrue && colStatus_ != INVALID)
@@ -1230,7 +1219,7 @@ std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVe
 				// do not accept DEFAULT value of 0.. convert to 100
 				mapByPriority[tmpPriority ? tmpPriority : 100].push_back(r);
 			}
-			else //assume equal priority
+			else  // assume equal priority
 				retVector[0].push_back(r);
 		}
 
@@ -1247,10 +1236,10 @@ std::vector<std::vector<unsigned int /*group row*/>> TableView::getGroupRowsInVe
 
 		__COUT__ << "Returning priority children list." << __E__;
 	}
-	//else equal priority vector already constructed
+	// else equal priority vector already constructed
 
 	return retVector;
-} //end getGroupRowsInVectors()
+}  // end getGroupRowsInVectors()
 
 //==============================================================================
 // removeRowFromGroup
@@ -1263,8 +1252,7 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	std::set<std::string> groupIDList;
 	if(!isEntryInGroupCol(row, col, groupNeedle, &groupIDList))
 	{
-		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" <<
-				row << ") was already removed!" << __E__;
+		__SS__ << "GroupID (" << groupNeedle << ") removed from row (" << row << ") was already removed!" << __E__;
 		print();
 		__SS_THROW__;
 	}
@@ -1299,7 +1287,7 @@ bool TableView::removeRowFromGroup(const unsigned int& row, const unsigned int& 
 	//__COUT__ << getDataView()[row][col] << __E__;
 
 	return wasDeleted;
-} //end removeRowFromGroup()
+}  // end removeRowFromGroup()
 
 //==============================================================================
 // isEntryInGroup
@@ -1312,7 +1300,7 @@ bool TableView::isEntryInGroup(const unsigned int& r, const std::string& childLi
 	unsigned int c = getLinkGroupIDColumn(childLinkIndex);  // column in question
 
 	return isEntryInGroupCol(r, c, groupNeedle);
-} //end isEntryInGroup()
+}  // end isEntryInGroup()
 
 //==============================================================================
 //	isEntryInGroupCol
@@ -1375,7 +1363,7 @@ bool TableView::isEntryInGroupCol(const unsigned int& r, const unsigned int& c, 
 	}
 
 	return found;
-} //end isEntryInGroupCol()
+}  // end isEntryInGroupCol()
 
 //==============================================================================
 // getSetOfGroupIDs
@@ -2006,7 +1994,8 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
-	std::vector<std::string> keys;
+	std::map<std::string /*key*/, unsigned int /*entries/rows*/> keyEntryCountMap;
+	std::vector<std::string>                                     keys;
 	keys.push_back("NAME");
 	keys.push_back("COMMENT");
 	keys.push_back("AUTHOR");
@@ -2460,9 +2449,14 @@ int TableView::fillFromJSON(const std::string& json)
 								if(keyIsMatch || keyIsComment)  // currKey ==
 								                                // columnsInfo_[c].getStorageName())
 								{
-									// matched
-									if(col <= lastCol)  // add row (use lastCol in case
-									                    // new column-0 was added
+									if(keyEntryCountMap.find(currKey) == keyEntryCountMap.end())
+										keyEntryCountMap[currKey] = 0;  // show follow row count
+									else
+										++keyEntryCountMap.at(currKey);
+
+									// add row (based on entry counts)
+									if(keyEntryCountMap.size() == 1 ||
+									   (keyEntryCountMap.at(currKey) && keyEntryCountMap.at(currKey) > row))  // if(col <= lastCol)
 									{
 										if(getNumberOfRows())  // skip first time
 											sourceColumnMissingCount_ += getNumberOfColumns() - colFoundCount;
@@ -2533,14 +2527,14 @@ int TableView::fillFromJSON(const std::string& json)
 
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
+		const std::set<std::string> srcColNames = getSourceColumnNames();
 		__SS__ << "Can not ignore errors because not every column was found in the "
 		          "source data!"
 		       << ". Please see the details below:\n\n"
-		       << "The source column size was found to be " << getDataColumnSize() << ", and the current number of columns for this table is "
+		       << "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
 		       << getNumberOfColumns() << ". This resulted in a count of " << getSourceColumnMismatch() << " source column mismatches, and a count of "
 		       << getSourceColumnMissing() << " table entries missing in " << getNumberOfRows() << " row(s) of data." << __E__;
 
-		const std::set<std::string> srcColNames = getSourceColumnNames();
 		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
 		char        index       = 'a';
 		std::string preIndexStr = "";

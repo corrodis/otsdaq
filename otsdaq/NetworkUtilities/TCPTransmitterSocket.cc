@@ -8,16 +8,16 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPTransmitterSocket::TCPTransmitterSocket(int socketId) : TCPSocket(socketId) {}
 
-//========================================================================================================================
+//==============================================================================
 TCPTransmitterSocket::~TCPTransmitterSocket(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void TCPTransmitterSocket::sendPacket(const std::string& buffer) { send(TCPPacket::encode(buffer)); }
 
-//========================================================================================================================
+//==============================================================================
 void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 {
 	std::size_t sentBytes = ::send(getSocketId(), buffer, size, MSG_NOSIGNAL);
@@ -61,7 +61,7 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPTransmitterSocket::send(const std::string& buffer)
 {
 	if(buffer.size() == 0)
@@ -72,7 +72,7 @@ void TCPTransmitterSocket::send(const std::string& buffer)
 	send(&buffer.at(0), buffer.size());
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPTransmitterSocket::send(const std::vector<char>& buffer)
 {
 	if(buffer.size() == 0)
@@ -81,4 +81,24 @@ void TCPTransmitterSocket::send(const std::vector<char>& buffer)
 		return;
 	}
 	send(&buffer.at(0), buffer.size());
+}
+
+//==============================================================================
+void TCPTransmitterSocket::send(const std::vector<uint16_t>& buffer)
+{
+	if(buffer.size() == 0)
+	{
+		std::cout << __PRETTY_FUNCTION__ << "I am sorry but I won't send an empty packet!" << std::endl;
+		return;
+	}
+	send((const char*)&buffer.at(0), buffer.size());
+}
+
+//==============================================================================
+void TCPTransmitterSocket::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)
+{
+	struct timeval tv;
+	tv.tv_sec  = timeoutSeconds;
+	tv.tv_usec = timeoutMicroSeconds;
+	setsockopt(getSocketId(), SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof tv);
 }

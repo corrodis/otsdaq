@@ -9,7 +9,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(ARTDAQFEDataManagerSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 // The intention is that the artdaq Board Reader would be a consumer
 //	extracting data that the front-end places in the buffer.
 ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor(xdaq::ApplicationStub* s) : FEDataManagerSupervisor(s, true /*artdaq Data Manager*/)
@@ -46,7 +46,7 @@ ARTDAQFEDataManagerSupervisor::ARTDAQFEDataManagerSupervisor(xdaq::ApplicationSt
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQFEDataManagerSupervisor::~ARTDAQFEDataManagerSupervisor(void)
 {
 	//	__SUP_COUT__ << "Destroying..." << std::endl;

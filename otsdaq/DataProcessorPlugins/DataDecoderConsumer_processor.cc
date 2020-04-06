@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 DataDecoderConsumer::DataDecoderConsumer(std::string              supervisorApplicationUID,
                                          std::string              bufferUID,
                                          std::string              processorUID,
@@ -23,10 +23,10 @@ DataDecoderConsumer::DataDecoderConsumer(std::string              supervisorAppl
 {
 }
 
-//========================================================================================================================
+//==============================================================================
 DataDecoderConsumer::~DataDecoderConsumer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 bool DataDecoderConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << processorUID_ << " running!"

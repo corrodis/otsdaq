@@ -102,7 +102,7 @@ class ConfigurationTree
 		tableView_ = a.tableView_;
 		__COUT__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
 		return *this;
-	};
+	}; //end operator=
 
 	static const std::string DISCONNECTED_VALUE;
 	static const std::string VALUE_TYPE_DISCONNECTED;

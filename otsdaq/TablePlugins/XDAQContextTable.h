@@ -63,6 +63,8 @@ class XDAQContextTable : public TableBase
 
 	std::string 					getContextUID				(const std::string& url) const;
 	std::string 					getApplicationUID			(const std::string& url, unsigned int id) const;
+	std::string 					getContextOfApplication		(ConfigurationManager* configManager, const std::string& appUID) const;
+	std::string 					getContextOfGateway			(ConfigurationManager* configManager) const;
 
 	const std::vector<XDAQContext>& getContexts					(void) const { return contexts_; }
 
@@ -75,8 +77,8 @@ class XDAQContextTable : public TableBase
 	const XDAQContext* 				getTheARTDAQSupervisorContext	(void) const;
 
   private:
-	std::vector<XDAQContext> contexts_;
-	unsigned int /*contextIndex*/ artdaqSupervisorContext_;
+	std::vector<XDAQContext> 		contexts_;
+	unsigned int /*contextIndex*/ 	artdaqSupervisorContext_;
 
   public:
 	// XDAQ Context Column names
@@ -132,7 +134,7 @@ class XDAQContextTable : public TableBase
 	    ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_;
 	static const std::string GATEWAY_SUPERVISOR_CLASS, WIZARD_SUPERVISOR_CLASS,
 	    DEPRECATED_SUPERVISOR_CLASS;
-};
+}; //end XDAQContextTable class
 }  // namespace ots
 // clang-format on
 #endif

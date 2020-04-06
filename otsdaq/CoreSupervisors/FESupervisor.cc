@@ -4,6 +4,10 @@
 
 #include "artdaq/DAQdata/Globals.hh"  // instantiates artdaq::Globals::metricMan_
 
+#include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
+
+#include "fhiclcpp/make_ParameterSet.h"
+
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
 // for metric manager include
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
@@ -30,7 +34,7 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(FESupervisor)
 
-//========================================================================================================================
+//==============================================================================
 FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
 {
 	__SUP_COUT__ << "Constructing..." << __E__;
@@ -115,7 +119,7 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 	}  // end Macro Maker mode initial configure
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 FESupervisor::~FESupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -127,7 +131,7 @@ FESupervisor::~FESupervisor(void)
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageReference message) try
 {
 	__SUP_COUT__ << "FE Request received: " << SOAPUtilities::translate(message) << __E__;
@@ -414,7 +418,7 @@ catch(...)
 	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailFECommunicationRequest", parameters);
 }  // end frontEndCommunicationRequest()
 
-//========================================================================================================================
+//==============================================================================
 // macroMakerSupervisorRequest
 //	 Handles all MacroMaker Requests:
 //		- GetInterfaces (returns interface type and id)
@@ -798,7 +802,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 
 }  // end macroMakerSupervisorRequest()
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReference message)
 {
 	if(!theFEInterfacesManager_)
@@ -813,7 +817,7 @@ xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReferenc
 	    (theFEInterfacesManager_->allFEWorkloopsAreDone() ? CoreSupervisorBase::WORK_LOOP_DONE : CoreSupervisorBase::WORK_LOOP_WORKING));
 }  // end workLoopStatusRequest()
 
-//========================================================================================================================
+//==============================================================================
 // extractFEInterfaceManager
 //
 //	locates theFEInterfacesManager in state machines vector and
@@ -850,3 +854,134 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 
 	return theFEInterfacesManager_;
 }  // end extractFEInterfaceManager()
+
+//==============================================================================
+void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
+{
+	__SUP_COUT__ << "transitionConfiguring" << __E__;
+	
+	{ //do like start of CoreSupervisorBase::transitionConfiguring
+		// activate the configuration tree (the first iteration)
+		if(RunControlStateMachine::getIterationIndex() == 0 && RunControlStateMachine::getSubIterationIndex() == 0)
+		{
+			std::pair<std::string /*group name*/, TableGroupKey> theGroup(
+					SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupName"),
+					TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupKey")));
+			
+			__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << __E__;
+			
+			theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
+		}
+	} //end start like CoreSupervisorBase::transitionConfiguring
+	
+	// get pset from Board Reader metric manager table
+	try
+	{
+		// FIXME -- this should be enabled and named by configuration!
+		
+		__COUTV__(CorePropertySupervisorBase::getSupervisorConfigurationPath());
+		
+		ConfigurationTree feSupervisorNode = CorePropertySupervisorBase::getSupervisorTableNode();
+		
+		bool enableMetricManager = false;
+		try
+		{
+			enableMetricManager = feSupervisorNode.getNode(
+				"/EnableSlowControlsMetricManager").getValue<bool>();
+		}
+		catch(...) {		}//ignore error
+		
+		
+		if(enableMetricManager)
+		{
+			if(!metricMan) 
+			{
+				__SUP_COUT__ << "Metric manager is not instantiated! Attempting to fix." << __E__;
+				metricMan = std::make_unique<artdaq::MetricManager>();
+			}
+			std::string			metricNamePreamble = feSupervisorNode.getNode(
+							"/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
+			__COUTV__(metricNamePreamble);
+			
+			std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
+			fhicl::ParameterSet metric_pset;
+			fhicl::make_ParameterSet(metric_string, metric_pset);
+
+			metricMan->initialize(metric_pset,metricNamePreamble);
+			
+			__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan <<
+				") initialized = " << metricMan->Initialized() << __E__;
+		}
+		else
+			__SUP_COUT__ << "Metric Manager disabled." << __E__;
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring(): " << e.what() << __E__;
+		__COUT_ERR__ << ss.str();
+		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+		//__SS_THROW_ONLY__;
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
+		                                         ss.str() /* message*/,
+		                                         "FESupervisor::transitionConfiguring" /*module*/,
+		                                         __LINE__ /*line*/,
+		                                         __FUNCTION__ /*function*/
+		);
+	}
+	catch(...)
+	{
+		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring()" << __E__;
+		__COUT_ERR__ << ss.str();
+		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+		//__SS_THROW_ONLY__;
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
+		                                         ss.str() /* message*/,
+		                                         "FESupervisor::transitionConfiguring" /*module*/,
+		                                         __LINE__ /*line*/,
+		                                         __FUNCTION__ /*function*/
+		);
+	}
+
+	CoreSupervisorBase::transitionConfiguringFSMs();
+
+	__SUP_COUT__ << "transitionConfiguring done." << __E__;
+}  // end transitionConfiguring()
+
+//==============================================================================
+void FESupervisor::transitionHalting(toolbox::Event::Reference event)
+{
+	__SUP_COUT__ << "transitionHalting" << __E__;
+	
+	try
+	{
+		
+		if(metricMan && metricMan->Initialized()) {
+			metricMan->shutdown();  //will set initilized_ to false with mutex, which should prevent races
+			metricMan.reset(nullptr);
+		}
+		else
+			__SUP_COUT__ << "Metric manager(" << metricMan << ") already shutdown." << __E__;
+	}
+	catch(...)
+	{
+		__SS__ << "Error shutting down metrics in FESupervisor::transitionHalting()" << __E__;
+		__COUT_ERR__ << ss.str();
+		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+		//__SS_THROW_ONLY__;
+		theStateMachine_.setErrorMessage(ss.str());
+		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
+		                                         ss.str() /* message*/,
+		                                         "FESupervisor::transitionHalting" /*module*/,
+		                                         __LINE__ /*line*/,
+		                                         __FUNCTION__ /*function*/
+		);
+	}
+	
+	CoreSupervisorBase::transitionHalting(event);
+	__SUP_COUT__ << "transitionHalting done." << __E__;
+}  // end transitionHalting()

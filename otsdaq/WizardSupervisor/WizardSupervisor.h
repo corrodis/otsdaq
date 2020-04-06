@@ -69,16 +69,17 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 
 	// External Supervisor XOAP handlers
 	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference supervisorLastTableGroupRequest(xoap::MessageReference msg);
 
   private:
-	std::string              securityCode_;
-	bool                     defaultSequence_;
-	std::vector<std::string> allowedFileUploadTypes_, matchingFileUploadTypes_;
+	std::string              				securityCode_;
+	bool                    				defaultSequence_;
+	static const std::vector<std::string> 	allowedFileUploadTypes_, matchingFileUploadTypes_;
+	static const std::string				WIZ_SUPERVISOR, WIZ_PORT, SERVICE_DATA_PATH;
 
-	std::string supervisorClass_;
-	std::string supervisorClassNoNamespace_;
-	AllSupervisorInfo	allSupervisorInfo_;
+	std::string 							supervisorClass_;
+	std::string 							supervisorClassNoNamespace_;
+	AllSupervisorInfo						allSupervisorInfo_;
 
 	enum
 	{

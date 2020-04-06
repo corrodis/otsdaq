@@ -23,7 +23,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 Socket::Socket(const std::string& IPAddress, unsigned int port) : socketNumber_(-1), IPAddress_(IPAddress), requestedPort_(port)
 //    maxSocketSize_(maxSocketSize)
 {
@@ -56,7 +56,7 @@ Socket::Socket(const std::string& IPAddress, unsigned int port) : socketNumber_(
 	__COUT__ << "Constructed socket for port " << ntohs(socketAddress_.sin_port) << "=" << getPort() << " htons: " << socketAddress_.sin_port << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 // protected constructor
 Socket::Socket(void)
 {
@@ -68,7 +68,7 @@ Socket::Socket(void)
 	__SS_THROW__;
 }
 
-//========================================================================================================================
+//==============================================================================
 Socket::~Socket(void)
 {
 	__COUT__ << "CLOSING THE SOCKET #" << socketNumber_ << " IP: " << IPAddress_ << " port: " << getPort() << " htons: " << socketAddress_.sin_port
@@ -77,7 +77,7 @@ Socket::~Socket(void)
 		close(socketNumber_);
 }
 
-//========================================================================================================================
+//==============================================================================
 void Socket::initialize(unsigned int socketReceiveBufferSize)
 {
 	__COUT__ << "Initializing port " << ntohs(socketAddress_.sin_port) << " htons: " << socketAddress_.sin_port << std::endl;
@@ -189,5 +189,5 @@ uint16_t Socket::getPort()
 	//	return ntohs(sin.sin_port);
 }
 
-//========================================================================================================================
+//==============================================================================
 const struct sockaddr_in& Socket::getSocketAddress(void) { return socketAddress_; }

@@ -4,10 +4,10 @@ using namespace ots;
 
 XDAQ_INSTANTIATOR_IMPL(CodeEditorSupervisor)
 
-//========================================================================================================================
+//==============================================================================
 CodeEditorSupervisor::CodeEditorSupervisor(xdaq::ApplicationStub* s) : CoreSupervisorBase(s) { __SUP_COUT__ << "Constructed." << __E__; }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 CodeEditorSupervisor::~CodeEditorSupervisor(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -15,7 +15,7 @@ CodeEditorSupervisor::~CodeEditorSupervisor(void)
 	// ~CoreSupervisorBase()
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 void CodeEditorSupervisor::defaultPage(xgi::Input* in, xgi::Output* out)
 {
 	__SUP_COUT__ << "ApplicationDescriptor LID=" << getApplicationDescriptor()->getLocalId() << __E__;
@@ -24,7 +24,7 @@ void CodeEditorSupervisor::defaultPage(xgi::Input* in, xgi::Output* out)
 	     << getApplicationDescriptor()->getLocalId() << "'></frameset></html>";
 }  // end defaultPage()
 
-//========================================================================================================================
+//==============================================================================
 // setSupervisorPropertyDefaults
 //		override to set defaults for supervisor property values (before user settings
 // override)
@@ -35,7 +35,7 @@ void CodeEditorSupervisor::setSupervisorPropertyDefaults()
 
 }  // end setSupervisorPropertyDefaults()
 
-//========================================================================================================================
+//==============================================================================
 // forceSupervisorPropertyValues
 //		override to force supervisor property values (and ignore user settings)
 void CodeEditorSupervisor::forceSupervisorPropertyValues()
@@ -45,7 +45,7 @@ void CodeEditorSupervisor::forceSupervisorPropertyValues()
 
 }  // end forceSupervisorPropertyValues()
 
-//========================================================================================================================
+//==============================================================================
 //	Request
 //		Handles Web Interface requests to Console supervisor.
 //		Does not refresh cookie for automatic update checks.

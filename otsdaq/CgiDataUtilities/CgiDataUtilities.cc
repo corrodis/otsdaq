@@ -3,7 +3,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // getOrPostData
 // 	return std::string value of needle from get or post std::string
 //		post format is expected to be: needle1=value1&needle2=value2...
@@ -16,7 +16,7 @@ std::string CgiDataUtilities::getOrPostData(cgicc::Cgicc& cgi, const std::string
 	return postData;
 }
 
-//========================================================================================================================
+//==============================================================================
 // getPostData
 // 	return std::string value of needle from post std::string
 //		post format is expected to be: needle1=value1&needle2=value2...
@@ -43,7 +43,7 @@ std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& nee
 	return postData.substr(start_pos, end_pos - start_pos);  // return value
 }
 
-//========================================================================================================================
+//==============================================================================
 // getData
 //	returns "" if not found
 //		get query data format is expected to be: needle1=value1&needle2=value2...
@@ -72,7 +72,7 @@ std::string CgiDataUtilities::getData(cgicc::Cgicc& cgi, const std::string& need
 	return getData.substr(start_pos, end_pos);  // return value
 }
 
-//========================================================================================================================
+//==============================================================================
 int CgiDataUtilities::getOrPostDataAsInt(cgicc::Cgicc& cgi, const std::string& needle) { return atoi(getOrPostData(cgi, needle).c_str()); }
 int CgiDataUtilities::postDataAsInt(cgicc::Cgicc& cgi, const std::string& needle) { return atoi(postData(cgi, needle).c_str()); }
 int CgiDataUtilities::getDataAsInt(cgicc::Cgicc& cgi, const std::string& needle) { return atoi(getData(cgi, needle).c_str()); }

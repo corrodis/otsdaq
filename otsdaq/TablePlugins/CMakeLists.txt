@@ -5,6 +5,7 @@
 #)
 
 add_subdirectory(ARTDAQTableBase)
+add_subdirectory(SlowControlsTableBase)
     
   
 simple_plugin(ARTDAQBoardReaderTable "table"

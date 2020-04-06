@@ -241,7 +241,7 @@ void get(TableBase*&                          table,
 	{
 		__SS__ << "Error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
 		ss << "\n" << e.what() << __E__;
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 	catch(...)
 	{

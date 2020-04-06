@@ -8,6 +8,7 @@
 #include "xgi/Method.h"  //for cgicc::Cgicc
 
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -33,25 +34,33 @@ class WebUsers
   public:
 	WebUsers();
 
+	enum
+	{
+		SESSION_ID_LENGTH     		= 512,
+		COOKIE_CODE_LENGTH    		= 512,
+		NOT_FOUND_IN_DATABASE 		= uint64_t(-1),
+		ACCOUNT_INACTIVE 			= uint64_t(-2),
+		ACCOUNT_BLACKLISTED 		= uint64_t(-3),
+		ACCOUNT_ERROR_THRESHOLD 	= uint64_t(-5),
+		USERNAME_LENGTH       		= 4,
+		DISPLAY_NAME_LENGTH   		= 4,
+	};
 
 	enum
 	{
-		SESSION_ID_LENGTH     = 512,
-		COOKIE_CODE_LENGTH    = 512,
-		NOT_FOUND_IN_DATABASE = uint64_t(-1),
-		USERNAME_LENGTH       = 4,
-		DISPLAY_NAME_LENGTH   = 4,
+		MOD_TYPE_UPDATE,
+		MOD_TYPE_ADD,
+		MOD_TYPE_DELETE
 	};
 
 	using permissionLevel_t = uint8_t;
 	enum
 	{
-		PERMISSION_LEVEL_ADMIN =
-		    WebUsers::permissionLevel_t(-1),  // max permission level!
-		PERMISSION_LEVEL_EXPERT   = 100,
-		PERMISSION_LEVEL_USER     = 10,
-		PERMISSION_LEVEL_NOVICE   = 1,
-		PERMISSION_LEVEL_INACTIVE = 0,
+		PERMISSION_LEVEL_ADMIN 		= WebUsers::permissionLevel_t(-1),  // max permission level!
+		PERMISSION_LEVEL_EXPERT   	= 100,
+		PERMISSION_LEVEL_USER     	= 10,
+		PERMISSION_LEVEL_NOVICE   	= 1,
+		PERMISSION_LEVEL_INACTIVE 	= 0,
 	};
 
 	static const std::string OTS_OWNER; //defined by environment variable, e.g. experiment name
@@ -71,6 +80,152 @@ class WebUsers
 
 	static const std::string SECURITY_TYPE_NONE;
 	static const std::string SECURITY_TYPE_DIGEST_ACCESS;
+	static const std::string SECURITY_TYPE_DEFAULT;
+
+	struct User
+	{
+		//"Users" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		//
+		//	Maintain list of existing Usernames and associate the following:
+		// 		- permissions map of group name to permission level (e.g. users, experts, masters) 0 to 255
+		// 		note: all users are at least in group WebUsers::DEFAULT_USER_GROUP
+		// 			0 	:= account inactive, not allowed to login (e.g. could be due to too many failed login attempts)
+		//			1 	:= normal user
+		//			255 := admin for things in group
+		// 		permission level is determined by finding the highest permission level number (0 to
+		// 		255) for an allowed group.. then that permission level is compared to the threshold.
+		//
+		// 		- Last Login attempt time, and last USERS_LOGIN_HISTORY_SIZE successful logins
+		// 		- Name to display
+		// 		- random salt, before first login salt is empty string ""
+		// 		- Keep count of login attempt failures. Limit failures per unit time (e.g. 5 per hour)
+		//		- Preferences (e.g. color scheme, etc)  Username appends to preferences file, and login history file
+		//		- UsersLastModifierUsernameVector - is username of last admin user to modify something about account
+		//		- UsersLastModifierTimeVector - is time of last modify by an admin user
+		User():lastLoginAttempt_(0),accountCreationTime_(0),loginFailureCount_(0),
+				lastModifierTime_(time(0)*100000 + (clock()%100000)) {}
+
+		void setModifier(const std::string& modifierUsername)
+		{
+			lastModifierUsername_ = modifierUsername;
+			lastModifierTime_ = time(0)*100000 + (clock()%100000); //clock used for NAC randomness
+		}
+
+		void loadModifierUsername(const std::string& modifierUsername)
+		{
+			lastModifierUsername_ = modifierUsername;
+		}
+
+		time_t& accessModifierTime() { return lastModifierTime_; }
+
+		time_t getModifierTime(bool convertToRealTime = false) const { return (convertToRealTime?lastModifierTime_/100000:lastModifierTime_); }
+		const std::string& getModifierUsername() const { return lastModifierUsername_; }
+		std::string getNewAccountCode() const {
+
+			if(salt_ != "")  // only give nac if account has not been activated yet with password
+				return "";
+
+			char charTimeStr[10];
+			sprintf(charTimeStr, "%5.5d", int(lastModifierTime_ & 0xffff));
+			return charTimeStr;
+		} //end getNewAccountCode()
+
+		std::string 			username_, email_, displayName_, salt_;
+		std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> permissions_;
+		uint64_t 				userId_;
+		time_t					lastLoginAttempt_, accountCreationTime_;
+		uint8_t					loginFailureCount_;
+
+	private:
+		std::string				lastModifierUsername_;
+		time_t					lastModifierTime_;
+	}; //end User struct
+
+	struct LoginSession
+	{
+		//"Login Session" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// 	Generate random sessionId when receive a unique user ID (UUID)
+		// 	reject UUID that have been used recently (e.g. last 5 minutes)
+		// 	Maintain list of active sessionIds and associated UUID
+		// 	remove from list if been idle after some time or login attempts (e.g. 5 minutes or
+		// 		3 login attempts)  maybe track IP address, to block multiple failed login attempts
+		// 		from same IP.  Use sessionId to un-jumble login attempts, lookup using UUID
+
+		std::string 			id_, uuid_, ip_;
+		time_t					startTime_;
+		uint8_t					loginAttempts_;
+	}; //end LoginSession struct
+
+	struct ActiveSession
+	{
+		//"Active Session" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// 	Maintain list of valid cookieCodes and associated user - all requests
+		//		must come with a valid cookieCode, else server fails request.
+		// 	On logout request, invalidate cookieCode.
+		// 	cookieCode expires after some idle time (e.g. 5 minutes) and
+		// 		is renewed and possibly changed each request.
+		//	"single user - multiple locations" issue resolved using ActiveSessionIndex
+		//		 where each independent login starts a new thread of cookieCodes tagged with
+		// 		ActiveSessionIndex if cookieCode not refreshed, then return most recent cookie code
+
+		std::string 			cookieCode_, ip_;
+		uint64_t				userId_, sessionIndex_;
+		time_t					startTime_;
+	}; //end ActiveSession struct
+
+	struct Hash
+	{
+		//"Hashes" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Maintain list of acceptable encoded (SHA-512) salt+user+pw's
+
+		std::string 			hash_;
+		time_t					accessTime_; // last login month resolution, blurred by 1/2 month
+	}; //end Hash struct
+
+	enum
+	{
+		SYS_CLEANUP_WILDCARD_TIME = 30,  // 30 seconds
+	};
+
+	struct SystemMessage
+	{
+		// Members for system messages ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		//	Set of vectors to delivers system messages to active users of the Web Gui
+		//		When a message is generated, systemMessageLock is set,
+		//			message is added and the vector set deliveredFlag = false,
+		//			and systemMessageLock is unset.
+		//		When a message is delivered deliveredFlag = true,
+		//		During systemMessageCleanup(), systemMessageLock is set, delivered messages are removed,
+		//			and systemMessageLock is unset.
+		//"SystemMessage" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Maintain list of user system messages:
+		//	time, message, deliveredFlag
+
+		SystemMessage(const std::string& message)
+		: message_			(message)
+		, creationTime_		(time(0))
+		, delivered_		(false)
+		{} //end constructor
+
+		std::string 			message_;
+		time_t					creationTime_;
+		bool					delivered_; //flag
+	}; //end SystemMessage struct
+
+	void        			addSystemMessage			(const std::string& targetUsersCSV, const std::string& message);
+	void        			addSystemMessage			(const std::string& targetUsersCSV, const std::string& subject, const std::string& message, bool doEmail);
+	void        			addSystemMessage			(const std::vector<std::string>& targetUsers, const std::string& subject, const std::string& message, bool doEmail);
+	std::string 			getSystemMessage			(const std::string& targetUser);
+
+  private:
+	void					addSystemMessageToMap		(const std::string& targetUser, const std::string& fullMessage); //private because target already vetted
+	void                   	systemMessageCleanup		(void);
+	std::mutex				systemMessageLock_;
+	std::map<std::string /*toUserDisplayName*/,std::vector<SystemMessage>> systemMessages_;
+
+
+  public:
+
 
 	struct RequestUserInfo
 	{
@@ -200,7 +355,7 @@ class WebUsers
 	  private:
 		std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>
 		    groupPermissionLevelMap_;
-	};
+	}; //end RequestUserInfo struct
 
 	// for the gateway supervisor to check request access
 	// if false, gateway request handling code should just return.. out is handled on
@@ -222,7 +377,7 @@ class WebUsers
 	                               bool                       isWizardMode = false,
 								   const std::string& 		  wizardModeSequence = "");
 
-	bool        createNewAccount(const std::string& username,
+	void        createNewAccount(const std::string& username,
 	                             const std::string& displayName,
 	                             const std::string& email);
 	void        cleanupExpiredEntries(std::vector<std::string>* loggedOutUsernames = 0);
@@ -323,13 +478,13 @@ class WebUsers
 
   private:
 	inline WebUsers::permissionLevel_t getPermissionLevelForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+	    const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool isInactiveForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+			const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 	inline bool isAdminForGroup(
-	    std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
+			const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
 	    const std::string& groupName = WebUsers::DEFAULT_USER_GROUP);
 
 	void         loadSecuritySelection(void);
@@ -346,8 +501,6 @@ class WebUsers
 	bool         addToHashesDatabase(const std::string& hash);
 	std::string  genCookieCode(void);
 	std::string  refreshCookieCode(unsigned int i, bool enableRefresh = true);
-	void         removeActiveSessionEntry(unsigned int i);
-	void         removeLoginSessionEntry(unsigned int i);
 	bool deleteAccount(const std::string& username, const std::string& displayName);
 	void incrementIpBlacklistCount(const std::string& ip);
 
@@ -359,12 +512,13 @@ class WebUsers
 	bool saveDatabaseToFile(uint8_t db);
 	bool loadDatabases(void);
 
-	uint64_t searchUsersDatabaseForUsername(const std::string& username) const;
-	uint64_t searchUsersDatabaseForUserEmail(const std::string& useremail) const;
-	uint64_t searchUsersDatabaseForUserId(uint64_t uid) const;
-	uint64_t searchLoginSessionDatabaseForUUID(const std::string& uuid) const;
-	uint64_t searchHashesDatabaseForHash(const std::string& hash);
-	uint64_t searchActiveSessionDatabaseForCookie(const std::string& cookieCode) const;
+	uint64_t searchUsersDatabaseForUsername			(const std::string& username) const;
+	uint64_t searchUsersDatabaseForDisplayName		(const std::string& displayName) const;
+	uint64_t searchUsersDatabaseForUserEmail		(const std::string& useremail) const;
+	uint64_t searchUsersDatabaseForUserId			(uint64_t uid) const;
+	uint64_t searchLoginSessionDatabaseForUUID		(const std::string& uuid) const;
+	uint64_t searchHashesDatabaseForHash			(const std::string& hash);
+	uint64_t searchActiveSessionDatabaseForCookie	(const std::string& cookieCode) const;
 
 	static std::string getTooltipFilename(const std::string& username,
 	                                      const std::string& srcFile,
@@ -380,13 +534,6 @@ class WebUsers
 
 	enum
 	{
-		MOD_TYPE_UPDATE,
-		MOD_TYPE_ADD,
-		MOD_TYPE_DELETE
-	};
-
-	enum
-	{
 		DB_SAVE_OPEN_AND_CLOSE,
 		DB_SAVE_OPEN,
 		DB_SAVE_CLOSE
@@ -394,21 +541,23 @@ class WebUsers
 
 	std::unordered_map<std::string, std::string> certFingerprints_;
 
-	std::vector<std::string> UsersDatabaseEntryFields, HashesDatabaseEntryFields;
+	static const std::vector<std::string> UsersDatabaseEntryFields_, HashesDatabaseEntryFields_;
 	bool                     CareAboutCookieCodes_;
 	std::string              securityType_;
 
 	//"Login Session" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	std::vector<LoginSession> LoginSessions_;
+
 	// Generate random sessionId when receive a unique user ID (UUID)
 	// reject UUID that have been used recently (e.g. last 5 minutes)
 	// Maintain list of active sessionIds and associated UUID
 	// remove from list if been idle after some time or login attempts (e.g. 5 minutes or
 	// 3 login attempts)  maybe track IP address, to block multiple failed login attempts
 	// from same IP.  Use sessionId to un-jumble login attempts, lookup using UUID
-	std::vector<std::string> LoginSessionIdVector, LoginSessionUUIDVector,
-	    LoginSessionIpVector;
-	std::vector<time_t>  LoginSessionStartTimeVector;
-	std::vector<uint8_t> LoginSessionAttemptsVector;
+//	std::vector<std::string> LoginSessionIdVector, LoginSessionUUIDVector,
+//	    LoginSessionIpVector;
+//	std::vector<time_t>  LoginSessionStartTimeVector;
+//	std::vector<uint8_t> LoginSessionAttemptsVector;
 	enum
 	{
 		LOGIN_SESSION_EXPIRATION_TIME = 5 * 60,  // 5 minutes
@@ -416,6 +565,8 @@ class WebUsers
 	};
 
 	//"Active Session" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	std::vector<ActiveSession> ActiveSessions_;
+
 	// Maintain list of valid cookieCodes and associated user
 	// all request must come with a valid cookieCode, else server fails request
 	// On logout request, invalidate cookieCode
@@ -425,9 +576,9 @@ class WebUsers
 	// where each independent login starts a new thread of cookieCodes tagged with
 	// ActiveSessionIndex  if cookieCode not refreshed, then return most recent cookie
 	// code
-	std::vector<std::string> ActiveSessionCookieCodeVector, ActiveSessionIpVector;
-	std::vector<uint64_t>    ActiveSessionUserIdVector, ActiveSessionIndex;
-	std::vector<time_t>      ActiveSessionStartTimeVector;
+//	std::vector<std::string> ActiveSessionCookieCodeVector, ActiveSessionIpVector;
+//	std::vector<uint64_t>    ActiveSessionUserIdVector, ActiveSessionIndex;
+//	std::vector<time_t>      ActiveSessionStartTimeVector;
 	enum
 	{
 		ACTIVE_SESSION_EXPIRATION_TIME = 120 * 60,  // 120 minutes, cookie is changed
@@ -440,6 +591,7 @@ class WebUsers
 	};
 
 	//"Users" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	std::vector<User>	Users_;
 	// Maintain list of acceptable Usernames and associate:
 	// permissions
 	// map of group name to permission level (e.g. users, experts, masters) 0 to 255
@@ -458,14 +610,14 @@ class WebUsers
 	// and login history file  UsersLastModifierUsernameVector - is username of last
 	// master user to modify something about account  UsersLastModifierTimeVector - is
 	// time of last modify by a master user
-	std::vector<std::string> UsersUsernameVector, UsersUserEmailVector,
-	    UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
-	std::vector<std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> >
-	                      UsersPermissionsVector;
-	std::vector<uint64_t> UsersUserIdVector;
-	std::vector<time_t>   UsersLastLoginAttemptVector, UsersAccountCreatedTimeVector,
-	    UsersLastModifiedTimeVector;
-	std::vector<uint8_t> UsersLoginFailureCountVector;
+//	std::vector<std::string> UsersUsernameVector, UsersUserEmailVector,
+//	    UsersDisplayNameVector, UsersSaltVector, UsersLastModifierUsernameVector;
+//	std::vector<std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> >
+//	                      UsersPermissionsVector;
+//	std::vector<uint64_t> UsersUserIdVector;
+//	std::vector<time_t>   UsersLastLoginAttemptVector, UsersAccountCreatedTimeVector,
+//	    UsersLastModifiedTimeVector;
+//	std::vector<uint8_t> UsersLoginFailureCountVector;
 	uint64_t             usersNextUserId_;
 	enum
 	{
@@ -478,15 +630,19 @@ class WebUsers
 	std::vector<std::string> UsersLoggedOutUsernames_;
 
 	//"Hashes" database associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	std::vector<Hash> 		Hashes_;
+
 	// Maintain list of acceptable encoded (SHA-512) salt+user+pw's
-	std::vector<std::string> HashesVector;
-	std::vector<time_t>      HashesAccessTimeVector;
+//	std::vector<std::string> HashesVector;
+//	std::vector<time_t>      HashesAccessTimeVector;
 
 	enum
 	{
 		IP_BLACKLIST_COUNT_THRESHOLD = 200,
 	};
 	std::map<std::string /*ip*/, uint32_t /*errorCount*/> ipBlacklistCounts_;
+
+	std::mutex				webUserMutex_;
 };
 // clang-format on
 }  // namespace ots

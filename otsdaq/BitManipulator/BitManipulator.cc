@@ -7,13 +7,13 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 BitManipulator::BitManipulator() {}
 
-//========================================================================================================================
+//==============================================================================
 BitManipulator::~BitManipulator() {}
 
-//========================================================================================================================
+//==============================================================================
 uint64_t BitManipulator::insertBits(uint64_t& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	//    std::cout << __COUT_HDR_FL__ << "Before: " << std::hex << data << "-<-" << value
@@ -27,7 +27,7 @@ uint64_t BitManipulator::insertBits(uint64_t& data, uint64_t value, unsigned int
 	return data;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint8_t            toWrite     = 0;
@@ -109,7 +109,7 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 	return (uint64_t)overWritten;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint64_t BitManipulator::reverseBits(uint64_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint64_t reversedData = 0;
@@ -118,7 +118,7 @@ uint64_t BitManipulator::reverseBits(uint64_t data, unsigned int startBit, unsig
 	return reversedData;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t BitManipulator::insertBits(uint32_t& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	//    std::cout << __COUT_HDR_FL__ << "Before: " << hex << data << "-<-" << value <<
@@ -137,7 +137,7 @@ uint32_t BitManipulator::insertBits(uint32_t& data, uint32_t value, unsigned int
 	return data;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint8_t            toWrite     = 0;
@@ -219,7 +219,7 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 	return (uint32_t)overWritten;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t BitManipulator::reverseBits(uint32_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint32_t reversedData = 0;
@@ -228,7 +228,7 @@ uint32_t BitManipulator::reverseBits(uint32_t data, unsigned int startBit, unsig
 	return reversedData;
 }
 
-//========================================================================================================================
+//==============================================================================
 uint32_t BitManipulator::readBits(uint32_t data, unsigned int startBit, unsigned int numberOfBits)
 {
 	uint32_t returnData = 0;

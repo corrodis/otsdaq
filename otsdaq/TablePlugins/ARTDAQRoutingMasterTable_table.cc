@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) : ARTDAQTableBase("ARTDAQRoutingMasterTable")
 {
 	//////////////////////////////////////////////////////////////////////
@@ -18,10 +18,10 @@ ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) : ARTDAQTableBase("ARTD
 	//////////////////////////////////////////////////////////////////////
 }
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQRoutingMasterTable::~ARTDAQRoutingMasterTable(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQRoutingMasterTable::init(ConfigurationManager* configManager)
 {
 	// use isFirstAppInContext to only run once per context, for example to avoid

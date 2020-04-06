@@ -6,21 +6,25 @@
 #include <iostream>
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients)
 {
+	fReceiveTimeout.tv_sec  = 0;
+	fReceiveTimeout.tv_usec = 0;
+	fSendTimeout.tv_sec     = 0;
+	fSendTimeout.tv_usec    = 0;
 	// fAcceptFuture = std::async(std::launch::async, &TCPServer::acceptConnections,
 	// this);
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPServer::~TCPServer(void) {}
 
 // void TCPServer::StartAcceptConnections()
 // {
 
 // }
-//========================================================================================================================
+//==============================================================================
 // time out or protection for this receive method?
 // void TCPServer::connectClient(int fdClientSocket)
 void TCPServer::connectClient(TCPTransceiverSocket* socket)
@@ -47,14 +51,14 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 		// std::cout << __PRETTY_FUNCTION__
 		//           //<< "Received message:-" << message << "-"
 		//           << "Message Length=" << message.length() << " From socket #: " << socket->getSocketId() << std::endl;
-		message = interpretMessage(message);
+		std::string messageToClient = interpretMessage(message);
 
-		if(message != "")
+		// Send back something only if there is actually a message to be sent!
+		if(messageToClient != "")
 		{
-			// std::cout << __PRETTY_FUNCTION__ << "Sending back message:-" <<
-			// messageToClient << "-(nbytes=" << messageToClient.length() << ") to socket
-			// #: " << socket->getSocketId() << std::endl;
-			socket->sendPacket(message);
+			// std::cout << __PRETTY_FUNCTION__ << "Sending back message:-" << messageToClient << "-(nbytes=" << messageToClient.length() << ") to socket #: "
+			// << socket->getSocketId() << std::endl;
+			socket->sendPacket(messageToClient);
 		}
 		// else
 		// 	std::cout << __PRETTY_FUNCTION__ << "Not sending anything back to socket  #: " << socket->getSocketId() << std::endl;
@@ -65,7 +69,7 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 	std::cout << __PRETTY_FUNCTION__ << "Thread done for socket  #: " << socket->getSocketId() << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPServer::acceptConnections()
 {
 	// std::pair<std::unordered_map<int, TCPTransceiverSocket>::iterator, bool> element;
@@ -73,7 +77,10 @@ void TCPServer::acceptConnections()
 	{
 		try
 		{
-			std::thread thread(&TCPServer::connectClient, this, acceptClient<TCPTransceiverSocket>());
+			TCPTransceiverSocket* clientSocket = acceptClient<TCPTransceiverSocket>();
+			clientSocket->setReceiveTimeout(fReceiveTimeout.tv_sec, fReceiveTimeout.tv_usec);
+			clientSocket->setSendTimeout(fSendTimeout.tv_sec, fSendTimeout.tv_usec);
+			std::thread thread(&TCPServer::connectClient, this, clientSocket);
 			thread.detach();
 		}
 		catch(int e)
@@ -84,4 +91,18 @@ void TCPServer::acceptConnections()
 		}
 	}
 	fAcceptPromise.set_value(true);
+}
+
+//==============================================================================
+void TCPServer::setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroseconds)
+{
+	fReceiveTimeout.tv_sec  = timeoutSeconds;
+	fReceiveTimeout.tv_usec = timeoutMicroseconds;
+}
+
+//==============================================================================
+void TCPServer::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroseconds)
+{
+	fSendTimeout.tv_sec  = timeoutSeconds;
+	fSendTimeout.tv_usec = timeoutMicroseconds;
 }

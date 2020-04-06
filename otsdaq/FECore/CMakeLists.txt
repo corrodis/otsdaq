@@ -6,7 +6,6 @@ cet_make(LIBRARY_NAME FECore
          ${XDAQ_BASIC_LIB_LIST}
 		 Configurable
 		 SupervisorInfo
-		 SystemMessenger
          WorkLoopManager
          FiniteStateMachine
          CgiDataUtilities
@@ -26,7 +25,6 @@ cet_make(LIBRARY_NAME FECore
 		 ${FHICLCPP}
 	#	 MessageFacility
 		 ${MF_UTILITIES}
-         ${XDAQ_BASIC_LIB_LIST}
          ${ROOT_CORE}
 )
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+		<TABLE Name="SlowControlsAlarmsToMonitorTable">
+			<VIEW Name="SLOW_CONTROLS_ALARMS_TO_MONITOR_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
+				<COLUMN Type="UID" 	 Name="AlarmUID" 	 StorageName="ALARM_UID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="GroupID-alarms" 	 Name="AlarmGroupID" 	 StorageName="ALARM_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="AlarmChannelName" 	 StorageName="ALARM_CHANNEL_NAME" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="TrueFalse" 	 Name="IgnoreMinorSeverity" 	 StorageName="IGNORE_MINOR_SEVERITY" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</TABLE>
+	</ROOT>

@@ -4,7 +4,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // getConfigurationStatusXML
 void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr)
 {
@@ -23,7 +23,7 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xml
 
 }  // end getConfigurationStatusXML()
 
-//========================================================================================================================
+//==============================================================================
 // handleCreateTableXML
 //
 //	Save the detail of specific table specified
@@ -183,7 +183,7 @@ catch(...)
 	xmlOut.addTextElementToData("Error", "Error saving new view! ");
 }  // end handleCreateTableXML() catch
 
-//========================================================================================================================
+//==============================================================================
 // saveModifiedVersionXML
 //
 // once source version has been modified in temporary version
@@ -336,7 +336,7 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(HttpXmlDocument
 	//	return newAssignedVersion;
 }  // end saveModifiedVersionXML()
 
-//========================================================================================================================
+//==============================================================================
 //	handleCreateTableGroupXML
 //
 //		Save a new TableGroup:
@@ -371,8 +371,7 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 	// make sure not using partial tables or anything weird when creating the group
 	//	so start from scratch and load backbone, but allow errors
 	std::string                             accumulatedWarnings;
-	const std::map<std::string, TableInfo>& allTableInfo =
-			cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
 	__COUT_WARN__ << "Ignoring these errors: " << accumulatedWarnings << __E__;
 	cfgMgr->loadConfigurationBackbone();
 
@@ -536,14 +535,14 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 			if(cfgViewPtr->getDataColumnSize() != cfgViewPtr->getNumberOfColumns() ||
 			   cfgViewPtr->getSourceColumnMismatch() != 0)  // check for column size mismatch
 			{
+				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				__SS__ << "\n\nThere were errors found in loading a member table " << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
 				       << ". Please see the details below:\n\n"
-				       << "The source column size was found to be " << cfgViewPtr->getDataColumnSize()
-				       << ", and the current number of columns for this table is " << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of "
-				       << cfgViewPtr->getSourceColumnMismatch() << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing()
-				       << " table entries missing in " << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
+				       << "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
+				       << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of " << cfgViewPtr->getSourceColumnMismatch()
+				       << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing() << " table entries missing in "
+				       << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
 
-				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				ss << "\n\nSource column names were as follows:\n";
 				char index = 'a';
 				for(auto& srcColName : srcColNames)
@@ -627,7 +626,7 @@ catch(...)
 	xmlOut.addTextElementToData("Error", "Error saving table group! ");
 }  // end handleCreateTableGroupXML() catch
 
-//========================================================================================================================
+//==============================================================================
 // handleGetTableGroupXML
 //
 //	give the detail of specific table specified
@@ -683,9 +682,28 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 	if(groupKey.isInvalid() ||  // if invalid or not found, get latest
 	   sortedKeys.find(groupKey) == sortedKeys.end())
 	{
-		if(sortedKeys.size())
-			groupKey = *sortedKeys.rbegin();
-		__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+		// report error if group key not found
+		if(!groupKey.isInvalid())
+		{
+			// attempt to reload all group info and power through
+			std::string                             accumulatedWarnings;
+			const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
+
+			__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
+			// xmlOut.addTextElementToData("Error", ss.str());
+
+			ss << "Found keys: " << __E__;
+			for(auto& key : sortedKeys)
+				ss << "\t" << key << __E__;
+			__COUT__ << ss.str() << __E__;
+		}
+		else
+		{
+			if(sortedKeys.size())
+				groupKey = *sortedKeys.rbegin();
+			__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+		}
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
@@ -848,9 +866,8 @@ catch(...)
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleGetTableGroupXML() catch
 
-//========================================================================================================================
-bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
-														  HttpXmlDocument&        xmlOut,
+//==============================================================================
+bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&        xmlOut,
                                                           ConfigurationManagerRW* cfgMgr,
                                                           const std::string&      iconCaption,
                                                           const std::string&      iconAltText,
@@ -961,7 +978,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 			{
 				try
 				{
-					int appRow = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+					windowLinkedApp = StringMacros::decodeURIComponent(windowLinkedApp);
+					int appRow      = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
 				{
@@ -975,6 +993,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 					{
 						// failed to treat like class, so throw original
 						__SS__ << "Failed to create an icon linking to app '" << windowLinkedApp << ".' The following error occurred: " << e.what() << __E__;
+						appTable.tableView_->print(ss);
 						__SS_THROW__;
 					}
 				}
@@ -1004,20 +1023,16 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 			unsigned int gidCol = parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_GID);
 
-			//remove all existing records from groupID (e.g. parameters leftover from manual manipulations)
-			std::vector<unsigned int /*row*/> rowsInGroup =
-					parameterTable.tableView_->getGroupRows(
-							gidCol,iconUID + "_Parameters" /*groupID*/);
+			// remove all existing records from groupID (e.g. parameters leftover from manual manipulations)
+			std::vector<unsigned int /*row*/> rowsInGroup = parameterTable.tableView_->getGroupRows(gidCol, iconUID + "_Parameters" /*groupID*/);
 
 			__COUTV__(StringMacros::vectorToString(rowsInGroup));
 
-			//go through vector backwards to maintain row integrity
-			for(unsigned int r = rowsInGroup.size()-1; r < rowsInGroup.size(); --r)
-				parameterTable.tableView_->removeRowFromGroup(
-						rowsInGroup[r],gidCol,iconUID + "_Parameters" /*groupID*/,
-						true /*deleteRowIfNoGroupLeft*/);
+			// go through vector backwards to maintain row integrity
+			for(unsigned int r = rowsInGroup.size() - 1; r < rowsInGroup.size(); --r)
+				parameterTable.tableView_->removeRowFromGroup(rowsInGroup[r], gidCol, iconUID + "_Parameters" /*groupID*/, true /*deleteRowIfNoGroupLeft*/);
 
-			//create new parameters
+			// create new parameters
 			for(const auto& parameter : parameters)
 			{
 				// create parameter record
@@ -1026,8 +1041,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 				// set parameter status true
 				parameterTable.tableView_->setValueAsString("1", row, parameterTable.tableView_->getColStatus());
 				// set parameter Group ID
-				parameterTable.tableView_->setValueAsString(
-				    iconUID + "_Parameters", row, gidCol);
+				parameterTable.tableView_->setValueAsString(iconUID + "_Parameters", row, gidCol);
 				// set parameter key
 				parameterTable.tableView_->setURIEncodedValue(parameter.first, row, parameterTable.tableView_->findCol(DesktopIconTable::COL_PARAMETER_KEY));
 				// set parameter value
@@ -1485,7 +1499,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 			for(auto& aliasNodePair : aliasNodePairs)
 			{
 				tableName    = aliasNodePair.second.getNode("TableName").getValueAsString();
-				tableVersion = aliasNodePair.second.getNode("TableVersion").getValueAsString();
+				tableVersion = aliasNodePair.second.getNode("Version").getValueAsString();
 
 				__COUT__ << "Table Alias: " << aliasNodePair.first << " => " << tableName << "-v" << tableVersion << "" << __E__;
 
@@ -1495,7 +1509,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 					tableAliasChange = true;
 
-					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(), row, tableView->findCol("TableVersion"));
+					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::ICON_TABLE].toString(), row, tableView->findCol("Version"));
 				}
 				else if(tableName == DesktopIconTable::PARAMETER_TABLE && TableVersion(tableVersion) == parameterTable.originalVersion_)
 				{
@@ -1503,7 +1517,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 
 					tableAliasChange = true;
 
-					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(), row, tableView->findCol("TableVersion"));
+					tableView->setValueAsString(contextGroupMembers[DesktopIconTable::PARAMETER_TABLE].toString(), row, tableView->findCol("Version"));
 				}
 
 				++row;
@@ -1548,8 +1562,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(
 		if(!newBackboneKey.isInvalid())
 		{
 			__COUT__ << "Found equivalent group key (" << newBackboneKey << ") for " << backboneGroupName << "." << __E__;
-			xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey",
-			                            "1" /*indicator*/);
+			xmlOut.addTextElementToData(backboneGroupName + "_foundEquivalentKey", "1" /*indicator*/);
 		}
 		else
 		{

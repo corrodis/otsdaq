@@ -44,6 +44,12 @@ class ConfigurationManager
 	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
 	static const std::string ACTIVE_GROUP_NAME_UNKNOWN;
 
+	static const std::string LAST_TABLE_GROUP_SAVE_PATH;
+	static const std::string LAST_ACTIVATED_CONFIG_GROUP_FILE;
+	static const std::string LAST_ACTIVATED_CONTEXT_GROUP_FILE;
+	static const std::string LAST_ACTIVATED_BACKBONE_GROUP_FILE;
+	static const std::string LAST_ACTIVATED_ITERATOR_GROUP_FILE;
+
 	static const uint8_t METADATA_COL_ALIASES;
 	static const uint8_t METADATA_COL_COMMENT;
 	static const uint8_t METADATA_COL_AUTHOR;
@@ -110,7 +116,7 @@ class ConfigurationManager
 	// getTable
 	//	get configuration * with specific configuration type
 	template<class T>
-	const T* 							getTable					(std::string name) const { return (T*)(getTableByName(name)); }
+	const T* 							getTable					(const std::string& tableName) const { const T* retPtr = dynamic_cast<const T*>(getTableByName(tableName)); if(retPtr == nullptr) { __SS__ << "Illegal cast of '" << tableName << "' to type " << StringMacros::getTypeName<T>() << __E__; __SS_THROW__ } return retPtr;}
 	const TableBase* 					getTableByName				(const std::string& configurationName) const;
 
 	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType);
@@ -157,6 +163,10 @@ class ConfigurationManager
 
 	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
 	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }
+	static void							saveGroupNameAndKey			(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
+	static std::pair<
+			std::string /*group name*/,
+			TableGroupKey> 				loadGroupNameAndKey			(const std::string& fileName, std::string& returnedTimeString);
 
 
   private:

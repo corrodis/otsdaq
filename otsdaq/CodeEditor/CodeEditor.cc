@@ -14,19 +14,19 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "CodeEditor"
 
-const std::string CodeEditor::SPECIAL_TYPE_FEInterface       = "FEInterface";
-const std::string CodeEditor::SPECIAL_TYPE_DataProcessor     = "DataProcessor";
-const std::string CodeEditor::SPECIAL_TYPE_Table             = "Table";
-const std::string CodeEditor::SPECIAL_TYPE_ControlsInterface = "ControlsInterface";
-const std::string CodeEditor::SPECIAL_TYPE_Tools             = "Tools";
-const std::string CodeEditor::SPECIAL_TYPE_UserData          = "UserData";
-const std::string CodeEditor::SPECIAL_TYPE_OutputData        = "OutputData";
+const std::string CodeEditor::SPECIAL_TYPE_FEInterface   = "FEInterface";
+const std::string CodeEditor::SPECIAL_TYPE_DataProcessor = "DataProcessor";
+const std::string CodeEditor::SPECIAL_TYPE_Table         = "Table";
+const std::string CodeEditor::SPECIAL_TYPE_SlowControls  = "SlowControls";
+const std::string CodeEditor::SPECIAL_TYPE_Tools         = "Tools";
+const std::string CodeEditor::SPECIAL_TYPE_UserData      = "UserData";
+const std::string CodeEditor::SPECIAL_TYPE_OutputData    = "OutputData";
 
 const std::string CodeEditor::SOURCE_BASE_PATH = std::string(__ENV__("MRB_SOURCE")) + "/";
 const std::string CodeEditor::USER_DATA_PATH   = std::string(__ENV__("USER_DATA")) + "/";
 const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DATA")) + "/";
 
-//========================================================================================================================
+//==============================================================================
 // CodeEditor
 CodeEditor::CodeEditor()
     : ALLOWED_FILE_EXTENSIONS_(
@@ -45,7 +45,7 @@ CodeEditor::CodeEditor()
 
 }  // end CodeEditor()
 
-//========================================================================================================================
+//==============================================================================
 // xmlRequest
 //	all requests are handled here
 void CodeEditor::xmlRequest(const std::string& option, bool readOnlyMode, cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username) try
@@ -99,7 +99,7 @@ catch(...)
 	xmlOut->addTextElementToData("Error", ss.str());
 }  // end xmlRequest()
 
-//========================================================================================================================
+//==============================================================================
 // safePathString
 std::string CodeEditor::safePathString(const std::string& path)
 {
@@ -118,7 +118,7 @@ std::string CodeEditor::safePathString(const std::string& path)
 	return fullpath;
 }  // end safePathString()
 
-//========================================================================================================================
+//==============================================================================
 // safeExtensionString
 //	remove all non ascii and make lower case
 std::string CodeEditor::safeExtensionString(const std::string& extension)
@@ -151,7 +151,7 @@ std::string CodeEditor::safeExtensionString(const std::string& extension)
 	return retExt;
 }  // end safeExtensionString()
 
-//========================================================================================================================
+//==============================================================================
 // getDirectoryContent
 void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
@@ -166,14 +166,14 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 	std::string        specialTypeNames[] = {"Front-End Plugins",
                                       "Data Processor Plugins",
                                       "Configuration Table Plugins",
-                                      "Controls Interface Plugins",
+                                      "Slow Controls Interface Plugins",
                                       "Tools and Scripts",
                                       "$USER_DATA",
                                       "$OTSDAQ_DATA"};
 	std::string        specialTypes[]     = {SPECIAL_TYPE_FEInterface,
                                   SPECIAL_TYPE_DataProcessor,
                                   SPECIAL_TYPE_Table,
-                                  SPECIAL_TYPE_ControlsInterface,
+                                  SPECIAL_TYPE_SlowControls,
                                   SPECIAL_TYPE_Tools,
                                   SPECIAL_TYPE_UserData,
                                   SPECIAL_TYPE_OutputData};
@@ -233,7 +233,7 @@ void CodeEditor::getDirectoryContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOu
 
 }  // end getDirectoryContent()
 
-//========================================================================================================================
+//==============================================================================
 // getPathContent
 void CodeEditor::getPathContent(const std::string& basepath, const std::string& path, HttpXmlDocument* xmlOut)
 {
@@ -347,7 +347,7 @@ void CodeEditor::getPathContent(const std::string& basepath, const std::string& 
 		xmlOut->addTextElementToData("file", name);
 }  // end getPathContent()
 
-//========================================================================================================================
+//==============================================================================
 // getFileContent
 void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 {
@@ -378,7 +378,7 @@ void CodeEditor::getFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut)
 
 }  // end getFileContent()
 
-//========================================================================================================================
+//==============================================================================
 // readFile
 void CodeEditor::readFile(const std::string& basepath, const std::string& path, std::string& contents)
 {
@@ -399,7 +399,7 @@ void CodeEditor::readFile(const std::string& basepath, const std::string& path, 
 	std::fclose(fp);
 }  // end readFile
 
-//========================================================================================================================
+//==============================================================================
 // writeFile
 void CodeEditor::writeFile(const std::string&        basepath,
                            const std::string&        path,
@@ -472,7 +472,7 @@ void CodeEditor::writeFile(const std::string&        basepath,
 
 }  // end writeFile
 
-//========================================================================================================================
+//==============================================================================
 // saveFileContent
 void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
 {
@@ -517,7 +517,7 @@ void CodeEditor::saveFileContent(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, c
 
 }  // end saveFileContent
 
-//========================================================================================================================
+//==============================================================================
 // build
 //	cleanBuild and incrementalBuild
 void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::string& username)
@@ -634,7 +634,7 @@ void CodeEditor::build(cgicc::Cgicc& cgiIn, HttpXmlDocument* xmlOut, const std::
 
 }  // end build()
 
-//========================================================================================================================
+//==============================================================================
 std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> CodeEditor::getSpecialsMap(void)
 {
 	std::map<std::string /*special type*/, std::set<std::string> /*special file paths*/> retMap;
@@ -642,29 +642,28 @@ std::map<std::string /*special type*/, std::set<std::string> /*special file path
 
 	__COUTV__(path);
 
-	const unsigned int numOfSpecials     = 7;
-	std::string        specialFolders[]  = {"FEInterfaces",
-                                    "DataProcessorPlugins",
-                                    "UserTableDataFormats",
-                                    "TablePlugins",
-                                    "TablePluginDataFormats",
-                                    "UserTablePlugins",
-                                    "UserTablePluginDataFormats",
-                                    "SlowControlsInterfacePlugins",
-                                    "ControlsInterfacePlugins",
-                                    "FEInterfacePlugins",
-                                    "tools"};
-	std::string        specialMapTypes[] = {CodeEditor::SPECIAL_TYPE_FEInterface,
-                                     CodeEditor::SPECIAL_TYPE_DataProcessor,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_Table,
-                                     CodeEditor::SPECIAL_TYPE_ControlsInterface,
-                                     CodeEditor::SPECIAL_TYPE_ControlsInterface,
-                                     CodeEditor::SPECIAL_TYPE_FEInterface,
-                                     CodeEditor::SPECIAL_TYPE_Tools};
+	std::vector<std::string> specialFolders({"FEInterfaces",
+	                                         "DataProcessorPlugins",
+	                                         "UserTableDataFormats",
+	                                         "TablePlugins",
+	                                         "TablePluginDataFormats",
+	                                         "UserTablePlugins",
+	                                         "UserTablePluginDataFormats",
+	                                         "SlowControlsInterfacePlugins",
+	                                         "ControlsInterfacePlugins",
+	                                         "FEInterfacePlugins",
+	                                         "tools"});
+	std::vector<std::string> specialMapTypes({CodeEditor::SPECIAL_TYPE_FEInterface,
+	                                          CodeEditor::SPECIAL_TYPE_DataProcessor,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_Table,
+	                                          CodeEditor::SPECIAL_TYPE_SlowControls,
+	                                          CodeEditor::SPECIAL_TYPE_SlowControls,
+	                                          CodeEditor::SPECIAL_TYPE_FEInterface,
+	                                          CodeEditor::SPECIAL_TYPE_Tools});
 
 	// Note: can not do lambda recursive function if using auto to declare the function,
 	//	and must capture reference to the function. Also, must capture specialFolders
@@ -723,11 +722,11 @@ std::map<std::string /*special type*/, std::set<std::string> /*special file path
 					    //__COUT__ << "Directory: " << type << " " << name << __E__;
 
 					    childSpecialIndex = -1;
-					    for(unsigned int i = 0; i < numOfSpecials; ++i)
+					    for(unsigned int i = 0; i < specialFolders.size(); ++i)
 						    if(name == specialFolders[i])
 						    {
 							    //__COUT__ << "Found special folder '" <<
-							    // specialFolders[i] <<
+							    //		specialFolders[i] <<
 							    //		"' at path " <<	path << __E__;
 
 							    childSpecialIndex = i;

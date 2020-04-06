@@ -13,25 +13,25 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 WorkLoopManager::WorkLoopManager(toolbox::task::ActionSignature* job) : cWorkLoopType_("waiting"), job_(job), requestNumber_(0), requestName_(job_->name())
 {
 	__COUT__ << "Request name: " << requestName_ << " jobName: " << job_->name() << std::endl;
 }
 
-//========================================================================================================================
+//==============================================================================
 WorkLoopManager::~WorkLoopManager(void) {}
 
-//========================================================================================================================
+//==============================================================================
 HttpXmlDocument WorkLoopManager::processRequest(cgicc::Cgicc& cgi) { return processRequest(composeWorkLoopName(requestNumber_++, cgi)); }
 
-//========================================================================================================================
+//==============================================================================
 HttpXmlDocument WorkLoopManager::processRequest(const xoap::MessageReference& message)
 {
 	return processRequest(composeWorkLoopName(requestNumber_++, message), &message);
 }
 
-//========================================================================================================================
+//==============================================================================
 HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const xoap::MessageReference* message)
 {
 	HttpXmlDocument   xmlDocument;
@@ -120,7 +120,7 @@ HttpXmlDocument WorkLoopManager::processRequest(std::string workLoopName, const 
 	return xmlDocument;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::report(toolbox::task::WorkLoop* workLoop, std::string result, float progress, bool status)
 {
 	RequestNumber requestNumber = getWorkLoopRequestNumber(workLoop);
@@ -140,14 +140,14 @@ bool WorkLoopManager::report(toolbox::task::WorkLoop* workLoop, std::string resu
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference WorkLoopManager::getMessage(toolbox::task::WorkLoop* workLoop)
 {
 	RequestNumber requestNumber = getWorkLoopRequestNumber(workLoop);
 	return workLoops_[requestNumber].message;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::getRequestResult(cgicc::Cgicc& cgi, HttpXmlDocument& xmlDocument)
 {
 	std::stringstream reportStream;
@@ -196,10 +196,10 @@ bool WorkLoopManager::getRequestResult(cgicc::Cgicc& cgi, HttpXmlDocument& xmlDo
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::removeWorkLoop(toolbox::task::WorkLoop* workLoop) { return removeWorkLoop(getWorkLoopRequestNumber(workLoop)); }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::removeWorkLoop(RequestNumber requestNumber)
 {
 	if(workLoops_.find(requestNumber) == workLoops_.end())
@@ -248,7 +248,7 @@ bool WorkLoopManager::removeWorkLoop(RequestNumber requestNumber)
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::removeProcessedRequests(void)
 {
 	std::map<RequestNumber, WorkLoopStruct>::iterator it = workLoops_.begin();
@@ -260,7 +260,7 @@ bool WorkLoopManager::removeProcessedRequests(void)
 	return true;
 }
 
-//========================================================================================================================
+//==============================================================================
 bool WorkLoopManager::removeTimedOutRequests(void)
 {
 	time_t now;
@@ -283,7 +283,7 @@ bool WorkLoopManager::removeTimedOutRequests(void)
 // WorkLoopName Format:
 // RequestNumber-CommandToExecute<Argument1Name:Argument1Value,Argument2Name:Argument2Value...>
 // Then the WorkLoop adds at the end /waiting
-//========================================================================================================================
+//==============================================================================
 std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, cgicc::Cgicc& cgi)
 {
 	std::stringstream name;
@@ -292,7 +292,7 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, cg
 	return name.str();
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, const xoap::MessageReference& message)
 {
 	SOAPCommand       soapCommand(message);
@@ -314,29 +314,29 @@ std::string WorkLoopManager::composeWorkLoopName(RequestNumber requestNumber, co
 	return name.str();
 }
 
-//========================================================================================================================
+//==============================================================================
 WorkLoopManager::RequestNumber WorkLoopManager::getWorkLoopRequestNumber(toolbox::task::WorkLoop* workLoop)
 {
 	return getWorkLoopRequestNumber(workLoop->getName());
 }
 
-//========================================================================================================================
+//==============================================================================
 WorkLoopManager::RequestNumber WorkLoopManager::getWorkLoopRequestNumber(std::string workLoopName)
 {
 	workLoopName = workLoopName.substr(0, workLoopName.find('-'));
 	return strtoull(workLoopName.c_str(), 0, 10);
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string WorkLoopManager::getWorkLoopRequest(toolbox::task::WorkLoop* workLoop) { return getWorkLoopRequest(workLoop->getName()); }
 
-//========================================================================================================================
+//==============================================================================
 std::string WorkLoopManager::getWorkLoopRequest(std::string workLoopName)
 {
 	return workLoopName.substr(workLoopName.find('-') + 1, workLoopName.find(std::string("/") + cWorkLoopType_) - workLoopName.find('-') - 1);
 }
 
-//========================================================================================================================
+//==============================================================================
 void WorkLoopManager::translateWorkLoopName(toolbox::task::WorkLoop* workLoop, SOAPCommand& soapCommand)
 {
 	std::string request = getWorkLoopRequest(workLoop);

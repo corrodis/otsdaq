@@ -14,4 +14,5 @@ class TCPClient : public TCPTransceiverSocket, public TCPClientBase
 	virtual ~TCPClient(void);
 };
 }
+
 #endif

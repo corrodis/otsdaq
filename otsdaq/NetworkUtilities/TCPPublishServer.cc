@@ -5,19 +5,20 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPPublishServer::TCPPublishServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
 
-//========================================================================================================================
+//==============================================================================
 TCPPublishServer::~TCPPublishServer(void) {}
 
+//==============================================================================
 void TCPPublishServer::acceptConnections()
 {
 	while(true)
 	{
 		try
 		{
-			TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
+			__attribute__((unused)) TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
 		}
 		catch(int e)
 		{

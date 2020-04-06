@@ -131,9 +131,9 @@ void BufferImplementation<D, H>::reset(void)
 template<class D, class H>
 void BufferImplementation<D, H>::dumpStatus(std::ostream* out) const
 {
-	*out << "SubBuffer count: " << numberOfSubBuffers_ << __E__;
-	*out << "Current header count: " << headers_.size() << __E__;
-	*out << "Current data count: " << subBuffers_.size() << __E__;
+	//*out << "SubBuffer count: " << numberOfSubBuffers_ << __E__;
+	//*out << "Current header count: " << headers_.size() << __E__;
+	//*out << "Current data count: " << subBuffers_.size() << __E__;
 
 	//	*out << "\t" << "SubBuffers: " << __E__;
 	//	for (unsigned int i=0; i<numberOfSubBuffers_; i++)
@@ -145,14 +145,10 @@ void BufferImplementation<D, H>::dumpStatus(std::ostream* out) const
 	//				it.first << " status: " << it.second.subBuffersStatus_[i] << __E__;
 	//	}
 
-	*out << "\t"
-	     << "Write pointer: " << writePointer_ << __E__;
-	*out << "\t"
-	     << "Read pointers: " << __E__;
+	*out << "W-pointer: " << writePointer_;
 	for(auto& it : consumers_)
-		*out << "\t\t"
-		     << "Read pointer for consumer: " << it.first << " = " << it.second.readPointer_ << std::endl;
-
+		*out << " C: " << it.first << " R-pointer: " << it.second.readPointer_;
+	*out << __E__;
 }  // end dumpStatus()
 
 //========================================================================================================================
@@ -168,16 +164,19 @@ int BufferImplementation<D, H>::attachToEmptySubBuffer(D*& data, H*& header)
 		             << " written buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%";
 		return ErrorBufferFull;
 	}
-	if(false && subBuffer % (numberOfSubBuffers_ / 1) == 0)
+	if(false && subBuffer % (numberOfSubBuffers_ / 50) == 0)
 	{
-		// dumpStatus();
-		__GEN_COUT__ << "Producer: " << producerName_ << " writing buffer: " << subBuffer << " write pointer: " << writePointer_
-		             << " Buffer free: " << isFree(subBuffer) << " written buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%";
+		dumpStatus();
+		//		__GEN_COUT__ << "Producer: " << producerName_ << " writing buffer: " << subBuffer << " write pointer: " << writePointer_
+		//		             << " Buffer free: " << isFree(subBuffer) << " written buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%";
 		for(auto& it : consumers_)
 		{
-			__GEN_COUT__ << " Read point: " << it.first << " = " << it.second.readPointer_ << std::endl;
-			if(it.second.readPointer_ > writePointer_)
-				__GEN_COUT__ << " I read already! Delta: " << subBuffer - it.second.readPointer_ << std::endl;
+			//			__GEN_COUT__ << " Read point: " << it.first << " = " << it.second.readPointer_ << std::endl;
+			//		__GEN_COUT__ << "P: " << producerName_ << " w-buffer: " << subBuffer << " w-pointer: " << writePointer_
+			//		             << " w-buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%"
+			//					 << " C: " << it.first << " r-pointer " << it.second.readPointer_;
+			//			if(it.second.readPointer_ > writePointer_)
+			//				__GEN_COUT__ << " I read already! Delta: " << subBuffer - it.second.readPointer_ << std::endl;
 		}
 	}
 
@@ -194,7 +193,9 @@ int BufferImplementation<D, H>::setWrittenSubBuffer(void)  // Must be used in co
                                                            // nextWritePointer buffer
 {
 	writePointer_ = nextWritePointer();  // Already protected in nextWritePointer with %numSubBuffers_
-	__GEN_COUTV__(writePointer_);
+	if(writePointer_ % 1000 == 0)
+		dumpStatus();
+	//__GEN_COUTV__(writePointer_);
 	setWritten(writePointer_);
 	return writePointer_;
 }
@@ -203,7 +204,7 @@ int BufferImplementation<D, H>::setWrittenSubBuffer(void)  // Must be used in co
 template<class D, class H>
 int BufferImplementation<D, H>::write(const D& buffer, const H& header)
 {
-	__GEN_COUT__ << __E__;
+	//__GEN_COUT__ << __E__;
 	int subBuffer = getFreeBufferIndex();
 	if(subBuffer == -1)
 	{
@@ -214,14 +215,16 @@ int BufferImplementation<D, H>::write(const D& buffer, const H& header)
 		return ErrorBufferFull;
 	}
 
-	if(false && subBuffer % (numberOfSubBuffers_ / 1) == 0)
+	if(false && subBuffer % (numberOfSubBuffers_ / 100) == 0)
 	{
 		// dumpStatus();
 		__GEN_COUT__ << "Producer: " << producerName_ << " writing buffer: " << subBuffer << " write pointer: " << writePointer_
 		             << " Buffer free: " << isFree(subBuffer) << " written buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%";
 		for(auto& it : consumers_)
 		{
-			__GEN_COUT__ << " Read point: " << it.first << " = " << it.second.readPointer_ << std::endl;
+			__GEN_COUT__ << "P: " << producerName_ << " w-buffer: " << subBuffer << " w-pointer: " << writePointer_
+			             << " w-buffers: " << (100 * numberOfWrittenBuffers()) / numberOfSubBuffers_ << "%"
+			             << " C: " << it.first << " r-pointer " << it.second.readPointer_;
 			if(it.second.readPointer_ > writePointer_)
 				__GEN_COUT__ << " I read already! Delta: " << subBuffer - it.second.readPointer_ << std::endl;
 		}
@@ -410,16 +413,16 @@ H& BufferImplementation<D, H>::getHeader(unsigned int subBuffer)
 template<class D, class H>
 void BufferImplementation<D, H>::setWritten(unsigned int subBuffer)
 {
-	__GEN_COUTV__(subBuffer);
+	//	__GEN_COUTV__(subBuffer);
 
-	__GEN_COUT__;
-	dumpStatus();
+	//	__GEN_COUT__;
+	//	dumpStatus();
 
 	// The consumers status must be set first because the consumers check for the producer
 	// subBufferStatus
 	for(auto& it : consumers_)
 	{
-		__GEN_COUT__ << it.first << __E__;
+		//		__GEN_COUT__ << it.first << __E__;
 		it.second.subBuffersStatus_[subBuffer] = !bufferFree_;
 	}
 
@@ -469,8 +472,8 @@ bool BufferImplementation<D, H>::isEmpty(void) const
 	for(unsigned int i = 0; i < numberOfSubBuffers_; i++)
 		if(!isFree(i))
 		{
-			__GEN_COUT__ << "i: " << i << " is free? " << isFree(i) << std::endl;
-			dumpStatus();
+			//			__GEN_COUT__ << "i: " << i << " is free? " << isFree(i) << std::endl;
+			//			dumpStatus();
 			return false;
 		}
 	return true;

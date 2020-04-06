@@ -27,7 +27,7 @@ using namespace ots;
 //
 ////////////////////////////////////
 
-//========================================================================================================================
+//==============================================================================
 FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
                                              const std::string& channelName,
                                              const std::string& dataType,
@@ -206,10 +206,10 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	__GEN_COUT__ << "Constructed." << __E__;
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 FESlowControlsChannel::~FESlowControlsChannel(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void FESlowControlsChannel::print(std::ostream& out) const
 {
 	out << "Slow Controls Channel for Interface '" << interfaceUID_ << "': " << channelName_ << __E__;
@@ -251,7 +251,7 @@ void FESlowControlsChannel::print(std::ostream& out) const
 
 }  // end print()
 
-//========================================================================================================================
+//==============================================================================
 // underscoreString
 //	replace all non-alphanumeric with underscore
 std::string FESlowControlsChannel::underscoreString(const std::string& str)
@@ -266,7 +266,7 @@ std::string FESlowControlsChannel::underscoreString(const std::string& str)
 	return retStr;
 }  // end underscoreString()
 
-//========================================================================================================================
+//==============================================================================
 // convertStringToBuffer
 //	if useDataType == false, then assume unsigned long long
 //
@@ -398,7 +398,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, s
 	}
 }  // end convertStringToBuffer()
 
-//========================================================================================================================
+//==============================================================================
 // handleSample
 //	adds to txBuffer if sample should be sent to monitor server
 void FESlowControlsChannel::handleSample(const std::string& universalReadValue, std::string& txBuffer, FILE* fpAggregate, bool aggregateIsBinaryFormat)
@@ -750,7 +750,7 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue, 
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 // extractSample
 //	extract sample from universalReadValue
 //		considering bit size and offset
@@ -776,7 +776,7 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 
 }  // end extractSample()
 
-//========================================================================================================================
+//==============================================================================
 // clearAlarms
 //	clear target alarm
 // 	if -1 clear all
@@ -792,7 +792,7 @@ void FESlowControlsChannel::clearAlarms(int targetAlarm)
 		hihiAlarmed_ = false;
 }  // end clearAlarms()
 
-//========================================================================================================================
+//==============================================================================
 // checkAlarms
 //	if current value is a new alarm, set alarmed and add alarm packet to buffer
 //

@@ -10,7 +10,7 @@
 // clang-format off
 namespace ots
 {
-class SlowControlsVInterface : public VStateMachine, public Configurable
+class SlowControlsVInterface : public Configurable, public VStateMachine
 {
   public:
 	SlowControlsVInterface(const std::string&       interfaceType,
@@ -18,6 +18,7 @@ class SlowControlsVInterface : public VStateMachine, public Configurable
 	                       const ConfigurationTree& theXDAQContextConfigTree,
 	                       const std::string&       configurationPath)
 	    : Configurable(theXDAQContextConfigTree, configurationPath)
+  	    , VStateMachine(Configurable::theConfigurationRecordName_)
 	    , interfaceUID_(interfaceUID)
 	    , interfaceType_(interfaceType)
 	    , mfSubject_("controls-" + interfaceType_ + "-" + interfaceUID_)
@@ -34,14 +35,18 @@ class SlowControlsVInterface : public VStateMachine, public Configurable
 	virtual void initialize() = 0;
 
 
-	virtual void                                       	subscribe(std::string Name)       	= 0;
-	virtual void                                       	subscribeJSON(std::string List)   	= 0;
-	virtual void                                       	unsubscribe(std::string Name)     	= 0;
-	virtual std::vector<std::string /*Name*/>           getChannelList()                  	= 0;
-	virtual std::string                                	getList(std::string format)       	= 0;
-	virtual std::array<std::string, 4>                 	getCurrentValue(std::string Name) 	= 0;
-	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(std::string Name)	= 0;
-	virtual std::array<std::string, 9>                 	getSettings(std::string Name)     	= 0;
+	virtual void                                       	subscribe(const std::string& Name)  = 0;
+	virtual void                                       	subscribeJSON(const std::string& JSONNameString)   	= 0;
+	virtual void                                       	unsubscribe(const std::string& Name)= 0;
+	virtual std::vector<std::string /*Name*/>           getChannelList(void)                = 0;
+	virtual std::string                                	getList(const std::string& format)       	= 0;
+	virtual std::array<std::string, 4>                 	getCurrentValue(const std::string& Name) 	= 0;
+	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(const std::string& Name)	= 0;
+	virtual std::vector<std::vector<std::string>>		getLastAlarms(const std::string& pvName)	= 0;
+	virtual std::vector<std::vector<std::string>>		getAlarmsLog(const std::string& pvName)		= 0;
+	virtual std::vector<std::vector<std::string>>		checkAlarmNotifications	(void)				= 0;
+
+	virtual std::array<std::string, 9>                 	getSettings(const std::string& Name)     	= 0;
 
 
 

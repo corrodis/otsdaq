@@ -34,6 +34,8 @@ class CorePropertySupervisorBase
 	AllSupervisorInfo     allSupervisorInfo_;
 	ConfigurationManager* theConfigurationManager_;
 
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getGatewaySupervisorDescriptor		(void); //will be wizard supervisor in wiz mode
+
 	virtual void 					setSupervisorPropertyDefaults					(void);  // override to control supervisor specific defaults
 	virtual void 					forceSupervisorPropertyValues					(void){;}  // override to force supervisor property values (and ignore user settings)
 

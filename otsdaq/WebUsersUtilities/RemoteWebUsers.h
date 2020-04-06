@@ -9,6 +9,7 @@
 
 #include "otsdaq/TableCore/TableGroupKey.h"  //for TableGroupKey
 
+// clang-format off
 namespace ots
 {
 class AllSupervisorInfo;
@@ -21,13 +22,21 @@ class HttpXmlDocument;
 class RemoteWebUsers : public SOAPMessenger
 {
   public:
-	RemoteWebUsers(xdaq::Application* application);
+	RemoteWebUsers(xdaq::Application* application, XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisorDescriptor);
+
+
+
+	// const_cast away the const
+	//	so that this line is compatible with slf6 and slf7 versions of xdaq
+	//	where they changed to XDAQ_CONST_CALL xdaq::ApplicationDescriptor* in slf7
+	//
+	// XDAQ_CONST_CALL is defined in "otsdaq/Macros/CoutMacros.h"
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisorDescriptor_;
 
 	// for external supervisors to check with Supervisor for login
 	// if false, user request handling code should just return.. out is handled on false;
 	// on true, out is untouched
-	bool xmlRequestToGateway(
-	    cgicc::Cgicc& cgi, std::ostringstream* out, HttpXmlDocument* xmldoc, const AllSupervisorInfo& allSupervisorInfo, WebUsers::RequestUserInfo& userInfo);
+	bool 		xmlRequestToGateway(cgicc::Cgicc& cgi, std::ostringstream* out, HttpXmlDocument* xmldoc, const AllSupervisorInfo& allSupervisorInfo, WebUsers::RequestUserInfo& userInfo);
 
 	//			uint8_t* 						userPermissions = 0,
 	//			const uint8_t					permissionsThreshold = 1,
@@ -43,40 +52,27 @@ class RemoteWebUsers : public SOAPMessenger
 	//			std::string* 					userGroups = 0,
 	//			uint64_t* 						activeSessionIndex = 0);
 
-	std::string getActiveUserList(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor);
-	void        sendSystemMessage(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& toUser, const std::string& msg);
-	void        makeSystemLogbookEntry(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor, const std::string& entryText);
-	std::pair<std::string /*group name*/, TableGroupKey> getLastConfigGroup(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-	                                                                        const std::string&                           actionOfLastGroup,
-	                                                                        std::string& actionTimeString);  // actionOfLastGroup = "Configured" or "Started",
-	                                                                                                         // for example
+	std::string getActiveUserList		(void);
+	void        sendSystemMessage		(const std::string& toUser, const std::string& message, bool doEmail = false);
+	void        sendSystemMessage		(const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail = false);
+	void        makeSystemLogbookEntry	(const std::string& entryText);
+	std::pair<std::string /*group name*/, TableGroupKey>
+				getLastTableGroup		(const std::string& actionOfLastGroup, std::string& returnedActionTimeString);  // actionOfLastGroup = "Configured" or "Started", for example
 
   private:
-	bool cookieCodeIsActiveForRequest(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-	                                  std::string&                                 cookieCode,
-	                                  uint8_t*                                     userPermissions = 0,
-	                                  std::string                                  ip              = "0",
-	                                  bool                                         refreshCookie   = true,
-	                                  std::string*                                 userWithLock    = 0);
-
-	bool getUserInfoForCookie(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* supervisorDescriptor,
-	                          std::string&                                 cookieCode,
-	                          std::string*                                 userName,
-	                          std::string*                                 displayName        = 0,
-	                          uint64_t*                                    activeSessionIndex = 0);
 
 	//"Active User List" associations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	std::string ActiveUserList_;
 	time_t      ActiveUserLastUpdateTime_;
 	enum
 	{
-		ACTIVE_USERS_UPDATE_THRESHOLD = 10,  // 10 seconds, min amount of time between Supervisor requests
+		ACTIVE_USERS_UPDATE_THRESHOLD = 2,  // seconds, min amount of time between Supervisor requests
 	};
 
-	std::string tmpUserWithLock_, tmpUserGroups_, tmpUsername_;
-	// uint8_t 	tmpUserPermissions_;
-};
+	//std::string tmpUserWithLock_, tmpUserGroups_, tmpUsername_;
 
+};
+// clang-format on
 }  // namespace ots
 
 #endif

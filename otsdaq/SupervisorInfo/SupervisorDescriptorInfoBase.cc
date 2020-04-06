@@ -7,19 +7,19 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(void) {}
 
-//========================================================================================================================
+//==============================================================================
 SupervisorDescriptorInfoBase::SupervisorDescriptorInfoBase(xdaq::ApplicationContext* applicationContext) { init(applicationContext); }
 
-//========================================================================================================================
+//==============================================================================
 SupervisorDescriptorInfoBase::~SupervisorDescriptorInfoBase() {}
 
-//========================================================================================================================
+//==============================================================================
 void SupervisorDescriptorInfoBase::destroy() { allSupervisors_.clear(); }
 
-//========================================================================================================================
+//==============================================================================
 void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationContext)
 {
 	if(applicationContext->getDefaultZone()->getApplicationGroup("daq") == 0)
@@ -75,5 +75,5 @@ void SupervisorDescriptorInfoBase::init(xdaq::ApplicationContext* applicationCon
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 const SupervisorDescriptors& SupervisorDescriptorInfoBase::getAllDescriptors(void) const { return allSupervisors_; }

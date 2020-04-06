@@ -33,16 +33,18 @@ using namespace ots;
 
 #define RUN_NUMBER_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunNumber/"
 #define RUN_NUMBER_FILE_NAME "NextRunNumber.txt"
-#define FSM_LAST_GROUP_ALIAS_PATH std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/"
 #define FSM_LAST_GROUP_ALIAS_FILE_START std::string("FSMLastGroupAlias-")
 #define FSM_USERS_PREFERENCES_FILETYPE "pref"
+
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "GatewaySupervisor"
 
 XDAQ_INSTANTIATOR_IMPL(GatewaySupervisor)
 
-//========================================================================================================================
+WebUsers GatewaySupervisor::theWebUsers_ = WebUsers();
+
+//==============================================================================
 GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     : xdaq::Application(s)
     , SOAPMessenger(this)
@@ -50,23 +52,23 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
     , CorePropertySupervisorBase(this)
     , stateMachineWorkLoopManager_(toolbox::task::bind(this, &GatewaySupervisor::stateMachineThread, "StateMachine"))
     , stateMachineSemaphore_(toolbox::BSem::FULL)
-    , infoRequestWorkLoopManager_(toolbox::task::bind(this, &GatewaySupervisor::infoRequestThread, "InfoRequest"))
-    , infoRequestSemaphore_(toolbox::BSem::FULL)
     , activeStateMachineName_("")
     , theIterator_(this)
     , broadcastCommandMessageIndex_(0)
     , broadcastIterationBreakpoint_(-1)  // for standard transitions, ignore the breakpoint
-    , counterTest_(0)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
+
 	__COUT__ << __E__;
 
 	// attempt to make directory structure (just in case)
 	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
-	mkdir((FSM_LAST_GROUP_ALIAS_PATH).c_str(), 0755);
+
+	//make table group history directory here and at ConfigurationManagerRW (just in case)
+	mkdir((ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH).c_str(), 0755);
 	mkdir((RUN_NUMBER_PATH).c_str(), 0755);
 
-	securityType_ = theWebUsers_.getSecurity();
+	securityType_ = GatewaySupervisor::theWebUsers_.getSecurity();
 
 	__COUT__ << "Security: " << securityType_ << __E__;
 
@@ -75,15 +77,13 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	xgi::bind(this, &GatewaySupervisor::request, "Request");
 	xgi::bind(this, &GatewaySupervisor::stateMachineXgiHandler, "StateMachineXgiHandler");
 	xgi::bind(this, &GatewaySupervisor::stateMachineIterationBreakpoint, "StateMachineIterationBreakpoint");
-
-	xgi::bind(this, &GatewaySupervisor::statusRequest, "StatusRequest");
 	xgi::bind(this, &GatewaySupervisor::tooltipRequest, "TooltipRequest");
 
 	xoap::bind(this, &GatewaySupervisor::supervisorCookieCheck, "SupervisorCookieCheck", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorGetActiveUsers, "SupervisorGetActiveUsers", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemMessage, "SupervisorSystemMessage", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, "SupervisorSystemLogbookEntry", XDAQ_NS_URI);
-	xoap::bind(this, &GatewaySupervisor::supervisorLastConfigGroupRequest, "SupervisorLastConfigGroupRequest", XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::supervisorLastTableGroupRequest, "SupervisorLastTableGroupRequest", XDAQ_NS_URI);
 
 	init();
 
@@ -91,7 +91,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 }  // end constructor
 
-//========================================================================================================================
+//==============================================================================
 //	TODO: Lore needs to detect program quit through killall or ctrl+c so that Logbook
 // entry is made when ots is halted
 GatewaySupervisor::~GatewaySupervisor(void)
@@ -100,41 +100,13 @@ GatewaySupervisor::~GatewaySupervisor(void)
 	makeSystemLogbookEntry("ots halted.");
 }  // end destructor
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::indicateOtsAlive(const CorePropertySupervisorBase* properties) { CorePropertySupervisorBase::indicateOtsAlive(properties); }
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::init(void)
 {
 	supervisorGuiHasBeenLoaded_ = false;
-
-	//	const XDAQContextTable* contextTable =
-	// CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(XDAQContextTable);
-	//
-	//	CorePropertySupervisorBase::supervisorContextUID_ =
-	// contextTable->getContextUID(
-	//		getApplicationContext()->getContextDescriptor()->getURL()
-	//	);
-	//	__COUT__ << "Context UID:" << supervisorContextUID_ << __E__;
-	//
-	//	CorePropertySupervisorBase::supervisorApplicationUID_ =
-	// contextTable->getApplicationUID(
-	//		getApplicationContext()->getContextDescriptor()->getURL(),
-	//		getApplicationDescriptor()->getLocalId()
-	//	);
-	//
-	//	__COUT__ << "Application UID:" << supervisorApplicationUID_ << __E__;
-	//
-	//	ConfigurationTree configLinkNode =
-	// CorePropertySupervisorBase::getSupervisorTreeNode();
-	//
-	//	std::string supervisorUID;
-	//	if (!configLinkNode.isDisconnected())
-	//		supervisorUID = configLinkNode.getValue();
-	//	else
-	//		supervisorUID = TableViewColumnInfo::DATATYPE_LINK_DEFAULT;
-	//
-	//__COUT__ << "GatewaySupervisor UID:" << supervisorUID << __E__;
 
 	// setting up thread for UDP thread to drive state machine
 	{
@@ -180,74 +152,57 @@ void GatewaySupervisor::init(void)
 			__COUT__ << "App Status checking is disabled." << __E__;
 	}  // end checking of Application Status
 
-	//	try
-	//	{
-	//		auto artdaqStateChangeEnabled =
-	//		    CorePropertySupervisorBase::getSupervisorTableNode()
-	//		        .getNode("EnableARTDAQCommanderPlugin")
-	//		        .getValue<bool>();
-	//		if(artdaqStateChangeEnabled)
-	//		{
-	//			auto artdaqStateChangePort =
-	//			    CorePropertySupervisorBase::getSupervisorTableNode()
-	//			        .getNode("ARTDAQCommanderID")
-	//			        .getValue<int>();
-	//			auto artdaqStateChangePluginType =
-	//			    CorePropertySupervisorBase::getSupervisorTableNode()
-	//			        .getNode("ARTDAQCommanderType")
-	//			        .getValue<std::string>();
-	//			theArtdaqCommandable_.init(artdaqStateChangePort,
-	//			                           artdaqStateChangePluginType);
-	//		}
-	//	}
-	//	catch(...)
-	//	{
-	//		;
-	//	}  // ignore errors
 }  // end init()
 
-//========================================================================================================================
+//==============================================================================
 // AppStatusWorkLoop
 //	child thread
 void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 {
-	sleep(5);
-	std::string status, progress, appName;
+	std::string status, progress, detail, appName;
 	int         progressInteger;
 	while(1)
 	{
+		sleep(1);
+
 		// workloop procedure
 		//	Loop through all Apps and request status
 		//	sleep
+
 		// __COUT__ << "Just debugging App status checking" << __E__;
 		for(const auto& it : theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
 		{
 			auto appInfo = it.second;
 			appName      = appInfo.getName();
-			//			__COUT__ << "Getting Status "
-			//			         << " Supervisor instance = '" << appInfo.getName()
-			//			         << "' [LID=" << appInfo.getId() << "] in Context '"
-			//			         << appInfo.getContextName() << "' [URL=" <<
-			// appInfo.getURL()
-			//			         << "].\n\n";
+//						__COUT__ << "Getting Status "
+//						         << " Supervisor instance = '" << appInfo.getName()
+//						         << "' [LID=" << appInfo.getId() << "] in Context '"
+//						         << appInfo.getContextName() << "' [URL=" <<
+//			 					appInfo.getURL()
+//						         << "].\n\n";
+
 			// if the application is the gateway supervisor, we do not send a SOAP message
-			if(appName == "Supervisor")
+			if(appInfo.isGatewaySupervisor())  // get gateway status
 			{
 				// send back status and progress parameters
-				status   = theSupervisor->theStateMachine_.getCurrentStateName();
+				const std::string& err = theSupervisor->theStateMachine_.getErrorMessage();
+				status = err == "" ? (theSupervisor->theStateMachine_.isInTransition() ? theSupervisor->theStateMachine_.getProvenanceStateName()
+				                                                                       : theSupervisor->theStateMachine_.getCurrentStateName())
+				                   : (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
 				progress = theSupervisor->theProgressBar_.readPercentageString();
 
-				if(theSupervisor->theStateMachine_.isInTransition())
+				try
 				{
-					// return the ProvenanceStateName
-					status = theSupervisor->theStateMachine_.getProvenanceStateName();
+					detail = (theSupervisor->theStateMachine_.isInTransition()
+					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(theSupervisor->stateMachineLastCommandInput_)
+					              : "");
 				}
-				else
+				catch(...)
 				{
-					status = theSupervisor->theStateMachine_.getCurrentStateName();
+					detail = "";
 				}
 			}
-			else
+			else  // get non-gateway status
 			{
 				// pass the application as a parameter to tempMessage
 				SOAPParameters appPointer;
@@ -258,58 +213,66 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				//				__COUT__ << "tempMessage... " <<
 				// SOAPUtilities::translate(tempMessage)
 				//				         << std::endl;
-				//
+
 				try
 				{
 					xoap::MessageReference statusMessage = theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(), tempMessage);
 
-					//					__COUT__ << "statusMessage... "
-					//					         <<
-					// SOAPUtilities::translate(statusMessage)
-					//<<  std::endl;
-					//
+//					__COUT__ << "statusMessage... "
+//					     <<
+//						 SOAPUtilities::translate(statusMessage)
+//						<<  std::endl;
+					
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
 					parameters.addParameter("Progress");
+					parameters.addParameter("Detail");
 					SOAPUtilities::receive(statusMessage, parameters);
 
 					status = parameters.getValue("Status");
 					if(status.empty())
-					{
-						status = "Unknown";
-					}
+						status = SupervisorInfo::APP_STATUS_UNKNOWN;
 
 					progress = parameters.getValue("Progress");
 					if(progress.empty())
-					{
-						progress = "0";
-					}
-					//					__COUTV__(status);
-					//					__COUTV__(progress);
+						progress = "100";
+
+					detail = parameters.getValue("Detail");
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
-					__COUT__ << "Failed to send SOAP Message... " << std::endl;
+					//__COUT__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
+					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
+					progress = "0";
+					detail   = "SOAP Message Error";
+					sleep(5); //sleep to not overwhelm server with errors
 				}
-			}
+				catch(...)
+				{
+					//__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
+					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
+					progress = "0";
+					detail   = "Unknown SOAP Message Error";
+					sleep(5); //sleep to not overwhelm server with errors
+				}
+			}  // end with non-gateway status request handling
 
-			// store status and progress in some struct..
-			//	in the APP STATUS structure
+			//					__COUTV__(status);
+			//					__COUTV__(progress);
+
 			// set status and progress
-			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status);
 			// convert the progress string into an integer in order to call
 			// appInfo.setProgress() function
 			std::istringstream ssProgress(progress);
 			ssProgress >> progressInteger;
-			theSupervisor->allSupervisorInfo_.setSupervisorProgress(appInfo, progressInteger);
 
-		}  // end of for loop
+			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger, detail);
 
-		sleep(5);
-	}
+		}  // end of app loop
+	}      // end of infinite status checking loop
 }  // end AppStatusWorkLoop
 
-//========================================================================================================================
+//==============================================================================
 // StateChangerWorkLoop
 //	child thread
 void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
@@ -393,7 +356,7 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				++commaCounter;
 			}
 
-			// set scope of mutext
+			// set scope of mutex
 			{
 				// should be mutually exclusive with GatewaySupervisor main thread state
 				// machine accesses  lockout the messages array for the remainder of the
@@ -431,9 +394,9 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 		else
 			sleep(1);
 	}
-}  // end StateChangerWorkLoop
+}  // end StateChangerWorkLoop()
 
-//========================================================================================================================
+//==============================================================================
 // makeSystemLogbookEntry
 //	makes a logbook entry into all Logbook supervisors
 //		and specifically the current active experiments within the logbook
@@ -448,13 +411,11 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	if(logbookInfoMap.size() == 0)
 	{
 		__COUT__ << "No logbooks found! Here is entry: " << entryText << __E__;
-		__MOUT__ << "No logbooks found! Here is entry: " << entryText << __E__;
 		return;
 	}
 	else
 	{
 		__COUT__ << "Making logbook entry: " << entryText << __E__;
-		__MOUT__ << "Making logbook entry: " << entryText << __E__;
 	}
 
 	//__COUT__ << "before: " << entryText << __E__;
@@ -482,22 +443,29 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 
 	for(auto& logbookInfo : logbookInfoMap)
 	{
-		xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogbookEntry", parameters);
+		try
+		{
+			xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogbookEntry", parameters);
 
-		SOAPParameters retParameters("Status");
-		// SOAPParametersV retParameters(1);
-		// retParameters[0].setName("Status");
-		SOAPUtilities::receive(retMsg, retParameters);
+			SOAPParameters retParameters("Status");
+			// SOAPParametersV retParameters(1);
+			// retParameters[0].setName("Status");
+			SOAPUtilities::receive(retMsg, retParameters);
 
-		__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+			__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+		}
+		catch(...)
+		{
+			__COUT_ERR__ << "Failed to send logbook SOAP entry to " <<
+					logbookInfo.first << ":" << logbookInfo.second.getContextName() <<
+					":" << logbookInfo.second.getName() << __E__;
+		}
 	}
-}
+}  // end makeSystemLogbookEntry()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
-
 {
-	//
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
 		makeSystemLogbookEntry("ots started.");
 
@@ -509,7 +477,7 @@ void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
 	     << "'></frameset></html>";
 }  // end Default()
 
-//========================================================================================================================
+//==============================================================================
 std::string GatewaySupervisor::getIconHeaderString(void)
 {
 	// show ots icon
@@ -537,7 +505,7 @@ std::string GatewaySupervisor::getIconHeaderString(void)
 
 }  // end getIconHeaderString()
 
-//========================================================================================================================
+//==============================================================================
 // stateMachineIterationBreakpoint
 //		get/set the state machine iteration breakpoint
 //		If the iteration index >= breakpoint, then pause.
@@ -617,7 +585,7 @@ catch(...)
 	__COUT_ERR__ << ss.str();
 }  // end stateMachineIterationBreakpoint() catch
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 {
 	// for simplicity assume all commands should be mutually exclusive with iterator
@@ -723,7 +691,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 
 }  // end stateMachineXgiHandler()
 
-//========================================================================================================================
+//==============================================================================
 std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*                xmldoc,
                                                              std::ostringstream*             out,
                                                              const std::string&              command,
@@ -791,8 +759,10 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		std::string configurationAlias = parameters.getValue("ConfigurationAlias");
 		__COUT__ << "Configure --> Name: ConfigurationAlias Value: " << configurationAlias << __E__;
 
-		// save last used config alias
-		std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START + username + "." + FSM_USERS_PREFERENCES_FILETYPE;
+		// save last used config alias by user
+		std::string fn = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" +
+				FSM_LAST_GROUP_ALIAS_FILE_START +
+				username + "." + FSM_USERS_PREFERENCES_FILETYPE;
 
 		__COUT__ << "Save FSM preferences: " << fn << __E__;
 		FILE* fp = fopen(fn.c_str(), "w");
@@ -859,59 +829,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 	return errorStr;
 }  // end attemptStateMachineTransition()
 
-////========================================================================================================================
-////FIXME -- delete? is this ever used by anything? ever?
-// void GatewaySupervisor::stateMachineResultXgiHandler(xgi::Input* in, xgi::Output* out)
-// throw (xgi::exception::Exception)
-//{
-//	cgicc::Cgicc cgiIn(in);
-//	__COUT__ << "Xgi Request!" << __E__;
-//
-//	uint8_t userPermissions; // uint64_t uid;
-//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode,
-//			&userPermissions))
-//	{
-//		*out << cookieCode;
-//		return;
-//	}
-//
-//	HttpXmlDocument xmldoc(cookieCode);
-//
-//	std::string command = CgiDataUtilities::getData(cgi, "StateMachine");
-//
-//	SOAPParameters parameters;
-//	/*
-//	 //FIXME I don't think that there should be this if statement and I guess it has been
-// copied from the stateMachineXgiHandler method 	 if (command == "Configure")
-//
-//{
-//	 parameters.addParameter("RUN_KEY", CgiDataUtilities::postData(cgi,
-//"ConfigurationAlias"));
-//	 __COUT__ << "Configure --> Name: RUN_KEY Value: " << parameters.getValue("RUN_KEY")
-//<< __E__;
-//	 }
-//	 else if (command == "Start")
-//
-//{
-//	 unsigned int runNumber = getNextRunNumber();
-//	 std::stringstream runNumberStream;
-//	 runNumberStream << runNumber;
-//	 parameters.addParameter("RUN_NUMBER", runNumberStream.str().c_str());
-//	 setNextRunNumber(++runNumber);
-//	 }
-//	 */
-//	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(
-//			CgiDataUtilities::getData(cgi, "StateMachine"), parameters);
-//	//Maybe we return an aknowledgment that the message has been received and processed
-//	xoap::MessageReference reply = stateMachineResultXoapHandler(message);
-//	//stateMachineWorkLoopManager_.removeProcessedRequests();
-//	//stateMachineWorkLoopManager_.processRequest(message);
-//	//xmldoc.outputXmlDocument((ostringstream*)out,false);
-//	__COUT__ << "Done - Xgi Request!" << __E__;
-//}
-
-//========================================================================================================================
+//==============================================================================
 xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(xoap::MessageReference message)
 
 {
@@ -920,21 +838,9 @@ xoap::MessageReference GatewaySupervisor::stateMachineXoapHandler(xoap::MessageR
 	stateMachineWorkLoopManager_.processRequest(message);
 	__COUT__ << "Done - Soap Handler!" << __E__;
 	return message;
-}
+}  // end stateMachineXoapHandler()
 
-////========================================================================================================================
-// xoap::MessageReference GatewaySupervisor::stateMachineResultXoapHandler(
-//    xoap::MessageReference message)
-//
-//{
-//	__COUT__ << "Soap Handler!" << __E__;
-//	// stateMachineWorkLoopManager_.removeProcessedRequests();
-//	// stateMachineWorkLoopManager_.processRequest(message);
-//	__COUT__ << "Done - Soap Handler!" << __E__;
-//	return message;
-//}
-
-//========================================================================================================================
+//==============================================================================
 // stateMachineThread
 //		This asynchronously sends the xoap message to its own RunControlStateMachine
 //			(that the Gateway inherits from), which then calls the Gateway
@@ -965,293 +871,45 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	               // workLoop->remove(job_) in WorkLoopManager
 }  // end stateMachineThread()
 
-//========================================================================================================================
-// statusRequest ~~
-//	Call from JS GUI
-//		parameter:
-//
-void GatewaySupervisor::statusRequest(xgi::Input* in, xgi::Output* out)
-
-{
-	__COUT__ << "Starting to Request!" << __E__;
-
-	cgicc::Cgicc cgiIn(in);
-	std::string  requestType = "statusRequest";  // force request type to statusRequest
-
-	HttpXmlDocument           xmlOut;
-	WebUsers::RequestUserInfo userInfo(requestType, CgiDataUtilities::postData(cgiIn, "CookieCode"));
-
-	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-
-	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
-		return;  // access failed
-
-	__COUT__ << "Starting to Request!" << __E__;
-
-	// If the thread is canceled when you are still in this method that activated it, then
-	// everything will freeze.  The way the workloop manager now works is safe since it
-	// cancel the thread only when the infoRequestResultHandler is called  and that method
-	// can be called ONLY when I am already out of here!
-
-	// HttpXmlDocument tmpDoc = infoRequestWorkLoopManager_.processRequest(cgiIn);
-
-	// xmlOut.copyDataChildren(tmpDoc);
-
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
-}
-
-//========================================================================================================================
-void GatewaySupervisor::infoRequestResultHandler(xgi::Input* in, xgi::Output* out)
-
-{
-	__COUT__ << "Starting ask!" << __E__;
-	cgicc::Cgicc cgi(in);
-
-	cgicc::Cgicc cgiIn(in);
-	std::string  requestType = "infoRequestResultHandler";  // force request type to infoRequestResultHandler
-
-	HttpXmlDocument           xmlOut;
-	WebUsers::RequestUserInfo userInfo(requestType, CgiDataUtilities::postData(cgiIn, "CookieCode"));
-
-	CorePropertySupervisorBase::getRequestUserInfo(userInfo);
-
-	if(!theWebUsers_.xmlRequestOnGateway(cgiIn, out, &xmlOut, userInfo))
-		return;  // access failed
-
-	//	//**** start LOGIN GATEWAY CODE ***//
-	//	//If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers
-	// optionally for uint8_t userPermissions, uint64_t uid
-	//	//Else, error message is returned in cookieCode
-	//	std::string cookieCode = CgiDataUtilities::postData(cgi, "CookieCode");
-	//	uint8_t userPermissions;// uint64_t uid;
-	//	if (!theWebUsers_.cookieCodeIsActiveForRequest(cookieCode, &userPermissions))
-	//	{
-	//		*out << cookieCode;
-	//		return;
-	//	}
-	//	//**** end LOGIN GATEWAY CODE ***//
-	//
-	//	HttpXmlDocument xmldoc(cookieCode);
-
-	infoRequestWorkLoopManager_.getRequestResult(cgiIn, xmlOut);
-
-	// return xml doc holding server response
-	xmlOut.outputXmlDocument((std::ostringstream*)out, false);
-
-	__COUT__ << "Done asking!" << __E__;
-}
-
-//========================================================================================================================
-bool GatewaySupervisor::infoRequestThread(toolbox::task::WorkLoop* workLoop)
-{
-	//    std::string workLoopName = workLoop->getName();
-	//    __COUT__ << " Starting WorkLoop: " << workLoopName << __E__;
-	//    __COUT__ << " Ready to lock" << __E__;
-	infoRequestSemaphore_.take();
-	//    __COUT__ << " Locked" << __E__;
-	vectorTest_.clear();
-
-	for(unsigned long long i = 0; i < 100000000; i++)
-	{
-		counterTest_ += 2;
-		vectorTest_.push_back(counterTest_);
-	}
-
-	infoRequestWorkLoopManager_.report(workLoop, "RESULT: This is the best result ever", 50, false);
-	std::string workLoopName = workLoop->getName();
-	__COUT__ << workLoopName << " test: " << counterTest_ << " vector size: " << vectorTest_.size() << __E__;
-	wait(400, "InfoRequestThread ----- locked");
-	infoRequestSemaphore_.give();
-	//    __COUT__ << " Lock released" << __E__;
-	wait(200, "InfoRequestThread");
-	//    __COUT__ << " Ready to lock again" << __E__;
-	infoRequestSemaphore_.take();
-	//    __COUT__ << " Locked again" << __E__;
-	vectorTest_.clear();
-
-	for(unsigned long long i = 0; i < 100000000; i++)
-	{
-		counterTest_ += 2;
-		vectorTest_.push_back(counterTest_);
-	}
-
-	wait(400, "InfoRequestThread ----- locked");
-	__COUT__ << workLoopName << " test: " << counterTest_ << " vector size: " << vectorTest_.size() << __E__;
-	infoRequestSemaphore_.give();
-	//    __COUT__ << " Lock released again" << __E__;
-	// infoRequestWorkLoopManager_->report(workLoop,"RESULT: This is the best result
-	// ever");
-	infoRequestWorkLoopManager_.report(workLoop, theStateMachine_.getCurrentStateName(), 100, true);
-	//    __COUT__ << " Done with WorkLoop: " << workLoopName << __E__;
-	return false;  // execute once and automatically remove the workloop so in
-	               // WorkLoopManager the try workLoop->remove(job_) could be commented
-	               // out return true;//go on and then you must do the
-	               // workLoop->remove(job_) in WorkLoopManager
-}
-
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	// diagService_->reportError("--- GatewaySupervisor is in its Initial state
-	// ---",DIAGINFO);  diagService_->reportError("GatewaySupervisor::stateInitial:
-	// workloop active: "+stringF(calibWorkloop_->isActive())+", workloop type:
-	// "+calibWorkloop_->getType(),DIAGINFO);
-}
 
-//========================================================================================================================
+}  // end stateInitial()
+
+//==============================================================================
 void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	/*
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Paused", "");
-	 }
-	 catch(xcept::Exception &e)
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
 
-	 diagService_->reportError("GatewaySupervisor::statePaused: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-	 */
-}
+}  // end statePaused()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	/*
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Running", "");
-	 }
-	 catch(xcept::Exception &e)
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
 
-	 diagService_->reportError("GatewaySupervisor::stateRunning: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-	 */
-}
+}  // end stateRunning()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+}  // end stateHalted()
 
-	/*
-	 percentageConfigured_=0.0;
-	 aliasesAndKeys_=PixelConfigInterface::getAliases();
-	 diagService_->reportError("GatewaySupervisor::stateHalted: aliases and keys
-reloaded",DIAGINFO); previousState_ = theStateMachine_.getCurrentStateName();
-	 diagService_->reportError("GatewaySupervisor::stateHalted: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGINFO);
-
-	 //(hopefully) make RCMS aware of successful Recovery
-	 //need to test that: (a) this works and (b) this does not break anything (regular
-Halt transition)
-	 //update -- condition (b) seems to be satisfied. not yet sure about condition (a)
-	 try
-{
-	 rcmsStateNotifier_.stateChanged("Halted", "");
-	 }
-	 catch(xcept::Exception &e)
-
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
-	 */
-}
-
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
-
 {
-	/*
-	 // Notify RCMS of having entered the Configured state
-	 try
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+}  // end stateConfigured()
 
-{
-	 //rcmsStateNotifier_.stateChanged(previousState_.toString(), "");
-	 rcmsStateNotifier_.stateChanged("Configured", std::stringF(theGlobalKey_->key()) );
-	 }
-	 catch(xcept::Exception &e)
-
-{
-	 diagService_->reportError("Failed to notify state change : "+
-xcept::stdformat_exception_history(e),DIAGERROR);
-	 }
-
-	 PixelTimer debugTimer;
-	 if (extratimers_)
-{
-	 debugTimer.setName("GatewaySupervisor::stateConfigured");
-	 debugTimer.printTime("RCMS notified of Configured state");
-	 }
-	 if (configurationTimer_.started() )
-{
-	 configurationTimer_.stop();
-
-	 std::string confsource(__ENV__("PIXELCONFIGURATIONBASE"));
-	 if (confsource != "DB") confsource = "files";
-
-	 diagService_->reportError("Total configuration time ["+confsource+"] =
-"+stringF(configurationTimer_.tottime()),DIAGUSERINFO); configurationTimer_.reset();
-	 }
-
-	 diagService_->reportError( "GatewaySupervisor::stateConfigured: workloop active:
-"+stringF(calibWorkloop_->isActive())+", workloop type:
-"+calibWorkloop_->getType(),DIAGDEBUG);
-	 */
-}
-
-// void GatewaySupervisor::stateTTSTestMode (toolbox::fsm::FiniteStateMachine & fsm)
-//{
-//  previousState_ = theStateMachine_.getCurrentStateName();
-//}
-
-// void GatewaySupervisor::inError (toolbox::fsm::FiniteStateMachine & fsm)
-//{
-//  previousState_ = theStateMachine_.getCurrentStateName();
-// rcmsStateNotifier_.stateChanged("Error", "");
-//}
-
-/*
- xoap::MessageReference GatewaySupervisor::reset (xoap::MessageReference message)
-
-{
- //diagService_->reportError("New state before reset is: " +
-theStateMachine_.getCurrentStateName(),DIAGINFO);
-
- theStateMachine_.reset();
-
- xoap::MessageReference reply = xoap::createMessage();
- xoap::SOAPEnvelope envelope = reply->getSOAPPart().getEnvelope();
- xoap::SOAPName responseName = envelope.createName("ResetResponse", "xdaq", XDAQ_NS_URI);
- (void) envelope.getBody().addBodyElement ( responseName );
-
- diagService_->reportError("New state after reset is: " +
-theStateMachine_.getCurrentStateName(),DIAGINFO);
-
- return reply;
- }
- */
-
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& fsm)
 
 {
@@ -1260,10 +918,9 @@ void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& fsm)
 	         // theStateMachine_.getCurrentStateName() //There may be a race condition here
 	         //	when async errors occur (e.g. immediately in running)
 	         << __E__;
-	// rcmsStateNotifier_.stateChanged("Error", "");
-}
+}  // end inError()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -1295,7 +952,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
 }  // end enteringError()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::checkForAsyncError()
 {
 	if(RunControlStateMachine::asyncFailureReceived_)
@@ -1311,7 +968,7 @@ void GatewaySupervisor::checkForAsyncError()
 /////////////////////////// FSM State Transition Functions //////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 {
 	checkForAsyncError();
@@ -1391,11 +1048,22 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 
 		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
+		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;		    
+		ss << "\n\nHere was the error: " << e.what() << "\n\nTo help debug this problem, try activating this group in the Configuration "
+		      "GUI "
+		   << " and detailed errors will be shown." << __E__;
+		__COUT_ERR__ << "\n" << ss.str();
+		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+		return;
+	}
 	catch(...)
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
 		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;
-		ss << "\n\nTo debug this problem, try activating this group in the Configuration "
+		ss << "\n\nTo help debug this problem, try activating this group in the Configuration "
 		      "GUI "
 		   << " and detailed errors will be shown." << __E__;
 		__COUT_ERR__ << "\n" << ss.str();
@@ -1510,13 +1178,13 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 	// diagService_->reportError("GatewaySupervisor::stateConfiguring: Exiting",DIAGINFO);
 
 	// save last configured group name/key
-	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
+	ConfigurationManager::saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE);
 
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
 }  // end transitionConfiguring()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
 {
 	checkForAsyncError();
@@ -1528,9 +1196,8 @@ void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionHalting()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1549,11 +1216,10 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
-}
+}  // end transitionShuttingDown()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
-
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1572,9 +1238,10 @@ void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
-}
 
-//========================================================================================================================
+}  // end transitionStartingUp()
+
+//==============================================================================
 void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 
 {
@@ -1585,9 +1252,9 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	__COUT__ << "Fsm current transition: " << theStateMachine_.getCurrentTransitionName(e->type()) << __E__;
 	__COUT__ << "Fsm final state: " << theStateMachine_.getTransitionFinalStateName(e->type()) << __E__;
-}
+}  // end transitionInitializing()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 {
 	checkForAsyncError();
@@ -1604,9 +1271,9 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 	}
 	else
 		broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+}  // end transitionPausing()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 {
 	if(RunControlStateMachine::asyncSoftFailureReceived_)
@@ -1625,7 +1292,7 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionResuming()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 {
 	if(RunControlStateMachine::asyncSoftFailureReceived_)
@@ -1702,10 +1369,10 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 	// save last started group name/key
-	saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
-}
+	ConfigurationManager::saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
+}  // end transitionStarting()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
 {
 	checkForAsyncError();
@@ -1715,13 +1382,13 @@ void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
 	makeSystemLogbookEntry("Run stopping.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
-}
+}  // end transitionStopping()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////      MESSAGES ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-//========================================================================================================================
+//==============================================================================
 // handleBroadcastMessageTarget
 //	Sends message and gets reply
 //	Handles sub-iterations at same target
@@ -1955,7 +1622,7 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 
 }  // end handleBroadcastMessageTarget()
 
-//========================================================================================================================
+//==============================================================================
 // broadcastMessageThread
 //	Sends transition command message and gets reply
 //		if failure, THROW
@@ -2021,7 +1688,7 @@ void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr,
 	threadStruct->working_ = false;  // indicate exiting
 }  // end broadcastMessageThread()
 
-//========================================================================================================================
+//==============================================================================
 // broadcastMessage
 //	Broadcast state transition to all xdaq Supervisors.
 //		- Transition in order of priority as given by AllSupervisorInfo
@@ -2279,29 +1946,16 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 	__COUT__ << "Broadcast complete." << __E__;
 }  // end broadcastMessage()
 
-//========================================================================================================================
-void GatewaySupervisor::wait(int milliseconds, std::string who) const
-{
-	for(int s = 1; s <= milliseconds; s++)
-	{
-		usleep(1000);
-
-		if(s % 100 == 0)
-			__COUT__ << s << " msecs " << who << __E__;
-	}
-}
-
-//========================================================================================================================
+//==============================================================================
 // LoginRequest
 //  handles all users login/logout actions from web GUI.
 //  NOTE: there are two ways for a user to be logged out: timeout or manual logout
 //      System logbook messages are generated for login and logout
 void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 {
-	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 	std::string  Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "*** Login RequestType = " << Command << __E__;
+	__COUT__ << "*** Login RequestType = " << Command << " clock=" << clock() << __E__;
 
 	// RequestType Commands:
 	// login
@@ -2398,13 +2052,15 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//		__COUT__ << "uuid = " << uuid << __E__;
 		//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
 
+
 		uint64_t uid = theWebUsers_.attemptActiveSession(uuid,
 		                                                 jumbledUser,
 		                                                 jumbledPw,
 		                                                 newAccountCode,
 		                                                 cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
 
-		if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+
+		if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
 		{
 			__COUT__ << "Login invalid." << __E__;
 			jumbledUser = "";          // clear display name if failure
@@ -2417,6 +2073,12 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
 
 		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
+
+		// include extra error detail
+		if(uid == theWebUsers_.ACCOUNT_INACTIVE)
+			xmldoc.addTextElementToData("Error", "Account is inactive. Notify admins.");
+		else if(uid == theWebUsers_.ACCOUNT_BLACKLISTED)
+			xmldoc.addTextElementToData("Error", "Account is blacklisted. Notify admins.");
 
 		theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
 
@@ -2512,17 +2174,16 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		*out << "0";
 	}
 
-	__COUT__ << "Done" << __E__;
+	__COUT__ << "Done clock=" << clock() << __E__;
 }  // end loginRequest()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 {
-	__COUT__ << "Start" << __E__;
 	cgicc::Cgicc cgi(in);
 
 	std::string Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "Tooltip RequestType = " << Command << __E__;
+	//__COUT__ << "Tooltip RequestType = " << Command << __E__;
 
 	//**** start LOGIN GATEWAY CODE ***//
 	// If TRUE, cookie code is good, and refreshed code is in cookieCode, also pointers
@@ -2565,10 +2226,10 @@ void GatewaySupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
 
 	xmldoc.outputXmlDocument((std::ostringstream*)out, false, true);
 
-	__COUT__ << "Done" << __E__;
-}  // end tooltipRequest
+	//__COUT__ << "Done" << __E__;
+}  // end tooltipRequest()
 
-//========================================================================================================================
+//==============================================================================
 // setSupervisorPropertyDefaults
 //		override to set defaults for supervisor property values (before user settings
 // override)
@@ -2576,9 +2237,9 @@ void GatewaySupervisor::setSupervisorPropertyDefaults()
 {
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
 	                                                  std::string() + "*=1 | gatewayLaunchOTS=-1 | gatewayLaunchWiz=-1");
-}
+}  // end setSupervisorPropertyDefaults()
 
-//========================================================================================================================
+//==============================================================================
 // forceSupervisorPropertyValues
 //		override to force supervisor property values (and ignore user settings)
 void GatewaySupervisor::forceSupervisorPropertyValues()
@@ -2588,17 +2249,20 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	//	stateMachineXgiHandler() -- prepend StateMachine to request type
 
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.AutomatedRequestTypes,
-	                                                  "getSystemMessages | getCurrentState | getIterationPlanStatus");
+	                                                  "getSystemMessages | getCurrentState | getIterationPlanStatus"
+	                                                  " | getAppStatus");
 	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.RequireUserLockRequestTypes,
 	                                                  "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
-}
+}  // end forceSupervisorPropertyValues()
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
-	//__COUT__ << "Start" << __E__;
+	//__COUT__ << "request()" << __E__;
+
+	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
 
 	// for simplicity assume all commands should be mutually exclusive with iterator
 	// thread state machine accesses (really should just be careful with
@@ -2658,9 +2322,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			__COUT__ << "accounts = " << accounts << __E__;
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 		}
-		else if(requestType == "viewCodeContent")
-		{
-		}
 		else if(requestType == "setSettings")
 		{
 			std::string bgcolor   = CgiDataUtilities::postData(cgiIn, "bgcolor");
@@ -2685,11 +2346,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			int         type_int = -1;
 
 			if(type == "updateAccount")
-				type_int = 0;
+				type_int = theWebUsers_.MOD_TYPE_UPDATE;
 			else if(type == "createAccount")
-				type_int = 1;
+				type_int = theWebUsers_.MOD_TYPE_ADD;
 			else if(type == "deleteAccount")
-				type_int = 2;
+				type_int = theWebUsers_.MOD_TYPE_DELETE;
 
 			std::string username    = CgiDataUtilities::postData(cgiIn, "username");
 			std::string displayname = CgiDataUtilities::postData(cgiIn, "displayname");
@@ -2866,8 +2527,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				}
 			}
 
-			// return last group alias
-			std::string fn = FSM_LAST_GROUP_ALIAS_PATH + FSM_LAST_GROUP_ALIAS_FILE_START + username + "." + FSM_USERS_PREFERENCES_FILETYPE;
+			// return last group alias by user
+			std::string fn = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" +
+					FSM_LAST_GROUP_ALIAS_FILE_START + username + "." +
+					FSM_USERS_PREFERENCES_FILETYPE;
 			__COUT__ << "Load preferences: " << fn << __E__;
 			FILE* fp = fopen(fn.c_str(), "r");
 			if(fp)
@@ -2882,19 +2545,20 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		}
 		else if(requestType == "getAppStatus")
 		{
-			for(auto it : allSupervisorInfo_.getAllSupervisorInfo())
+			for(const auto& it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
-				// bool pass = true;
-
-				auto appInfo = it.second;
+				const auto& appInfo = it.second;
 
 				xmlOut.addTextElementToData("name",
 				                            appInfo.getName());                      // get application name
 				xmlOut.addTextElementToData("id", std::to_string(appInfo.getId()));  // get application id
 				xmlOut.addTextElementToData("status", appInfo.getStatus());          // get status
-				xmlOut.addTextElementToData("time",
-				                            StringMacros::getTimestampString(appInfo.getLastStatusTime()));  // get time stamp
-				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress()));              // get progress
+				xmlOut.addTextElementToData(
+				    "time", appInfo.getLastStatusTime() ? StringMacros::getTimestampString(appInfo.getLastStatusTime()) : "0");  // get time stamp
+				xmlOut.addTextElementToData("stale",
+				                            std::to_string(time(0) - appInfo.getLastStatusTime()));  // time since update
+				xmlOut.addTextElementToData("progress", std::to_string(appInfo.getProgress()));      // get progress
+				xmlOut.addTextElementToData("detail", appInfo.getDetail());                          // get detail
 				xmlOut.addTextElementToData("class",
 				                            appInfo.getClass());  // get application class
 				xmlOut.addTextElementToData("url",
@@ -2902,6 +2566,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				xmlOut.addTextElementToData("context",
 				                            appInfo.getContextName());  // get context
 			}
+		}
+		else if(requestType == "getAppId")
+		{
+			GatewaySupervisor::handleGetApplicationIdRequest(&allSupervisorInfo_, cgiIn, xmlOut);
 		}
 		else if(requestType == "getContextMemberNames")
 		{
@@ -2913,10 +2581,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				xmlOut.addTextElementToData("ContextMember", context.contextUID_);  // get context member name
 			}
 		}
-
 		else if(requestType == "getSystemMessages")
 		{
-			xmlOut.addTextElementToData("systemMessages", theSystemMessenger_.getSystemMessage(theWebUsers_.getUsersDisplayName(userInfo.uid_)));
+			xmlOut.addTextElementToData("systemMessages",
+					theWebUsers_.getSystemMessage(userInfo.displayName_));
 
 			xmlOut.addTextElementToData("username_with_lock",
 			                            theWebUsers_.getUserWithLock());  // always give system lock update
@@ -2944,7 +2612,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			theWebUsers_.insertSettingsForUser(userInfo.uid_, &xmlOut, accounts == "1");
 
 			if(tmpUserWithLock != theWebUsers_.getUserWithLock())  // if there was a change, broadcast system message
-				theSystemMessenger_.addSystemMessage(
+				theWebUsers_.addSystemMessage(
 				    "*", theWebUsers_.getUserWithLock() == "" ? tmpUserWithLock + " has unlocked ots." : theWebUsers_.getUserWithLock() + " has locked ots.");
 		}
 		else if(requestType == "getStateMachine")
@@ -3186,8 +2854,14 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//	note: each icon has own permission threshold, so each user can have
 			//		a unique desktop icon experience.
 
-			const DesktopIconTable*                    iconTable = CorePropertySupervisorBase::theConfigurationManager_->__GET_CONFIG__(DesktopIconTable);
-			std::vector<DesktopIconTable::DesktopIcon> icons     = iconTable->getAllDesktopIcons();
+			// use latest context always from temporary configuration manager,
+			//	to get updated icons every time...
+			//(so icon changes do no require an ots restart)
+
+			ConfigurationManagerRW                            tmpCfgMgr(theWebUsers_.getUsersUsername(
+                userInfo.uid_));  // constructor will activate latest context, note: not CorePropertySupervisorBase::theConfigurationManager_
+			const DesktopIconTable*                           iconTable = tmpCfgMgr.__GET_CONFIG__(DesktopIconTable);
+			const std::vector<DesktopIconTable::DesktopIcon>& icons     = iconTable->getAllDesktopIcons();
 
 			std::string iconString = "";  // comma-separated icon string, 7 fields:
 			//				0 - caption 		= text below icon
@@ -3210,8 +2884,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			bool firstIcon = true;
 			for(const auto& icon : icons)
 			{
-				__COUTV__(icon.caption_);
-				__COUTV__(icon.permissionThresholdString_);
+				//__COUTV__(icon.caption_);
+				//__COUTV__(icon.permissionThresholdString_);
 
 				CorePropertySupervisorBase::extractPermissionsMapFromString(icon.permissionThresholdString_, iconPermissionThresholdsMap);
 
@@ -3237,7 +2911,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				iconString += "," + icon.windowContentURL_;
 				iconString += "," + icon.folderPath_;
 			}
-			__COUTV__(iconString);
+			//__COUTV__(iconString);
 
 			xmlOut.addTextElementToData("iconList", iconString);
 		}
@@ -3245,20 +2919,17 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		{
 			std::vector<DesktopIconTable::DesktopIcon> newIcons;
 
-			bool success = GatewaySupervisor::handleAddDesktopIconRequest(
-					theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut,
-					&newIcons);
+			bool success = GatewaySupervisor::handleAddDesktopIconRequest(theWebUsers_.getUsersUsername(userInfo.uid_), cgiIn, xmlOut, &newIcons);
 
 			if(success)
 			{
 				__COUT__ << "Attempting dynamic icon change..." << __E__;
 
-				DesktopIconTable* iconTable =
-						(DesktopIconTable*)CorePropertySupervisorBase::theConfigurationManager_->getDesktopIconTable();
+				DesktopIconTable* iconTable = (DesktopIconTable*)CorePropertySupervisorBase::theConfigurationManager_->getDesktopIconTable();
 				iconTable->setAllDesktopIcons(newIcons);
 			}
 			else
-				__COUT__ << "Failed icon add." << __E__;
+				__COUT__ << "Failed dynamic icon add." << __E__;
 		}
 		else if(requestType == "gatewayLaunchOTS" || requestType == "gatewayLaunchWiz")
 		{
@@ -3312,7 +2983,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	//__COUT__ << "Done" << __E__;
 }  // end request()
 
-//========================================================================================================================
+//==============================================================================
 // launchStartOTSCommand
 //	static function (so WizardSupervisor can use it)
 //	throws exception if command fails to start
@@ -3396,7 +3067,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 	}
 }  // end launchStartOTSCommand
 
-//========================================================================================================================
+//==============================================================================
 // xoap::supervisorCookieCheck
 //	verify cookie
 xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageReference message)
@@ -3440,44 +3111,57 @@ xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageRef
 	//__COUT__ << __E__;
 
 	return SOAPUtilities::makeSOAPMessageReference("CookieResponse", retParameters);
-}
+}  // end supervisorCookieCheck()
 
-//========================================================================================================================
+//==============================================================================
 // xoap::supervisorGetActiveUsers
 //	get display names for all active users
 xoap::MessageReference GatewaySupervisor::supervisorGetActiveUsers(xoap::MessageReference message)
-
 {
 	__COUT__ << __E__;
 
 	SOAPParameters parameters("UserList", theWebUsers_.getActiveUsersString());
 	return SOAPUtilities::makeSOAPMessageReference("ActiveUserResponse", parameters);
-}
+} //end supervisorGetActiveUsers()
 
-//========================================================================================================================
+//==============================================================================
 // xoap::supervisorSystemMessage
 //	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
+//	or comma-separated variable  (CSV) to multiple users
 xoap::MessageReference GatewaySupervisor::supervisorSystemMessage(xoap::MessageReference message)
-
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ToUser");
+	parameters.addParameter("Subject");
 	parameters.addParameter("Message");
+	parameters.addParameter("DoEmail");
 	SOAPUtilities::receive(message, parameters);
 
-	__COUT__ << "toUser: " << parameters.getValue("ToUser").substr(0, 10) << ", message: " << parameters.getValue("Message").substr(0, 10) << __E__;
+	std::string toUserCSV = parameters.getValue("ToUser");
+	std::string subject = parameters.getValue("Subject");
+	std::string systemMessage = parameters.getValue("Message");
+	std::string doEmail = parameters.getValue("DoEmail");
 
-	theSystemMessenger_.addSystemMessage(parameters.getValue("ToUser"), parameters.getValue("Message"));
+	__COUTV__(toUserCSV);
+	__COUTV__(subject);
+	__COUTV__(systemMessage);
+	__COUTV__(doEmail);
+
+	theWebUsers_.addSystemMessage(
+			toUserCSV,
+			subject,
+			systemMessage,
+			doEmail == "1");
+
 	return SOAPUtilities::makeSOAPMessageReference("SystemMessageResponse");
-}
+} //end supervisorSystemMessage()
 
 //===================================================================================================================
 // xoap::supervisorSystemLogbookEntry
 //	SOAPUtilities::receive a new system Message from a supervisor
 //	ToUser wild card * is to all users
 xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(xoap::MessageReference message)
-
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText");
@@ -3491,27 +3175,27 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(xoap::Mes
 }
 
 //===================================================================================================================
-// supervisorLastConfigGroupRequest
+// supervisorLastTableGroupRequest
 //	return the group name and key for the last state machine activity
 //
-//	Note: same as OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
-xoap::MessageReference GatewaySupervisor::supervisorLastConfigGroupRequest(xoap::MessageReference message)
+//	Note: same as OtsConfigurationWizardSupervisor::supervisorLastTableGroupRequest
+xoap::MessageReference GatewaySupervisor::supervisorLastTableGroupRequest(xoap::MessageReference message)
 
 {
 	SOAPParameters parameters;
 	parameters.addParameter("ActionOfLastGroup");
 	SOAPUtilities::receive(message, parameters);
 
-	return GatewaySupervisor::lastConfigGroupRequestHandler(parameters);
+	return GatewaySupervisor::lastTableGroupRequestHandler(parameters);
 }
 
 //===================================================================================================================
-// xoap::lastConfigGroupRequestHandler
+// xoap::lastTableGroupRequestHandler
 //	handles last config group request.
 //	called by both:
-//		GatewaySupervisor::supervisorLastConfigGroupRequest
-//		OtsConfigurationWizardSupervisor::supervisorLastConfigGroupRequest
-xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(const SOAPParameters& parameters)
+//		GatewaySupervisor::supervisorLastTableGroupRequest
+//		OtsConfigurationWizardSupervisor::supervisorLastTableGroupRequest
+xoap::MessageReference GatewaySupervisor::lastTableGroupRequestHandler(const SOAPParameters& parameters)
 {
 	std::string action = parameters.getValue("ActionOfLastGroup");
 	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 10) << __E__;
@@ -3521,13 +3205,22 @@ xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(const SO
 		fileName = FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE;
 	else if(action == "Started")
 		fileName = FSM_LAST_STARTED_GROUP_ALIAS_FILE;
+	else if(action == "ActivatedConfig")
+		fileName = ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE;
+	else if(action == "ActivatedContext")
+		fileName = ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE;
+	else if(action == "ActivatedBackbone")
+		fileName = ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE;
+	else if(action == "ActivatedIterator")
+		fileName = ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE;
 	else
 	{
 		__COUT_ERR__ << "Invalid last group action requested." << __E__;
 		return SOAPUtilities::makeSOAPMessageReference("LastConfigGroupResponseFailure");
 	}
 	std::string                                          timeString;
-	std::pair<std::string /*group name*/, TableGroupKey> theGroup = loadGroupNameAndKey(fileName, timeString);
+	std::pair<std::string /*group name*/, TableGroupKey> theGroup =
+			ConfigurationManager::loadGroupNameAndKey(fileName, timeString);
 
 	// fill return parameters
 	SOAPParameters retParameters;
@@ -3539,7 +3232,7 @@ xoap::MessageReference GatewaySupervisor::lastConfigGroupRequestHandler(const SO
 	return SOAPUtilities::makeSOAPMessageReference("LastConfigGroupResponse", retParameters);
 }
 
-//========================================================================================================================
+//==============================================================================
 // getNextRunNumber
 //
 //	If fsmName is passed, then get next run number for that FSM name
@@ -3581,7 +3274,7 @@ unsigned int GatewaySupervisor::getNextRunNumber(const std::string& fsmNameIn)
 	return atoi(runNumberString.c_str());
 }
 
-//========================================================================================================================
+//==============================================================================
 bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::string& fsmNameIn)
 {
 	std::string runNumberFileName = RUN_NUMBER_PATH + "/";
@@ -3605,76 +3298,12 @@ bool GatewaySupervisor::setNextRunNumber(unsigned int runNumber, const std::stri
 	runNumberFile << runNumberStream.str().c_str();
 	runNumberFile.close();
 	return true;
-}
+} //end setNextRunNumber()
 
-//========================================================================================================================
-// loadGroupNameAndKey
-//	loads group name and key (and time) from specified file
-//	returns time string in returnedTimeString
-//
-//	Note: this is static so the OtsConfigurationWizardSupervisor can call it
-std::pair<std::string /*group name*/, TableGroupKey> GatewaySupervisor::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
-{
-	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
-
-	FILE* groupFile = fopen(fullPath.c_str(), "r");
-	if(!groupFile)
-	{
-		__COUT__ << "Can't open file: " << fullPath << __E__;
-
-		__COUT__ << "Returning empty groupName and key -1" << __E__;
-
-		return std::pair<std::string /*group name*/, TableGroupKey>("", TableGroupKey());
-	}
-
-	char line[500];  // assuming no group names longer than 500 chars
-	// name and then key
-	std::pair<std::string /*group name*/, TableGroupKey> theGroup;
-
-	fgets(line, 500, groupFile);  // name
-	theGroup.first = line;
-
-	fgets(line, 500, groupFile);  // key
-	int key;
-	sscanf(line, "%d", &key);
-	theGroup.second = key;
-
-	fgets(line, 500, groupFile);  // time
-	time_t timestamp;
-	sscanf(line, "%ld", &timestamp);                                   // type long int
-	                                                                   //	struct tm tmstruct;
-	                                                                   //	::localtime_r(&timestamp, &tmstruct);
-	                                                                   //	::strftime(line, 30, "%c %Z", &tmstruct);
-	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
-	fclose(groupFile);
-
-	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
-
-	return theGroup;
-}  // end loadGroupNameAndKey()
-
-//========================================================================================================================
-void GatewaySupervisor::saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup, const std::string& fileName)
-{
-	std::string fullPath = FSM_LAST_GROUP_ALIAS_PATH + "/" + fileName;
-
-	std::ofstream groupFile(fullPath.c_str());
-	if(!groupFile.is_open())
-	{
-		__SS__ << "Error. Can't open file: " << fullPath << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
-	}
-	std::stringstream outss;
-	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
-	groupFile << outss.str().c_str();
-	groupFile.close();
-}  // end saveGroupNameAndKey()
-
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupervisorInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut)
 {
-	std::string classNeedle = CgiDataUtilities::getData(cgiIn, "classNeedle");
+	std::string classNeedle = StringMacros::decodeURIComponent(CgiDataUtilities::getData(cgiIn, "classNeedle"));
 	__COUTV__(classNeedle);
 
 	for(auto it : allSupervisorInfo->getAllSupervisorInfo())
@@ -3699,16 +3328,19 @@ void GatewaySupervisor::handleGetApplicationIdRequest(AllSupervisorInfo* allSupe
 
 }  // end handleGetApplicationIdRequest()
 
-//========================================================================================================================
-bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut,
-		std::vector<DesktopIconTable::DesktopIcon>* newIcons /* = nullptr*/)
+//==============================================================================
+bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string&                          author,
+                                                    cgicc::Cgicc&                               cgiIn,
+                                                    HttpXmlDocument&                            xmlOut,
+                                                    std::vector<DesktopIconTable::DesktopIcon>* newIcons /* = nullptr*/)
 {
-	std::string  iconCaption              = CgiDataUtilities::getData(cgiIn, "iconCaption");                                         // from GET
-	std::string  iconAltText              = CgiDataUtilities::getData(cgiIn, "iconAltText");                                         // from GET
-	std::string  iconFolderPath           = CgiDataUtilities::getData(cgiIn, "iconFolderPath");                                      // from GET
-	std::string  iconImageURL             = CgiDataUtilities::getData(cgiIn, "iconImageURL");                                        // from GET
-	std::string  iconWindowURL            = CgiDataUtilities::getData(cgiIn, "iconWindowURL");                                       // from GET
-	std::string  iconPermissions          = CgiDataUtilities::getData(cgiIn, "iconPermissions");                                     // from GET
+	std::string iconCaption     = CgiDataUtilities::getData(cgiIn, "iconCaption");      // from GET
+	std::string iconAltText     = CgiDataUtilities::getData(cgiIn, "iconAltText");      // from GET
+	std::string iconFolderPath  = CgiDataUtilities::getData(cgiIn, "iconFolderPath");   // from GET
+	std::string iconImageURL    = CgiDataUtilities::getData(cgiIn, "iconImageURL");     // from GET
+	std::string iconWindowURL   = CgiDataUtilities::getData(cgiIn, "iconWindowURL");    // from GET
+	std::string iconPermissions = CgiDataUtilities::getData(cgiIn, "iconPermissions");  // from GET
+	// windowLinkedApp is one of the only fields that needs to be decoded before write into table cells, because the app class name might be here
 	std::string  windowLinkedApp          = CgiDataUtilities::getData(cgiIn, "iconLinkedApp");                                       // from GET
 	unsigned int windowLinkedAppLID       = CgiDataUtilities::getDataAsInt(cgiIn, "iconLinkedAppLID");                               // from GET
 	bool         enforceOneWindowInstance = CgiDataUtilities::getData(cgiIn, "iconEnforceOneWindowInstance") == "1" ? true : false;  // from GET
@@ -3730,30 +3362,27 @@ bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string& author, c
 
 	ConfigurationManagerRW tmpCfgMgr(author);
 
-
-	bool success =
-			ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
-	                                                     &tmpCfgMgr,
-	                                                     iconCaption,
-	                                                     iconAltText,
-	                                                     iconFolderPath,
-	                                                     iconImageURL,
-	                                                     iconWindowURL,
-	                                                     iconPermissions,
-	                                                     windowLinkedApp /*= ""*/,
-	                                                     windowLinkedAppLID /*= 0*/,
-	                                                     enforceOneWindowInstance /*= false*/,
-	                                                     windowParameters /*= ""*/);
+	bool success = ConfigurationSupervisorBase::handleAddDesktopIconXML(xmlOut,
+	                                                                    &tmpCfgMgr,
+	                                                                    iconCaption,
+	                                                                    iconAltText,
+	                                                                    iconFolderPath,
+	                                                                    iconImageURL,
+	                                                                    iconWindowURL,
+	                                                                    iconPermissions,
+	                                                                    windowLinkedApp /*= ""*/,
+	                                                                    windowLinkedAppLID /*= 0*/,
+	                                                                    enforceOneWindowInstance /*= false*/,
+	                                                                    windowParameters /*= ""*/);
 
 	if(newIcons && success)
 	{
 		__COUT__ << "Passing new icons back to caller..." << __E__;
 
-		const std::vector<DesktopIconTable::DesktopIcon>& tmpNewIcons =
-				tmpCfgMgr.__GET_CONFIG__(DesktopIconTable)->getAllDesktopIcons();
+		const std::vector<DesktopIconTable::DesktopIcon>& tmpNewIcons = tmpCfgMgr.__GET_CONFIG__(DesktopIconTable)->getAllDesktopIcons();
 
 		newIcons->clear();
-		for(const auto& tmpNewIcon:tmpNewIcons)
+		for(const auto& tmpNewIcon : tmpNewIcons)
 			newIcons->push_back(tmpNewIcon);
 	}
 

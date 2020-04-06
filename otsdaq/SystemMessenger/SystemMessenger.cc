@@ -7,9 +7,17 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 // addSystemMessage
-void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
+//	targetUser can be "*" for all users
+void SystemMessenger::addSystemMessage(std::string targetUsersCSM, std::string msg, bool doEmail)
+{
+	addSystemMessage
+} //end addSystemMessage()
+//==============================================================================
+// addSystemMessage
+//	targetUser can be "*" for all users
+void SystemMessenger::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail)
 {
 	sysMsgCleanup();
 
@@ -27,10 +35,10 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 	sysMsgDelivered_.push_back(false);
 	sysMsgSetLock(false);  // unset lock
 
-	std::cout << __COUT_HDR_FL__ << "Current System Messages: " << sysMsgTargetUser_.size() << std::endl << std::endl;
-}
+	__COUT__ << "Current System Messages count = " << sysMsgTargetUser_.size() << __E__;
+} //end addSystemMessage()
 
-//========================================================================================================================
+//==============================================================================
 // getSystemMessage
 //	Deliver | separated system messages (time | msg | time | msg...etc),
 //		if there is any in vector set for user or for wildcard *
@@ -38,7 +46,7 @@ void SystemMessenger::addSystemMessage(std::string targetUser, std::string msg)
 //	Note: | is an illegal character and will cause GUI craziness
 std::string SystemMessenger::getSystemMessage(std::string targetUser)
 {
-	// std::cout << __COUT_HDR_FL__ << "Current System Messages: " << targetUser <<
+	// __COUT__ << "Current System Messages: " << targetUser <<
 	// std::endl << std::endl;
 	std::string retStr = "";
 	int         cnt    = 0;
@@ -61,7 +69,7 @@ std::string SystemMessenger::getSystemMessage(std::string targetUser)
 	return retStr;
 }
 
-//========================================================================================================================
+//==============================================================================
 // sysMsgSetLock
 //	ALWAYS calling thread with true, must also call with false to release lock
 void SystemMessenger::sysMsgSetLock(bool set)
@@ -71,13 +79,13 @@ void SystemMessenger::sysMsgSetLock(bool set)
 	sysMsgLock_ = set;
 }
 
-//========================================================================================================================
+//==============================================================================
 // sysMsgCleanup
 //	Cleanup messages if delivered, and targetUser != wildcard *
 //	For all remaining messages, wait some time before removing (e.g. 30 sec)
 void SystemMessenger::sysMsgCleanup()
 {
-	// std::cout << __COUT_HDR_FL__ << "Current System Messages: " <<
+	// __COUT__ << "Current System Messages: " <<
 	// sysMsgTargetUser_.size() <<  std::endl << std::endl;
 	for(uint64_t i = 0; i < sysMsgTargetUser_.size(); ++i)
 		if((sysMsgDelivered_[i] && sysMsgTargetUser_[i] != "*") ||  // delivered and != *
@@ -92,6 +100,6 @@ void SystemMessenger::sysMsgCleanup()
 			sysMsgSetLock(false);  // unset lock
 			--i;                   // rewind
 		}
-	// std::cout << __COUT_HDR_FL__ << "Remaining System Messages: " <<
+	// __COUT__ << "Remaining System Messages: " <<
 	// sysMsgTargetUser_.size() <<  std::endl << std::endl;
 }

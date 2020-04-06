@@ -24,7 +24,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort) : communicationInterface_(NULL)
 {
 	// network stuff
@@ -42,7 +42,7 @@ NetworkDevice::NetworkDevice(std::string IPAddress, unsigned int IPPort) : commu
 	memset(&(deviceAddress_.sin_zero), '\0', 8);  // zero the rest of the struct
 }
 
-//========================================================================================================================
+//==============================================================================
 NetworkDevice::~NetworkDevice(void)
 {
 	for(std::map<int, int>::iterator it = openSockets_.begin(); it != openSockets_.end(); it++)
@@ -53,7 +53,7 @@ NetworkDevice::~NetworkDevice(void)
 	openSockets_.clear();
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::initSocket(std::string socketPort)
 {
 	struct addrinfo hints;
@@ -114,7 +114,7 @@ int NetworkDevice::initSocket(std::string socketPort)
 	return socketOut;
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::initSocket(unsigned int socketPort)
 {
 	std::stringstream socket("");
@@ -123,7 +123,7 @@ int NetworkDevice::initSocket(unsigned int socketPort)
 	return initSocket(socket.str());
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::send(int socketDescriptor, const std::string& buffer)
 {
 	if(sendto(socketDescriptor, buffer.c_str(), buffer.size(), 0, (struct sockaddr*)&(deviceAddress_), sizeof(deviceAddress_)) < (int)(buffer.size()))
@@ -134,7 +134,7 @@ int NetworkDevice::send(int socketDescriptor, const std::string& buffer)
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 {
 	struct timeval tv;
@@ -170,7 +170,7 @@ int NetworkDevice::receive(int socketDescriptor, std::string& buffer)
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 {
 	__COUT__ << "LISTENING!!!!!" << std::endl;
@@ -207,7 +207,7 @@ int NetworkDevice::listen(int socketDescriptor, std::string& buffer)
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::ping(int socketDescriptor)
 {
 	std::string pingMsg(1, 0);
@@ -250,7 +250,7 @@ int NetworkDevice::ping(int socketDescriptor)
 	return 0;
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
 {
 	__COUT__ << "partial IP: " << partialIpAddress << std::endl;
@@ -278,7 +278,7 @@ std::string NetworkDevice::getFullIPAddress(std::string partialIpAddress)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkDevice::getInterfaceName(std::string ipAddress)
 {
 	__COUT__ << "IP: " << ipAddress << std::endl;
@@ -298,7 +298,7 @@ std::string NetworkDevice::getInterfaceName(std::string ipAddress)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 int NetworkDevice::getInterface(std::string ipAddress)
 {
 	int  family, s;
@@ -402,7 +402,7 @@ int NetworkDevice::getInterface(std::string ipAddress)
 	return found;
 }
 
-//========================================================================================================================
+//==============================================================================
 std::string NetworkDevice::getMacAddress(std::string interfaceName)
 {
 	std::string macAddress(6, '0');

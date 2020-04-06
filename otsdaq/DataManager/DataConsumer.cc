@@ -8,9 +8,9 @@ using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "Consumer"
-#define mfSubject_ (std::string("Consumer-") + DataProcessor::processorUID_)
+#define mfSubject_ (std::string("Consumer:") + DataProcessor::processorUID_)
 
-//========================================================================================================================
+//==============================================================================
 DataConsumer::DataConsumer(std::string supervisorApplicationUID, std::string bufferUID, std::string processorUID, ConsumerPriority priority)
     : WorkLoop(processorUID), DataProcessor(supervisorApplicationUID, bufferUID, processorUID), priority_(priority)
 {
@@ -19,7 +19,7 @@ DataConsumer::DataConsumer(std::string supervisorApplicationUID, std::string buf
 	__GEN_COUT__ << "Constructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 DataConsumer::~DataConsumer(void)
 {
 	__GEN_COUT__ << "Destructor." << __E__;
@@ -27,10 +27,10 @@ DataConsumer::~DataConsumer(void)
 	__GEN_COUT__ << "Destructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 DataConsumer::ConsumerPriority DataConsumer::getPriority(void) { return priority_; }
 
-//========================================================================================================================
+//==============================================================================
 // mirror DataProducerBase::registerToBuffer
 void DataConsumer::registerToBuffer(void)
 {
@@ -62,7 +62,7 @@ void DataConsumer::registerToBuffer(void)
 	//	__GEN_COUT__ << "Registered." << __E__;
 }  // end registerToBuffer()
 
-////========================================================================================================================
+////==============================================================================
 ////mirror DataProducerBase::unregisterFromBuffer
 // void DataConsumer::unregisterFromBuffer(void)
 //{
@@ -88,8 +88,8 @@ void DataConsumer::registerToBuffer(void)
 //			"' Unregistered." << __E__;
 //} //end unregisterFromBuffer()
 
-//========================================================================================================================
+//==============================================================================
 void DataConsumer::startProcessingData(std::string runNumber) { WorkLoop::startWorkLoop(); }
 
-//========================================================================================================================
+//==============================================================================
 void DataConsumer::stopProcessingData(void) { WorkLoop::stopWorkLoop(); }

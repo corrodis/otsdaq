@@ -12,8 +12,8 @@
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
-#include "otsdaq/TablePlugins/DesktopIconTable.h"
 #include "otsdaq/CodeEditor/CodeEditor.h"
+#include "otsdaq/TablePlugins/DesktopIconTable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -77,7 +77,6 @@ class GatewaySupervisor : public xdaq::Application,
 	static void 				handleGetApplicationIdRequest	(AllSupervisorInfo* applicationInfo, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut);
 
 	xoap::MessageReference 		stateMachineXoapHandler			(xoap::MessageReference msg);
-	xoap::MessageReference 		stateMachineResultXoapHandler	(xoap::MessageReference msg);
 
 	bool 						stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 
@@ -92,7 +91,7 @@ class GatewaySupervisor : public xdaq::Application,
 	xoap::MessageReference 		supervisorSystemMessage			(xoap::MessageReference msg);
 	xoap::MessageReference 		supervisorGetUserInfo			(xoap::MessageReference msg);
 	xoap::MessageReference 		supervisorSystemLogbookEntry	(xoap::MessageReference msg);
-	xoap::MessageReference 		supervisorLastConfigGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorLastTableGroupRequest(xoap::MessageReference msg);
 
 	// Finite State Machine States
 	void 						stateInitial					(toolbox::fsm::FiniteStateMachine& fsm);
@@ -127,11 +126,8 @@ class GatewaySupervisor : public xdaq::Application,
   private:
 	unsigned int 				getNextRunNumber				(const std::string& fsmName = "");
 	bool 						setNextRunNumber				(unsigned int runNumber, const std::string& fsmName = "");
-	static std::pair<
-		std::string /*group name*/,
-		TableGroupKey> 			loadGroupNameAndKey				(const std::string& fileName, std::string& returnedTimeString);
-	void 						saveGroupNameAndKey				(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup,const std::string& fileName);
-	static xoap::MessageReference lastConfigGroupRequestHandler	(const SOAPParameters& parameters);
+
+	static xoap::MessageReference lastTableGroupRequestHandler	(const SOAPParameters& parameters);
 	static void 				launchStartOTSCommand			(const std::string& command, ConfigurationManager* cfgMgr);
 	static void 				indicateOtsAlive				(const CorePropertySupervisorBase* properties = 0);
 
@@ -265,13 +261,10 @@ class GatewaySupervisor : public xdaq::Application,
 
 	// Member Variables
 
-	WebUsers          theWebUsers_;
-	SystemMessenger   theSystemMessenger_;
+	static WebUsers   theWebUsers_;
 
 	WorkLoopManager stateMachineWorkLoopManager_;
 	toolbox::BSem   stateMachineSemaphore_;
-	WorkLoopManager infoRequestWorkLoopManager_;
-	toolbox::BSem   infoRequestSemaphore_;
 
 	std::string activeStateMachineName_;  // when multiple state machines, this is the
 	                                      // name of the state machine which executed the
@@ -303,10 +296,6 @@ class GatewaySupervisor : public xdaq::Application,
 	// temporary member variable to avoid redeclaration in repetitive functions
 	char tmpStringForConversions_[100];
 
-	// Trash tests
-	void               wait(int milliseconds, std::string who = "") const;
-	unsigned long long counterTest_;
-	std::vector<int>   vectorTest_;
 	std::string        securityType_;
 };
 // clang-format on

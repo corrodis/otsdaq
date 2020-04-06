@@ -5,7 +5,7 @@
 
 GETPACKAGEINFO(GatewaySupervisor)
 
-//========================================================================================================================
+//==============================================================================
 void GatewaySupervisor::checkPackageDependencies()
 {
 	CHECKDEPENDENCY(config);
@@ -13,7 +13,7 @@ void GatewaySupervisor::checkPackageDependencies()
 	CHECKDEPENDENCY(xdaq);
 }
 
-//========================================================================================================================
+//==============================================================================
 std::set<std::string, std::less<std::string> > GatewaySupervisor::getPackageDependencies()
 {
 	std::set<std::string, std::less<std::string> > dependencies;

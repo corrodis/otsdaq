@@ -113,12 +113,12 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 		{
 			if(number.find("0x") == 0)  // indicates hex
 			{
-				//__COUT__ << "0x found" << std::endl;
+				//__COUT__ << "0x found" << __E__;
 				for(unsigned int i = 2; i < number.size(); ++i)
 				{
 					if(!((number[i] >= '0' && number[i] <= '9') || (number[i] >= 'A' && number[i] <= 'F') || (number[i] >= 'a' && number[i] <= 'f')))
 					{
-						//__COUT__ << "prob " << number[i] << std::endl;
+						//__COUT__ << "prob " << number[i] << __E__;
 						return false;
 					}
 				}
@@ -126,13 +126,13 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 			}
 			else if(number[0] == 'b')  // indicates binary
 			{
-				//__COUT__ << "b found" << std::endl;
+				//__COUT__ << "b found" << __E__;
 
 				for(unsigned int i = 1; i < number.size(); ++i)
 				{
 					if(!((number[i] >= '0' && number[i] <= '1')))
 					{
-						//__COUT__ << "prob " << number[i] << std::endl;
+						//__COUT__ << "prob " << number[i] << __E__;
 						return false;
 					}
 				}
@@ -255,12 +255,14 @@ T StringMacros::validateValueForDefaultStringDataType(const std::string& value, 
 	{
 		__SS__ << "Failed to validate the string value for the data type  '" << StringMacros::demangleTypeName(typeid(retValue).name()) << "' requested. "
 		       << __E__ << e.what() << __E__;
+		ss << StringMacros::stackTrace();
 		__SS_THROW__;
 	}
 }  // end validateValueForDefaultStringDataType<T>()
 
 //==============================================================================
 // static template function
+//	Note: that empty names are not allowed (or at least are confusing)!
 template<class T /*value type*/, class S = std::string /*name string or const string*/>
 void StringMacros::getMapFromString(const std::string&    inputString,
                                     std::map<S, T>&       mapToReturn,
@@ -287,7 +289,7 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 			        i != j)  // assume end of map name
 			{
 				//__COUT__ << "Map name found: " <<
-				//		inputString.substr(i,j-i) << std::endl;
+				//		inputString.substr(i,j-i) << __E__;
 
 				name = inputString.substr(i, j - i);  // save name, for concluding pair
 
@@ -308,7 +310,7 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 			                                                                            // i != j)  // assume end of value name
 			{
 				//__COUT__ << "Map value found: " <<
-				//		inputString.substr(i,j-i) << std::endl;
+				//		inputString.substr(i,j-i) << __E__;
 
 				auto /*pair<it,success>*/ emplaceReturn =
 				    mapToReturn.emplace(std::pair<S, T>(name, validateValueForDefaultStringDataType<T>(inputString.substr(i, j - i))  // value
@@ -316,8 +318,8 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 
 				if(!emplaceReturn.second)
 				{
-					__COUT__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('"
-					         << emplaceReturn.first->second << "'). " << __E__;
+					__COUT_WARN__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('"
+					              << emplaceReturn.first->second << "'). " << __E__;
 				}
 
 				needValue = false;  // need name now
@@ -327,16 +329,19 @@ void StringMacros::getMapFromString(const std::string&    inputString,
 			}
 		}
 
-	if(i != j)  // last value (for case when no concluding ' ' or delimiter)
+	if(needValue && i != j)  // last value (for case when no concluding ' ' or delimiter)
 	{
+		//__COUT__ << "Map value found: " <<
+		//		inputString.substr(i,j-i) << __E__;
+
 		auto /*pair<it,success>*/ emplaceReturn =
 		    mapToReturn.emplace(std::pair<S, T>(name, validateValueForDefaultStringDataType<T>(inputString.substr(i, j - i))  // value
 		                                        ));
 
 		if(!emplaceReturn.second)
 		{
-			__COUT__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('" << emplaceReturn.first->second
-			         << "'). " << __E__;
+			__COUT_WARN__ << "Ignoring repetitive value ('" << inputString.substr(i, j - i) << "') and keeping current value ('" << emplaceReturn.first->second
+			              << "'). " << __E__;
 		}
 	}
 }  // end getMapFromString<T>()

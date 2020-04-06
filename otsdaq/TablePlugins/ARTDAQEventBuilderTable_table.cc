@@ -11,7 +11,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void) : ARTDAQTableBase("ARTDAQEventBuilderTable")
 {
 	//////////////////////////////////////////////////////////////////////
@@ -19,10 +19,10 @@ ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void) : ARTDAQTableBase("ARTDAQ
 	//////////////////////////////////////////////////////////////////////
 }
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQEventBuilderTable::~ARTDAQEventBuilderTable(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 {
 	// use isFirstAppInContext to only run once per context, for example to avoid

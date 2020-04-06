@@ -22,6 +22,7 @@ class TCPSocket
 	TCPSocket& operator=(TCPSocket const&) = delete;
 
 	int  getSocketId(void) const { return fSocketId; }
+	void open(void);
 	void close(void);
 	void sendClose(void);
 

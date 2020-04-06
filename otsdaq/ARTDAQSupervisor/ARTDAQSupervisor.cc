@@ -4,6 +4,7 @@
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
+#include "artdaq/ExternalComms/MakeCommanderPlugin.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
@@ -91,7 +92,7 @@ static void init_sighandler(ARTDAQSupervisor* inst)
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
     : CoreSupervisorBase(stub)
     , daqinterface_ptr_(NULL)
@@ -104,6 +105,10 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 	init_sighandler(this);
 
+	// Only use system Python
+	unsetenv("PYTHONPATH");
+	unsetenv("PYTHONHOME");
+
 	// Write out settings file
 	auto          settings_file = __ENV__("DAQINTERFACE_SETTINGS");
 	std::ofstream o(settings_file, std::ios::trunc);
@@ -113,7 +118,13 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	setenv("DAQINTERFACE_LOGFILE", logfileName.c_str(), 1);
 
 	o << "log_directory: " << getSupervisorProperty("log_directory", std::string(__ENV__("OTSDAQ_LOG_DIR"))) << std::endl;
-	o << "record_directory: " << getSupervisorProperty("record_directory", ARTDAQTableBase::ARTDAQ_FCL_PATH + "/run_records/") << std::endl;
+
+	{
+		const std::string record_directory = getSupervisorProperty("record_directory", ARTDAQTableBase::ARTDAQ_FCL_PATH + "/run_records/");
+		mkdir(record_directory.c_str(), 0755);
+		o << "record_directory: " << record_directory << std::endl;
+	}
+
 	o << "package_hashes_to_save: " << getSupervisorProperty("package_hashes_to_save", "[artdaq]") << std::endl;
 	// Note that productsdir_for_bash_scripts is REQUIRED!
 	o << "productsdir_for_bash_scripts: " << getSupervisorProperty("productsdir_for_bash_scripts", std::string(__ENV__("OTS_PRODUCTS"))) << std::endl;
@@ -136,7 +147,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQSupervisor::~ARTDAQSupervisor(void)
 {
 	__SUP_COUT__ << "Destructor." << __E__;
@@ -144,14 +155,14 @@ ARTDAQSupervisor::~ARTDAQSupervisor(void)
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::init(void)
 {
 	stop_runner_();
 
 	__SUP_COUT__ << "Initializing..." << __E__;
 	{
-		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
 		// allSupervisorInfo_.init(getApplicationContext());
 		artdaq::configureMessageFacility("ARTDAQSupervisor");
@@ -239,7 +250,7 @@ void ARTDAQSupervisor::init(void)
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end init()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::destroy(void)
 {
 	__SUP_COUT__ << "Destroying..." << __E__;
@@ -247,9 +258,9 @@ void ARTDAQSupervisor::destroy(void)
 	if(daqinterface_ptr_ != NULL)
 	{
 		__SUP_COUT__ << "Calling recover transition" << __E__;
-		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
-		PyObject*                   pName = PyString_FromString("do_recover");
-		PyObject*                   res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+		PyObject*                             pName = PyString_FromString("do_recover");
+		PyObject*                             res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
 		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
 		getDAQState_();
@@ -268,7 +279,7 @@ void ARTDAQSupervisor::destroy(void)
 	__SUP_COUT__ << "Destroyed." << __E__;
 }  // end destroy()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
@@ -289,7 +300,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
 
 		// start configuring thread
-		std::thread([](ARTDAQSupervisor* as) { ARTDAQSupervisor::configuringThread(as); }, this).detach();
+		std::thread(&ARTDAQSupervisor::configuringThread, this).detach();
 
 		__SUP_COUT__ << "Configuring thread started." << __E__;
 
@@ -344,38 +355,39 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
 			sleep(1 /*seconds*/);
 		}
 		else
+		{
 			__SUP_COUT_INFO__ << "Complete configuring transition!" << __E__;
+			__SUP_COUTV__(getProcessInfo_());
+		}
 	}
 
 	return;
 }  // end transitionConfiguring()
 
-//========================================================================================================================
-void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) try
+//==============================================================================
+void ARTDAQSupervisor::configuringThread() try
 {
-	ProgressBar& progressBar = theArtdaqSupervisor->thread_progress_bar_;
-
-	const std::string& uid = theArtdaqSupervisor->theConfigurationManager_
-	                             ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" +
-	                                       theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorUID() + "/" + "LinkToSupervisorTable")
-	                             .getValueAsString();
+	const std::string& uid =
+	    theConfigurationManager_
+	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" + CorePropertySupervisorBase::getSupervisorUID() + "/" + "LinkToSupervisorTable")
+	        .getValueAsString();
 
 	__COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node" << __E__;
 
-	const std::string mfSubject_ = theArtdaqSupervisor->supervisorClassNoNamespace_ + "-" + uid;
+	const std::string mfSubject_ = supervisorClassNoNamespace_ + "-" + uid;
 
-	ConfigurationTree theSupervisorNode = theArtdaqSupervisor->getSupervisorTableNode();
+	ConfigurationTree theSupervisorNode = getSupervisorTableNode();
 
-	progressBar.step();
+	thread_progress_bar_.step();
 
 	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
 	    false /*getStatusFalseNodes*/,
 	    true /*doWriteFHiCL*/,
-	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
-	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_timeout_ms", ARTDAQTableBase::DEFAULT_ROUTING_TIMEOUT_MS),
-	    theArtdaqSupervisor->CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
-	    &progressBar);
+	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
+	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_timeout_ms", ARTDAQTableBase::DEFAULT_ROUTING_TIMEOUT_MS),
+	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
+	    &thread_progress_bar_);
 
 	// Check lists
 	if(info.processes.count(ARTDAQTableBase::ARTDAQAppType::BoardReader) == 0)
@@ -391,7 +403,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		return;
 	}
 
-	progressBar.step();
+	thread_progress_bar_.step();
 
 	__GEN_COUT__ << "Writing boot.txt" << __E__;
 
@@ -464,7 +476,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 	}
 	o.close();
 
-	progressBar.step();
+	thread_progress_bar_.step();
 
 	__GEN_COUT__ << "Building configuration directory" << __E__;
 
@@ -498,19 +510,19 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + rmaster.label + ".fcl").c_str());
 	}
 
-	progressBar.step();
+	thread_progress_bar_.step();
 
-	std::lock_guard<std::mutex> lk(theArtdaqSupervisor->daqinterface_mutex_);
-	theArtdaqSupervisor->getDAQState_();
-	if(theArtdaqSupervisor->daqinterface_state_ != "stopped" && theArtdaqSupervisor->daqinterface_state_ != "")
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+	getDAQState_();
+	if(daqinterface_state_ != "stopped" && daqinterface_state_ != "")
 	{
 		__GEN_SS__ << "Cannot configure DAQInterface because it is in the wrong state"
-		           << " (" << theArtdaqSupervisor->daqinterface_state_ << " != stopped)!" << __E__;
+		           << " (" << daqinterface_state_ << " != stopped)!" << __E__;
 		__GEN_SS_THROW__
 	}
 
 	__GEN_COUT__ << "Calling setdaqcomps" << __E__;
-	__GEN_COUT__ << "Status before setdaqcomps: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Status before setdaqcomps: " << daqinterface_state_ << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
 
 	PyObject* readerDict = PyDict_New();
@@ -527,7 +539,7 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		PyList_SetItem(readerData, 2, readerSubsystem);
 		PyDict_SetItem(readerDict, readerName, readerData);
 	}
-	PyObject* res1 = PyObject_CallMethodObjArgs(theArtdaqSupervisor->daqinterface_ptr_, pName1, readerDict, NULL);
+	PyObject* res1 = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName1, readerDict, NULL);
 	Py_DECREF(readerDict);
 
 	if(res1 == NULL)
@@ -536,15 +548,15 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		__GEN_SS__ << "Error calling setdaqcomps transition" << __E__;
 		__GEN_SS_THROW__;
 	}
-	theArtdaqSupervisor->getDAQState_();
-	__GEN_COUT__ << "Status after setdaqcomps: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+	getDAQState_();
+	__GEN_COUT__ << "Status after setdaqcomps: " << daqinterface_state_ << __E__;
 
-	progressBar.step();
+	thread_progress_bar_.step();
 	__GEN_COUT__ << "Calling do_boot" << __E__;
-	__GEN_COUT__ << "Status before boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Status before boot: " << daqinterface_state_ << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
 	PyObject* pStateArgs1 = PyString_FromString((ARTDAQTableBase::ARTDAQ_FCL_PATH + "/boot.txt").c_str());
-	PyObject* res2        = PyObject_CallMethodObjArgs(theArtdaqSupervisor->daqinterface_ptr_, pName2, pStateArgs1, NULL);
+	PyObject* res2        = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName2, pStateArgs1, NULL);
 
 	if(res2 == NULL)
 	{
@@ -553,21 +565,21 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		__GEN_SS_THROW__;
 	}
 
-	theArtdaqSupervisor->getDAQState_();
-	if(theArtdaqSupervisor->daqinterface_state_ != "booted")
+	getDAQState_();
+	if(daqinterface_state_ != "booted")
 	{
 		__GEN_SS__ << "DAQInterface boot transition failed! "
-		           << "Status after boot attempt: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+		           << "Status after boot attempt: " << daqinterface_state_ << __E__;
 		__GEN_SS_THROW__;
 	}
-	__GEN_COUT__ << "Status after boot: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Status after boot: " << daqinterface_state_ << __E__;
 
-	progressBar.step();
+	thread_progress_bar_.step();
 	__GEN_COUT__ << "Calling do_config" << __E__;
-	__GEN_COUT__ << "Status before config: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
+	__GEN_COUT__ << "Status before config: " << daqinterface_state_ << __E__;
 	PyObject* pName3      = PyString_FromString("do_config");
 	PyObject* pStateArgs2 = Py_BuildValue("[s]", FAKE_CONFIG_NAME);
-	PyObject* res3        = PyObject_CallMethodObjArgs(theArtdaqSupervisor->daqinterface_ptr_, pName3, pStateArgs2, NULL);
+	PyObject* res3        = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName3, pStateArgs2, NULL);
 
 	if(res3 == NULL)
 	{
@@ -575,16 +587,16 @@ void ARTDAQSupervisor::configuringThread(ARTDAQSupervisor* theArtdaqSupervisor) 
 		__GEN_SS__ << "Error calling config transition" << __E__;
 		__GEN_SS_THROW__;
 	}
-	theArtdaqSupervisor->getDAQState_();
-	// if(theArtdaqSupervisor->daqinterface_state_ != "ready")
+	getDAQState_();
+	// if(daqinterface_state_ != "ready")
 	// {
 	// 	__GEN_SS__ << "DAQInterface config transition failed!" << __E__
-	// 	           << "Supervisor state: "<< theArtdaqSupervisor->daqinterface_state_ <<
+	// 	           << "Supervisor state: "<< daqinterface_state_ <<
 	// __E__;
 	// 	__GEN_SS_THROW__;
 	// }
-	__GEN_COUT__ << "Status after config: " << theArtdaqSupervisor->daqinterface_state_ << __E__;
-	progressBar.complete();
+	__GEN_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
+	thread_progress_bar_.complete();
 	__GEN_COUT__ << "Configured." << __E__;
 
 }  // end configuringThread()
@@ -592,8 +604,8 @@ catch(const std::runtime_error& e)
 {
 	__SS__ << "Error was caught while configuring: " << e.what() << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
-	std::lock_guard<std::mutex> lock(theArtdaqSupervisor->thread_mutex_);  // lock out for remainder of scope
-	theArtdaqSupervisor->thread_error_message_ = ss.str();
+	std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+	thread_error_message_ = ss.str();
 }
 catch(...)
 {
@@ -602,15 +614,15 @@ catch(...)
 
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 
-	std::lock_guard<std::mutex> lock(theArtdaqSupervisor->thread_mutex_);  // lock out for remainder of scope
-	theArtdaqSupervisor->thread_error_message_ = ss.str();
+	std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+	thread_error_message_ = ss.str();
 }  // end configuringThread() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 	getDAQState_();
 	__SUP_COUT__ << "Status before halt: " << daqinterface_state_ << __E__;
 
@@ -681,7 +693,7 @@ catch(...)
 	}
 }  // end transitionHalting() exception handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
@@ -700,11 +712,11 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionInitializing() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
 	getDAQState_();
 	__SUP_COUT__ << "Status before pause: " << daqinterface_state_ << __E__;
@@ -737,11 +749,11 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionPausing() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
 	getDAQState_();
 	__SUP_COUT__ << "Status before resume: " << daqinterface_state_ << __E__;
@@ -771,12 +783,12 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionResuming() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
-		std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 		getDAQState_();
 		__SUP_COUT__ << "Status before start: " << daqinterface_state_ << __E__;
 		auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
@@ -815,11 +827,11 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionStarting() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event) try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 	getDAQState_();
 	__SUP_COUT__ << "Status before stop: " << daqinterface_state_ << __E__;
 	PyObject* pName = PyString_FromString("do_stop_running");
@@ -847,11 +859,11 @@ catch(...)
 	__SS_THROW__;
 }  // end transitionStopping() error handling
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
-	std::lock_guard<std::mutex> lk(daqinterface_mutex_);
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 	getDAQState_();
 	__SUP_COUT__ << "Status before error: " << daqinterface_state_ << __E__;
 
@@ -870,10 +882,11 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
 
 }  // end enteringError()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::getDAQState_()
 {
 	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
 	if(daqinterface_ptr_ == nullptr)
 	{
@@ -896,7 +909,117 @@ void ots::ARTDAQSupervisor::getDAQState_()
 	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
 }  // end getDAQState_()
 
-//========================================================================================================================
+//==============================================================================
+std::string ots::ARTDAQSupervisor::getProcessInfo_(void)
+{
+	//__SUP_COUT__ << "Getting DAQInterface state" << __E__;
+	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+
+	if(daqinterface_ptr_ == nullptr)
+	{
+		return "";
+	}
+
+	PyObject* pName = PyString_FromString("artdaq_process_info");
+	PyObject* pArg  = PyString_FromString("DAQInterface");
+	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
+
+	if(res == NULL)
+	{
+		PyErr_Print();
+		__SS__ << "Error calling artdaq_process_info function" << __E__;
+		__SUP_SS_THROW__;
+		return "";
+	}
+	return std::string(PyString_AsString(res));
+	//__SUP_COUT__ << "getDAQState_ DONE: state=" << result << __E__;
+}  // end getProcessInfo_()
+
+//==============================================================================
+std::list<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo> ots::ARTDAQSupervisor::getAndParseProcessInfo_()
+{
+	std::list<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo> output;
+	auto                                                      info  = getProcessInfo_();
+	auto                                                      procs = tokenize_(info);
+
+	// 0: Whole string
+	// 1: Process Label
+	// 2: Process host
+	// 3: Process port
+	// 4: Process subsystem
+	// 5: Process Rank
+	// 6: Process state
+	std::regex re("(.*?) at ([^:]*):(\\d+) \\(subsystem (\\d+), rank (\\d+)\\): (.*)");
+
+	for(auto& proc : procs)
+	{
+		std::smatch match;
+		if(std::regex_match(proc, match, re))
+		{
+			DAQInterfaceProcessInfo info;
+
+			info.label     = match[1];
+			info.host      = match[2];
+			info.port      = std::stoi(match[3]);
+			info.subsystem = std::stoi(match[4]);
+			info.rank      = std::stoi(match[5]);
+			info.state     = match[6];
+
+			output.push_back(info);
+		}
+	}
+	return output;
+}  // end getAndParseProcessInfo_()
+
+//==============================================================================
+std::list<std::pair<ots::ARTDAQSupervisor::DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>>
+ots::ARTDAQSupervisor::makeCommandersFromProcessInfo()
+{
+	std::list<std::pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>> output;
+	auto                                                                                       infos = getAndParseProcessInfo_();
+
+	for(auto& info : infos)
+	{
+		artdaq::Commandable cm;
+		fhicl::ParameterSet ps;
+
+		ps.put<std::string>("commanderPluginType", "xmlrpc");
+		ps.put<int>("id", info.port);
+		ps.put<std::string>("server_url", info.host);
+
+		output.emplace_back(
+		    std::make_pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>(std::move(info), artdaq::MakeCommanderPlugin(ps, cm)));
+	}
+
+	return output;
+}  // end makeCommandersFromProcessInfo()
+
+//==============================================================================
+std::list<std::string> ots::ARTDAQSupervisor::tokenize_(std::string const& input)
+{
+	size_t                 pos = 0;
+	std::list<std::string> output;
+
+	while(pos != std::string::npos && pos < input.size())
+	{
+		auto newpos = input.find('\n', pos);
+		if(newpos != std::string::npos)
+		{
+			output.emplace_back(input, pos, newpos - pos);
+			// TLOG(TLVL_TRACE) << "tokenize_: " << output.back();
+			pos = newpos + 1;
+		}
+		else
+		{
+			output.emplace_back(input, pos);
+			// TLOG(TLVL_TRACE) << "tokenize_: " << output.back();
+			pos = newpos;
+		}
+	}
+	return output;
+}  // end tokenize_()
+
+//==============================================================================
 void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 {
 	TLOG(TLVL_TRACE) << "Runner thread starting";
@@ -905,7 +1028,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 	{
 		if(daqinterface_ptr_ != NULL)
 		{
-			std::unique_lock<std::mutex> lk(daqinterface_mutex_);
+			std::unique_lock<std::recursive_mutex> lk(daqinterface_mutex_);
 			getDAQState_();
 			std::string state_before = daqinterface_state_;
 
@@ -982,7 +1105,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 	TLOG(TLVL_TRACE) << "Runner thread complete";
 }  // end daqinterfaceRunner_()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::stop_runner_()
 {
 	runner_running_ = false;
@@ -993,7 +1116,7 @@ void ots::ARTDAQSupervisor::stop_runner_()
 	}
 }  // end stop_runner_()
 
-//========================================================================================================================
+//==============================================================================
 void ots::ARTDAQSupervisor::start_runner_()
 {
 	stop_runner_();

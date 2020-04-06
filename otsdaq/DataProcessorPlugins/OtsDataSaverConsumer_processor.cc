@@ -3,7 +3,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 OtsDataSaverConsumer::OtsDataSaverConsumer(std::string              supervisorApplicationUID,
                                            std::string              bufferUID,
                                            std::string              processorUID,
@@ -13,13 +13,13 @@ OtsDataSaverConsumer::OtsDataSaverConsumer(std::string              supervisorAp
 {
 }
 
-//========================================================================================================================
+//==============================================================================
 OtsDataSaverConsumer::~OtsDataSaverConsumer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void OtsDataSaverConsumer::writeHeader(void) {}
 
-//========================================================================================================================
+//==============================================================================
 // add one byte quad-word count before each packet
 void OtsDataSaverConsumer::writePacketHeader(const std::string& data)
 {
@@ -32,9 +32,10 @@ void OtsDataSaverConsumer::writePacketHeader(const std::string& data)
 	if(quadWordsCount)
 	{
 		unsigned char seqId = data[1];
+		__CFG_COUT__ << "quadcount: " << quadWordsCount << " packetType: " << data[0] << " sequence id: " << seqId << " last: " << lastSeqId_ << __E__;
 		if(!(lastSeqId_ + 1 == seqId || (lastSeqId_ == 255 && seqId == 0)))
 		{
-			__COUT__ << "?????? NOOOO Missing Packets: " << (unsigned int)lastSeqId_ << " v " << (unsigned int)seqId << __E__;
+			__CFG_COUT__ << "?????? NOOOO Missing Packets: " << (unsigned int)lastSeqId_ << " v " << (unsigned int)seqId << __E__;
 		}
 		lastSeqId_ = seqId;
 	}

@@ -5,13 +5,14 @@
 #include "otsdaq/NetworkUtilities/NetworkConverters.h"
 
 #include <string.h>
-#include <unistd.h>
 #include <cassert>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 TCPDataListenerProducer::TCPDataListenerProducer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
@@ -32,24 +33,25 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
 {
 }
 
-//========================================================================================================================
+//==============================================================================
 TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect();
+	TCPSubscribeClient::setReceiveTimeout(0, 1000);
 	DataProducer::startProcessingData(runNumber);
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::stopProcessingData(void)
 {
-	TCPSubscribeClient::close();
 	DataProducer::stopProcessingData();
+	TCPSubscribeClient::disconnect();
 }
 
-//========================================================================================================================
+//==============================================================================
 bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 // bool TCPDataListenerProducer::getNextFragment(void)
 {
@@ -59,13 +61,27 @@ bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
 	return WorkLoop::continueWorkLoop_;
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::slowWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
 
-	data_                = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	try
+	{
+		data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		if(data_.size() == 0)
+		{
+			std::this_thread::sleep_for(std::chrono::microseconds(1000));
+			return;
+		}
+	}
+	catch(const std::exception& e)
+	{
+		__COUT__ << "Error: " << e.what() << std::endl;
+		;
+		return;
+	}
 	header_["IPAddress"] = ipAddress_;
 	header_["Port"]      = std::to_string(port_);
 
@@ -74,12 +90,12 @@ void TCPDataListenerProducer::slowWrite(void)
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 "
 		            "milliseconds!"
 		         << std::endl;
-		usleep(10000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		return;
 	}
 }
 
-//========================================================================================================================
+//==============================================================================
 void TCPDataListenerProducer::fastWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
@@ -88,19 +104,24 @@ void TCPDataListenerProducer::fastWrite(void)
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
-		usleep(10000);
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		return;
 	}
 
-	// IT IS A BLOCKING CALL! SO NEEDS TO BE CHANGED
-	*dataP_                  = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+	try
+	{
+		*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		if(dataP_->size() == 0)
+			return;
+	}
+	catch(const std::exception& e)
+	{
+		__COUT__ << "Error: " << e.what() << std::endl;
+		;
+		return;
+	}
 	(*headerP_)["IPAddress"] = ipAddress_;
 	(*headerP_)["Port"]      = std::to_string(port_);
-
-	// if (port_ == 40005)
-	//{
-	//	__COUT__ << "Got data: " << dataP_->length() << std::endl;
-	//}
 
 	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();
 }

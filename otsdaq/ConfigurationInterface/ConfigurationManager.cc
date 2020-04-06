@@ -6,12 +6,20 @@
 #include <fstream>  // std::ofstream
 
 #include "otsdaq/TableCore/TableGroupKey.h"
-#include "otsdaq/TablePlugins/DesktopIconTable.h" //for dynamic desktop icon change
+#include "otsdaq/TablePlugins/DesktopIconTable.h"  //for dynamic desktop icon change
 
 using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManager"
+
+
+const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			= std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE 	= "CFGLastActivatedConfigGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE 	= "CFGLastActivatedContextGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE 	= "CFGLastActivatedBackboneGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE 	= "CFGLastActivatedIteratorGroup.hist";
+
 
 const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
 
@@ -44,11 +52,12 @@ const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
                                                                          ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
                                                                          "XDAQApplicationPropertyTable",
-																		 ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
+                                                                         ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
                                                                          "MessageFacilityTable",
                                                                          "GatewaySupervisorTable",
                                                                          "StateMachineTable",
-                                                                         "DesktopWindowParameterTable"};
+                                                                         "DesktopWindowParameterTable",
+                                                                         "SlowControlsDashboardSupervisorTable"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_ = {ConfigurationManager::GROUP_ALIASES_TABLE_NAME,
                                                                           ConfigurationManager::VERSION_ALIASES_TABLE_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"IterateTable",
@@ -65,6 +74,7 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"Itera
                                                                          "IterationCommandModifyGroupTable",
                                                                          "IterationCommandRepeatLabelTable",
                                                                          "IterationCommandRunTable"};
+
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
@@ -179,10 +189,14 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 		}
 		catch(std::runtime_error& e)
 		{
+			__COUT_ERR__ << "Error caught in init(): " << e.what();
 			if(accumulatedErrors)
 				*accumulatedErrors += e.what();
 			else
-				throw;
+			{
+				__SS__ << e.what();  // add line number of rethrow
+				__SS_ONLY_THROW__;
+			}
 		}
 	}
 }  // end init()
@@ -331,8 +345,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool               throwErro
 
 	if(throwErrors && errorStr != "")
 	{
-		__COUT_INFO__ << "\n" << errorStr;
-		__THROW__(errorStr);
+		__SS__ << "\n" << errorStr;
+		__SS_ONLY_THROW__;
 	}
 	else if(errorStr != "")
 		__COUT_INFO__ << "\n" << errorStr;
@@ -1015,9 +1029,9 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 	//		get()
 	for(auto& memberPair : memberMap)
 	{
-		// if(accumulateWarnings)
-		//	__COUT__ << "\tMember config " << memberPair.first << ":" <<
-		//		memberPair.second << __E__;
+		//		if(accumulateWarnings)
+		//			__COUT__ << "\tMember config " << memberPair.first << ":" <<
+		//				memberPair.second << __E__;
 
 		// get the proper temporary pointer
 		//	use 0 if doesn't exist yet.
@@ -1057,7 +1071,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			if(accumulateWarnings)
 				getError = ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 		catch(...)
 		{
@@ -1091,7 +1105,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 				continue;
 			}
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 
 		nameToTableMap_[memberPair.first] = tmpConfigBasePtr;
@@ -1112,7 +1126,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			__SS__ << nameToTableMap_[memberPair.first]->getTableName() << ": View version not activated properly!";
 			__SS_THROW__;
 		}
-	}
+	}  // end member map loop
 }  // end loadMemberMap()
 
 //==============================================================================
@@ -1284,7 +1298,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					{
 						__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
 						       << ",' which was not found in the active Backbone!" << __E__;
-						__SS_THROW__;
+						__SS_ONLY_THROW__;
 					}
 
 					memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
@@ -1420,8 +1434,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 					       << " are not allowed! Please only use unique, persistent "
 					          "versions when version tracking is enabled."
 					       << __E__;
-					__COUT_ERR__ << "\n" << ss.str();
-					__SS_THROW__;
+					__SS_ONLY_THROW__;
 				}
 
 				// attempt to init using the configuration's specific init
@@ -1528,7 +1541,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 		catch(...)
 		{
@@ -1537,7 +1550,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 		}
 	}
 
@@ -1559,7 +1572,7 @@ catch(...)
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
-			__SS_THROW__;
+			__SS_ONLY_THROW__;
 	}
 	catch(...)
 	{
@@ -1568,7 +1581,7 @@ catch(...)
 		if(accumulatedWarnings)
 			*accumulatedWarnings += ss.str();
 		else
-			__SS_THROW__;
+			__SS_ONLY_THROW__;
 	}
 }  // end loadTableGroup()
 
@@ -1865,7 +1878,7 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 	std::map<std::string, TableBase*>::const_iterator it;
 	if((it = nameToTableMap_.find(tableName)) == nameToTableMap_.end())
 	{
-		__SS__ << "\n\nCan not find configuration named '" << tableName << "'\n\n\n\nYou need to load the configuration before it can be used."
+		__SS__ << "Can not find table named '" << tableName << "' - you need to load the table before it can be used."
 		       << " It probably is missing from the member list of the Table "
 		          "Group that was loaded.\n"
 		       << "\nYou may need to enter wiz mode to remedy the situation, use the "
@@ -2561,13 +2574,11 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 	return isFirstAppInContext;
 }  // end isOwnerFirstAppInContext()
 
-
 //==============================================================================
 // allow for just the desktop icons of the Context to be changed during run-time
 TableBase* ConfigurationManager::getDesktopIconTable(void)
 {
-	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) ==
-			nameToTableMap_.end())
+	if(nameToTableMap_.find(DESKTOP_ICON_TABLE_NAME) == nameToTableMap_.end())
 	{
 		__SS__ << "Desktop icon table not found!" << __E__;
 		ss << StringMacros::stackTrace() << __E__;
@@ -2575,35 +2586,74 @@ TableBase* ConfigurationManager::getDesktopIconTable(void)
 	}
 
 	return nameToTableMap_.at(DESKTOP_ICON_TABLE_NAME);
-} //end dynamicDesktopIconChange()
+}  // end dynamicDesktopIconChange()
 
+//==============================================================================
+void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup, const std::string& fileName)
+{
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
+			"/" + fileName;
 
+	std::ofstream groupFile(fullPath.c_str());
+	if(!groupFile.is_open())
+	{
+		__SS__ << "Error. Can't open file to save group activity: " << fullPath << __E__;
+		__SS_THROW__;
+	}
+	std::stringstream outss;
+	outss << theGroup.first << "\n" << theGroup.second << "\n" << time(0);
+	groupFile << outss.str().c_str();
+	groupFile.close();
+}  // end saveGroupNameAndKey()
 
+//==============================================================================
+// loadGroupNameAndKey
+//	loads group name and key (and time) from specified file
+//	returns time string in returnedTimeString
+//
+//	Note: this is static so the GatewaySupervisor and WizardSupervisor can call it
+std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
+{
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
+			"/" + fileName;
 
+	FILE* groupFile = fopen(fullPath.c_str(), "r");
+	if(!groupFile)
+	{
+		__COUT__ << "Can't open file: " << fullPath << __E__;
 
+		__COUT__ << "Returning empty groupName and key -1" << __E__;
 
+		return std::pair<std::string /*group name*/, TableGroupKey>("", TableGroupKey());
+	}
 
+	char line[500];  // assuming no group names longer than 500 chars
+	// name and then key
+	std::pair<std::string /*group name*/, TableGroupKey> theGroup;
 
+	fgets(line, 500, groupFile);  // name
+	if(strlen(line) && line[strlen(line)-1] == '\n')
+		line[strlen(line)-1] = '\0'; //remove trailing newline
+	theGroup.first = line;
 
+	fgets(line, 500, groupFile);  // key
+	int key;
+	sscanf(line, "%d", &key);
+	theGroup.second = key;
 
+	fgets(line, 500, groupFile);  // time
+	time_t timestamp;
+	sscanf(line, "%ld", &timestamp);                                   // type long int
+	                                                                   //	struct tm tmstruct;
+	                                                                   //	::localtime_r(&timestamp, &tmstruct);
+	                                                                   //	::strftime(line, 30, "%c %Z", &tmstruct);
+	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
+	fclose(groupFile);
 
+	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	return theGroup;
+}  // end loadGroupNameAndKey()
 
 
 

@@ -1,6 +1,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/TablePluginMacros.h"
 #include "otsdaq/TablePlugins/DesktopIconTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 
@@ -77,6 +78,15 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
+	ConfigurationTree contextTableNode = configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+	const XDAQContextTable* contextTable =
+			configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+
+	//find gateway host origin string, to avoid modifying icons with same host
+	std::string gatewayContextUID = contextTable->getContextOfGateway(configManager);
+
+
+
 	activeDesktopIcons_.clear();
 
 	DesktopIconTable::DesktopIcon* icon;
@@ -87,6 +97,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	{
 		if(!child.second.getNode(COL_STATUS).getValue<bool>())
 			continue;
+		//__COUTV__(child.first);
 
 		activeDesktopIcons_.push_back(DesktopIconTable::DesktopIcon());
 		icon = &(activeDesktopIcons_.back());
@@ -125,22 +136,68 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		icon->windowContentURL_ = removeCommas(icon->windowContentURL_, true /*andHexReplace*/);
 		icon->folderPath_       = removeCommas(icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 
-		// add URN/LID to windowContentURL_, if link is given
+		// add application origin and URN/LID to windowContentURL_, if link is given
 		addedAppId = false;
-		if(!child.second.getNode(COL_APP_LINK).isDisconnected())
+		ConfigurationTree appLink = child.second.getNode(COL_APP_LINK);
+		if(!appLink.isDisconnected())
 		{
+
+			//first check app origin
+			if(icon->windowContentURL_.size() && icon->windowContentURL_[0] == '/')
+			{
+				//if starting with opening slash, then assume app should come from
+				//	appLink context's origin (to avoid cross-origin issues communicating
+				//	with app/supervisor)
+
+				std::string contextUID = contextTable->getContextOfApplication(configManager,
+						appLink.getValueAsString());
+
+
+				//only prepend address if not same as gateway
+				if(contextUID != gatewayContextUID)
+				{
+					try
+					{
+						//__COUTV__(contextUID);
+						ConfigurationTree contextNode =
+								contextTableNode.getNode(contextUID);
+
+						std::string contextAddress =  contextNode.getNode(
+								XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
+						unsigned int contextPort =  contextNode.getNode(
+								XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+
+						//__COUTV__(contextAddress);
+						icon->windowContentURL_ = contextAddress + ":" +
+								std::to_string(contextPort) +
+								icon->windowContentURL_;
+						//__COUTV__(icon->windowContentURL_);
+					}
+					catch(const std::runtime_error& e)
+					{
+						__SS__ << "Error finding App origin which was linked to Desktop Icon '" <<
+								child.first <<
+								"': " << e.what() << __E__;
+						ss << "\n\nPlease fix by disabling the Icon, enabling the App or fixing the link in the Configurate Tree." << __E__;
+						__SS_THROW__;
+					}
+				}
+			} //end app origin check
+
+
 			// if last character is not '='
 			//	then assume need to add "?urn="
 			if(icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '=')
 				icon->windowContentURL_ += "?urn=";
 
 			//__COUT__ << "Following Application link." << std::endl;
-			child.second.getNode(COL_APP_LINK).getNode(COL_APP_ID).getValue(intVal);
+			appLink.getNode(COL_APP_ID).getValue(intVal);
 			icon->windowContentURL_ += std::to_string(intVal);
 
 			//__COUT__ << "URN/LID=" << intVal << std::endl;
 			addedAppId = true;
 		}
+		//__COUTV__(icon->windowContentURL_);
 
 		// add parameters if link is given
 		if(!child.second.getNode(COL_PARAMETER_LINK).isDisconnected())
@@ -170,7 +227,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		}
 	}  // end main icon extraction loop
 
-} //end init()
+}  // end init()
 
 //==============================================================================
 std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexReplace, bool andHTMLReplace)
@@ -187,16 +244,15 @@ std::string DesktopIconTable::removeCommas(const std::string& str, bool andHexRe
 			retStr += "&#44;";
 
 	return retStr;
-} //end removeCommas()
+}  // end removeCommas()
 
 //==============================================================================
 void DesktopIconTable::setAllDesktopIcons(const std::vector<DesktopIconTable::DesktopIcon>& newIcons)
 {
 	activeDesktopIcons_.clear();
-	for(const auto& newIcon:newIcons)
+	for(const auto& newIcon : newIcons)
 		activeDesktopIcons_.push_back(newIcon);
 
-} //end setAllDesktopIcons
-
+}  // end setAllDesktopIcons
 
 DEFINE_OTS_TABLE(DesktopIconTable)

@@ -10,7 +10,7 @@
 
 using namespace ots;
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath)
     : DataManager(theXDAQContextConfigTree, supervisorConfigurationPath)
 {
@@ -43,10 +43,10 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 	__CFG_COUT__ << "Constructed." << __E__;
 }
 
-//========================================================================================================================
+//==============================================================================
 ARTDAQDataManager::~ARTDAQDataManager(void) {}
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQDataManager::configure(void)
 {
 	__CFG_COUT__ << "ARTDAQDataManager configuring..." << __E__;
@@ -97,5 +97,5 @@ void ARTDAQDataManager::configure(void)
 	__CFG_SS_THROW__;
 }  // end configure()
 
-//========================================================================================================================
+//==============================================================================
 void ARTDAQDataManager::stop(void) { DataManager::stop(); }  // end stop()

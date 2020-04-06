@@ -30,7 +30,7 @@ class DataProducerBase : public DataProcessor
 	template<class D, class H>
 	int setWrittenSubBuffer(void)
 	{
-		__COUT__ << __E__;
+		// __COUT__ << __E__;
 		return static_cast<CircularBuffer<D, H>*>(theCircularBuffer_)->getBuffer(DataProcessor::processorUID_).setWrittenSubBuffer();
 	}
 

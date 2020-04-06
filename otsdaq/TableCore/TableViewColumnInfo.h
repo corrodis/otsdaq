@@ -89,7 +89,7 @@ class TableViewColumnInfo
 	std::string              dataType_;
 	std::vector<std::string> dataChoices_;
 	BitMapInfo*              bitMapInfoP_;
-};
+}; //end TableViewColumnInfo class
 
 }  // namespace ots
 
