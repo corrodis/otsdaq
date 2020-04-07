@@ -5,7 +5,10 @@
 #include "otsdaq/Macros/StringMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
-#include "xgi/Method.h"  //for cgicc::Cgicc
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#include <xgi/Method.h>  //for cgicc::Cgicc
+#pragma GCC diagnostic pop
 
 #include <iostream>
 #include <string>

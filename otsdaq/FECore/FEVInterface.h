@@ -88,7 +88,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		runSequenceOfCommands(
 		    "LinkToConfigureSequence"); /*Run Configure Sequence Commands*/
 	}
-	virtual void 								start						(std::string runNumber)
+	virtual void 								start						(std::string /*runNumber*/)
 	{
 		__COUT__ << "\t Start" << std::endl;
 		runSequenceOfCommands("LinkToStartSequence"); /*Run Start Sequence Commands*/

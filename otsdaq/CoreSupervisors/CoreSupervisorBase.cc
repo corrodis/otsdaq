@@ -62,7 +62,7 @@ void CoreSupervisorBase::destroy(void)
 void CoreSupervisorBase::defaultPageWrapper(xgi::Input* in, xgi::Output* out) { return defaultPage(in, out); }
 
 //==============================================================================
-void CoreSupervisorBase::defaultPage(xgi::Input* in, xgi::Output* out)
+void CoreSupervisorBase::defaultPage(xgi::Input* /*in*/, xgi::Output* out)
 {
 	__SUP_COUT__ << "Supervisor class " << supervisorClass_ << __E__;
 
@@ -171,7 +171,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 // been verified 		according to the Supervisor Property settings. The
 // CoreSupervisorBase class provides consistent 		access, responses, and error
 // handling  across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& cgiIn, HttpXmlDocument& xmlOut, const WebUsers::RequestUserInfo& userInfo)
+void CoreSupervisorBase::request(const std::string& /*requestType*/, cgicc::Cgicc& /*cgiIn*/, HttpXmlDocument& xmlOut, const WebUsers::RequestUserInfo& /*userInfo*/)
 {
 	__SUP_SS__ << "This is the empty Core Supervisor request. Supervisors should "
 	              "override this function."
@@ -234,7 +234,7 @@ void CoreSupervisorBase::request(const std::string& requestType, cgicc::Cgicc& c
 // been verified 		according to the Supervisor Property settings. The
 // CoreSupervisorBase class provides consistent 		access, responses, and error
 // handling  across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cgicc& cgiIn, std::ostream& out, const WebUsers::RequestUserInfo& userInfo)
+void CoreSupervisorBase::nonXmlRequest(const std::string& /*requestType*/, cgicc::Cgicc& /*cgiIn*/, std::ostream& out, const WebUsers::RequestUserInfo& /*userInfo*/)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors "
 	                "should override this function."
@@ -245,7 +245,7 @@ void CoreSupervisorBase::nonXmlRequest(const std::string& requestType, cgicc::Cg
 }  // end nonXmlRequest()
 
 //==============================================================================
-void CoreSupervisorBase::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out) {}
+void CoreSupervisorBase::stateMachineXgiHandler(xgi::Input* /*in*/, xgi::Output* /*out*/) {}
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::stateMachineXoapHandler(xoap::MessageReference message)
@@ -266,14 +266,14 @@ xoap::MessageReference CoreSupervisorBase::workLoopStatusRequestWrapper(xoap::Me
 }  // end workLoopStatusRequest()
 
 //==============================================================================
-xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference message)
+xoap::MessageReference CoreSupervisorBase::workLoopStatusRequest(xoap::MessageReference /*message*/)
 {
 	// this should have an override for monitoring work loops being done
 	return SOAPUtilities::makeSOAPMessageReference(CoreSupervisorBase::WORK_LOOP_DONE);
 }  // end workLoopStatusRequest()
 
 //==============================================================================
-xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::MessageReference message)
+xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::MessageReference /*message*/)
 {
 	// send back status and progress parameters
 
@@ -300,7 +300,7 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 	unsigned int cnt = 0;
 	
 	
-	
+	/*
 	//__SUP_COUT__ << "Checking..." << CoreSupervisorBase::theStateMachineImplementation_.size() << __E__;
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
@@ -315,7 +315,8 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 			throw;
 		}
 	}
-	
+	*/
+
 	if(theStateMachine_.getCurrentStateName() == "Halted") return detail;
 	
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
@@ -347,14 +348,14 @@ bool CoreSupervisorBase::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }  // end stateMachineThread()
 
 //==============================================================================
-xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference message)
+xoap::MessageReference CoreSupervisorBase::stateMachineStateRequest(xoap::MessageReference /*message*/)
 {
 	__SUP_COUT__ << "theStateMachine_.getCurrentStateName() = " << theStateMachine_.getCurrentStateName() << __E__;
 	return SOAPUtilities::makeSOAPMessageReference(theStateMachine_.getCurrentStateName());
 }
 
 //==============================================================================
-xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap::MessageReference message)
+xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap::MessageReference /*message*/)
 
 {
 	__SUP_COUT__ << "theStateMachine_.getErrorMessage() = " << theStateMachine_.getErrorMessage() << __E__;
@@ -365,22 +366,22 @@ xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap:
 }
 
 //==============================================================================
-void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& fsm) { __SUP_COUT__ << "CoreSupervisorBase::stateInitial" << __E__; }
+void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateInitial" << __E__; }
 
 //==============================================================================
-void CoreSupervisorBase::stateHalted(toolbox::fsm::FiniteStateMachine& fsm) { __SUP_COUT__ << "CoreSupervisorBase::stateHalted" << __E__; }
+void CoreSupervisorBase::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateHalted" << __E__; }
 
 //==============================================================================
-void CoreSupervisorBase::stateRunning(toolbox::fsm::FiniteStateMachine& fsm) { __SUP_COUT__ << "CoreSupervisorBase::stateRunning" << __E__; }
+void CoreSupervisorBase::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateRunning" << __E__; }
 
 //==============================================================================
-void CoreSupervisorBase::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm) { __SUP_COUT__ << "CoreSupervisorBase::stateConfigured" << __E__; }
+void CoreSupervisorBase::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateConfigured" << __E__; }
 
 //==============================================================================
-void CoreSupervisorBase::statePaused(toolbox::fsm::FiniteStateMachine& fsm) { __SUP_COUT__ << "CoreSupervisorBase::statePaused" << __E__; }
+void CoreSupervisorBase::statePaused(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::statePaused" << __E__; }
 
 //==============================================================================
-void CoreSupervisorBase::inError(toolbox::fsm::FiniteStateMachine& fsm)
+void CoreSupervisorBase::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
 	__SUP_COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -487,7 +488,7 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 }
 
 //==============================================================================
-void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
@@ -565,7 +566,7 @@ void CoreSupervisorBase::transitionConfiguringFSMs()
 //==============================================================================
 // transitionHalting
 //	Ignore errors if coming from Failed state
-void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference /*event*/)
 {
 	const std::string transitionName = "Halting";
 	try
@@ -638,7 +639,7 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference event)
 //==============================================================================
 // Inheriting supervisor classes should not override this function, or should at least
 // also call it in the override 	to maintain property functionality.
-void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "transitionInitializing" << __E__;
 
@@ -653,7 +654,7 @@ void CoreSupervisorBase::transitionInitializing(toolbox::Event::Reference event)
 }  // end transitionInitializing()
 
 //==============================================================================
-void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference /*event*/)
 {
 	const std::string transitionName = "Pausing";
 	try
@@ -704,7 +705,7 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference event)
 }  // end transitionPausing()
 
 //==============================================================================
-void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference /*event*/)
 {
 	const std::string transitionName = "Resuming";
 	try
@@ -755,7 +756,7 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference event)
 }  // end transitionResuming()
 
 //==============================================================================
-void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference /*event*/)
 {
 	const std::string transitionName = "Starting";
 	const std::string runNumber      = SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
@@ -808,7 +809,7 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference event)
 }  // end transitionStarting()
 
 //==============================================================================
-void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference event)
+void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference /*event*/)
 {
 	const std::string transitionName = "Stopping";
 	try

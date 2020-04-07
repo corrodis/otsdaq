@@ -89,7 +89,7 @@ void DataConsumer::registerToBuffer(void)
 //} //end unregisterFromBuffer()
 
 //==============================================================================
-void DataConsumer::startProcessingData(std::string runNumber) { WorkLoop::startWorkLoop(); }
+void DataConsumer::startProcessingData(std::string /*runNumber*/) { WorkLoop::startWorkLoop(); }
 
 //==============================================================================
 void DataConsumer::stopProcessingData(void) { WorkLoop::stopWorkLoop(); }

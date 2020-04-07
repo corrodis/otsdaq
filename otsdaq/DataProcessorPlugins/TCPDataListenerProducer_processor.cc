@@ -52,7 +52,7 @@ void TCPDataListenerProducer::stopProcessingData(void)
 }
 
 //==============================================================================
-bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 // bool TCPDataListenerProducer::getNextFragment(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_

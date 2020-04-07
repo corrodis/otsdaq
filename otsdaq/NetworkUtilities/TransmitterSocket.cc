@@ -75,7 +75,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::string& buffer, bool ve
 }
 
 //==============================================================================
-int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffer, bool verbose)
+int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffer, bool /*verbose*/)
 {
 	// lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);
@@ -104,7 +104,7 @@ int TransmitterSocket::send(Socket& toSocket, const std::vector<uint16_t>& buffe
 }
 
 //==============================================================================
-int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffer, bool verbose)
+int TransmitterSocket::send(Socket& toSocket, const std::vector<uint32_t>& buffer, bool /*verbose*/)
 {
 	// lockout other senders for the remainder of the scope
 	std::lock_guard<std::mutex> lock(sendMutex_);

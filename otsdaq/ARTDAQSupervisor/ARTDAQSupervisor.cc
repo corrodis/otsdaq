@@ -260,7 +260,7 @@ void ARTDAQSupervisor::destroy(void)
 		__SUP_COUT__ << "Calling recover transition" << __E__;
 		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 		PyObject*                             pName = PyString_FromString("do_recover");
-		PyObject*                             res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+		/*PyObject*                             res   =*/ PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
 		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
 		getDAQState_();
@@ -280,7 +280,7 @@ void ARTDAQSupervisor::destroy(void)
 }  // end destroy()
 
 //==============================================================================
-void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference event)
+void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 
@@ -619,7 +619,7 @@ catch(...)
 }  // end configuringThread() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -694,7 +694,7 @@ catch(...)
 }  // end transitionHalting() exception handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
@@ -713,7 +713,7 @@ catch(...)
 }  // end transitionInitializing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -750,7 +750,7 @@ catch(...)
 }  // end transitionPausing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -784,7 +784,7 @@ catch(...)
 }  // end transitionResuming() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Starting..." << __E__;
 	{
@@ -828,7 +828,7 @@ catch(...)
 }  // end transitionStarting() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference event) try
+void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference /*event*/) try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -860,7 +860,7 @@ catch(...)
 }  // end transitionStopping() error handling
 
 //==============================================================================
-void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference event)
+void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "Entering error recovery state" << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);

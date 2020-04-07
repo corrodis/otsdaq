@@ -103,10 +103,10 @@ TableGroupKey TableGroupKey::getNextKey(const TableGroupKey& key)
 }
 
 //==============================================================================
-const unsigned int TableGroupKey::getDefaultKey(void) { return DEFAULT; }
+ unsigned int TableGroupKey::getDefaultKey(void) { return DEFAULT; }
 
 //==============================================================================
-const unsigned int TableGroupKey::getInvalidKey(void) { return INVALID; }
+ unsigned int TableGroupKey::getInvalidKey(void) { return INVALID; }
 
 //==============================================================================
 // getGroupNameWithKey

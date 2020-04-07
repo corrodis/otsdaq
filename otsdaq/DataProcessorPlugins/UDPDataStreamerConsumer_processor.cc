@@ -36,7 +36,7 @@ UDPDataStreamerConsumer::UDPDataStreamerConsumer(std::string              superv
 UDPDataStreamerConsumer::~UDPDataStreamerConsumer(void) {}
 
 //==============================================================================
-bool UDPDataStreamerConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool UDPDataStreamerConsumer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 {
 	fastRead();
 	return WorkLoop::continueWorkLoop_;
