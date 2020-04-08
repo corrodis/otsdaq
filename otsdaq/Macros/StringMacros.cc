@@ -1,5 +1,7 @@
 #include "otsdaq/Macros/StringMacros.h"
 
+#include <array>
+
 using namespace ots;
 
 //==============================================================================
@@ -464,7 +466,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 	unsigned int             j = 0;
 	unsigned int             c = 0;
 	std::set<char>::iterator delimeterSearchIt;
-	char                     lastDelimiter;
+	char                     lastDelimiter = 0;
 	bool                     isDelimiter;
 	// bool foundLeadingDelimiter = false;
 
@@ -843,7 +845,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 			else
 				break;
 
-		bool allHave0 = true;
+		//bool allHave0 = true;
 		for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
 		{
 			unsigned int cnt = 0;
@@ -1025,7 +1027,7 @@ std::string StringMacros::stackTrace()
 	char** messages = backtrace_symbols(array, size);
 
 	// skip first stack frame (points here)
-	char syscom[256];
+	//char syscom[256];
 	for(unsigned int i = 1; i < size && messages != NULL; ++i)
 	{
 		// mangled name needs to be converted to get nice name and line number

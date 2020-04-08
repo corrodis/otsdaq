@@ -262,7 +262,7 @@ class ConfigurationTree
 	struct RecordField
 	{
 		RecordField(const std::string&         table,
-		            const std::string&         uid,
+		            const std::string&         /*uid*/,
 		            const std::string&         columnName,
 		            const std::string&         relativePath,
 		            const TableViewColumnInfo* columnInfo)

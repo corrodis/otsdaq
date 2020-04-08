@@ -24,16 +24,16 @@ RootFileExplorer::RootFileExplorer(
   
  if( debug_ ) 
  {
-  STDLINE(string("fSystemPath_ : ")+fSystemPath_ ,ACWhite) ;
-  STDLINE(string("fRootPath_   : ")+fRootPath_   ,ACWhite) ; 
-  STDLINE(string("fFoldersPath_: ")+fFoldersPath_,ACWhite) ;
-  STDLINE(string("fHistName_   : ")+fHistName_   ,ACWhite) ;
-  STDLINE(string("fFileName_   : ")+fFileName_   ,ACWhite) ;
+  STDLINE(std::string("fSystemPath_ : ")+fSystemPath_ ,ACWhite) ;
+  STDLINE(std::string("fRootPath_   : ")+fRootPath_   ,ACWhite) ;
+  STDLINE(std::string("fFoldersPath_: ")+fFoldersPath_,ACWhite) ;
+  STDLINE(std::string("fHistName_   : ")+fHistName_   ,ACWhite) ;
+  STDLINE(std::string("fFileName_   : ")+fFileName_   ,ACWhite) ;
  }
  
- rootFile_ = new TFile((fSystemPath_ +string("/") +
-                        fRootPath_   +string("/") +
-                        fFoldersPath_+string("/") +
+ rootFile_ = new TFile((fSystemPath_ + std::string("/") +
+                        fRootPath_   + std::string("/") +
+                        fFoldersPath_+ std::string("/") +
                         fFileName).c_str()         ) ;
  
  if( debug_) rootFile_->ls() ;
@@ -49,8 +49,8 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
  }
  catch(xercesc::XMLException& e)
  {
-  string msg = xercesc::XMLString::transcode(e.getMessage()) ;
-  //STDLINE(string("XML toolkit initialization error: ")+msg,ACRed) ;
+     std::string msg = xercesc::XMLString::transcode(e.getMessage()) ;
+  //STDLINE(std::string("XML toolkit initialization error: ")+msg,ACRed) ;
  }
 
  theImplementation_ = xercesc::DOMImplementationRegistry::getDOMImplementation(xercesc::XMLString::transcode("Core"));
@@ -80,7 +80,7 @@ xercesc::DOMDocument * RootFileExplorer::initialize(void)
   }
   catch(const xercesc::XMLException& e)
   {
-   //STDLINE(string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
+   //STDLINE(std::string("Error Message: ")+xercesc::XMLString::transcode(e.getMessage()),ACRed) ;
   }
   catch(...)
   {
@@ -175,22 +175,22 @@ xercesc::DOMElement * RootFileExplorer::populateBinaryTreeNode(xercesc::DOMEleme
     fFileName   ->appendChild(fFileNameVal   );     
     fHistName   ->appendChild(fHistNameVal   );
 
-    STDLINE(string("fFileNameVal: ")+fFileName_,string(ACBlue)  +string(ACReverse)) ;
-    STDLINE(string("fHistNameVal: ")+fHistName_,string(ACYellow)+string(ACReverse)) ;
+    STDLINE(std::string("fFileNameVal: ")+fFileName_, std::string(ACBlue)  + std::string(ACReverse)) ;
+    STDLINE(std::string("fHistNameVal: ")+fHistName_, std::string(ACYellow)+ std::string(ACReverse)) ;
         
     xercesc::DOMElement * leaf            = theDocument_->createElement( xercesc::XMLString::transcode("leaf"                ));
     node->appendChild(leaf);
-    STDLINE(nodes,string(ACCyan)+string(ACReverse)) ;
+    STDLINE(nodes, std::string(ACCyan)+ std::string(ACReverse)) ;
 
     xercesc::DOMText    * leafVal        = theDocument_->createTextNode(xercesc::XMLString::transcode(isALeaf_[isLeaf].c_str()));
     leaf->appendChild(leafVal);
     
-    STDLINE(string("fSystemPath_  : ")+fSystemPath_ ,ACRed);
-    STDLINE(string("fRootPath_    : ")+fRootPath_   ,ACRed);
-    STDLINE(string("fFoldersPath_ : ")+fFoldersPath_,ACRed);
-    STDLINE(string("fFileName_    : ")+name         ,ACRed);
-    STDLINE(string("fRFoldersPath_: ")              ,string(ACRed)+string(ACReverse));
-    STDLINE(string("fHistName_    : ")+name         ,ACRed);
+    STDLINE(std::string("fSystemPath_  : ")+fSystemPath_ ,ACRed);
+    STDLINE(std::string("fRootPath_    : ")+fRootPath_   ,ACRed);
+    STDLINE(std::string("fFoldersPath_ : ")+fFoldersPath_,ACRed);
+    STDLINE(std::string("fFileName_    : ")+name         ,ACRed);
+    STDLINE(std::string("fRFoldersPath_: ")              , std::string(ACRed)+ std::string(ACReverse));
+    STDLINE(std::string("fHistName_    : ")+name         ,ACRed);
     
     fFoldersPath_ = "" ;
 
@@ -209,13 +209,13 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
     while((keyH = (TKey*)hList()))
     {
         std::string hName = keyH->GetName() ;  
-        string what = keyH->GetClassName() ;
+        std::string what = keyH->GetClassName() ;
         if( what == "TTree"       ) continue ;
         if( what == "TNtuple"     ) continue ;
         if( what == "TGeoManager" ) continue ;
         if( what == "TGeoVolume" ) continue ;
-        if( debug_ ) STDLINE(string("currentDirectory: ")+string(currentDirectory->GetName()),ACCyan) ;
-        if( debug_ ) STDLINE(string("Object type     : ")+what,ACRed) ;
+        if( debug_ ) STDLINE(std::string("currentDirectory: ")+ std::string(currentDirectory->GetName()),ACCyan) ;
+        if( debug_ ) STDLINE(std::string("Object type     : ")+what,ACRed) ;
         if( keyH->IsFolder() ) 
         {
             fThisFolderPath_ = hName ;
@@ -236,7 +236,7 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
             for(int i=0; i<(int)theHierarchy_.size(); i++)
             {
                 fFoldersPath_ += theHierarchy_.find(i)->second ;
-                STDLINE(string("fFoldersPath_: ")+fFoldersPath_,ACWhite) ;
+                STDLINE(std::string("fFoldersPath_: ")+fFoldersPath_,ACWhite) ;
             }
             xercesc::DOMElement * node = this->populateBinaryTreeNode(anchorNode, hName, level, false) ;
             this->makeDirectoryBinaryTree(subDir,level+1,node) ;
@@ -248,14 +248,14 @@ void RootFileExplorer::makeDirectoryBinaryTree(TDirectory          * currentDire
             if( debug_ ) STDLINE(hName,"") ;
             for(int i=0; i<level; i++)
             {
-                fFoldersPath_ += theHierarchy_[i] + string("/") ;
+                fFoldersPath_ += theHierarchy_[i] + std::string("/") ;
                 ss_.str("") ; ss_ << "fFoldersPath_: " << fFoldersPath_  ;
                 STDLINE(ss_.str(),ACWhite) ;
             }
             //fFoldersPath_ += currentDirectory->GetName() ;
             fHistName_ = hName ;
-            STDLINE(string("fFoldersPath_: ")+fFoldersPath_,"") ;
-            xercesc::DOMElement * node = this->populateBinaryTreeNode(anchorNode, hName, level, true  ) ;
+            STDLINE(std::string("fFoldersPath_: ")+fFoldersPath_,"") ;
+            /*xercesc::DOMElement * node =*/ this->populateBinaryTreeNode(anchorNode, hName, level, true  ) ;
         }
     }
 }

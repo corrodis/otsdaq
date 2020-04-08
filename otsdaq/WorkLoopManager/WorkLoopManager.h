@@ -2,7 +2,10 @@
 #define _ots_WorkLoopManager_h
 
 #include <toolbox/task/WorkLoop.h>
-#include <xgi/Method.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#include <xgi/Method.h>  //for cgicc::Cgicc
+#pragma GCC diagnostic pop
 #include <xoap/MessageReference.h>
 
 #include <ctime>

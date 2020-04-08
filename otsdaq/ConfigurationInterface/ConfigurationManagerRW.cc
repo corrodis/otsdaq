@@ -1398,7 +1398,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 		TableEditStruct& groupAliasTable = backboneGroupEdit.getTableEditStruct(ConfigurationManager::GROUP_ALIASES_TABLE_NAME, true /*markModified*/);
 		TableView*       tableView       = groupAliasTable.tableView_;
 
-		unsigned int col;
+		//unsigned int col;
 		unsigned int row = 0;
 
 		std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs = cfgMgr->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getChildren();
@@ -1485,7 +1485,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 			__COUT__ << "Checking alias... original version is " << groupTable.second.tableName_ << "-v" << groupTable.second.originalVersion_
 			         << " and new version is v" << groupMembers_.at(groupTable.second.tableName_) << __E__;
 
-			unsigned int col;
+			//unsigned int col;
 			unsigned int row = 0;
 
 			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =

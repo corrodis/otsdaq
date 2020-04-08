@@ -83,7 +83,7 @@ TableBase::~TableBase(void) {}
 std::string TableBase::getTypeId() { return typeid(this).name(); }
 
 //==============================================================================
-void TableBase::init(ConfigurationManager* tableManager)
+void TableBase::init(ConfigurationManager* /*tableManager*/)
 {
 	//__COUT__ << "Default TableBase::init() called." << __E__;
 }
@@ -149,7 +149,7 @@ void TableBase::trimCache(unsigned int trimSize)
 	if(trimSize == (unsigned int)-1)  // if -1, use MAX_VIEWS_IN_CACHE
 		trimSize = MAX_VIEWS_IN_CACHE;
 
-	int i = 0;
+	//int i = 0;
 	while(getNumberOfStoredViews() > trimSize)
 	{
 		TableVersion versionToDelete;

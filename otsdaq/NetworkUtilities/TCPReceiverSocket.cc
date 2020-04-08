@@ -26,7 +26,7 @@ std::string TCPReceiverSocket::receivePacket(void)
 }
 
 //==============================================================================
-std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int timeoutMicroSeconds)
+std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int /*timeoutMicroSeconds*/)
 {
 	// std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " <<
 	// getSocketId() << std::endl;

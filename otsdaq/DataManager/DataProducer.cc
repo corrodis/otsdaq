@@ -22,7 +22,7 @@ DataProducer::DataProducer(std::string supervisorApplicationUID, std::string buf
 DataProducer::~DataProducer(void) { __GEN_COUT__ << "Destructed." << __E__; }
 
 //==============================================================================
-void DataProducer::startProcessingData(std::string runNumber)
+void DataProducer::startProcessingData(std::string /*runNumber*/)
 {
 	__GEN_COUT__ << "startWorkLoop..." << std::endl;
 	WorkLoop::startWorkLoop();

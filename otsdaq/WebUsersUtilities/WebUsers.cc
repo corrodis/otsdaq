@@ -232,7 +232,7 @@ void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUse
 // userInfo.groupPermissionLevelMap_ and userInfo.permissionLevel_ are properly setup
 //		by either calling userInfo.setGroupPermissionLevels() or
 // userInfo.getGroupPermissionLevel()
-bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
+bool WebUsers::checkRequestAccess(cgicc::Cgicc&              /*cgi*/,
                                   std::ostringstream*        out,
                                   HttpXmlDocument*           xmldoc,
                                   WebUsers::RequestUserInfo& userInfo,
@@ -470,7 +470,7 @@ bool WebUsers::loadDatabases()
 	const unsigned int LINE_LEN = 1000;
 	char               line[LINE_LEN];
 	unsigned int       i, si, c, len, f;
-	uint64_t           tmpInt64;
+	//uint64_t           tmpInt64;
 
 	// hashes
 	//	File Organization:
@@ -2275,7 +2275,7 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 // WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
-                                              HttpXmlDocument*   xmldoc,
+                                              HttpXmlDocument*   /*xmldoc*/,
                                               const std::string& srcFile,
                                               const std::string& srcFunc,
                                               const std::string& srcId,

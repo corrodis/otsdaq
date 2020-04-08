@@ -34,10 +34,10 @@ class ARTDAQConsumer : public DataConsumer,
 	//	// void configure         (fhicl::ParameterSet const& pset);
 	//	void configure(int rank);
 	//	void halt(void);
-	void pauseProcessingData(void);
-	void resumeProcessingData(void);
+	void pauseProcessingData(void) override;
+	void resumeProcessingData(void) override;
 	void startProcessingData(std::string runNumber) override;
-	void stopProcessingData(void);
+	void stopProcessingData(void) override;
 	//	// int universalRead	  (char *address, char *returnValue) override {;}
 	//	// void universalWrite	  (char *address, char *writeValue) override {;}
 	//	// artdaq::BoardReaderCore* getFragmentReceiverPtr(){return
@@ -45,7 +45,7 @@ class ARTDAQConsumer : public DataConsumer,
 	//	// override;
 	//
   private:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop) { return false; }
+	bool workLoopThread(toolbox::task::WorkLoop* /*workLoop*/) override { return false; }
 	//
 	//	std::unique_ptr<artdaq::BoardReaderApp> fragment_receiver_ptr_;
 	//	std::string                             name_;

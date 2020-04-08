@@ -7,6 +7,8 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
 #endif
@@ -79,7 +81,7 @@ class SupervisorInfo
 	const unsigned int&                          getId							(void) const { return id_; }
 	const std::string&                           getClass						(void) const { return class_; }
 	const std::string&                           getStatus						(void) const { return status_; }
-	const time_t                                 getLastStatusTime				(void) const { return lastStatusTime_; }
+	time_t                                 getLastStatusTime				(void) const { return lastStatusTime_; }
 	const unsigned int&                          getProgress					(void) const { return progress_; }
 	const std::string&                           getDetail						(void) const { return detail_; }
 	const std::string&                           getURL							(void) const { return contextURL_; }

@@ -279,7 +279,7 @@ void ConfigurationHandler::readXML(TableBase& table, TableVersion version)
 		xercesc::DOMElement* runElement = getElement(runTag_, headerNode, 0);
 		if(!runElement)
 			throw(std::runtime_error(std::string("The document is missing the mandatory tag: ") + XML_TO_STRING(runTag_)));
-		xercesc::DOMNode* runTypeNode = getNode(runTypeTag_, runElement, 0);
+		[[maybe_unused]] xercesc::DOMNode* runTypeNode = getNode(runTypeTag_, runElement, 0);
 		assert(validateNode(runTypeTag_, runTypeNode, table.getTableName()));
 		xercesc::DOMNode* runNumberNode = getNode(runNumberTag_, runElement, 0);
 		if(!runNumberNode)
@@ -303,9 +303,9 @@ void ConfigurationHandler::readXML(TableBase& table, TableVersion version)
 
 		//   <PART>
 		//__COUT__ << "Reading Part" << std::endl;
-		xercesc::DOMNode* partNode       = getNode(partTag_, datasetElement, 0);
-		xercesc::DOMNode* nameLabelNode  = getNode(nameLabelTag_, partNode, 0);
-		xercesc::DOMNode* kindOfPartNode = getNode(kindOfPartTag_, partNode, 0);
+		//xercesc::DOMNode* partNode       = getNode(partTag_, datasetElement, 0);
+		//xercesc::DOMNode* nameLabelNode  = getNode(nameLabelTag_, partNode, 0);
+		//xercesc::DOMNode* kindOfPartNode = getNode(kindOfPartTag_, partNode, 0);
 
 		//  </PART>
 		xercesc::DOMNode* versionNode = getNode(versionTag_, datasetElement, 0);

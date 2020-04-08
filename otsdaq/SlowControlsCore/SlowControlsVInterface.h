@@ -54,7 +54,7 @@ class SlowControlsVInterface : public Configurable, public VStateMachine
 	virtual void 										halt(void) override {;} //by default do nothing on FSM transitions
 	virtual void 										pause(void) override {;} //by default do nothing on FSM transitions
 	virtual void 										resume(void) override {;} //by default do nothing on FSM transitions
-	virtual void 										start(std::string runNumber) override {;} //by default do nothing on FSM transitions
+	virtual void 										start(std::string /*runNumber*/) override {;} //by default do nothing on FSM transitions
 	virtual void 										stop(void) override {;} //by default do nothing on FSM transitions
 
 	// States

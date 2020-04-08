@@ -3,6 +3,7 @@ cet_make(LIBRARY_NAME WorkLoopManager
 		   XmlUtilities
 		   SOAPUtilities
 		   ${XDAQ_BASIC_LIB_LIST}
+        ${XDAQ_CGICC}
 )
 
 install_headers()
