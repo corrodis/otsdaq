@@ -11,7 +11,9 @@
 using namespace ots;
 
 //==============================================================================
-ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void) : ARTDAQTableBase("ARTDAQDataLoggerTable")
+ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void) 
+: TableBase("ARTDAQDataLoggerTable")
+, ARTDAQTableBase("ARTDAQDataLoggerTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //

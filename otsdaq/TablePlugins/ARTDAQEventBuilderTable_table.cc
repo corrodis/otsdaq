@@ -40,12 +40,15 @@ struct ColsChannel
 
 //==============================================================================
 ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void)
-    : ARTDAQTableBase("ARTDAQEventBuilderTable"), isFirstAppInContext_(false), channelListHasChanged_(false), lastConfigManager_(nullptr)
+    : TableBase("ARTDAQEventBuilderTable")
+    , ARTDAQTableBase("ARTDAQEventBuilderTable")
+    , SlowControlsTableBase("ARTDAQEventBuilderTable")
+    , isFirstAppInContext_(false)
+    , channelListHasChanged_(false)
+    , lastConfigManager_(nullptr)
 {
-	//////////////////////////////////////////////////////////////////////
-	// WARNING: the names used in C++ MUST match the Table INFO  //
-	//////////////////////////////////////////////////////////////////////
-}
+	__COUT__ << "Constructed." << __E__;
+} //end constructor()
 
 //==============================================================================
 ARTDAQEventBuilderTable::~ARTDAQEventBuilderTable(void) {}

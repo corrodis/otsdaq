@@ -1,4 +1,5 @@
 #include "otsdaq/TableCore/TableView.h"
+#include "otsdaq/TableCore/TableBase.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -15,9 +16,9 @@ using namespace ots;
 const unsigned int TableView::INVALID = -1;
 
 //==============================================================================
-TableView::TableView(const std::string& name)
-	: uniqueStorageIdentifier_("")
-	, tableName_(name)
+TableView::TableView(const std::string& tableName)
+	: uniqueStorageIdentifier_(tableName) //hijack momentarily for convert to caps
+	, tableName_(TableBase::convertToCaps(uniqueStorageIdentifier_))
 	, version_(TableVersion::INVALID)
 	, comment_("")
 	, author_("")
@@ -30,7 +31,16 @@ TableView::TableView(const std::string& name)
 	, sourceColumnMismatchCount_(0)
 	, sourceColumnMissingCount_(0)
 {
-}
+	uniqueStorageIdentifier_ = ""; //unhijack
+
+	if(tableName == "")
+	{
+		__SS__ << "Do not allow anonymous table view construction!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
+} //end constructor
 
 //==============================================================================
 TableView::~TableView(void) {}
@@ -49,7 +59,7 @@ TableView& TableView::operator=(const TableView /*src*/)
 //==============================================================================
 TableView& TableView::copy(const TableView& src, TableVersion destinationVersion, const std::string& author)
 {
-	tableName_ = src.tableName_;
+	//tableName_ = src.tableName_;
 	version_ = destinationVersion;
 	comment_ = src.comment_;
 	author_ = author;  // take new author
@@ -80,7 +90,7 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 	}  // ignore no Priority column
 
 	return *this;
-}
+} //end copy()
 
 //==============================================================================
 // copyRows
@@ -971,7 +981,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 //==============================================================================
 // initColUID
 //	if column not found throw error
- unsigned int TableView::initColUID(void)
+unsigned int TableView::initColUID(void)
 {
 	if (colUID_ != INVALID)
 		return colUID_;
@@ -992,7 +1002,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 // getColOfUID
 //	const version, so don't attempt to lookup
 //	if column not found throw error
- unsigned int TableView::getColUID(void) const
+unsigned int TableView::getColUID(void) const
 {
 	if (colUID_ != INVALID)
 		return colUID_;
@@ -1013,7 +1023,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 //==============================================================================
 // initColStatus
 //	if column not found throw error
- unsigned int TableView::initColStatus(void)
+unsigned int TableView::initColStatus(void)
 {
 	if (colStatus_ != INVALID)
 		return colStatus_;
@@ -1047,7 +1057,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 //==============================================================================
 // initColPriority
 //	if column not found throw error
- unsigned int TableView::initColPriority(void)
+unsigned int TableView::initColPriority(void)
 {
 	if (colPriority_ != INVALID)
 		return colPriority_;
@@ -1070,7 +1080,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 // getColStatus
 //	const version, so don't attempt to lookup
 //	if column not found throw error
- unsigned int TableView::getColStatus(void) const
+unsigned int TableView::getColStatus(void) const
 {
 	if (colStatus_ != INVALID)
 		return colStatus_;
@@ -1097,7 +1107,7 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 //
 //	Note: common for Priority column to not exist, so be quiet with printouts
 //	 so as to not scare people.
- unsigned int TableView::getColPriority(void) const
+unsigned int TableView::getColPriority(void) const
 {
 	if (colPriority_ != INVALID)
 		return colPriority_;
@@ -1767,7 +1777,7 @@ const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 void TableView::setUniqueStorageIdentifier(const std::string& storageUID) { uniqueStorageIdentifier_ = storageUID; }
 
 //==============================================================================
-void TableView::setTableName(const std::string& name) { tableName_ = name; }
+//void TableView::setTableName(const std::string& name) { tableName_ = name; }
 
 //==============================================================================
 void TableView::setComment(const std::string& comment) { comment_ = comment; }
@@ -1994,6 +2004,8 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
+	bool dbg = tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
+
 	std::map<std::string /*key*/, unsigned int /*entries/rows*/> keyEntryCountMap;
 	std::vector<std::string>                                     keys;
 	keys.push_back("NAME");
@@ -2012,7 +2024,8 @@ int TableView::fillFromJSON(const std::string& json)
 		CV_JSON_FILL_DATA_SET
 	};
 
-	//__COUTV__(json);
+	if(dbg) __COUTV__(tableName_);
+	if(dbg) __COUTV__(json);
 
 	sourceColumnMismatchCount_ = 0;
 	sourceColumnMissingCount_ = 0;
@@ -2336,8 +2349,16 @@ int TableView::fillFromJSON(const std::string& json)
 				switch (matchedKey)
 				{
 				case CV_JSON_FILL_NAME:
+					//table name is now constant, set by parent TableBase
 					if (currDepth == 1)
-						setTableName(currVal);
+					{
+					//	setTableName(currVal);
+						//check for consistency, and show warning
+						if(currVal != getTableName())
+							__COUT_WARN__ << "JSON-fill Table name mismatch: " << 
+								currVal << " vs " <<
+								getTableName() << __E__;
+					}
 					break;
 				case CV_JSON_FILL_COMMENT:
 					if (currDepth == 1)

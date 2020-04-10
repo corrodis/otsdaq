@@ -11,7 +11,9 @@
 using namespace ots;
 
 //==============================================================================
-ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) : ARTDAQTableBase("ARTDAQRoutingMasterTable")
+ARTDAQRoutingMasterTable::ARTDAQRoutingMasterTable(void) 
+: TableBase("ARTDAQRoutingMasterTable")
+, ARTDAQTableBase("ARTDAQRoutingMasterTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //

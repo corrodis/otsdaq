@@ -86,6 +86,7 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theConfigurationTableGroup_("")
     , theContextTableGroup_("")
     , theBackboneTableGroup_("")
+    , groupMetadataTable_(true /*special table*/,ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 

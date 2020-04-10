@@ -319,7 +319,17 @@ std::string TableInfoReader::read(TableBase& table)
 			if(!checkViewType(viewType))
 				continue;
 			storageTypeFound = true;
-			table.getMockupViewP()->setTableName(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_)));
+			
+			//table name is now constant, set by parent TableBase			
+			//table.getMockupViewP()->setTableName(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_)));
+			//check for consistency, and show warning
+			if(std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) !=
+				table.getMockupViewP()->getTableName())
+				__COUT_WARN__ << "Table Info name mismatch: " << 
+					std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) << " vs " <<
+					table.getMockupViewP()->getTableName() << __E__;
+			
+			
 			xercesc::DOMNodeList* columnNodeList = viewElement->getElementsByTagName(columnTag_);
 			for(XMLSize_t column = 0; column < columnNodeList->getLength(); column++)
 			{

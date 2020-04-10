@@ -7,7 +7,7 @@
 namespace ots
 {
 class XDAQContextTable;
-
+// clang-format off
 class ARTDAQEventBuilderTable : public ARTDAQTableBase, public SlowControlsTableBase
 {
   public:
@@ -21,7 +21,7 @@ class ARTDAQEventBuilderTable : public ARTDAQTableBase, public SlowControlsTable
 	virtual bool    slowControlsChannelListHasChanged	(void) const override;
 	virtual void    getSlowControlsChannelList			(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const override;
 
-	unsigned int	localSlowControlsHandler			(
+	unsigned int	slowControlsHandler					(
 															  std::stringstream& out
 															, std::string& tabStr
 															, std::string& commentStr
@@ -32,11 +32,12 @@ class ARTDAQEventBuilderTable : public ARTDAQTableBase, public SlowControlsTable
 														);
 
   private:
-	bool outputEpicsPVFile								(ConfigurationManager* configManager,
+	bool 			outputEpicsPVFile					(ConfigurationManager* configManager,
 	                       								std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList = 0) const;
 
-	bool            isFirstAppInContext_, channelListHasChanged_;  // for managing if PV list has changed
-	ConfigurationManager* lastConfigManager_;
+	bool            			isFirstAppInContext_, channelListHasChanged_;  // for managing if PV list has changed
+	ConfigurationManager* 		lastConfigManager_;
 };
+// clang-format on
 }  // namespace ots
 #endif

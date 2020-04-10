@@ -11,7 +11,9 @@
 using namespace ots;
 
 //==============================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) : ARTDAQTableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) 
+: TableBase("ARTDAQBoardReaderTable")
+, ARTDAQTableBase("ARTDAQBoardReaderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //
