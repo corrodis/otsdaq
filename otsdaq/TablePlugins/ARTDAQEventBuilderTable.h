@@ -2,12 +2,13 @@
 #define _ots_ARTDAQEventBuilderTable_h_
 
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
+#include "otsdaq/TablePlugins/SlowControlsTableBase/SlowControlsTableBase.h"
 
 namespace ots
 {
 class XDAQContextTable;
 
-class ARTDAQEventBuilderTable : public ARTDAQTableBase
+class ARTDAQEventBuilderTable : public ARTDAQTableBase, public SlowControlsTableBase
 {
   public:
 	ARTDAQEventBuilderTable(void);
@@ -15,6 +16,27 @@ class ARTDAQEventBuilderTable : public ARTDAQTableBase
 
 	// Methods
 	void init(ConfigurationManager* configManager);
+
+	// Getters
+	virtual bool    slowControlsChannelListHasChanged	(void) const override;
+	virtual void    getSlowControlsChannelList			(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const override;
+
+	unsigned int	localSlowControlsHandler			(
+															  std::stringstream& out
+															, std::string& tabStr
+															, std::string& commentStr
+															, std::string& subsystem
+															, std::string& location
+															, ConfigurationTree slowControlsLink
+															, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
+														);
+
+  private:
+	bool outputEpicsPVFile								(ConfigurationManager* configManager,
+	                       								std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList = 0) const;
+
+	bool            isFirstAppInContext_, channelListHasChanged_;  // for managing if PV list has changed
+	ConfigurationManager* lastConfigManager_;
 };
 }  // namespace ots
 #endif

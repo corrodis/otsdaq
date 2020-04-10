@@ -15,7 +15,7 @@
 namespace ots
 {
 // clang-format off
-class ARTDAQTableBase : public TableBase
+class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can inherit from multiple table base classes
 {
   public:
 	ARTDAQTableBase();
