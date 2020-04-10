@@ -652,7 +652,7 @@ catch(...)
 void ConfigurationSupervisorBase::handleGetTableGroupXML(
     HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr, const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
 {
-	char                 tmpIntStr[100];
+	//char                 tmpIntStr[100];
 	xercesc::DOMElement *parentEl, *configEl;
 
 	// steps:
@@ -687,7 +687,7 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 		{
 			// attempt to reload all group info and power through
 			std::string                             accumulatedWarnings;
-			const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+			/*const std::map<std::string, TableInfo>& allTableInfo = */cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
 			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
 
 			__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
@@ -979,7 +979,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 				try
 				{
 					windowLinkedApp = StringMacros::decodeURIComponent(windowLinkedApp);
-					int appRow      = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+				/*	int appRow      = */appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
 				{
@@ -1227,7 +1227,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 				{
 					try
 					{
-						int appRow = appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+						/*int appRow =*/ appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 					}
 					catch(const std::runtime_error& e)
 					{
@@ -1434,7 +1434,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 			TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
 			TableView*   tableView        = table->getTemporaryView(temporaryVersion);
 
-			unsigned int col;
+		//	unsigned int col;
 			unsigned int row = 0;
 
 			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
@@ -1490,7 +1490,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 			TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
 			TableView*   tableView        = table->getTemporaryView(temporaryVersion);
 
-			unsigned int col;
+			//unsigned int col;
 			unsigned int row = 0;
 
 			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =

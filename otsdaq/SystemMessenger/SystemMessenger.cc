@@ -10,32 +10,55 @@ using namespace ots;
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void SystemMessenger::addSystemMessage(std::string targetUsersCSM, std::string msg, bool doEmail)
+void SystemMessenger::addSystemMessage(std::string targetUsersCSV, std::string msg, bool doEmail)
 {
-	addSystemMessage
+	std::vector<std::string> targetUsers;
+
+	size_t pos = 0;
+
+	while (pos != std::string::npos && pos < targetUsersCSV.size())
+	{
+		auto newpos = targetUsersCSV.find(',', pos);
+		if (newpos != std::string::npos)
+		{
+			targetUsers.emplace_back(targetUsersCSV, pos, newpos - pos);
+			//TLOG(TLVL_TRACE) << "tokenize_: " << targetUsers.back();
+			pos = newpos + 1;
+		}
+		else
+		{
+			targetUsers.emplace_back(targetUsersCSV, pos);
+			//TLOG(TLVL_TRACE) << "tokenize_: " << targetUsers.back();
+			pos = newpos;
+		}
+	}
+
+	addSystemMessage(targetUsers, msg, doEmail);
 } //end addSystemMessage()
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void SystemMessenger::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool doEmail)
+void SystemMessenger::addSystemMessage(std::vector<std::string> targetUsers, std::string msg, bool /*doEmail*/)
 {
 	sysMsgCleanup();
 
-	// reject if same message is already in vector set
-	// for(uint64_t i=0;i<sysMsgTargetUser_.size();++i)
-	// if(sysMsgTargetUser_[i] == targetUser && sysMsgMessage_[i] == msg) return;
-	// reject only if last message
-	if(sysMsgTargetUser_.size() && sysMsgTargetUser_[sysMsgTargetUser_.size() - 1] == targetUser && sysMsgMessage_[sysMsgTargetUser_.size() - 1] == msg)
-		return;
+	std::lock_guard<std::mutex> lk(sysMsgLock_);
+	auto now = time(0);
 
-	sysMsgSetLock(true);  // set lock
-	sysMsgTargetUser_.push_back(targetUser);
-	sysMsgMessage_.push_back(msg);
-	sysMsgTime_.push_back(time(0));
-	sysMsgDelivered_.push_back(false);
-	sysMsgSetLock(false);  // unset lock
+	// Reject messages already received
+	if (sysMessages_.size() > 0) {
+		for (auto& receivedMsg : (*sysMessages_.begin()).second) {
+			if (receivedMsg.msg == msg) return;
+		}
+	}
 
-	__COUT__ << "Current System Messages count = " << sysMsgTargetUser_.size() << __E__;
+
+	for (auto& targetUser : targetUsers)
+	{
+		sysMessages_[targetUser].emplace_back(targetUser, msg, now);
+	}
+
+	__COUT__ << "Current System Messages count = " << sysMessages_.size() << __E__;
 } //end addSystemMessage()
 
 //==============================================================================
@@ -46,37 +69,28 @@ void SystemMessenger::addSystemMessage(std::vector<std::string> targetUsers, std
 //	Note: | is an illegal character and will cause GUI craziness
 std::string SystemMessenger::getSystemMessage(std::string targetUser)
 {
-	// __COUT__ << "Current System Messages: " << targetUser <<
-	// std::endl << std::endl;
-	std::string retStr = "";
-	int         cnt    = 0;
-	char        tmp[100];
-	for(uint64_t i = 0; i < sysMsgTargetUser_.size(); ++i)
-		if(sysMsgTargetUser_[i] == targetUser || sysMsgTargetUser_[i] == "*")
-		{
-			// deliver system message
-			if(cnt)
-				retStr += "|";
-			sprintf(tmp, "%lu", sysMsgTime_[i]);
-			retStr += std::string(tmp) + "|" + sysMsgMessage_[i];
 
-			if(sysMsgTargetUser_[i] != "*")  // mark delivered
-				sysMsgDelivered_[i] = true;
-			++cnt;
+	std::ostringstream strbuf;
+	{
+		std::lock_guard<std::mutex> lk(sysMsgLock_);
+		// __COUT__ << "Current System Messages: " << targetUser <<
+		// std::endl << std::endl;
+
+		bool first = true;
+		for (auto& msg : sysMessages_[targetUser]) {
+			if (!first) strbuf << "|";
+			strbuf << format_time_(msg.time) << "|" << msg.msg;
+			first = false;
+			msg.delivered = true;
 		}
-
+		for (auto& msg : sysMessages_["*"]) {
+			if (!first) strbuf << "|";
+			strbuf << format_time_(msg.time) << "|" << msg.msg;
+			first = false;
+		}
+	}
 	sysMsgCleanup();
-	return retStr;
-}
-
-//==============================================================================
-// sysMsgSetLock
-//	ALWAYS calling thread with true, must also call with false to release lock
-void SystemMessenger::sysMsgSetLock(bool set)
-{
-	while(set && sysMsgLock_)
-		usleep(1000);  // wait for other thread to unlock
-	sysMsgLock_ = set;
+	return strbuf.str();
 }
 
 //==============================================================================
@@ -85,21 +99,18 @@ void SystemMessenger::sysMsgSetLock(bool set)
 //	For all remaining messages, wait some time before removing (e.g. 30 sec)
 void SystemMessenger::sysMsgCleanup()
 {
+	std::lock_guard<std::mutex> lk(sysMsgLock_);
 	// __COUT__ << "Current System Messages: " <<
 	// sysMsgTargetUser_.size() <<  std::endl << std::endl;
-	for(uint64_t i = 0; i < sysMsgTargetUser_.size(); ++i)
-		if((sysMsgDelivered_[i] && sysMsgTargetUser_[i] != "*") ||  // delivered and != *
-		   sysMsgTime_[i] + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
-		{
-			// remove
-			sysMsgSetLock(true);  // set lock
-			sysMsgTargetUser_.erase(sysMsgTargetUser_.begin() + i);
-			sysMsgMessage_.erase(sysMsgMessage_.begin() + i);
-			sysMsgTime_.erase(sysMsgTime_.begin() + i);
-			sysMsgDelivered_.erase(sysMsgDelivered_.begin() + i);
-			sysMsgSetLock(false);  // unset lock
-			--i;                   // rewind
+	time_t now = time(0);
+
+	for (auto& user : sysMessages_) {
+		for (auto it = user.second.begin(); it != user.second.end(); ++it) {
+			if (it->delivered) it = user.second.erase(it);
+			else if (it->time < now - SYS_CLEANUP_WILDCARD_TIME) it = user.second.erase(it);
 		}
+	}
+
 	// __COUT__ << "Remaining System Messages: " <<
 	// sysMsgTargetUser_.size() <<  std::endl << std::endl;
 }

@@ -46,7 +46,7 @@ UDPDataListenerProducer::UDPDataListenerProducer(std::string              superv
 UDPDataListenerProducer::~UDPDataListenerProducer(void) {}
 
 //==============================================================================
-bool UDPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool UDPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 // bool UDPDataListenerProducer::getNextFragment(void)
 {
 	//__CFG_COUT__DataProcessor::processorUID_ << " running, because workloop: " <<

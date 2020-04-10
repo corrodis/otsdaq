@@ -323,7 +323,7 @@ void FEVInterfacesManager::pause(void)
 void FEVInterfacesManager::resume(void)
 {
 	const std::string transitionName = "Resuming";
-	FEVInterface*     fe;
+	//FEVInterface*     fe;
 
 	preStateMachineExecutionLoop();
 	for(unsigned int i = 0; i < theFENamesByPriority_.size(); ++i)
@@ -826,7 +826,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 				    // if enabled to save to file, do it.
 				    __GEN_COUT__ << "\n" << outSS.str();
 				    if(outputFilePointer)
-					    fprintf(outputFilePointer, outSS.str().c_str());
+					    fprintf(outputFilePointer, "%s", outSS.str().c_str());
 			    }  // end output header
 
 			    unsigned int iterationCount = 0;
@@ -901,7 +901,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 						        // if enabled to save to file, do it.
 						        __GEN_COUT__ << "\n" << outSS.str();
 						        if(outputFilePointer)
-							        fprintf(outputFilePointer, outSS.str().c_str());
+							        fprintf(outputFilePointer, "%s", outSS.str().c_str());
 					        }  // end output inputs
 
 					        // have FE and Macro structure, so run it
@@ -923,7 +923,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 						        // if enabled to save to file, do it.
 						        __GEN_COUT__ << "\n" << outSS.str();
 						        if(outputFilePointer)
-							        fprintf(outputFilePointer, outSS.str().c_str());
+							        fprintf(outputFilePointer,"%s", outSS.str().c_str());
 					        }  // end output results
 
 					        return;
@@ -1331,7 +1331,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 				    // if enabled to save to file, do it.
 				    __GEN_COUT__ << "\n" << outSS.str();
 				    if(outputFilePointer)
-					    fprintf(outputFilePointer, outSS.str().c_str());
+					    fprintf(outputFilePointer,"%s", outSS.str().c_str());
 			    }  // end output header
 
 			    unsigned int iterationCount = 0;
@@ -1452,7 +1452,7 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 						        // if enabled to save to file, do it.
 						        __GEN_COUT__ << "\n" << outSS.str();
 						        if(outputFilePointer)
-							        fprintf(outputFilePointer, outSS.str().c_str());
+							        fprintf(outputFilePointer,"%s", outSS.str().c_str());
 					        }  // end output results
 
 					        return;

@@ -139,7 +139,7 @@ void BinaryStringMacros::extractValueFromBinaryString(
 	unsigned int         bitOffset    = bitIndex % 8;
 	unsigned int         bitsLeft     = valueNumberOfBits;
 
-	unsigned int valueBytes = (valueNumberOfBits / 8) + ((valueNumberOfBits % 8) ? 1 : 0);
+	//unsigned int valueBytes = (valueNumberOfBits / 8) + ((valueNumberOfBits % 8) ? 1 : 0);
 
 	unsigned int valuei = 0;
 

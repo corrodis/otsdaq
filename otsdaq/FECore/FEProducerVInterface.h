@@ -23,7 +23,7 @@ class FEProducerVInterface : public FEVInterface, public DataProducerBase
 
 	virtual ~FEProducerVInterface(void);
 
-	virtual void startProcessingData(std::string runNumber) { __FE_COUT__ << "Do nothing. The FE Manager starts the workloop." << __E__; }
+	virtual void startProcessingData(std::string /*runNumber*/) { __FE_COUT__ << "Do nothing. The FE Manager starts the workloop." << __E__; }
 	virtual void stopProcessingData(void) { __FE_COUT__ << "Do nothing. The FE Manager stops the workloop." << __E__; }
 
 	virtual void         copyToNextBuffer(const std::string& dataToWrite);

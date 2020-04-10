@@ -464,7 +464,7 @@ catch(...)
 //==============================================================================
 // override WorkLoop::workLoopThread
 //	return false to stop the workloop from calling the thread again
-bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 {
 	try
 	{
@@ -814,7 +814,7 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 	__FE_COUTV__(parentSupervisor_);
 
 	std::string data  = "0";
-	bool        found = false;
+	//bool        found = false;
 	while(1)
 	{
 		// mutex scope

@@ -53,12 +53,13 @@ IterateTable::IterateTable(void) : TableBase(IterateTable::ITERATE_TABLE) {}
 IterateTable::~IterateTable(void) {}
 
 //==============================================================================
-void IterateTable::init(ConfigurationManager* configManager)
+void IterateTable::init(ConfigurationManager* /*configManager*/)
 {
 	// do something to validate or refactor table
 	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
 	//	__COUT__ << configManager->__SELF_NODE__ << std::endl;
 
+	/*
 	std::string value;
 	auto        childrenMap = configManager->__SELF_NODE__.getChildren();
 	for(auto& childPair : childrenMap)
@@ -69,6 +70,7 @@ void IterateTable::init(ConfigurationManager* configManager)
 		// std::endl;  childPair.second.getNode(colNames_.colColumnName_
 		// ).getValue(value);
 	}
+	*/
 }
 
 //==============================================================================

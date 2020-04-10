@@ -3,8 +3,10 @@
 
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
-#include <xgi/Method.h>
+#pragma GCC diagnostic pop
 #include "otsdaq/Macros/XDAQApplicationMacros.h"
 
 #include <xoap/Method.h>
@@ -12,10 +14,14 @@
 #include <xoap/SOAPEnvelope.h>
 #include <xoap/domutils.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#include <xgi/Method.h>
 #include <cgicc/HTMLClasses.h>
 #include <cgicc/HTMLDoctype.h>
 #include <cgicc/HTTPCookie.h>
 #include <cgicc/HTTPHeader.h>
+#pragma GCC diagnostic pop
 
 #include <map>
 #include <string>

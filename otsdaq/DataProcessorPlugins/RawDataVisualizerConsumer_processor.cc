@@ -28,7 +28,7 @@ void RawDataVisualizerConsumer::startProcessingData(std::string runNumber) { Dat
 void RawDataVisualizerConsumer::stopProcessingData(void) { DataConsumer::stopProcessingData(); }
 
 //==============================================================================
-bool RawDataVisualizerConsumer::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool RawDataVisualizerConsumer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 {
 	__COUT__ << DataProcessor::processorUID_ << " running, because workloop: " << WorkLoop::continueWorkLoop_ << std::endl;
 	slowRead();  // fastRead();

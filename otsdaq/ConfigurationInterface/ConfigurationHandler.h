@@ -16,8 +16,8 @@ class ConfigurationHandler
   public:
 	ConfigurationHandler(void);
 	virtual ~ConfigurationHandler(void);
-	virtual void read(TableBase& configuration) { ; }
-	virtual void write(const TableBase& configuration) { ; }
+	virtual void read(TableBase& /*configuration*/) { ; }
+	virtual void write(const TableBase& /*configuration*/) { ; }
 
 	static void        readXML(TableBase& configuration, TableVersion version);
 	static void        readXML(TableBase* configuration, TableVersion version);
