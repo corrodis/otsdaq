@@ -130,6 +130,25 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 	}
 }
 
+//========================================================================================================================
+void TCPServerBase::broadcast(const char* message, std::size_t length)
+{
+	//	std::lock_guard<std::mutex> lock(clientsMutex_);
+	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	{
+		try
+		{
+			dynamic_cast<TCPTransmitterSocket *>(it->second)->send(message, length);
+		}
+		catch (const std::exception &e)
+		{
+			//std::cout << __PRETTY_FUNCTION__ << "Connection closed with the server! Stop writing!" << std::endl;
+			delete it->second;
+			fConnectedClients.erase(it--);
+		}
+	}
+}
+
 //==============================================================================
 void TCPServerBase::broadcast(const std::string& message)
 {
