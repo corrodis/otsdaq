@@ -86,6 +86,7 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theConfigurationTableGroup_("")
     , theContextTableGroup_("")
     , theBackboneTableGroup_("")
+    , groupMetadataTable_(true /*special table*/,ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
@@ -1640,7 +1641,7 @@ TableGroupKey ConfigurationManager::getActiveGroupKey(const ConfigurationManager
 }  // end getActiveGroupKey()
 
 //==============================================================================
-ConfigurationTree ConfigurationManager::getContextNode(const std::string& contextUID, const std::string& applicationUID) const
+ConfigurationTree ConfigurationManager::getContextNode(const std::string& contextUID, const std::string& /*applicationUID*/) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" + contextUID);
 }  // end getContextNode()
@@ -1702,7 +1703,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 
 //==============================================================================
 // getFirstPathToNode
-std::string ConfigurationManager::getFirstPathToNode(const ConfigurationTree& node, const std::string& startPath) const
+std::string ConfigurationManager::getFirstPathToNode(const ConfigurationTree& /*node*/, const std::string& /*startPath*/) const
 // void ConfigurationManager::getFirstPathToNode(const ConfigurationTree &node, const
 // ConfigurationTree &startNode) const
 {

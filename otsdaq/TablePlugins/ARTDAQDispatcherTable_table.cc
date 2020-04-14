@@ -11,7 +11,9 @@
 using namespace ots;
 
 //==============================================================================
-ARTDAQDispatcherTable::ARTDAQDispatcherTable(void) : ARTDAQTableBase("ARTDAQDispatcherTable")
+ARTDAQDispatcherTable::ARTDAQDispatcherTable(void) 
+: TableBase("ARTDAQDispatcherTable")
+, ARTDAQTableBase("ARTDAQDispatcherTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  //

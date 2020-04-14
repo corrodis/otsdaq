@@ -44,7 +44,7 @@ class TCPServerBase : public TCPSocket
 	void shutdownAccept(void);
 
 	const int         fMaxConnectionBacklog = 5;
-	unsigned int      fMaxNumberOfClients;
+	//unsigned int      fMaxNumberOfClients;
 	std::atomic_bool  fAccept;
 	std::future<bool> fAcceptFuture;
 };

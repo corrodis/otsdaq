@@ -263,7 +263,7 @@ T StringMacros::validateValueForDefaultStringDataType(const std::string& value, 
 //==============================================================================
 // static template function
 //	Note: that empty names are not allowed (or at least are confusing)!
-template<class T /*value type*/, class S = std::string /*name string or const string*/>
+template<class T /*value type*/, class S /*name string or const string*/>
 void StringMacros::getMapFromString(const std::string&    inputString,
                                     std::map<S, T>&       mapToReturn,
                                     const std::set<char>& pairPairDelimiter /* = {',','|','&'}*/,

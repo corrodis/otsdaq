@@ -27,7 +27,7 @@ TableVersion FileConfigurationInterface::findLatestVersion(const TableBase* conf
 
 //==============================================================================
 // save active configuration view to file
-void FileConfigurationInterface::saveActiveVersion(const TableBase* configuration, bool overwrite) const { ConfigurationHandler::writeXML(configuration); }
+void FileConfigurationInterface::saveActiveVersion(const TableBase* configuration, bool /*overwrite*/) const { ConfigurationHandler::writeXML(configuration); }
 
 //==============================================================================
 std::set<TableVersion> FileConfigurationInterface::getVersions(const TableBase* configuration) const

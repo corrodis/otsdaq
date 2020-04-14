@@ -26,7 +26,7 @@ class RawDataVisualizerConsumer : public DataConsumer, public Configurable
 	const std::string& getLastRawDataBuffer(void) { return data_; }
 
   private:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
+	bool workLoopThread(toolbox::task::WorkLoop* workLoop) override;
 	void fastRead(void);
 	void slowRead(void);
 

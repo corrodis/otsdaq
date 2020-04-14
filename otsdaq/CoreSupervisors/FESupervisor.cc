@@ -803,7 +803,7 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 }  // end macroMakerSupervisorRequest()
 
 //==============================================================================
-xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReference message)
+xoap::MessageReference FESupervisor::workLoopStatusRequest(xoap::MessageReference /*message*/)
 {
 	if(!theFEInterfacesManager_)
 	{
@@ -856,7 +856,7 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 }  // end extractFEInterfaceManager()
 
 //==============================================================================
-void FESupervisor::transitionConfiguring(toolbox::Event::Reference event)
+void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
 	

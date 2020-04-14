@@ -16,7 +16,7 @@ CodeEditorSupervisor::~CodeEditorSupervisor(void)
 }  // end destructor
 
 //==============================================================================
-void CodeEditorSupervisor::defaultPage(xgi::Input* in, xgi::Output* out)
+void CodeEditorSupervisor::defaultPage(xgi::Input* /*in*/, xgi::Output* out)
 {
 	__SUP_COUT__ << "ApplicationDescriptor LID=" << getApplicationDescriptor()->getLocalId() << __E__;
 	*out << "<!DOCTYPE HTML><html lang='en'><frameset col='100%' row='100%'><frame "

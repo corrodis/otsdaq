@@ -45,13 +45,13 @@ class TableViewColumnInfo
 	static std::map<std::pair<std::string, std::string>, std::string> getAllDefaultsForGUI(void);
 	static std::vector<std::string>                                   getAllDataTypesForGUI(void);
 
-	const bool isChildLink(void) const;
-	const bool isChildLinkUID(void) const;
-	const bool isChildLinkGroupID(void) const;
-	const bool isGroupID(void) const;
-	const bool isUID(void) const;
-	const bool isBoolType(void) const;
-	const bool isNumberDataType(void) const;
+	 bool isChildLink(void) const;
+	 bool isChildLinkUID(void) const;
+	 bool isChildLinkGroupID(void) const;
+	 bool isGroupID(void) const;
+	 bool isUID(void) const;
+	 bool isBoolType(void) const;
+	 bool isNumberDataType(void) const;
 
 	std::string getChildLinkIndex(void) const;
 

@@ -22,6 +22,7 @@ simple_plugin(ARTDAQDispatcherTable "table"
   
 simple_plugin(ARTDAQEventBuilderTable "table"
   ARTDAQTableBase
+  SlowControlsTableBase
   )
   
 simple_plugin(ARTDAQRoutingMasterTable "table"

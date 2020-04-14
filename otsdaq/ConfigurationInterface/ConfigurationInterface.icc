@@ -36,6 +36,8 @@ void get(TableBase*&                          table,
          bool                                 looseColumnMatching = false,
          std::string*                         accumulatedErrors   = 0)
 {
+	bool dbg = tableName == "ARTDAQEventBuilderTable";
+
 	if(table == 0)
 	{
 		// try making table table plugin, if fails use TableBase
@@ -67,7 +69,7 @@ void get(TableBase*&                          table,
 				throw;
 			}
 		}
-		//__COUT__ << "Table constructed!" << std::endl;
+		if(dbg) __COUT__ << tableName << " Table constructed!" << std::endl;
 	}
 
 	if(groupKey != 0 && groupName != 0)
@@ -172,7 +174,9 @@ void get(TableBase*&                          table,
 
 		// loose column matching can be used to ignore column names
 		table->getViewP()->setLooseColumnMatching(looseColumnMatching);
+		if(dbg) __COUT__ << tableName << " Table filling...!" << std::endl;
 		fill(table, version);
+		if(dbg) __COUT__ << tableName << " Table filled!" << std::endl;
 		if(looseColumnMatching)
 			table->getViewP()->setLooseColumnMatching(false);
 		table->getViewP()->setLastAccessTime();
@@ -206,10 +210,10 @@ void get(TableBase*&                          table,
 			++nameIsMatchStorageIndex;
 		}
 
-		if(nameIsMatch)  // if name is considered match by above rule, then force
+		if(!nameIsMatch)  // if name is considered match by above rule, then force
 			// matchup
-			table->getViewP()->setTableName(table->getMockupViewP()->getTableName());
-		else  // table->getViewP()->getTableName() !=
+			//table->getViewP()->setTableName(table->getMockupViewP()->getTableName());
+		//else  // table->getViewP()->getTableName() !=
 		      // table->getMockupViewP()->getTableName())
 		{
 			__SS__ << "View Table Name mismatch!! " << table->getViewP()->getTableName() << " vs " << table->getMockupViewP()->getTableName() << std::endl;

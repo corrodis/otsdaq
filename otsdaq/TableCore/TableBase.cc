@@ -18,19 +18,30 @@ using namespace ots;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-TableBase::TableBase(std::string  tableName,
+TableBase::TableBase(const std::string&  tableName,
                      std::string* accumulatedExceptions)
     : MAX_VIEWS_IN_CACHE(20)  // This is done, so that inheriting table classes could have
                               // varying amounts of cache
     , tableName_(tableName)
     , activeTableView_(0)
+    , mockupTableView_(tableName)
 {
+	if(tableName == "")
+	{
+		__SS__ << "Do not allow anonymous table view construction!" << __E__;
+		ss << StringMacros::stackTrace() << __E__;
+		__SS_THROW__;
+	}
+
+	bool dbg = tableName == "ARTDAQEventBuilderTable";	
+	if(dbg) __COUTV__(tableName);
 	// info reader fills up the mockup view
 	TableInfoReader tableInfoReader(accumulatedExceptions);
+	if(dbg) __COUT__ << "Reading..." << __E__;
 	try  // to read info
 	{
 		std::string returnedExceptions = tableInfoReader.read(this);
-
+		if(dbg) __COUT__ << "Read.";
 		if(returnedExceptions != "")
 			__COUT_ERR__ << returnedExceptions << __E__;
 
@@ -48,11 +59,12 @@ TableBase::TableBase(std::string  tableName,
 			throw;
 		return;  // do not proceed with mockup check if this failed
 	}
-
+	if(dbg) __COUT__ << "Initializing..." << __E__;
 	// call init on mockup view to verify columns
 	try
 	{
 		getMockupViewP()->init();
+		if(dbg) __COUT__ << "Init." << __E__;
 	}
 	catch(std::runtime_error& e)  // if accumulating exceptions, continue to and return, else throw
 	{
@@ -68,13 +80,25 @@ TableBase::TableBase(std::string  tableName,
 //	Default constructor is only used  to create special tables
 //		not based on an ...Info.xml file
 //	e.g. the TableGroupMetadata table in ConfigurationManager
-TableBase::TableBase(void)
+TableBase::TableBase(bool specialTable, const std::string& specialTableName)
     : MAX_VIEWS_IN_CACHE(1)  // This is done, so that inheriting table classes could have
                              // varying amounts of cache
-    , tableName_("")
+    , tableName_(specialTableName)
     , activeTableView_(0)
-{
-}
+    , mockupTableView_(specialTableName)
+{	
+	__COUT__ << "Special table '" << tableName_ << "' constructed. " <<  specialTable << __E__;
+} //special table constructor()
+
+
+////==============================================================================
+//TableBase::TableBase(void)
+// : MAX_VIEWS_IN_CACHE(1)
+// {
+//	__SS__ << "Should not call void constructor, table type is lost!" << __E__;
+//	ss << StringMacros::stackTrace() << __E__;
+//	__SS_THROW__;	
+//}
 
 //==============================================================================
 TableBase::~TableBase(void) {}
@@ -83,7 +107,7 @@ TableBase::~TableBase(void) {}
 std::string TableBase::getTypeId() { return typeid(this).name(); }
 
 //==============================================================================
-void TableBase::init(ConfigurationManager* tableManager)
+void TableBase::init(ConfigurationManager* /*tableManager*/)
 {
 	//__COUT__ << "Default TableBase::init() called." << __E__;
 }
@@ -118,8 +142,9 @@ void TableBase::print(std::ostream& out) const
 void TableBase::setupMockupView(TableVersion version)
 {
 	if(!isStored(version))
-	{
-		tableViews_[version].copy(mockupTableView_, version, mockupTableView_.getAuthor());
+	{		
+		tableViews_.emplace(std::make_pair(version,TableView(tableName_)));
+		tableViews_.at(version).copy(mockupTableView_, version, mockupTableView_.getAuthor());
 		trimCache();
 		if(!isStored(version))  // the trim cache is misbehaving!
 		{
@@ -135,7 +160,7 @@ void TableBase::setupMockupView(TableVersion version)
 		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
-}
+} //end setupMockupView()
 
 //==============================================================================
 // trimCache
@@ -149,7 +174,7 @@ void TableBase::trimCache(unsigned int trimSize)
 	if(trimSize == (unsigned int)-1)  // if -1, use MAX_VIEWS_IN_CACHE
 		trimSize = MAX_VIEWS_IN_CACHE;
 
-	int i = 0;
+	//int i = 0;
 	while(getNumberOfStoredViews() > trimSize)
 	{
 		TableVersion versionToDelete;
@@ -335,7 +360,8 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)
-{
+{	
+	auto tmpIt = tableViews_.find(temporaryVersion);
 	if(tableViews_.find(temporaryVersion) == tableViews_.end())
 	{
 		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << __E__;
@@ -352,7 +378,8 @@ void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, Tabl
 	if(tableViews_.find(version) != tableViews_.end())
 		__COUT_WARN__ << "WARNING: View version " << version << " already exists! Overwriting." << __E__;
 
-	tableViews_[version].copy(tableViews_[temporaryVersion], version, tableViews_[temporaryVersion].getAuthor());
+	auto emplacePair /*it,bool*/ = tableViews_.emplace(std::make_pair(version,TableView(tableName_)));
+	emplacePair.first->second.copy(tmpIt->second, version, tmpIt->second.getAuthor());
 	setActiveView(version);
 	eraseView(temporaryVersion);  // delete temp version from tableViews_
 }
@@ -485,9 +512,9 @@ bool TableBase::setActiveView(TableVersion version)
 		__SS_THROW__;
 		return false;
 	}
-	activeTableView_ = &tableViews_[version];
+	activeTableView_ = &tableViews_.at(version);
 
-	if(tableViews_[version].getVersion() != version)
+	if(tableViews_.at(version).getVersion() != version)
 	{
 		__SS__ << "Something has gone very wrong with the version handling!" << __E__;
 		__SS_THROW__;
@@ -825,7 +852,9 @@ TableVersion TableBase::mergeViews(
 	{
 		// start with a copy of source view A
 
-		TableView* destinationView = &(tableViews_[destinationVersion].copy(sourceViewA, destinationVersion, author));
+		tableViews_.emplace(std::make_pair(destinationVersion,TableView(getTableName())));
+		TableView* destinationView = &(tableViews_.at(destinationVersion).copy(
+			sourceViewA, destinationVersion, author));
 
 		unsigned int destRow, destSize = destinationView->getDataView().size();
 		unsigned int cb;
@@ -1050,7 +1079,8 @@ TableVersion TableBase::copyView(const TableView& sourceView, TableVersion desti
 
 	try
 	{
-		tableViews_[destinationVersion].copy(sourceView, destinationVersion, author);
+		tableViews_.emplace(std::make_pair(destinationVersion,TableView(tableName_)));
+		tableViews_.at(destinationVersion).copy(sourceView, destinationVersion, author);
 	}
 	catch(...)  // if the copy fails then delete the destinationVersion view
 	{
@@ -1105,13 +1135,17 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 			__SS_THROW__;
 		}
 		__COUT__ << "Using Mock-up view" << __E__;
-		tableViews_[tmpVersion].copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
+		tableViews_.emplace(std::make_pair(tmpVersion,TableView(tableName_)));
+		tableViews_.at(tmpVersion).copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
 	}
 	else
 	{
 		try  // do not allow init to throw an exception here..
 		{    // it's ok to copy invalid data, the user may be trying to change it
-			tableViews_[tmpVersion].copy(tableViews_[sourceViewVersion], tmpVersion, tableViews_[sourceViewVersion].getAuthor());
+			tableViews_.emplace(std::make_pair(tmpVersion,TableView(tableName_)));
+			tableViews_.at(tmpVersion).copy(
+				tableViews_.at(sourceViewVersion), tmpVersion, 
+				tableViews_.at(sourceViewVersion).getAuthor());
 		}
 		catch(...)
 		{
@@ -1184,18 +1218,18 @@ TableView* TableBase::getTemporaryView(TableVersion temporaryVersion)
 		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
-	return &tableViews_[temporaryVersion];
+	return &tableViews_.at(temporaryVersion);
 }
 
 //==============================================================================
 // convertToCaps
 //	static utility for converting table and column names to the caps version
 //	throw std::runtime_error if not completely alpha-numeric input
-std::string TableBase::convertToCaps(std::string& str, bool isConfigName)
+std::string TableBase::convertToCaps(std::string& str, bool isTableName)
 {
 	// append Table to be nice to user
 	unsigned int configPos = (unsigned int)std::string::npos;
-	if(isConfigName && (configPos = str.find("Table")) != str.size() - strlen("Table"))
+	if(isTableName && (configPos = str.find("Table")) != str.size() - strlen("Table"))
 		str += "Table";
 
 	// create all caps name and validate

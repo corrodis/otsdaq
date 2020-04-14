@@ -15,7 +15,7 @@
 namespace ots
 {
 // clang-format off
-class ARTDAQTableBase : public TableBase
+class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can inherit from multiple table base classes
 {
   public:
 	ARTDAQTableBase();
@@ -56,7 +56,7 @@ class ARTDAQTableBase : public TableBase
 		int         subsystem;
 		bool		status;
 
-		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType t, bool onOff)
+		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff)
 		: label(l), hostname(h), subsystem(s), status(onOff) {}
 	};
 
