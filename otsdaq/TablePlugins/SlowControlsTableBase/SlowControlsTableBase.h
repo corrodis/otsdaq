@@ -38,7 +38,13 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 	//use table name to have different file names! (instead of DEFINES like in DTC)
 	
 	//is channel binary or not?.. then can handle all the same
-	virtual bool 			outputEpicsPVFile			(ConfigurationManager* configManager, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList = 0) const = 0;
+	virtual bool 			outputEpicsPVFile			(ConfigurationManager* configManager, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList = 0) const;
+
+	virtual unsigned int	slowControlsHandlerConfig	(
+															  std::stringstream& out
+															, ConfigurationManager* configManager
+															, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
+														) const = 0;
 
 	virtual unsigned int	slowControlsHandler			(
 															  std::stringstream& out
@@ -49,6 +55,7 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 															, ConfigurationTree slowControlsLink
 															, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
 														) const;
+	virtual std::string		setFilePath					()  const = 0;
 
 	// Column names
 	struct ColChannel
@@ -64,7 +71,7 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 
 	bool					isFirstAppInContext_ 	= false; //for managing if PV list has changed
 	bool					channelListHasChanged_ 	= false; //for managing if PV list has changed
-	ConfigurationManager* 	lastConfigManager_ = nullptr;
+	ConfigurationManager* 	lastConfigManager_		= nullptr;
 
 private:
 

@@ -1,6 +1,8 @@
 #include "otsdaq/TablePlugins/SlowControlsTableBase/SlowControlsTableBase.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
+#include <fstream>     // std::fstream
+
 using namespace ots;
 
 #undef __MF_SUBJECT__
@@ -194,3 +196,117 @@ unsigned int SlowControlsTableBase::slowControlsHandler(std::stringstream&      
 
 	return numberOfChannels;
 }  // end localSlowControlsHandler
+
+//==============================================================================
+// return channel list if pointer passed
+bool SlowControlsTableBase::outputEpicsPVFile(ConfigurationManager*                                                          configManager,
+                                          std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/) const
+{
+	/*
+	    the file will look something like this:
+
+	        file name.template {
+	          pattern { var1, var2, var3, ... }
+	              { sub1_for_set1, sub2_for_set1, sub3_for_set1, ... }
+	              { sub1_for_set2, sub2_for_set2, sub3_for_set2, ... }
+	              { sub1_for_set3, sub2_for_set3, sub3_for_set3, ... }
+
+	              ...
+	          }
+
+	          # for comment lines
+
+	    file "soft_ai.dbt"  -- for floating point ("analog") data
+
+	    file "soft_bi.dbt"  -- for binary values (on/off, good/bad, etc)
+
+	    file "soft_stringin.dbt" -- for string values (e.g. "states")
+
+	    Subsystem names:
+	   https://docs.google.com/spreadsheets/d/1SO8R3O5Xm37X0JdaBiVmbg9p9aXy1Gk13uqiWFCchBo/edit#gid=1775059019
+	    DTC maps to: CRV, Tracker, EMCal, STM, TEM
+
+	    Example lines:
+
+	    file "soft_ai.dbt" {
+	        pattern  { Subsystem, loc, var, PREC, EGU, LOLO, LOW, HIGH, HIHI, MDEL, ADEL,
+	   DESC } { "TDAQ", "DataLogger", "RunNumber", "0", "", "-1e23", "-1e23", "1e23",
+	   "1e23", "", "", "DataLogger run number" } { "TDAQ", "DataLogger", "AvgEvtSize",
+	   "0", "MB/evt", "-1e23", "-1e23", "1e23", "1e23", "", "", "Datalogger avg event
+	   size" }
+	    }
+
+	    file "soft_bi.dbt" {
+	        pattern  { Subsystem, loc, pvar, ZNAM, ONAM, ZSV, OSV, COSV, DESC  }
+	             { "Computer", "daq01", "voltages_ok", "NOT_OK", "OK", "MAJOR",
+	   "NO_ALARM", "", "voltages_ok daq01"  } { "Computer", "daq02", "voltages_ok",
+	   "NOT_OK", "OK", "MAJOR", "NO_ALARM", "", "voltages_ok daq02"  }
+	    }
+	*/
+
+	std::string filename = setFilePath();
+
+	__COUT__ << "EPICS PV file: " << filename << __E__;
+
+	std::string previousConfigFileContents;
+	{
+		std::FILE* fp = std::fopen(filename.c_str(), "rb");
+		if(fp)
+		{
+			std::fseek(fp, 0, SEEK_END);
+			previousConfigFileContents.resize(std::ftell(fp));
+			std::rewind(fp);
+			std::fread(&previousConfigFileContents[0], 1, previousConfigFileContents.size(), fp);
+			std::fclose(fp);
+		}
+		else
+			__COUT_WARN__ << "Could not open EPICS IOC config file at " << filename << __E__;
+
+	}  // done reading
+
+	/////////////////////////
+	// generate xdaq run parameter file
+
+	std::stringstream out;
+	unsigned int      numberOfParameters = slowControlsHandlerConfig(out, configManager, channelList);
+	__COUTV__(numberOfParameters);
+
+	// check if need to restart EPICS ioc
+	//	if dbg string has changed, then mark ioc configuration dirty
+	if(previousConfigFileContents != out.str())
+	{
+		__COUT__ << "Configuration has changed! Marking dirty flag..." << __E__;
+
+		// only write files if first app in context AND channelList is not passed, i.e. init() is only time we write!
+		// if(isFirstAppInContext_ && channelList == nullptr)
+		if(channelList == nullptr)
+		{
+			std::fstream fout;
+			fout.open(filename, std::fstream::out | std::fstream::trunc);
+			if(fout.fail())
+			{
+				__SS__ << "Failed to open EPICS PV file: " << filename << __E__;
+				__SS_THROW__;
+			}
+
+			fout << out.str();
+			fout.close();
+
+			std::FILE* fp = fopen(EPICS_DIRTY_FILE_PATH.c_str(), "w");
+			if(fp)
+			{
+				fprintf(fp, "1");  // set dirty flag
+				fclose(fp);
+			}
+			else
+				__COUT_WARN__ << "Could not open dirty file: " << EPICS_DIRTY_FILE_PATH << __E__;
+		}
+
+		// Indicate that PV list has changed
+		//	if otsdaq_epics plugin is listening, then write PV data to archive db:	SQL insert or modify of ROW for PV
+		__COUT__ << "outputEpicsPVFile() return true" << __E__;
+		return true;
+	}  // end handling of previous contents
+	__COUT__ << "outputEpicsPVFile() return false" << __E__;
+	return false;
+}  // end outputEpicsPVFile()
