@@ -28,9 +28,9 @@ class TCPServerBase : public TCPSocket
 
 	void closeClientSocket(int socket);
 	template<class T>
-	T* acceptClient()
+	T* acceptClient(bool blocking = true)
 	{
-		int socketId = accept();
+		int socketId = accept(blocking);
 		fConnectedClients.emplace(socketId, new T(socketId));
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
@@ -41,8 +41,8 @@ class TCPServerBase : public TCPSocket
 
   private:
 	void closeClientSockets(void);
-	int  accept(void);
-	void shutdownAccept(void);
+	int  accept            (bool blocking = true);
+	void shutdownAccept    (void);
 
 	const int         fMaxConnectionBacklog = 5;
 	//unsigned int      fMaxNumberOfClients;
