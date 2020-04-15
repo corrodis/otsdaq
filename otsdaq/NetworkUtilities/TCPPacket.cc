@@ -11,20 +11,26 @@ TCPPacket::TCPPacket() : fBuffer("") {}
 TCPPacket::~TCPPacket(void) {}
 
 //==============================================================================
+std::string TCPPacket::encode(char const* message, std::size_t length)
+{
+	return encode(std::string(message, length));
+}
+
+//==============================================================================
 std::string TCPPacket::encode(const std::string& message)
 {
-	uint32_t    length = htonl(TCPPacket::headerLength + message.length());
+	uint32_t    size   = htonl(TCPPacket::headerLength + message.length());
 	std::string buffer = std::string(TCPPacket::headerLength, ' ') + message;  // THE HEADER LENGTH IS SET TO 4 = sizeof(uint32_t)
-	buffer[0]          = (length)&0xff;
-	buffer[1]          = (length >> 8) & 0xff;
-	buffer[2]          = (length >> 16) & 0xff;
-	buffer[3]          = (length >> 24) & 0xff;
+	buffer[0]          = (size)&0xff;
+	buffer[1]          = (size >> 8) & 0xff;
+	buffer[2]          = (size >> 16) & 0xff;
+	buffer[3]          = (size >> 24) & 0xff;
 
 	// std::cout << __PRETTY_FUNCTION__
 	//           << std::hex
-	//           << "Message length: " << message.length()
+	//           << "Message length: "  << message.length()
 	//           << ", Buffer length: " << buffer.length()
-	//           << ", htonl length: " << length
+	//           << ", htonl length: "  << size
 	//           << std::dec
 
 	//           << std::endl;
@@ -37,6 +43,9 @@ std::string TCPPacket::encode(const std::string& message)
 
 //==============================================================================
 void TCPPacket::reset(void) { fBuffer.clear(); }
+
+//==============================================================================
+bool TCPPacket::isEmpty(void) {return !fBuffer.size(); }
 
 //==============================================================================
 bool TCPPacket::decode(std::string& message)

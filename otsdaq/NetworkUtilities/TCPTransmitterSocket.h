@@ -33,6 +33,7 @@ class TCPTransmitterSocket : public virtual TCPSocket
 		send(reinterpret_cast<const char*>(&buffer.at(0)), buffer.size() * sizeof(T));
 	}
 
+	void sendPacket(char const* buffer, std::size_t size);
 	void sendPacket(const std::string& buffer);
 	void setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds);
 };

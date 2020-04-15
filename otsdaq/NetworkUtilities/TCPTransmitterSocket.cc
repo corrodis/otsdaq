@@ -15,6 +15,9 @@ TCPTransmitterSocket::TCPTransmitterSocket(int socketId) : TCPSocket(socketId) {
 TCPTransmitterSocket::~TCPTransmitterSocket(void) {}
 
 //==============================================================================
+void TCPTransmitterSocket::sendPacket(char const* buffer, std::size_t size) { send(TCPPacket::encode(buffer, size)); }
+
+//==============================================================================
 void TCPTransmitterSocket::sendPacket(const std::string& buffer) { send(TCPPacket::encode(buffer)); }
 
 //==============================================================================

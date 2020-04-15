@@ -11,11 +11,13 @@ class TCPPacket
 	TCPPacket();
 	virtual ~TCPPacket(void);
 
+	static std::string encode(char const* message, std::size_t length);
 	static std::string encode(const std::string& message);
 
-	bool decode(std::string& message);
+	bool decode (std::string& message);
 	// Resets the storage buffer
-	void reset(void);
+	void reset  (void);
+	bool isEmpty(void);
 
 	// Operator overload
 	TCPPacket& operator+=(const std::string& buffer)

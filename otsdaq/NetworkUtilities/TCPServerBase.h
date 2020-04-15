@@ -16,6 +16,7 @@ class TCPServerBase : public TCPSocket
 	virtual ~TCPServerBase(void);
 
 	void startAccept(void);
+	void broadcastPacket(const char* message, std::size_t length);
 	void broadcastPacket(const std::string& message);
 	void broadcast(const char* message, std::size_t length);
 	void broadcast(const std::string& message);
