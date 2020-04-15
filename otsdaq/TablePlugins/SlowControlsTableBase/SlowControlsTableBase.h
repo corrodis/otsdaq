@@ -1,8 +1,15 @@
 #ifndef _ots_SlowControlsTableBase_h_
 #define _ots_SlowControlsTableBase_h_
 
+#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/TableCore/TableBase.h"
 
+// helpers
+#define OUT out << tabStr << commentStr
+#define PUSHTAB tabStr += "\t"
+#define POPTAB tabStr.resize(tabStr.size() - 1)
+#define PUSHCOMMENT commentStr += "# "
+#define POPCOMMENT commentStr.resize(commentStr.size() - 2)
 
 namespace ots
 {
@@ -15,9 +22,10 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 
 	virtual ~SlowControlsTableBase(void);
 
-	virtual bool	slowControlsChannelListHasChanged 	(void) const = 0;
-	virtual void	getSlowControlsChannelList			(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const = 0;
-	
+	// Getters
+	virtual bool	slowControlsChannelListHasChanged 	(void) const;
+	virtual void	getSlowControlsChannelList			(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const;
+
 	//boardReader{
 	//	build vector .. based on table 1,2,3,4,5.. 
 	//	pass vector outputPV()
@@ -30,7 +38,17 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 	//use table name to have different file names! (instead of DEFINES like in DTC)
 	
 	//is channel binary or not?.. then can handle all the same
-	void outputPVListAndSetFlagsForEPICs(const std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList);
+	virtual bool 			outputEpicsPVFile			(ConfigurationManager* configManager, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList = 0) const = 0;
+
+	virtual unsigned int	slowControlsHandler			(
+															  std::stringstream& out
+															, std::string& tabStr
+															, std::string& commentStr
+															, std::string& subsystem
+															, std::string& location
+															, ConfigurationTree slowControlsLink
+															, std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
+														) const;
 
 	// Column names
 	struct ColChannel
@@ -43,6 +61,10 @@ class SlowControlsTableBase : virtual public TableBase //virtual so future plugi
 		std::string const colHighThreshold_			= "HighThreshold";
 		std::string const colHighHighThreshold_ 	= "HighHighThreshold";
 	} channelColNames_;
+
+	bool					isFirstAppInContext_ 	= false; //for managing if PV list has changed
+	bool					channelListHasChanged_ 	= false; //for managing if PV list has changed
+	ConfigurationManager* 	lastConfigManager_ = nullptr;
 
 private:
 
