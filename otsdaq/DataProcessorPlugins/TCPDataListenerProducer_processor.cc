@@ -30,6 +30,7 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
+	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
 }
 
@@ -110,8 +111,11 @@ void TCPDataListenerProducer::fastWrite(void)
 
 	try
 	{
-		//*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
-		*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
+		if(dataType_ == "Packet")
+			*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
+		else//"Raw" || DEFAULT
+			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+
 		if(dataP_->size() == 0)
 			return;
 	}
