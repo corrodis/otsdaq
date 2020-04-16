@@ -40,7 +40,7 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(0, 1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 1000);
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -110,7 +110,8 @@ void TCPDataListenerProducer::fastWrite(void)
 
 	try
 	{
-		*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		//*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
 		if(dataP_->size() == 0)
 			return;
 	}
