@@ -58,35 +58,74 @@ TCPServerBase::~TCPServerBase(void)
 //==============================================================================
 void TCPServerBase::startAccept(void)
 {
+	fAccept = true;
 	std::thread thread(&TCPServerBase::acceptConnections, this);
 	thread.detach();
 }
 
 // An accepts waits for a connection and returns the opened socket number
 //==============================================================================
-int TCPServerBase::accept(void)
+int TCPServerBase::accept(bool blocking)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Now server accept connections on socket: " << getSocketId() << std::endl;
-	if(getSocketId() == invalidSocketId)
+	if (getSocketId() == invalidSocketId)
 	{
 		throw std::logic_error("Accept called on a bad socket object (this object was moved)");
 	}
 
 	struct sockaddr_storage serverStorage;
-	socklen_t               addr_size    = sizeof serverStorage;
-	int                     clientSocket = invalidSocketId;
-	while(fAccept)
+	socklen_t addr_size = sizeof serverStorage;
+	int clientSocket = invalidSocketId;
+	if (blocking)
 	{
-		clientSocket = ::accept(getSocketId(), (struct sockaddr*)&serverStorage, &addr_size);
-		if(clientSocket != invalidSocketId)
-			return clientSocket;
-		else
+		clientSocket = ::accept(getSocketId(), (struct sockaddr *)&serverStorage, &addr_size);
+		std::cout << __LINE__<< "] " << __PRETTY_FUNCTION__ << "fAccept? " << fAccept << std::endl;
+		if (!fAccept)
 		{
-			std::cout << __PRETTY_FUNCTION__ << "Accept: " << fAccept << " New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
+			throw E_SHUTDOWN;
 		}
+		if (clientSocket == invalidSocketId)
+		{
+			std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
+			throw std::runtime_error(std::string("Accept: ") + strerror(errno));
+		}
+		std::cout << __PRETTY_FUNCTION__ << "Server just accepted a connection on socket: " << getSocketId() << " Client socket: " << clientSocket << std::endl;
+		return clientSocket;
 	}
-	fAccept = true;
-	throw E_SHUTDOWN;
+	else
+	{
+		constexpr int sleepMSeconds = 5;
+		constexpr int timeoutSeconds = 0;
+		constexpr int timeoutUSeconds = 1000;
+		struct timeval timeout;
+		timeout.tv_sec = timeoutSeconds;
+		timeout.tv_usec = timeoutUSeconds;
+
+		fd_set fdSet;
+
+		while (fAccept)
+		{
+			FD_ZERO(&fdSet);
+			FD_SET(getSocketId(), &fdSet);
+			select(getSocketId() + 1, &fdSet, 0, 0, &timeout);
+
+			if (FD_ISSET(getSocketId(), &fdSet))
+			{
+				struct sockaddr_in clientAddress;
+				socklen_t socketSize = sizeof(clientAddress);
+				//int newSocketFD = ::accept4(fdServerSocket_,(struct sockaddr*)&clientAddress,&socketSize, (pushOnly_ ? SOCK_NONBLOCK : 0));
+				clientSocket = ::accept(getSocketId(), (struct sockaddr *)&clientAddress, &socketSize); //Blocking since select goes in timeout if there is nothing
+				if (clientSocket == invalidSocketId)
+				{
+					std::cout << __PRETTY_FUNCTION__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
+					throw std::runtime_error(std::string("Accept: ") + strerror(errno));
+				}
+				return clientSocket;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(sleepMSeconds));
+		}
+		throw E_SHUTDOWN;
+	}
 }
 
 //==============================================================================
@@ -113,6 +152,12 @@ void TCPServerBase::closeClientSocket(int socket)
 }
 
 //==============================================================================
+void TCPServerBase::broadcastPacket(const char* message, std::size_t length)
+{
+	broadcastPacket(std::string(message,length));
+}
+
+//==============================================================================
 void TCPServerBase::broadcastPacket(const std::string& message)
 {
 	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
@@ -124,6 +169,25 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			delete it->second;
+			fConnectedClients.erase(it--);
+		}
+	}
+}
+
+//========================================================================================================================
+void TCPServerBase::broadcast(const char* message, std::size_t length)
+{
+	//	std::lock_guard<std::mutex> lock(clientsMutex_);
+	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	{
+		try
+		{
+			dynamic_cast<TCPTransmitterSocket *>(it->second)->send(message, length);
+		}
+		catch (const std::exception &e)
+		{
+			//std::cout << __PRETTY_FUNCTION__ << "Connection closed with the server! Stop writing!" << std::endl;
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}

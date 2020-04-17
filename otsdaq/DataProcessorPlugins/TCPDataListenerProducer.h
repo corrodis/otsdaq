@@ -36,6 +36,7 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 
 	std::string    ipAddress_;
 	unsigned short port_;
+	std::string    dataType_;
 
 	// bool getNextFragment(void);
 };

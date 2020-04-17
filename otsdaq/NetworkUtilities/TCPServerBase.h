@@ -16,7 +16,9 @@ class TCPServerBase : public TCPSocket
 	virtual ~TCPServerBase(void);
 
 	void startAccept(void);
+	void broadcastPacket(const char* message, std::size_t length);
 	void broadcastPacket(const std::string& message);
+	void broadcast(const char* message, std::size_t length);
 	void broadcast(const std::string& message);
 	void broadcast(const std::vector<char>& message);
 	void broadcast(const std::vector<uint16_t>& message);
@@ -26,9 +28,9 @@ class TCPServerBase : public TCPSocket
 
 	void closeClientSocket(int socket);
 	template<class T>
-	T* acceptClient()
+	T* acceptClient(bool blocking = true)
 	{
-		int socketId = accept();
+		int socketId = accept(blocking);
 		fConnectedClients.emplace(socketId, new T(socketId));
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
@@ -39,8 +41,8 @@ class TCPServerBase : public TCPSocket
 
   private:
 	void closeClientSockets(void);
-	int  accept(void);
-	void shutdownAccept(void);
+	int  accept            (bool blocking = true);
+	void shutdownAccept    (void);
 
 	const int         fMaxConnectionBacklog = 5;
 	//unsigned int      fMaxNumberOfClients;
