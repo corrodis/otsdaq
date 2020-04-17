@@ -2,10 +2,6 @@
 #include "otsdaq/TablePlugins/ARTDAQEventBuilderTable.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
 
-#include <stdio.h>
-#include <sys/stat.h>  //for mkdir
-#include <iostream>
-
 using namespace ots;
 
 // clang-format off
@@ -24,7 +20,10 @@ ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void)
     , ARTDAQTableBase("ARTDAQEventBuilderTable")
     , SlowControlsTableBase("ARTDAQEventBuilderTable")
 {
-	__COUT__ << "Constructed." << __E__;
+	//////////////////////////////////////////////////////////////////////
+	// WARNING: the names used in C++ MUST match the Table INFO  		//
+	//////////////////////////////////////////////////////////////////////
+	__COUT__ << "ARTDAQEventBuilderTable Constructed." << __E__;
 } //end constructor()
 
 //==============================================================================
@@ -115,8 +114,8 @@ unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(std::stringstrea
 					if(daqMetricsLink.second.getNode("metricParametersLink").isDisconnected())
 						continue;
 
-					// ConfigurationTree slowControlsLink = daqMetricsLink.second.getNode("ARTDAQMetricAlarmThresholdsTable");
-					ConfigurationTree slowControlsLink = configManager->getNode("ARTDAQMetricAlarmThresholdsTable");
+					//ConfigurationTree slowControlsLink = configManager->getNode("ARTDAQMetricAlarmThresholdsTable");
+					ConfigurationTree slowControlsLink = eventBuilderPair.second.getNode("MetricAlarmThresholdsLink");
 
 					auto metricParametersLinks = daqMetricsLink.second.getNode("metricParametersLink").getChildren();
 					for(auto& metricParametersLink : metricParametersLinks)  // start daq MetricParametersLinks record loop

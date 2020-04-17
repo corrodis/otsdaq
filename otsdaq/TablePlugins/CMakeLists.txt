@@ -10,14 +10,17 @@ add_subdirectory(SlowControlsTableBase)
   
 simple_plugin(ARTDAQBoardReaderTable "table"
   ARTDAQTableBase
+  SlowControlsTableBase
   )
   
 simple_plugin(ARTDAQDataLoggerTable "table"
   ARTDAQTableBase
+  SlowControlsTableBase
   )
   
 simple_plugin(ARTDAQDispatcherTable "table"
   ARTDAQTableBase
+  SlowControlsTableBase
   )
   
 simple_plugin(ARTDAQEventBuilderTable "table"
@@ -27,6 +30,7 @@ simple_plugin(ARTDAQEventBuilderTable "table"
   
 simple_plugin(ARTDAQRoutingMasterTable "table"
   ARTDAQTableBase
+  SlowControlsTableBase
   )
   
 simple_plugin(FESlowControlsTable "table"

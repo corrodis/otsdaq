@@ -73,8 +73,8 @@ unsigned int SlowControlsTableBase::slowControlsHandler(std::stringstream&      
 	unsigned int numberOfChannels = 0;
 	__COUT__ << "slowControlsHandler" << __E__;
 
-	//if(!slowControlsLink.isDisconnected())
-	if(1)
+	if(!slowControlsLink.isDisconnected())
+	//if(1)
 	{
 		std::vector<std::pair<std::string, ConfigurationTree>> channelChildren = slowControlsLink.getChildren();
 
