@@ -1631,7 +1631,7 @@ void Iterator::pauseIterationPlan(HttpXmlDocument& xmldoc)
 }
 
 //==============================================================================
-void Iterator::haltIterationPlan(HttpXmlDocument& xmldoc)
+void Iterator::haltIterationPlan(HttpXmlDocument& /*xmldoc*/)
 {
 	__MOUT__ << "Attempting to halt iteration plan '" << activePlanName_ << ".'" << __E__;
 	__COUT__ << "Attempting to halt iteration plan '" << activePlanName_ << ".'" << __E__;

@@ -24,7 +24,7 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 	virtual void stopProcessingData(void) override;
 
   protected:
-	bool workLoopThread(toolbox::task::WorkLoop* workLoop);
+	bool workLoopThread(toolbox::task::WorkLoop* workLoop) override;
 	void slowWrite(void);
 	void fastWrite(void);
 	// For slow write
@@ -36,6 +36,7 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 
 	std::string    ipAddress_;
 	unsigned short port_;
+	std::string    dataType_;
 
 	// bool getNextFragment(void);
 };

@@ -25,7 +25,7 @@
 
 #include "otsdaq/Macros/CoutMacros.h"
 
-#define __ARGS__ const frontEndMacroStruct_t &feMacroStruct, FEVInterface::frontEndMacroConstArgs_t argsIn, FEVInterface::frontEndMacroArgs_t argsOut
+#define __ARGS__ [[maybe_unused]] const frontEndMacroStruct_t &feMacroStruct,[[maybe_unused]] FEVInterface::frontEndMacroConstArgs_t argsIn, [[maybe_unused]] FEVInterface::frontEndMacroArgs_t argsOut
 
 #define __GET_ARG_IN__(X, Y) getFEMacroConstArgumentValue<Y>(argsIn, X)
 #define __GET_ARG_OUT__(X, Y) getFEMacroArgumentValue<Y>(argsOut, X)
@@ -88,7 +88,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		runSequenceOfCommands(
 		    "LinkToConfigureSequence"); /*Run Configure Sequence Commands*/
 	}
-	virtual void 								start						(std::string runNumber)
+	virtual void 								start						(std::string /*runNumber*/)
 	{
 		__COUT__ << "\t Start" << std::endl;
 		runSequenceOfCommands("LinkToStartSequence"); /*Run Start Sequence Commands*/

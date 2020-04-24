@@ -30,6 +30,7 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
+	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
 }
 
@@ -40,7 +41,7 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(0, 1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 1000);
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -52,7 +53,7 @@ void TCPDataListenerProducer::stopProcessingData(void)
 }
 
 //==============================================================================
-bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* workLoop)
+bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 // bool TCPDataListenerProducer::getNextFragment(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_
@@ -110,7 +111,11 @@ void TCPDataListenerProducer::fastWrite(void)
 
 	try
 	{
-		*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		if(dataType_ == "Packet")
+			*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
+		else//"Raw" || DEFAULT
+			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+
 		if(dataP_->size() == 0)
 			return;
 	}

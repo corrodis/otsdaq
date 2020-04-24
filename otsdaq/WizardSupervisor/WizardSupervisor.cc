@@ -476,7 +476,7 @@ xoap::MessageReference WizardSupervisor::supervisorLastTableGroupRequest(xoap::M
 }
 
 //==============================================================================
-void WizardSupervisor::Default(xgi::Input* in, xgi::Output* out)
+void WizardSupervisor::Default(xgi::Input* /*in*/, xgi::Output* out)
 {
 	__COUT__ << "Unauthorized Request made, security sequence doesn't match!" << std::endl;
 	*out << "Unauthorized Request.";
@@ -736,9 +736,9 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 	// SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;
-	uint64_t        activeSessionIndex;
+	//uint64_t        activeSessionIndex;
 	std::string     user;
-	uint8_t         userPermissions;
+	//uint8_t         userPermissions;
 
 	if(Command != "")
 	{
@@ -910,7 +910,7 @@ void WizardSupervisor::cleanUpPreviews()
 //	savePostPreview
 //      save post to preview directory named with time and incremented index
 void WizardSupervisor::savePostPreview(
-    std::string& subject, std::string& text, const std::vector<cgicc::FormFile>& files, std::string creator, HttpXmlDocument* xmldoc)
+    std::string& /*subject*/, std::string& /*text*/, const std::vector<cgicc::FormFile>& /*files*/, std::string /*creator*/, HttpXmlDocument* xmldoc)
 {
 	/*if(activeExperiment_ == "") //no active experiment!
 	{

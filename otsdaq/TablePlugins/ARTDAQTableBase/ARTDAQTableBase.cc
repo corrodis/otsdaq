@@ -59,8 +59,7 @@ ARTDAQTableBase::ProcessTypes 			ARTDAQTableBase::processTypes_;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) 
-: TableBase(tableName, accumulatedExceptions)
+ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) : TableBase(tableName, accumulatedExceptions)
 {
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
@@ -69,8 +68,7 @@ ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulated
 //==============================================================================
 // ARTDAQTableBase
 //	Default constructor should never be used because table type is lost
-ARTDAQTableBase::ARTDAQTableBase(void) 
-: TableBase("ARTDAQTableBase")
+ARTDAQTableBase::ARTDAQTableBase(void) : TableBase("ARTDAQTableBase")
 {
 	__SS__ << "Should not call void constructor, table type is lost!" << __E__;
 	__SS_THROW__;
@@ -663,6 +661,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 		PUSHTAB;
 
 		OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
+
 		if(appType == ARTDAQAppType::DataLogger)
 		{
 			OUT << "is_datalogger: true\n";
@@ -752,37 +751,15 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			                 true /*onlyInsertAtTableParameters*/,
 			                 false /*includeAtTableParameters*/);
 
-			// scheduler
-			OUT << "scheduler: {\n";
+			OUT << "ArtdaqSharedMemoryServiceInterface: { service_provider: ArtdaqSharedMemoryService \n";
 
-#if ART_HEX_VERSION < 0x30200
-			PUSHTAB;
-			//		OUT << "fileMode: " <<
-			// services.getNode("schedulerFileMode").getValue()
-			//<<
-			//"\n";
-			OUT << "errorOnFailureToPut: " << (services.getNode("schedulerErrorOnFailtureToPut").getValue<bool>() ? "true" : "false") << "\n";
-			POPTAB;
-#endif
+			OUT << "waiting_time: " << services.getNode("sharedMemoryWaitingTime").getValue() << "\n";
+			OUT << "resume_after_timeout: " << (services.getNode("sharedMemoryResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
 			OUT << "}\n\n";
 
-#if 1  // artdaq v3_07_00+
-			OUT << "ArtdaqSharedMemoryServiceInterface: { service_provider: ArtdaqSharedMemoryService }\n\n";
-#else
-			// NetMonTransportServiceInterface
-			OUT << "NetMonTransportServiceInterface: {\n";
+			OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: " << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>())
+			    << "}\n\n";
 
-			PUSHTAB;
-			OUT << "service_provider: " <<
-			    // services.getNode("NetMonTrasportServiceInterfaceServiceProvider").getEscapedValue()
-			    services.getNode("NetMonTrasportServiceInterfaceServiceProvider").getValue() << "\n";
-
-			OUT << "destinations: {\n"
-			    << "}\n\n";  // end destinations
-
-			POPTAB;
-			OUT << "}\n\n";  // end NetMonTransportServiceInterface
-#endif
 
 			//--------------------------------------
 			// handle services NOT @table:: parameters
@@ -1058,22 +1035,12 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle source
-		//__COUT__ << "Filling art.source" << __E__;
-		auto source = art.getNode("sourceLink");
-		if(!source.isDisconnected())
-		{
-			OUT << "source: {\n";
-
-			PUSHTAB;
-
-			insertModuleType(out, tabStr, commentStr, source.getNode("sourceModuleType"));
-
-			OUT << "waiting_time: " << source.getNode("sourceWaitingTime").getValue() << "\n";
-			OUT << "resume_after_timeout: " << (source.getNode("sourceResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
-			POPTAB;
-			OUT << "}\n\n";  // end source
-		}
-
+		OUT << "source: {\n";
+		PUSHTAB;
+		OUT << "module_type: ArtdaqInput";
+		POPTAB;
+		OUT << "}\n\n";  // end source
+		
 		//--------------------------------------
 		// handle process_name
 		//__COUT__ << "Writing art.process_name" << __E__;
@@ -1839,7 +1806,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 				//		search for other records with same values/links except hostname/name
 
 				std::vector<std::string> multiNodeNames, hostnameArray;
-				unsigned int             hostnameFixedWidth = 0;
+				//unsigned int             hostnameFixedWidth = 0;
 
 				__COUTV__(allNodes.size());
 				for(auto& otherNode : allNodes)  // start multi-node search loop
@@ -2078,7 +2045,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						if(allIntegers)
 						{
 							std::set<unsigned int> intSortWildcards;
-							unsigned int           tmpInt;
+							//unsigned int           tmpInt;
 							for(auto& wildcard : wildcards)
 								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
@@ -2167,7 +2134,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							if(allIntegers)
 							{
 								std::set<unsigned int> intSortWildcards;
-								unsigned int           tmpInt;
+								//unsigned int           tmpInt;
 								for(auto& wildcard : wildcards)
 									intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
@@ -2636,84 +2603,79 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 		TableEditStruct& artdaqSupervisorTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUPERVISOR_TABLE, true /*markModified*/);
 
-		//for any NO_LINK links in artdaqSupervisor record, fix them
+		// for any NO_LINK links in artdaqSupervisor record, fix them
 		{
 			std::string artdaqSupervisorUID =
-					artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->getColUID()];
+			    artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->getColUID()];
 
 			// create group link to board readers
-			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
-					colARTDAQSupervisor_.colLinkToBoardReaders_)] ==
-							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			if(artdaqSupervisorTable.tableView_
+			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReaders_)] ==
+			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
-
 				__COUT__ << "Fixing missing link to Readers" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-						ARTDAQ_READER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReaders_));
+				    ARTDAQ_READER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReaders_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-						artdaqSupervisorRow,
-						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReadersGroupID_),
-						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.READER));
+				    artdaqSupervisorRow,
+				    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToBoardReadersGroupID_),
+				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.READER));
 			}
 
 			// create group link to event builders
-			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
-					colARTDAQSupervisor_.colLinkToEventBuilders_)] ==
-							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			if(artdaqSupervisorTable.tableView_
+			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuilders_)] ==
+			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
 				__COUT__ << "Fixing missing link to Builders" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-						ARTDAQ_BUILDER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
-								colARTDAQSupervisor_.colLinkToEventBuilders_));
+				    ARTDAQ_BUILDER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuilders_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-						artdaqSupervisorRow,
-						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuildersGroupID_),
-						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.BUILDER));
+				    artdaqSupervisorRow,
+				    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToEventBuildersGroupID_),
+				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.BUILDER));
 			}
 
 			// create group link to data loggers
-			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
-					colARTDAQSupervisor_.colLinkToDataLoggers_)] ==
-							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			if(artdaqSupervisorTable.tableView_
+			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggers_)] ==
+			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
 				__COUT__ << "Fixing missing link to Loggers" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-						ARTDAQ_LOGGER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
-								colARTDAQSupervisor_.colLinkToDataLoggers_));
+				    ARTDAQ_LOGGER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggers_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-						artdaqSupervisorRow,
-						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggersGroupID_),
-						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.LOGGER));
+				    artdaqSupervisorRow,
+				    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDataLoggersGroupID_),
+				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.LOGGER));
 			}
 
 			// create group link to dispatchers
-			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
-					colARTDAQSupervisor_.colLinkToDispatchers_)] ==
-							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			if(artdaqSupervisorTable.tableView_
+			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchers_)] ==
+			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
 				__COUT__ << "Fixing missing link to Dispatchers" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-						ARTDAQ_DISPATCHER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
-								colARTDAQSupervisor_.colLinkToDispatchers_));
+				    ARTDAQ_DISPATCHER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchers_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-						artdaqSupervisorRow,
-						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
-						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
+				    artdaqSupervisorRow,
+				    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
+				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
 			}
 
 			// create group link to routing masters
-			if(artdaqSupervisorTable.tableView_->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(
-					colARTDAQSupervisor_.colLinkToRoutingMasters_)] ==
-							TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
+			if(artdaqSupervisorTable.tableView_
+			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_)] ==
+			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
 				__COUT__ << "Fixing missing link to Routers" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-						ARTDAQ_ROUTER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(
-								colARTDAQSupervisor_.colLinkToRoutingMasters_));
+				    ARTDAQ_ROUTER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
-						artdaqSupervisorRow,
-						artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
-						artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
+				    artdaqSupervisorRow,
+				    artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
 			}
 
 			{
@@ -2721,11 +2683,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				artdaqSupervisorTable.tableView_->print(ss);
 				__COUT__ << ss.str();
 			}
-		} //end fixing links
-
-
-
-
+		}  // end fixing links
 
 		// Step	1. create/verify subsystems and destinations
 		TableEditStruct& artdaqSubsystemTable = configGroupEdit.getTableEditStruct(ARTDAQ_SUBSYSTEM_TABLE, true /*markModified*/);
@@ -2772,7 +2730,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			// test the table before getting for real
 			try
 			{
-				TableEditStruct& tmpTypeTable = configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
+			/*	TableEditStruct& tmpTypeTable = */ configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
 			}
 			catch(...)
 			{
@@ -2843,7 +2801,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 							std::vector<std::string> printerSyntaxArr = StringMacros::getVectorFromString(originalParameterArr[1], {','} /*delimiter*/);
 
-							unsigned int             count = 0;
+							//unsigned int             count = 0;
 							std::vector<std::string> originalNodeIndices;
 							for(auto& printerSyntaxValue : printerSyntaxArr)
 							{
@@ -2889,7 +2847,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								__SS_THROW__;
 							}
 
-							bool         isFirst     = true;
+							//bool         isFirst     = true;
 							unsigned int originalRow = TableView::INVALID, lastOriginalRow = TableView::INVALID;
 							for(unsigned int i = 0; i < originalNodeIndices.size(); ++i)
 							{
@@ -3050,7 +3008,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							}
 						}
 
-						unsigned int count = 0;
+						//unsigned int count = 0;
 						for(auto& printerSyntaxValue : printerSyntaxArr)
 						{
 							__COUTV__(printerSyntaxValue);
@@ -3235,7 +3193,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			{  // delete record handling
 				__COUT__ << "Deleting '" << nodeTypePair.first << "' records not specified..." << __E__;
 
-				unsigned int           row;
+				//unsigned int           row;
 				std::set<unsigned int> orderedRowSet;  // need to delete in reverse order
 				for(auto& deletePair : deleteRecordMap)
 				{

@@ -21,9 +21,9 @@ class TableBase
   public:
 	const unsigned int MAX_VIEWS_IN_CACHE;  // Each inheriting table class could have
 	                                        // varying amounts of cache
-
-	TableBase(void);
-	TableBase(std::string tableName, std::string* accumulatedExceptions = 0);
+	//TableBase(void); //should not be used
+	TableBase(bool specialTable, const std::string& specialTableName);
+	TableBase(const std::string& tableName, std::string* accumulatedExceptions = 0);
 
 	virtual ~TableBase(void);
 

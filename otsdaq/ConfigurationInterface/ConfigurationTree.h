@@ -102,7 +102,7 @@ class ConfigurationTree
 		tableView_ = a.tableView_;
 		__COUT__ << "OPERATOR COPY CONSTRUCTOR" << std::endl;
 		return *this;
-	};
+	}; //end operator=
 
 	static const std::string DISCONNECTED_VALUE;
 	static const std::string VALUE_TYPE_DISCONNECTED;
@@ -262,7 +262,7 @@ class ConfigurationTree
 	struct RecordField
 	{
 		RecordField(const std::string&         table,
-		            const std::string&         uid,
+		            const std::string&         /*uid*/,
 		            const std::string&         columnName,
 		            const std::string&         relativePath,
 		            const TableViewColumnInfo* columnInfo)

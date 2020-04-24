@@ -22,7 +22,7 @@ class FESupervisor : public CoreSupervisorBase
 
 	xoap::MessageReference         frontEndCommunicationRequest(xoap::MessageReference message);
 	xoap::MessageReference         macroMakerSupervisorRequest(xoap::MessageReference message);
-	virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message);
+	virtual xoap::MessageReference workLoopStatusRequest(xoap::MessageReference message) override;
 
 	virtual void transitionConfiguring(toolbox::Event::Reference event) override;
 	virtual void transitionHalting(toolbox::Event::Reference event) override;

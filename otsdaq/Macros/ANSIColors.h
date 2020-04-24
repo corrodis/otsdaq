@@ -34,8 +34,6 @@
 #include <iostream>
 #include <sstream>
 
-using namespace std;
-
 /*! \file ANSIColors.h
  *  \brief Header file containing macros to highlight output lines with color.
  *

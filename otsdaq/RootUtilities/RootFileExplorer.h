@@ -59,7 +59,6 @@
 #include <TFile.h>
 #include <TKey.h>
 
-using namespace std;
 using namespace ots;
 
 // clang-format off
@@ -67,11 +66,11 @@ class RootFileExplorer
 {
  public:
 
-                         RootFileExplorer       (string                fSystemPath     ,
-                                                 string                fRootPath       ,
-                                                 string                fFoldersPath    ,
-                                                 string                fHistName       ,
-                                                 string                fFileName       ,
+                         RootFileExplorer       (std::string                fSystemPath     ,
+                             std::string                fRootPath       ,
+                             std::string                fFoldersPath    ,
+                             std::string                fHistName       ,
+                             std::string                fFileName       ,
                                                  HttpXmlDocument     & xmlOut           )  ;
                         ~RootFileExplorer       (void                                   ) {;}
   xercesc::DOMDocument * initialize             (void                                   )  ;
@@ -86,12 +85,12 @@ class RootFileExplorer
  private:
 
   bool                                    debug_            ;
-  string                                  fSystemPath_      ;
-  string                                  fRootPath_        ;
-  string                                  fFoldersPath_     ;
-  string                                  fFileName_        ;
-  string                                  fRFoldersPath_    ;
-  string                                  fHistName_        ;
+  std::string                                  fSystemPath_      ;
+  std::string                                  fRootPath_        ;
+  std::string                                  fFoldersPath_     ;
+  std::string                                  fFileName_        ;
+  std::string                                  fRFoldersPath_    ;
+  std::string                                  fHistName_        ;
   std::string                             fThisFolderPath_  ;
   xercesc::DOMImplementation            * theImplementation_;
   xercesc::DOMDocument                  * theDocument_      ;
@@ -102,7 +101,7 @@ class RootFileExplorer
   const std::string                       rootTagName_      ;
   TFile                                 * rootFile_         ;
   int                                     level_            ;
-  stringstream                            ss_               ;
+  std::stringstream                            ss_               ;
   HttpXmlDocument                         xmlOut_           ;
 } ;
 // clang-format on

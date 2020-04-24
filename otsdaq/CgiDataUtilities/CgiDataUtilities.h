@@ -1,7 +1,10 @@
 #ifndef ots_CgiDataUtilities_h
 #define ots_CgiDataUtilities_h
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #include <xgi/Method.h>  //for cgicc::Cgicc
+#pragma GCC diagnostic pop
 #include <string>
 
 namespace ots

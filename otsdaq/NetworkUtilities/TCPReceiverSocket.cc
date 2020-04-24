@@ -14,22 +14,23 @@ TCPReceiverSocket::TCPReceiverSocket(int socketId) : TCPSocket(socketId) { fPack
 TCPReceiverSocket::~TCPReceiverSocket(void) {}
 
 //==============================================================================
-std::string TCPReceiverSocket::receivePacket(void)
+std::string TCPReceiverSocket::receivePacket()
 {
-	while(true)
+	std::string retVal = "";
+	do
 	{
-		std::string retVal = "";
-		if(fPacket.decode(retVal))
-			return retVal;
+		//std::cout << __PRETTY_FUNCTION__ << "Receiving..." << fPacket.isEmpty() << std::endl;
 		fPacket += receive<std::string>();
+		//std::cout << __PRETTY_FUNCTION__ << "Received!" << fPacket.isEmpty() << std::endl;
 	}
+	while(!fPacket.isEmpty() && !fPacket.decode(retVal));
+	return retVal;
 }
 
 //==============================================================================
-std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int timeoutMicroSeconds)
+std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int /*timeoutMicroSeconds*/)
 {
-	// std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " <<
-	// getSocketId() << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " << getSocketId() << std::endl;
 	if(getSocketId() == 0)
 	{
 		throw std::logic_error("Bad socket object (this object was moved)");

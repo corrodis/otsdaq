@@ -3,12 +3,18 @@
 
 #include <memory>
 #include "otsdaq/FECore/FEVInterface.h"
+#include "cetlib/compiler_macros.h"
+
+#ifndef EXTERN_C_FUNC_DECLARE_START
+#define EXTERN_C_FUNC_DECLARE_START extern "C" {
+#endif
 
 #define DEFINE_OTS_INTERFACE(klass)                                                                                                        \
-	extern "C" std::unique_ptr<ots::FEVInterface> make(                                                                                    \
+	EXTERN_C_FUNC_DECLARE_START                                                      \
+std::unique_ptr<ots::FEVInterface> make(                                                                                    \
 	    const std::string& interfaceUID, const ots::ConfigurationTree& configurationTree, const std::string& pathToInterfaceConfiguration) \
 	{                                                                                                                                      \
 		return std::unique_ptr<ots::FEVInterface>(new klass(interfaceUID, configurationTree, pathToInterfaceConfiguration));               \
-	}
+	} }
 
 #endif /* _ots_InterfacePluginMacro_h_ */

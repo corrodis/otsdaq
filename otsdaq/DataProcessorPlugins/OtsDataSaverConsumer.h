@@ -15,7 +15,7 @@ class OtsDataSaverConsumer : public RawDataSaverConsumerBase
 	                     const std::string&       configurationPath);
 	virtual ~OtsDataSaverConsumer(void);
 
-	virtual void writePacketHeader(const std::string& data);
+	virtual void writePacketHeader(const std::string& data) override;
 
   protected:
 	void writeHeader(void) override;

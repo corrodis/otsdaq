@@ -42,15 +42,15 @@ public:
 	TableVersion                   			saveNewVersion					(TableBase*   configuration, TableVersion temporaryVersion, TableVersion newVersion = TableVersion());
 
 	// group handling
-	virtual std::set<std::string /*name*/> 	getAllTableGroupNames			(const std::string& filterString = "") const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getAllTableGroupNames in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
-	virtual std::set<TableGroupKey> 		getKeys							(const std::string& groupName) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getKeys in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
+	virtual std::set<std::string /*name*/> 	getAllTableGroupNames			(const std::string& /*filterString*/ = "") const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getAllTableGroupNames in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
+	virtual std::set<TableGroupKey> 		getKeys							(const std::string& /*groupName*/) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getKeys in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 
 
 	// Caution: getTableGroupMembers must be carefully used.. the table versions
 	// are as initially defined for table versions aliases, i.e. not converted according
 	// to the metadata groupAliases!
 	virtual std::map<std::string /*name*/,
-	TableVersion /*version*/> 			getTableGroupMembers			(std::string const& /*groupName*/, bool includeMetaDataTable = false) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getTableGroupMembers in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
+	TableVersion /*version*/> 			getTableGroupMembers			(std::string const& /*groupName*/, bool /*includeMetaDataTable*/ = false) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getTableGroupMembers in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 	virtual void 							saveTableGroup					(std::map<std::string /*name*/,TableVersion /*version*/> const& /*tableToVersionMap*/, std::string const& /*groupName*/) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call saveTableGroup in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 
 
@@ -59,7 +59,7 @@ protected:
 
 public:  // was protected,.. unfortunately, must be public to allow
 	// otsdaq_database_migrate and otsdaq_import_system_aliases to compile
-	virtual TableGroupKey 					findLatestGroupKey				(const std::string& groupName) const /* return INVALID if no existing versions */ { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call findLatestGroupKey in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
+	virtual TableGroupKey 					findLatestGroupKey				(const std::string& /*groupName*/) const /* return INVALID if no existing versions */ { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call findLatestGroupKey in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 	virtual TableVersion 					findLatestVersion				(const TableBase* configuration) const = 0;  // return INVALID if no existing versions
 	virtual void 							saveActiveVersion				(const TableBase* configuration, bool overwrite = false) const = 0;
 

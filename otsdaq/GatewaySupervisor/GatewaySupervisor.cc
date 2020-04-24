@@ -13,11 +13,15 @@
 
 #include "otsdaq/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #include <cgicc/HTMLClasses.h>
 #include <cgicc/HTMLDoctype.h>
 #include <cgicc/HTTPCookie.h>
 #include <cgicc/HTTPHeader.h>
 #include <xgi/Utils.h>
+#pragma GCC diagnostic pop
 
 #include <toolbox/fsm/FailedEvent.h>
 #include <toolbox/task/WorkLoopFactory.h>
@@ -464,7 +468,7 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 }  // end makeSystemLogbookEntry()
 
 //==============================================================================
-void GatewaySupervisor::Default(xgi::Input* in, xgi::Output* out)
+void GatewaySupervisor::Default(xgi::Input* /*in*/, xgi::Output* out)
 {
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
 		makeSystemLogbookEntry("ots started.");
@@ -872,7 +876,7 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 }  // end stateMachineThread()
 
 //==============================================================================
-void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -880,7 +884,7 @@ void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& fsm)
 }  // end stateInitial()
 
 //==============================================================================
-void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -888,14 +892,14 @@ void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& fsm)
 }  // end statePaused()
 
 //==============================================================================
-void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 }  // end stateRunning()
 
 //==============================================================================
-void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
@@ -903,14 +907,14 @@ void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& fsm)
 }  // end stateHalted()
 
 //==============================================================================
-void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
 }  // end stateConfigured()
 
 //==============================================================================
-void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& fsm)
+void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
 	__COUT__ << "Fsm current state: "
@@ -969,7 +973,7 @@ void GatewaySupervisor::checkForAsyncError()
 /////////////////////////////////////////////////////////////////////////////////////
 
 //==============================================================================
-void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 {
 	checkForAsyncError();
 
@@ -1185,7 +1189,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference e)
 }  // end transitionConfiguring()
 
 //==============================================================================
-void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionHalting(toolbox::Event::Reference /*e*/)
 {
 	checkForAsyncError();
 
@@ -1197,7 +1201,7 @@ void GatewaySupervisor::transitionHalting(toolbox::Event::Reference e)
 }  // end transitionHalting()
 
 //==============================================================================
-void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1219,7 +1223,7 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference e)
 }  // end transitionShuttingDown()
 
 //==============================================================================
-void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference /*e*/)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
@@ -1255,7 +1259,7 @@ void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
 }  // end transitionInitializing()
 
 //==============================================================================
-void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionPausing(toolbox::Event::Reference /*e*/)
 {
 	checkForAsyncError();
 
@@ -1274,7 +1278,7 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference e)
 }  // end transitionPausing()
 
 //==============================================================================
-void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionResuming(toolbox::Event::Reference /*e*/)
 {
 	if(RunControlStateMachine::asyncSoftFailureReceived_)
 	{
@@ -1293,7 +1297,7 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference e)
 }  // end transitionResuming()
 
 //==============================================================================
-void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 {
 	if(RunControlStateMachine::asyncSoftFailureReceived_)
 	{
@@ -1373,7 +1377,7 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference e)
 }  // end transitionStarting()
 
 //==============================================================================
-void GatewaySupervisor::transitionStopping(toolbox::Event::Reference e)
+void GatewaySupervisor::transitionStopping(toolbox::Event::Reference /*e*/)
 {
 	checkForAsyncError();
 
@@ -1734,7 +1738,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		                                                         // false /*initial value*/));
 
 	unsigned int iteration = 0;
-	unsigned int subIteration;
+	//unsigned int subIteration;
 	unsigned int iterationBreakpoint;
 
 	// send command to all supervisors (for multiple iterations) until all are done
@@ -2261,6 +2265,8 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
 	//__COUT__ << "request()" << __E__;
+
+	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
 
 	// for simplicity assume all commands should be mutually exclusive with iterator
 	// thread state machine accesses (really should just be careful with
@@ -3027,7 +3033,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 		FILE*       fp = fopen(fn.c_str(), "w");
 		if(fp)
 		{
-			fprintf(fp, command.c_str());
+			fprintf(fp,"%s", command.c_str());
 			fclose(fp);
 		}
 		else
@@ -3114,7 +3120,7 @@ xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageRef
 //==============================================================================
 // xoap::supervisorGetActiveUsers
 //	get display names for all active users
-xoap::MessageReference GatewaySupervisor::supervisorGetActiveUsers(xoap::MessageReference message)
+xoap::MessageReference GatewaySupervisor::supervisorGetActiveUsers(xoap::MessageReference /*message*/)
 {
 	__COUT__ << __E__;
 

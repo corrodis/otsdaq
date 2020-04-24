@@ -232,7 +232,7 @@ void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUse
 // userInfo.groupPermissionLevelMap_ and userInfo.permissionLevel_ are properly setup
 //		by either calling userInfo.setGroupPermissionLevels() or
 // userInfo.getGroupPermissionLevel()
-bool WebUsers::checkRequestAccess(cgicc::Cgicc&              cgi,
+bool WebUsers::checkRequestAccess(cgicc::Cgicc&              /*cgi*/,
                                   std::ostringstream*        out,
                                   HttpXmlDocument*           xmldoc,
                                   WebUsers::RequestUserInfo& userInfo,
@@ -470,7 +470,7 @@ bool WebUsers::loadDatabases()
 	const unsigned int LINE_LEN = 1000;
 	char               line[LINE_LEN];
 	unsigned int       i, si, c, len, f;
-	uint64_t           tmpInt64;
+	//uint64_t           tmpInt64;
 
 	// hashes
 	//	File Organization:
@@ -2275,7 +2275,7 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 // WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
-                                              HttpXmlDocument*   xmldoc,
+                                              HttpXmlDocument*   /*xmldoc*/,
                                               const std::string& srcFile,
                                               const std::string& srcFunc,
                                               const std::string& srcId,
@@ -3078,7 +3078,8 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 				StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
 		fprintf(fp,"To: %s\n",toList.c_str());
 		fprintf(fp,"Subject: %s\n",subject.c_str());
-		fprintf(fp,"%s",message.c_str());
+		fprintf(fp,"Content-Type: text/html\n");
+		fprintf(fp,"\n<html><pre>%s</pre></html>",message.c_str());
 		fclose(fp);
 
 		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());

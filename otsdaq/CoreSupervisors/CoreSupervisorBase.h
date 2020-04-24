@@ -56,7 +56,7 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	void destroy(void);
 
-	const unsigned int 		getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
+	 unsigned int 		getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
 
 	// Here are the common web request handlers:
 	//	defaultPage returns the public html page

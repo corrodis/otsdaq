@@ -28,7 +28,7 @@ class TCPReceiverSocket : public virtual TCPSocket
 		// std::endl;
 		return buffer;  // c++11 doesn't make a copy anymore when returned
 	}
-	std::string receivePacket(void);
+	std::string receivePacket();
 	void        setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds);
 
   private:

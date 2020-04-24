@@ -25,7 +25,7 @@ class TableView
 	typedef DataView::iterator                     					iterator;
 	typedef DataView::const_iterator               					const_iterator;
 
-												TableView					(const std::string& name = "");
+												TableView					(const std::string& tableName);// = "");
 	virtual 									~TableView					(void);
 
 	void         								init						(void);
@@ -76,7 +76,7 @@ class TableView
 	const time_t&                               getCreationTime				(void) const;
 	const time_t&                               getLastAccessTime			(void) const;
 	const bool&                                 getLooseColumnMatching		(void) const;
-	const unsigned int                          getDataColumnSize			(void) const;
+	unsigned int                          		getDataColumnSize			(void) const;
 	const unsigned int&                         getSourceColumnMismatch		(void) const;
 	const unsigned int&                         getSourceColumnMissing		(void) const;
 	const std::set<std::string /*col name*/>&   getSourceColumnNames		(void) const;
@@ -87,9 +87,9 @@ class TableView
 
 	unsigned int       							getNumberOfRows				(void) const;
 	unsigned int       							getNumberOfColumns			(void) const;
-	const unsigned int 							getColUID					(void) const;
-	const unsigned int 							getColStatus				(void) const;
-	const unsigned int 							getColPriority				(void) const;
+	unsigned int 								getColUID					(void) const;
+	unsigned int 								getColStatus				(void) const;
+	unsigned int 								getColPriority				(void) const;
 
 	// Note: Group link handling should be done in this TableView class
 	//	only by using isEntryInGroup ...
@@ -107,11 +107,11 @@ class TableView
 	bool                 						isEntryInGroup				(const unsigned int& row,
 																			 const std::string&  childLinkIndex,
 																			 const std::string&  groupNeedle) const;
-	const bool            						getChildLink				(const unsigned int&                      col,
+	 bool            							getChildLink				(const unsigned int&                      col,
 																			 bool&                                    isGroup,
 																			 std::pair<unsigned int /*link col*/,
 																			 unsigned int /*link id col*/>& linkPair) const;
-	const unsigned int    						getLinkGroupIDColumn		(const std::string& childLinkIndex) const;
+	 unsigned int    							getLinkGroupIDColumn		(const std::string& childLinkIndex) const;
 	std::vector<unsigned int /*row*/>			getGroupRows				(const unsigned int groupIdCol, const std::string& groupID, bool onlyStatusTrue = false, bool orderedByPriority = false) const;
 	std::vector<std::vector<unsigned int /*row*/>> getGroupRowsByPriority	(const unsigned int groupIdCol, const std::string& groupID, bool onlyStatusTrue = false) const;
 private:
@@ -164,7 +164,7 @@ public:
 	// Setters
 
 	void 										setUniqueStorageIdentifier	(const std::string& storageUID);
-	void 										setTableName				(const std::string& name);
+	//void 										setTableName				(const std::string& name);
 	void 										setComment					(const std::string& comment);
 	void 										setURIEncodedComment		(const std::string& uriComment);
 	void 										setAuthor					(const std::string& author);
@@ -218,16 +218,16 @@ public:
 	               								                  			 const std::string&  author = "");
 
   private:
-	const unsigned int 							initColUID					(void);
-	const unsigned int 							initColStatus				(void);
-	const unsigned int 							initColPriority				(void);
+	unsigned int 								initColUID					(void);
+	unsigned int 								initColStatus				(void);
+	unsigned int 								initColPriority				(void);
 
 	TableView& 									operator=					(const TableView src);  // operator= is purposely undefined and
 														                                            // private (DO NOT USE IT!) - should use
 														                                            // TableView::copy()
 
 	std::string 													uniqueStorageIdentifier_;  	// starts empty "", used to implement re-writable views ("temporary views") in artdaq db
-	std::string  													tableName_;               	// View name (extensionTableName in xml)
+	const std::string												tableName_;               	// View name (extensionTableName in xml)
 	TableVersion 													version_;                 	// Table version
 	std::string  													comment_;                 	// Table version comment
 	std::string  													author_;

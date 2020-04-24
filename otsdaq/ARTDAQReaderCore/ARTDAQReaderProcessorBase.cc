@@ -18,8 +18,8 @@ using namespace ots;
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //==============================================================================
-ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              supervisorApplicationUID,
-                                                     std::string              bufferUID,
+ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              /*supervisorApplicationUID*/,
+                                                     std::string              /*bufferUID*/,
                                                      std::string              processorUID,
                                                      const ConfigurationTree& theXDAQContextConfigTree,
                                                      const std::string&       configurationPath)
