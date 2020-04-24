@@ -5,7 +5,7 @@
 				<COLUMN Type="UID" 	 Name="servicesUID" 	 StorageName="SERVICES_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="TrueFalse" 	 Name="sharedMemoryResumeAfterTimeout" 	 StorageName="SHARED_MEMORY_RESUME_AFTER_TIMEOUT" 		DataType="VARCHAR2" 		DataChoices=""/>
         <COLUMN Type="Data" 	 Name="sharedMemoryWaitingTime" 	 StorageName="SHARED_MEMORY_WAITING_TIME" 		DataType="VARCHAR2" 		DataChoices=""/>
-        <COLUMN Type="Data" 	 Name="fragmentNamingServiceProvider" 	 StorageName="FRAGMENT_NAMING_SERVICE_PROVIDER" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,OtsArtdaqFragmentNamingService,OtsDemoArtdaqFragmentNamingService,Mu2eArtdaqFragmentNamingService"/>
+        <COLUMN Type="FixedChoiceData" 	 Name="fragmentNamingServiceProvider" 	 StorageName="FRAGMENT_NAMING_SERVICE_PROVIDER" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,OtsArtdaqFragmentNamingService,OtsDemoArtdaqFragmentNamingService"/>
         <COLUMN Type="ChildLink-daqParameters" 	 Name="ServicesParametersLink" 	 StorageName="SERVICES_PARAMETERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
 				<COLUMN Type="ChildLinkGroupID-daqParameters" 	 Name="ServiceParametersLinkGroupID" 	 StorageName="SERVICE_PARAMETERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
