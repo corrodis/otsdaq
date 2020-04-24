@@ -8,6 +8,9 @@ console : {
 	}
 }
 
-file : {}
-
+#file: {
+#	type: "file" 
+#	filename: "/dev/null" 
+#}
+file:""
 udp : {}

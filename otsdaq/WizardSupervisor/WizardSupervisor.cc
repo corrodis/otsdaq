@@ -185,6 +185,9 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	     << ",Processor Wizard,CFG,0,1,icon-Configure.png,"
 		 	"/WebPath/html/RecordWiz_ConfigurationGUI.html?urn=280&recordAlias=Processor,Config Wizards"
 
+	     << ",artdaq Config Editor,CFG,0,1,icon-Configure.png,"
+		 	"/WebPath/html/ConfigurationGUI_artdaq.html?urn=280,Config Wizards"
+
 	     << ",Block Diagram,CFG,0,1,icon-Configure.png,"
 		 	"/WebPath/html/ConfigurationSubsetBlockDiagram.html?urn=280,Config Wizards"
 		 //end Configuration Wizards ------------------

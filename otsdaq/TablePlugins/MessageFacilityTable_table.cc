@@ -245,7 +245,8 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 
 	// close MF config files
 	artdaqfs << fclSs.str();
-	fs << fclSs.str() << "\nfile: {}";
+	//fs << fclSs.str() << "\nfile: {type:\"file\" filename:\"/dev/null\"}\n";
+	fs << fclSs.str() << "\nfile: \"\"\n";
 	fs.close();
 	artdaqfs.close();
 

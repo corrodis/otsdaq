@@ -12,4 +12,9 @@ console: {
 	format_string: 			"|%L:%N:%f [%u]\t%m"
 }
 
-file: {}
+#file: {
+#	type: "file" 
+#	filename: "/dev/null" 
+#}
+file:""
+
