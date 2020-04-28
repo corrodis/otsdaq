@@ -2354,7 +2354,7 @@ int TableView::fillFromJSON(const std::string& json)
 					{
 					//	setTableName(currVal);
 						//check for consistency, and show warning
-						if(currVal != getTableName())
+						if(currVal != getTableName() && getTableName() != "TABLE_GROUP_METADATA") //allow metadata table to be illegal, since it is created by ConfigurationManager.cc
 							__COUT_WARN__ << "JSON-fill Table name mismatch: " << 
 								currVal << " vs " <<
 								getTableName() << __E__;
