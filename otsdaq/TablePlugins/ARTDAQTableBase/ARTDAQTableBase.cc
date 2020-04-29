@@ -1041,8 +1041,6 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			OUT << "source: {\n";
 			PUSHTAB;
 			insertModuleType(out, tabStr, commentStr, source.getNode("sourceModuleType"));
-			OUT << "waiting_time: " << source.getNode("sourceWaitingTime").getValue() << "\n";
-			OUT << "resume_after_timeout: " << (source.getNode("sourceResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
 			POPTAB;
 			OUT << "}\n\n";  // end source
 		}
