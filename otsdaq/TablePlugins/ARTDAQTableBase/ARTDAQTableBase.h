@@ -26,7 +26,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	static const std::string ARTDAQ_FCL_PATH;
 	static const std::string ARTDAQ_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_TABLE;
 	static const std::string ARTDAQ_READER_TABLE, ARTDAQ_BUILDER_TABLE, ARTDAQ_LOGGER_TABLE, ARTDAQ_DISPATCHER_TABLE, ARTDAQ_MONITOR_TABLE, ARTDAQ_ROUTER_TABLE;
-	static const std::string ARTDAQ_SUBSYSTEM_TABLE;
+	static const std::string ARTDAQ_SUBSYSTEM_TABLE, ARTDAQ_DAQ_TABLE, ARTDAQ_DAQ_PARAMETER_TABLE;
 	static const std::string ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID;
 
 	enum class ARTDAQAppType
@@ -212,12 +212,41 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		std::string const colLinkToRoutingMastersGroupID_ 	= "RoutingMastersLinkGroupID";
 	} colARTDAQSupervisor_;
 
-	// ARTDAQ Supervisor Column names
+	// ARTDAQ Subsystem Column names
 	static struct ColARTDAQSubsystem
 	{
 		std::string const colLinkToDestination_    			= "SubsystemDestinationLink";
 		std::string const colLinkToDestinationUID_ 			= "SubsystemDestinationUID";
 	} colARTDAQSubsystem_;
+
+	// ARTDAQ Reader Column names
+	static struct ColARTDAQReader
+	{
+		std::string const colLinkToDaqParameters_    		= "daqParametersLink";
+		std::string const colLinkToDaqParametersGroupID_ 	= "daqParametersLinkGroupID";
+	} colARTDAQReader_;
+
+	// ARTDAQ Builder/Logger/Dispatcher Column names
+	static struct ColARTDAQNotReader
+	{
+		std::string const colLinkToDaq_    					= "daqLink";
+		std::string const colLinkToDaqUID_ 					= "daqLinkUID";
+	} colARTDAQNotReader_;
+
+	// ARTDAQ DAQ Column names
+	static struct ColARTDAQDaq
+	{
+		std::string const colLinkToDaqParameters_    		= "daqParametersLink";
+		std::string const colLinkToDaqParametersGroupID_ 	= "daqParametersLinkGroupID";
+	} colARTDAQDaq_;
+
+	// ARTDAQ DAQ Parameter Column names
+	static struct ColARTDAQDaqParameter
+	{
+		std::string const colDaqParameterKey_    			= "daqParameterKey";
+		std::string const colDaqParameterValue_ 			= "daqParameterValue";
+		std::string const colDaqParameterGroupID_ 			= "daqParameterGroupID";
+	} colARTDAQDaqParameter_;
 };
 // clang-format on
 }  // namespace ots

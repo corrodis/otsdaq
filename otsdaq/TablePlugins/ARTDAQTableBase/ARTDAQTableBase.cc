@@ -34,6 +34,8 @@ const std::string 	ARTDAQTableBase::ARTDAQ_MONITOR_TABLE 			= "ARTDAQMonitorTabl
 const std::string 	ARTDAQTableBase::ARTDAQ_ROUTER_TABLE 			= "ARTDAQRoutingMasterTable";
 
 const std::string 	ARTDAQTableBase::ARTDAQ_SUBSYSTEM_TABLE 		= "ARTDAQSubsystemTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_DAQ_TABLE				= "ARTDAQDaqTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE		= "ARTDAQDaqParameterTable";
 
 const std::string 	ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME 			= "ExecutionHostname";
 const std::string 	ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK 		= "SubsystemLink";
@@ -47,8 +49,12 @@ ARTDAQTableBase::ARTDAQInfo 			ARTDAQTableBase::info_;
 
 ARTDAQTableBase::ColARTDAQSupervisor 	ARTDAQTableBase::colARTDAQSupervisor_;
 ARTDAQTableBase::ColARTDAQSubsystem 	ARTDAQTableBase::colARTDAQSubsystem_;
+ARTDAQTableBase::ColARTDAQReader 		ARTDAQTableBase::colARTDAQReader_;
+ARTDAQTableBase::ColARTDAQNotReader 	ARTDAQTableBase::colARTDAQNotReader_;
+ARTDAQTableBase::ColARTDAQDaq 			ARTDAQTableBase::colARTDAQDaq_;
+ARTDAQTableBase::ColARTDAQDaqParameter 	ARTDAQTableBase::colARTDAQDaqParameter_;
 
-//Note: processTypes_ must be instantiate after the static artdaq table names (to construct map in constructor)
+//Note!!!! processTypes_ must be instantiate after the static artdaq table names (to construct map in constructor in .h)
 ARTDAQTableBase::ProcessTypes 			ARTDAQTableBase::processTypes_;
 
 // clang-format on
@@ -2493,7 +2499,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 					for(unsigned int i = 0; i < propertyNames.size(); ++i)
 					{
-						// create artdaq Supervisor context record
+						// create artdaq Supervisor property record
 						row = appPropertyTable.tableView_->addRow(author, true /*incrementUniqueData*/, appUID + propertyUIDs[i]);
 						// set app status true
 						appPropertyTable.tableView_->setValueAsString("1", row, appPropertyTable.tableView_->getColStatus());
@@ -2749,6 +2755,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				deleteRecordMap.emplace(std::make_pair(r,       // typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
 				                                       true));  // init to delete
 
+			//node instance loop
 			for(auto& nodePair : nodeTypePair.second)
 			{
 				__COUTV__(nodePair.first);
@@ -2930,6 +2937,136 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 						{
 							// create artdaq type instance record
 							row = typeTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName);
+
+							//fill defaults properties/parameters here!
+							if(nodeTypePair.first == processTypes_.READER)
+							{
+								__COUT__ << "Handling new " << nodeTypePair.first << " defaults!" << __E__;
+								TableEditStruct& daqParameterTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
+
+								//create group link to daq parameter table
+								typeTable.tableView_->setValueAsString(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE,
+										row,
+										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParameters_));
+								std::string daqParameterGroupID = typeTable.tableView_->setUniqueColumnValue(
+										row,
+										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParametersGroupID_),
+										nodeName + "DaqParameters");
+
+								typeTable.tableView_->print();
+
+								//now create parameters at target link
+								const std::vector<std::string> parameterUIDs = {
+										"BoardID",
+										"FragmentID"
+								};
+
+								const std::vector<std::string> parameterNames = {
+										"board_id",                     //"BoardID",
+										"fragment_id",  				//"FragmentID"
+								};
+								const std::vector<std::string> parameterValues = {
+										"0",                //"BoardID",
+										"0"  				//"FragmentID",
+								};
+
+								unsigned int parameterRow;
+								for(unsigned int i = 0; i < parameterNames.size(); ++i)
+								{
+									// create artdaq Reader property record
+									parameterRow = daqParameterTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName + parameterUIDs[i]);
+
+									// set app status true
+									daqParameterTable.tableView_->setValueAsString("1", parameterRow, daqParameterTable.tableView_->getColStatus());
+									// set key
+									daqParameterTable.tableView_->setValueAsString(
+											parameterNames[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
+									// set value
+									daqParameterTable.tableView_->setValueAsString(
+											parameterValues[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
+									// set groupid
+									daqParameterTable.tableView_->setValueAsString(
+											daqParameterGroupID, parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
+
+								} //end Reader default property create loop
+
+								daqParameterTable.tableView_->init();  // verify new table (throws runtime_errors)
+
+							} //end Reader default property setup
+							else if(nodeTypePair.first == processTypes_.BUILDER ||
+									nodeTypePair.first == processTypes_.LOGGER 	||
+									nodeTypePair.first == processTypes_.DISPATCHER)
+							{
+
+								__COUT__ << "Handling new " << nodeTypePair.first << " defaults!" << __E__;
+
+								//goes through DAQ table
+								TableEditStruct& daqTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_TABLE, true /*markModified*/);
+								// create DAQ record
+								unsigned int daqRecordRow = daqTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName + "Daq");
+								std::string daqRecordUID = daqTable.tableView_->getDataView()[daqRecordRow][daqTable.tableView_->getColUID()];
+
+								//create unique link to daq table
+								typeTable.tableView_->setValueAsString(
+										ARTDAQTableBase::ARTDAQ_DAQ_TABLE,
+										row,
+										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaq_));
+								typeTable.tableView_->setValueAsString(
+										daqRecordUID,
+										row,
+										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaqUID_));
+
+
+								TableEditStruct& daqParameterTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
+								//create group link to daq parameter table
+								daqTable.tableView_->setValueAsString(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE,
+										daqRecordRow,
+										daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParameters_));
+								std::string daqParameterGroupID = daqTable.tableView_->setUniqueColumnValue(
+										daqRecordRow,
+										daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParametersGroupID_),
+										nodeName + "DaqParameters");
+
+								//now create parameters at target link
+								const std::vector<std::string> parameterUIDs = {
+										"BufferCount",
+										"FragmentsPerEvent"
+								};
+
+								const std::vector<std::string> parameterNames = {
+										"buffer_count",                 //"BufferCount",
+										"expected_fragments_per_event"  //"FragmentsPerEvent"
+								};
+								const std::vector<std::string> parameterValues = {
+										"10",                //"BufferCount",
+										"0"  				//"FragmentsPerEvent",
+								};
+
+								unsigned int parameterRow;
+								for(unsigned int i = 0; i < parameterNames.size(); ++i)
+								{
+									// create artdaq Reader property record
+									parameterRow = daqParameterTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName + parameterUIDs[i]);
+
+									// set app status true
+									daqParameterTable.tableView_->setValueAsString("1", parameterRow, daqParameterTable.tableView_->getColStatus());
+									// set key
+									daqParameterTable.tableView_->setValueAsString(
+											parameterNames[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
+									// set value
+									daqParameterTable.tableView_->setValueAsString(
+											parameterValues[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
+									// set groupid
+									daqParameterTable.tableView_->setValueAsString(
+											daqParameterGroupID, parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
+
+								} //end Reader default property create loop
+
+								daqTable.tableView_->init();  			// verify new table (throws runtime_errors)
+								daqParameterTable.tableView_->init();  	// verify new table (throws runtime_errors)
+
+
+							} //end Builder, Logger, Dispatcher default property setup
 						}
 						else  // set UID
 						{
