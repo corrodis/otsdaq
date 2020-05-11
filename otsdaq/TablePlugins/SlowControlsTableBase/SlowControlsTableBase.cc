@@ -292,6 +292,27 @@ bool SlowControlsTableBase::outputEpicsPVFile(ConfigurationManager*             
 			fout << out.str();
 			fout.close();
 
+			std::string csvFilename = filename.substr(0, filename.length()-3) + "csv";
+			fout.open(csvFilename, std::fstream::out | std::fstream::trunc);
+			if(fout.fail())
+			{
+				__SS__ << "Failed to open CSV EPICS PV file: " << filename << __E__;
+				__SS_THROW__;
+			}
+
+			std::string csvOut = out.str();
+			//if (csvOut.find("file \"dbt/subst_ai.dbt\" {\n") != std::string::npos) csvOut = csvOut.replace(csvOut.find("file \"dbt/subst_ai.dbt\" {\n"), 26, "");
+			csvOut.erase(0, csvOut.find("\n") + 1);
+			if (csvOut.find("pattern  {") != std::string::npos) csvOut = csvOut.replace(csvOut.find("pattern  {"), 10, "");
+			while (csvOut.find("{") != std::string::npos) csvOut = csvOut.replace(csvOut.find("{"), 1, "");
+			while (csvOut.find("}") != std::string::npos) csvOut = csvOut.replace(csvOut.find("}"), 1, "");
+			while (csvOut.find("\"") != std::string::npos) csvOut = csvOut.replace(csvOut.find("\""), 1, "");
+			while (csvOut.find(" ") != std::string::npos) csvOut = csvOut.replace(csvOut.find(" "), 1, "");
+			while (csvOut.find("\t") != std::string::npos) csvOut = csvOut.replace(csvOut.find("\t"), 1, "");
+			
+			fout << csvOut.substr(0, csvOut.length()-1);
+			fout.close();
+
 			std::FILE* fp = fopen(EPICS_DIRTY_FILE_PATH.c_str(), "w");
 			if(fp)
 			{

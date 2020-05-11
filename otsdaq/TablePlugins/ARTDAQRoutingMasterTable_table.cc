@@ -99,15 +99,10 @@ unsigned int ARTDAQRoutingMasterTable::slowControlsHandlerConfig(
 
 			try
 			{
-				if(routingMasterPair.second.getNode("daqLink").isDisconnected())
+				if(routingMasterPair.second.getNode("daqMetricsLink").isDisconnected())
 					continue;
 
-				auto daqLink = routingMasterPair.second.getNode("daqLink");
-
-				if(daqLink.getNode("daqMetricsLink").isDisconnected())
-					continue;
-
-				auto daqMetricsLinks = daqLink.getNode("daqMetricsLink").getChildren();
+				auto daqMetricsLinks = routingMasterPair.second.getNode("daqMetricsLink").getChildren();
 				for(auto& daqMetricsLink : daqMetricsLinks)  // start daqMetricsLinks record loop
 				{
 					if(!daqMetricsLink.second.status())

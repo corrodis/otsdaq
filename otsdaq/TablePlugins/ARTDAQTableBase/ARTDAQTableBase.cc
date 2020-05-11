@@ -766,7 +766,6 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: " << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>())
 			    << "}\n\n";
 
-
 			//--------------------------------------
 			// handle services NOT @table:: parameters
 			insertParameters(out,
@@ -1041,12 +1040,25 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		//--------------------------------------
 		// handle source
-		OUT << "source: {\n";
-		PUSHTAB;
-		OUT << "module_type: ArtdaqInput";
-		POPTAB;
-		OUT << "}\n\n";  // end source
-		
+		//__COUT__ << "Filling art.source" << __E__;
+		auto source = art.getNode("sourceLink");
+		if(!source.isDisconnected())
+		{
+			OUT << "source: {\n";
+			PUSHTAB;
+			insertModuleType(out, tabStr, commentStr, source.getNode("sourceModuleType"));
+			POPTAB;
+			OUT << "}\n\n";  // end source
+		}
+		else
+		{
+			OUT << "source: {\n";
+			PUSHTAB;
+			OUT << "module_type: ArtdaqInput";
+			POPTAB;
+			OUT << "}\n\n";  // end source
+		}
+
 		//--------------------------------------
 		// handle process_name
 		//__COUT__ << "Writing art.process_name" << __E__;
@@ -1812,7 +1824,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 				//		search for other records with same values/links except hostname/name
 
 				std::vector<std::string> multiNodeNames, hostnameArray;
-				//unsigned int             hostnameFixedWidth = 0;
+				// unsigned int             hostnameFixedWidth = 0;
 
 				__COUTV__(allNodes.size());
 				for(auto& otherNode : allNodes)  // start multi-node search loop
@@ -2051,7 +2063,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						if(allIntegers)
 						{
 							std::set<unsigned int> intSortWildcards;
-							//unsigned int           tmpInt;
+							// unsigned int           tmpInt;
 							for(auto& wildcard : wildcards)
 								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
@@ -2140,7 +2152,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							if(allIntegers)
 							{
 								std::set<unsigned int> intSortWildcards;
-								//unsigned int           tmpInt;
+								// unsigned int           tmpInt;
 								for(auto& wildcard : wildcards)
 									intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
@@ -2736,7 +2748,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			// test the table before getting for real
 			try
 			{
-			/*	TableEditStruct& tmpTypeTable = */ configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
+				/*	TableEditStruct& tmpTypeTable = */ configGroupEdit.getTableEditStruct(it->second, true /*markModified*/);
 			}
 			catch(...)
 			{
@@ -2808,7 +2820,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 							std::vector<std::string> printerSyntaxArr = StringMacros::getVectorFromString(originalParameterArr[1], {','} /*delimiter*/);
 
-							//unsigned int             count = 0;
+							// unsigned int             count = 0;
 							std::vector<std::string> originalNodeIndices;
 							for(auto& printerSyntaxValue : printerSyntaxArr)
 							{
@@ -2854,7 +2866,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 								__SS_THROW__;
 							}
 
-							//bool         isFirst     = true;
+							// bool         isFirst     = true;
 							unsigned int originalRow = TableView::INVALID, lastOriginalRow = TableView::INVALID;
 							for(unsigned int i = 0; i < originalNodeIndices.size(); ++i)
 							{
@@ -3145,7 +3157,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							}
 						}
 
-						//unsigned int count = 0;
+						// unsigned int count = 0;
 						for(auto& printerSyntaxValue : printerSyntaxArr)
 						{
 							__COUTV__(printerSyntaxValue);
@@ -3330,7 +3342,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			{  // delete record handling
 				__COUT__ << "Deleting '" << nodeTypePair.first << "' records not specified..." << __E__;
 
-				//unsigned int           row;
+				// unsigned int           row;
 				std::set<unsigned int> orderedRowSet;  // need to delete in reverse order
 				for(auto& deletePair : deleteRecordMap)
 				{

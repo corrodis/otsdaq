@@ -99,15 +99,10 @@ unsigned int ARTDAQBoardReaderTable::slowControlsHandlerConfig(
 
 			try
 			{
-				if(boardReaderPair.second.getNode("daqLink").isDisconnected())
+				if(boardReaderPair.second.getNode("daqMetricsLink").isDisconnected())
 					continue;
 
-				auto daqLink = boardReaderPair.second.getNode("daqLink");
-
-				if(daqLink.getNode("daqMetricsLink").isDisconnected())
-					continue;
-
-				auto daqMetricsLinks = daqLink.getNode("daqMetricsLink").getChildren();
+				auto daqMetricsLinks = boardReaderPair.second.getNode("daqMetricsLink").getChildren();
 				for(auto& daqMetricsLink : daqMetricsLinks)  // start daqMetricsLinks record loop
 				{
 					if(!daqMetricsLink.second.status())
