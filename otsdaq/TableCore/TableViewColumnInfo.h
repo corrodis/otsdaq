@@ -6,8 +6,10 @@
 #include <string>
 #include <vector>
 
+
 namespace ots
 {
+// clang-format off
 class TableViewColumnInfo
 {
   public:
@@ -15,6 +17,7 @@ class TableViewColumnInfo
 	                    const std::string& name,
 	                    const std::string& storageName,
 	                    const std::string& dataType,
+	                    const std::string* defaultValue,
 	                    const std::string& dataChoicesCSV,
 	                    std::string*       capturedExceptionString);
 	TableViewColumnInfo(const TableViewColumnInfo& c);             // copy constructor because of bitmap pointer
@@ -27,6 +30,7 @@ class TableViewColumnInfo
 	const std::string&              getStorageName(void) const;
 	const std::string&              getDataType(void) const;
 	const std::string&              getDefaultValue(void) const;
+	static const std::string&       getDefaultDefaultValue(const std::string& type, const std::string& dataType);
 	const std::vector<std::string>& getDataChoices(void) const;
 
 	struct BitMapInfo  // uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
@@ -46,6 +50,7 @@ class TableViewColumnInfo
 	static std::vector<std::string>                                   getAllDataTypesForGUI(void);
 
 	 bool isChildLink(void) const;
+	 static bool isChildLink(const std::string& type);
 	 bool isChildLinkUID(void) const;
 	 bool isChildLinkGroupID(void) const;
 	 bool isGroupID(void) const;
@@ -82,15 +87,18 @@ class TableViewColumnInfo
 	TableViewColumnInfo();  // private constructor, only used in assignment operator
 	void extractBitMapInfo();
 
-  protected:
-	std::string              type_;
-	std::string              name_;
-	std::string              storageName_;
-	std::string              dataType_;
-	std::vector<std::string> dataChoices_;
-	BitMapInfo*              bitMapInfoP_;
-}; //end TableViewColumnInfo class
+	std::vector<std::string>        getDataChoicesFromString(const std::string& dataChoicesCSV) const;
 
+  protected:
+	const std::string        	   type_;
+	const std::string              name_;
+	const std::string              storageName_;
+	const std::string              dataType_;
+	const std::string              defaultValue_;
+	const std::vector<std::string> dataChoices_;
+	BitMapInfo*              		bitMapInfoP_;
+}; //end TableViewColumnInfo class
+// clang-format on
 }  // namespace ots
 
 #endif

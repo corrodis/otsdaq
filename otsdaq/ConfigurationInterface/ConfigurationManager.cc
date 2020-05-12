@@ -109,23 +109,28 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		                                       "UnusedUID",
 		                                       "UNUSED_UID",
 		                                       TableViewColumnInfo::DATATYPE_NUMBER,
+											   0 /*Default*/,
 		                                       "",
 		                                       0));
-		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING, "", 0));
+		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING,
+				   0 /*Default*/, "", 0));
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_COMMENT,  // just to make init() happy
 		                                       TableViewColumnInfo::COL_NAME_COMMENT,
 		                                       "COMMENT_DESCRIPTION",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
+											   0 /*Default*/,
 		                                       "",
 		                                       0));
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_AUTHOR,  // just to make init() happy
 		                                       "GroupAuthor",
 		                                       "AUTHOR",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
+											   0 /*Default*/,
 		                                       "",
 		                                       0));
 		colInfo->push_back(
-		    TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP, "GroupCreationTime", "GROUP_CREATION_TIME", TableViewColumnInfo::DATATYPE_TIME, "", 0));
+		    TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP, "GroupCreationTime", "GROUP_CREATION_TIME", TableViewColumnInfo::DATATYPE_TIME,
+					   0 /*Default*/, "", 0));
 		auto tmpVersion = groupMetadataTable_.createTemporaryView();
 		groupMetadataTable_.setActiveView(tmpVersion);
 		// only need this one and only row for all time

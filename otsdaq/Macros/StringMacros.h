@@ -107,12 +107,14 @@ struct StringMacros
 	    std::vector<std::string>& 								listToReturn,
 	    const std::set<char>&     								delimiter        	= {',', '|', '&'},
 	    const std::set<char>&     								whitespace       	= {' ', '\t', '\n', '\r'},
-	    std::vector<char>*        								listOfDelimiters 	= 0);
+	    std::vector<char>*        								listOfDelimiters 	= 0,
+		bool													decodeURIComponents = false);
 	static std::vector<std::string> getVectorFromString	 	(
 		const std::string&        								inputString,
 		const std::set<char>&     								delimiter        	= {',', '|', '&'},
 		const std::set<char>&     								whitespace       	= {' ', '\t', '\n', '\r'},
-		std::vector<char>*        								listOfDelimiters 	= 0);
+		std::vector<char>*        								listOfDelimiters 	= 0,
+		bool													decodeURIComponents = false);
 
 	//========================================================================================================================
 	// mapToString ~

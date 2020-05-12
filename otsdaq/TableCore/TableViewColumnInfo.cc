@@ -73,9 +73,14 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 	const std::string& name,
 	const std::string& storageName,
 	const std::string& dataType,
+    const std::string* defaultValue,
 	const std::string& dataChoicesCSV,
 	std::string* capturedExceptionString)
-	: type_(type), name_(name), storageName_(storageName), dataType_(dataType), bitMapInfoP_(0)
+	: type_(type), name_(name), storageName_(storageName),
+	  dataType_(/*convert antiquated*/dataType == "VARCHAR2"?DATATYPE_STRING:dataType),
+	  defaultValue_(defaultValue?*defaultValue:getDefaultDefaultValue(type_,dataType_)), //if default pointer, take input default value
+	  dataChoices_(getDataChoicesFromString(dataChoicesCSV)),
+	  bitMapInfoP_(0)
 {
 	// verify type
 	if ((type_ != TYPE_UID) && (type_ != TYPE_DATA) && (type_ != TYPE_UNIQUE_DATA) && (type_ != TYPE_UNIQUE_GROUP_DATA) && (type_ != TYPE_MULTILINE_DATA) &&
@@ -110,11 +115,6 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 		}
 
 	// verify data type
-
-	// first, convert antiquated
-	if (dataType_ == "VARCHAR2")
-		dataType_ = DATATYPE_STRING;
-
 	if ((dataType_ != DATATYPE_NUMBER) && (dataType_ != DATATYPE_STRING) && (dataType_ != DATATYPE_TIME))
 	{
 		__SS__ << "The data type for column " << name_ << " is " << dataType_ << ", while the only accepted types are: " << DATATYPE_NUMBER << " "
@@ -194,16 +194,23 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 				__SS_THROW__;
 		}
 
+	//RAR moved to call from initialization of constructor!
+
 	// build data choices vector from URI encoded data
 	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
-	{
-		std::istringstream f(dataChoicesCSV);
-		std::string        s;
-		while (getline(f, s, ','))
-			dataChoices_.push_back(StringMacros::decodeURIComponent(s));
-		// for(const auto &dc: dataChoices_)
-		//	__COUT__ << dc << std::endl;
-	}
+//	{
+//		std::istringstream f(dataChoicesCSV);
+//		std::string        s;
+//		while (getline(f, s, ','))
+//			dataChoices_.push_back(StringMacros::decodeURIComponent(s));
+//		// for(const auto &dc: dataChoices_)
+//		//	__COUT__ << dc << std::endl;
+//	}
+//	__COUTV__(dataChoicesCSV);
+//	__COUTV__(StringMacros::vectorToString(dataChoices_));
+//	__COUTV__(dataChoices_.size());
+//	__COUTV__ (defaultValue);
+//	__COUTV__ (defaultValue_);
 
 	try
 	{
@@ -219,6 +226,23 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 
 	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
 }
+
+//==============================================================================
+std::vector<std::string> TableViewColumnInfo::getDataChoicesFromString(const std::string& dataChoicesCSV) const
+{
+	std::vector<std::string> dataChoices;
+	// build data choices vector from URI encoded data
+	//__COUT__ << "dataChoicesCSV " << dataChoicesCSV << std::endl;
+	{
+		std::istringstream f(dataChoicesCSV);
+		std::string        s;
+		while (getline(f, s, ','))
+			dataChoices.push_back(StringMacros::decodeURIComponent(s));
+		// for(const auto &dc: dataChoices_)
+		//	__COUT__ << dc << std::endl;
+	}
+	return dataChoices;
+} //end getDataChoicesFromString
 
 //==============================================================================
 void TableViewColumnInfo::extractBitMapInfo()
@@ -290,28 +314,64 @@ TableViewColumnInfo::TableViewColumnInfo(void) {}
 
 //==============================================================================
 TableViewColumnInfo::TableViewColumnInfo(const TableViewColumnInfo& c)  // copy constructor because of bitmap pointer
-	: type_(c.type_), name_(c.name_), storageName_(c.storageName_), dataType_(c.dataType_), dataChoices_(c.dataChoices_), bitMapInfoP_(0)
+	: type_(c.type_), name_(c.name_), storageName_(c.storageName_),
+	  dataType_(c.dataType_), defaultValue_(c.defaultValue_),
+	  dataChoices_(c.dataChoices_), bitMapInfoP_(0)
 {
 	// extract bitmap info if necessary
 	extractBitMapInfo();
-}
+} //end copy constructor
 
 //==============================================================================
-TableViewColumnInfo& TableViewColumnInfo::operator=(const TableViewColumnInfo& c)  // assignment operator because of bitmap pointer
+TableViewColumnInfo& TableViewColumnInfo::operator=(const TableViewColumnInfo&)  // assignment operator because of bitmap pointer
 {
-	TableViewColumnInfo* retColInfo = new TableViewColumnInfo();
-	retColInfo->type_ = c.type_;
-	retColInfo->name_ = c.name_;
-	retColInfo->storageName_ = c.storageName_;
-	retColInfo->dataType_ = c.dataType_;
-	retColInfo->dataChoices_ = c.dataChoices_;
-	retColInfo->bitMapInfoP_ = 0;
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR " << std::endl;
+	// Note: Members of the ConfigurationTree are declared constant.
+	//	(Refer to comments at top of class declaration for solutions)
+	//	So this operator cannot work.. SO I am going to crash just in case it is
+	// called by mistake
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - TableViewColumnInfo is a "
+			"const class. SO YOUR CODE IS WRONG! You should probably instantiate "
+			"and initialize another TableViewColumnInfo, rather than assigning to "
+			"an existing TableViewColumnInfo. Crashing now."
+			<< std::endl;
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - TableViewColumnInfo is a "
+			"const class. SO YOUR CODE IS WRONG! You should probably instantiate "
+			"and initialize another TableViewColumnInfo, rather than assigning to "
+			"an existing TableViewColumnInfo. Crashing now."
+			<< std::endl;
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - TableViewColumnInfo is a "
+			"const class. SO YOUR CODE IS WRONG! You should probably instantiate "
+			"and initialize another TableViewColumnInfo, rather than assigning to "
+			"an existing TableViewColumnInfo. Crashing now."
+			<< std::endl;
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - TableViewColumnInfo is a "
+			"const class. SO YOUR CODE IS WRONG! You should probably instantiate "
+			"and initialize another TableViewColumnInfo, rather than assigning to "
+			"an existing TableViewColumnInfo. Crashing now."
+			<< std::endl;
+	__COUT__ << "OPERATOR= COPY CONSTRUCTOR CANNOT BE USED - TableViewColumnInfo is a "
+			"const class. SO YOUR CODE IS WRONG! You should probably instantiate "
+			"and initialize another TableViewColumnInfo, rather than assigning to "
+			"an existing TableViewColumnInfo. Crashing now."
+			<< std::endl;
+
+	__COUT__ << StringMacros::stackTrace() << __E__;
+	exit(0);
+//	TableViewColumnInfo* retColInfo = new TableViewColumnInfo();
+//	retColInfo->type_ = c.type_;
+//	retColInfo->name_ = c.name_;
+//	retColInfo->storageName_ = c.storageName_;
+//	retColInfo->dataType_ = c.dataType_;
+//	retColInfo->dataChoices_ = c.dataChoices_;
+//	retColInfo->bitMapInfoP_ = 0;
 
 	// extract bitmap info if necessary
-	retColInfo->extractBitMapInfo();
+	//retColInfo->extractBitMapInfo();
 
-	return *retColInfo;
-}
+	extractBitMapInfo();
+	return *this;//*retColInfo;
+} //end assignment operator
 
 //==============================================================================
 TableViewColumnInfo::~TableViewColumnInfo(void)
@@ -324,30 +384,35 @@ TableViewColumnInfo::~TableViewColumnInfo(void)
 const std::string& TableViewColumnInfo::getType(void) const { return type_; }
 
 //==============================================================================
-const std::string& TableViewColumnInfo::getDefaultValue(void) const
+const std::string& TableViewColumnInfo::getDefaultValue(void) const { return defaultValue_; }
+
+//==============================================================================
+const std::string& TableViewColumnInfo::getDefaultDefaultValue(const std::string& type, const std::string& dataType)
 {
-	if (getDataType() == TableViewColumnInfo::DATATYPE_STRING)
+	if (dataType == TableViewColumnInfo::DATATYPE_STRING)
 	{
-		if (getType() == TableViewColumnInfo::TYPE_ON_OFF || getType() == TableViewColumnInfo::TYPE_TRUE_FALSE || getType() == TableViewColumnInfo::TYPE_YES_NO)
+		if (type == TableViewColumnInfo::TYPE_ON_OFF ||
+				type == TableViewColumnInfo::TYPE_TRUE_FALSE ||
+				type == TableViewColumnInfo::TYPE_YES_NO)
 			return (TableViewColumnInfo::DATATYPE_BOOL_DEFAULT);  // default to OFF, NO, FALSE
-		else if (isChildLink())
+		else if (TableViewColumnInfo::isChildLink(type)) //call static version
 			return (TableViewColumnInfo::DATATYPE_LINK_DEFAULT);
-		else if (getType() == TableViewColumnInfo::TYPE_COMMENT)
+		else if (type == TableViewColumnInfo::TYPE_COMMENT)
 			return (TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT);
 		else
 			return (TableViewColumnInfo::DATATYPE_STRING_DEFAULT);
 	}
-	else if (getDataType() == TableViewColumnInfo::DATATYPE_NUMBER)
+	else if (dataType == TableViewColumnInfo::DATATYPE_NUMBER)
 		return (TableViewColumnInfo::DATATYPE_NUMBER_DEFAULT);
-	else if (getDataType() == TableViewColumnInfo::DATATYPE_TIME)
+	else if (dataType == TableViewColumnInfo::DATATYPE_TIME)
 		return (TableViewColumnInfo::DATATYPE_TIME_DEFAULT);
 	else
 	{
-		__SS__ << "\tUnrecognized View data type: " << getDataType() << std::endl;
+		__SS__ << "\tUnrecognized View data type: " << dataType << std::endl;
 		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
-}
+} //end getDefaultDefaultValue()
 
 //==============================================================================
 std::vector<std::string> TableViewColumnInfo::getAllTypesForGUI(void)
@@ -367,7 +432,7 @@ std::vector<std::string> TableViewColumnInfo::getAllTypesForGUI(void)
 	all.push_back(TYPE_START_CHILD_LINK);
 	all.push_back(TYPE_START_GROUP_ID);
 	return all;
-}
+} //end getAllTypesForGUI()
 
 //==============================================================================
 std::vector<std::string> TableViewColumnInfo::getAllDataTypesForGUI(void)
@@ -439,9 +504,22 @@ const TableViewColumnInfo::BitMapInfo& TableViewColumnInfo::getBitMapInfo(void) 
 // isChildLink
 //	note: TYPE_START_CHILD_LINK index may be a subset of UID and GROUP_ID
 //	so don't allow alpha character immediately after
+bool TableViewColumnInfo::isChildLink(const std::string& type)
+{
+	return (type.find(TYPE_START_CHILD_LINK) == 0 &&
+			type.length() > TYPE_START_CHILD_LINK.length() &&
+			type[TYPE_START_CHILD_LINK.length()] == '-');
+}
+
+//==============================================================================
+// isChildLink
+//	note: TYPE_START_CHILD_LINK index may be a subset of UID and GROUP_ID
+//	so don't allow alpha character immediately after
 bool TableViewColumnInfo::isChildLink(void) const
 {
-	return (type_.find(TYPE_START_CHILD_LINK) == 0 && type_.length() > TYPE_START_CHILD_LINK.length() && type_[TYPE_START_CHILD_LINK.length()] == '-');
+	return (type_.find(TYPE_START_CHILD_LINK) == 0 &&
+			type_.length() > TYPE_START_CHILD_LINK.length() &&
+			type_[TYPE_START_CHILD_LINK.length()] == '-');
 }
 
 //==============================================================================

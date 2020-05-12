@@ -83,7 +83,7 @@ class TableView
 	std::set<std::string /*col name*/>          getColumnNames				(void) const;
 	std::map<std::string, unsigned int /*col*/> getColumnNamesMap			(void) const;
 	std::set<std::string /*storage name*/>      getColumnStorageNames		(void) const;
-	std::vector<std::string /*default value*/>  getDefaultRowValues			(void) const;
+	const std::vector<std::string /*per col*/>& getDefaultRowValues			(void) const;
 
 	unsigned int       							getNumberOfRows				(void) const;
 	unsigned int       							getNumberOfColumns			(void) const;
@@ -221,6 +221,7 @@ public:
 	unsigned int 								initColUID					(void);
 	unsigned int 								initColStatus				(void);
 	unsigned int 								initColPriority				(void);
+	const std::vector<std::string /*per col*/>&	initRowDefaults				(void);
 
 	TableView& 									operator=					(const TableView src);  // operator= is purposely undefined and
 														                                            // private (DO NOT USE IT!) - should use
@@ -233,7 +234,8 @@ public:
 	std::string  													author_;
 	time_t       													creationTime_;  			// used more like "construction"(constructor) time
 	time_t 															lastAccessTime_;  			// last time the ConfigurationInterface:get() retrieved this view
-	
+
+	std::vector<std::string> 										rowDefaultValues_;
 	unsigned int 													colUID_, colStatus_, colPriority_;  // special column pointers
 	std::map<std::string, unsigned int>								colLinkGroupIDs_;  // map from child link index to column
 

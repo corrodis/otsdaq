@@ -11,11 +11,12 @@
 				<xs:sequence>
 				<xs:element name="COLUMN" minOccurs="1" maxOccurs="unbounded">
 				<xs:complexType>
-					<xs:attribute name="Type"	     type="xs:string" />
-					<xs:attribute name="Name"	     type="xs:string" />
-					<xs:attribute name="StorageName" type="xs:string" />
-					<xs:attribute name="DataType"	 type="xs:string" />
-					<xs:attribute name="DataChoices" type="xs:string" />
+					<xs:attribute name="Type"	     	type="xs:string" />
+					<xs:attribute name="Name"	     	type="xs:string" />
+					<xs:attribute name="StorageName" 	type="xs:string" />
+					<xs:attribute name="DataType"	 	type="xs:string" />
+					<xs:attribute name="DefaultValue"	type="xs:string" />
+					<xs:attribute name="DataChoices" 	type="xs:string" />
 				</xs:complexType>
 				</xs:element>
 				</xs:sequence>

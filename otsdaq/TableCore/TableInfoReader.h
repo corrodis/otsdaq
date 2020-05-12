@@ -43,6 +43,7 @@ class TableInfoReader
 	XMLCh* columnStorageNameAttributeTag_;
 	XMLCh* columnDataTypeAttributeTag_;
 	XMLCh* columnDataChoicesAttributeTag_;
+	XMLCh* columnDefaultValueAttributeTag_;
 
 	bool allowIllegalColumns_;
 

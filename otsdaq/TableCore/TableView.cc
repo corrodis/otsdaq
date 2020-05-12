@@ -53,6 +53,10 @@ TableView& TableView::operator=(const TableView /*src*/)
 {
 	__SS__ << "Invalid use of operator=... Should not directly copy a TableView. Please "
 		"use TableView::copy(sourceView,author,comment)";
+	ss << StringMacros::stackTrace() << __E__;
+
+	__COUT__ << ss.str() << __E__;
+	exit(0);
 	__SS_THROW__;
 }
 
@@ -65,7 +69,13 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 	author_ = author;  // take new author
 	// creationTime_ 	= time(0); //don't change creation time
 	lastAccessTime_ = time(0);
-	columnsInfo_ = src.columnsInfo_;
+
+	//can not use operator= for TableViewColumn (it is a const class)
+	//columnsInfo_ = src.columnsInfo_;
+	columnsInfo_.clear();
+	for(auto& c:src.columnsInfo_)
+		columnsInfo_.push_back(c);
+
 	theDataView_ = src.theDataView_;
 	sourceColumnNames_ = src.sourceColumnNames_;
 
@@ -74,6 +84,7 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 	// init();  // verify consistency
 
 	initColUID();  // setup UID column
+	initRowDefaults();
 	try
 	{
 		initColStatus();  // setup Status column
@@ -398,7 +409,7 @@ void TableView::init(void)
 				}
 		}  // end TYPE_UNIQUE_GROUP_DATA check
 
-		auto rowDefaults = getDefaultRowValues();
+		auto rowDefaults = initRowDefaults();//getDefaultRowValues();
 
 		// check that column types are well behaved
 		//	- check that fixed choice data is one of choices
@@ -1682,9 +1693,13 @@ std::set<std::string> TableView::getColumnStorageNames(void) const
 }
 
 //==============================================================================
-std::vector<std::string> TableView::getDefaultRowValues(void) const
+const std::vector<std::string>& TableView::getDefaultRowValues(void) const { return rowDefaultValues_; }
+
+//==============================================================================
+const std::vector<std::string>& TableView::initRowDefaults(void)
 {
-	std::vector<std::string> retVec;
+	std::vector<std::string>& retVec = rowDefaultValues_;
+	retVec.clear();
 
 	// fill each col of new row with default values
 	for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
@@ -1734,7 +1749,9 @@ std::vector<std::string> TableView::getDefaultRowValues(void) const
 			retVec.push_back(columnsInfo_[col].getDefaultValue());
 	}
 
-	return retVec;
+	//__COUT__ << StringMacros::stackTrace() << __E__;
+	//__COUTV__(StringMacros::vectorToString(rowDefaultValues_));
+	return rowDefaultValues_;
 }  // end getDefaultRowValues()
 
 //==============================================================================

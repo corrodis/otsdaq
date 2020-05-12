@@ -29,7 +29,7 @@
 using namespace ots;
 
 #undef __COUT_HDR__
-#define __COUT_HDR__ "TableInfoReader"
+#define __COUT_HDR__ "TableInfoReader <>"
 
 // const std::string TableInfoReader::CONFIGURATION_BACKEND_TYPE_ =
 //    __ENV__("CONFIGURATION_TYPE");
@@ -52,6 +52,7 @@ TableInfoReader::TableInfoReader(bool allowIllegalColumns) : allowIllegalColumns
 	columnStorageNameAttributeTag_ = xercesc::XMLString::transcode("StorageName");
 	columnDataTypeAttributeTag_    = xercesc::XMLString::transcode("DataType");
 	columnDataChoicesAttributeTag_ = xercesc::XMLString::transcode("DataChoices");
+	columnDefaultValueAttributeTag_ = xercesc::XMLString::transcode("DefaultValue");
 }
 
 //==============================================================================
@@ -72,6 +73,7 @@ TableInfoReader::~TableInfoReader(void)
 		xercesc::XMLString::release(&columnStorageNameAttributeTag_);
 		xercesc::XMLString::release(&columnDataTypeAttributeTag_);
 		xercesc::XMLString::release(&columnDataChoicesAttributeTag_);
+		xercesc::XMLString::release(&columnDefaultValueAttributeTag_);
 	}
 	catch(...)
 	{
@@ -339,6 +341,22 @@ std::string TableInfoReader::read(TableBase& table)
 				// XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)) <<
 				// __E__;
 
+				//Check for default value tag being there (for backwards compatibility)
+				// Documentation :https://xerces.apache.org/xerces-c/apiDocs-3/classDOMElement.html#a9d6a102d853eafe6619be4324c1555c3
+				std::string defaultValue;
+				bool isDefaultValue = columnElement->getAttributeNode(columnDefaultValueAttributeTag_)?true:false;
+				if(isDefaultValue)
+				{
+					defaultValue =
+							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnDefaultValueAttributeTag_)));
+
+					//__COUT__ << "FOUND default value! " << defaultValue << __E__;
+				}
+//				else
+//				{
+//					__COUT__ << "DID NOT find default value!" << __E__;
+//				}
+
 				// automatically delete the persistent version of the column info
 				std::string capturedException;
 				table.getMockupViewP()->getColumnsInfoP()->push_back(
@@ -346,6 +364,7 @@ std::string TableInfoReader::read(TableBase& table)
 				                        XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)),
 				                        XML_TO_CHAR(columnElement->getAttribute(columnStorageNameAttributeTag_)),
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataTypeAttributeTag_)),
+										isDefaultValue?&defaultValue:0,
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataChoicesAttributeTag_)),
 				                        allowIllegalColumns_ ? &capturedException : 0));  // capture exception string if allowing illegal columns
 

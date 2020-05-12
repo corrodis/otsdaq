@@ -460,7 +460,8 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
                                        std::vector<std::string>& listToReturn,
                                        const std::set<char>&     delimiter,
                                        const std::set<char>&     whitespace,
-                                       std::vector<char>*        listOfDelimiters)
+                                       std::vector<char>*        listOfDelimiters,
+					   bool	decodeURIComponents)
 {
 	unsigned int             i = 0;
 	unsigned int             j = 0;
@@ -511,7 +512,9 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 				//__COUTV__(lastDelimiter);
 				listOfDelimiters->push_back(lastDelimiter);
 			}
-			listToReturn.push_back(inputString.substr(i, j - i));
+			listToReturn.push_back(decodeURIComponents?
+					StringMacros::decodeURIComponent(inputString.substr(i, j - i)):
+					inputString.substr(i, j - i));
 
 			// setup i and j for next find
 			i = c + 1;
@@ -538,7 +541,9 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 			//__COUTV__(lastDelimiter);
 			listOfDelimiters->push_back(lastDelimiter);
 		}
-		listToReturn.push_back(inputString.substr(i, j - i));
+		listToReturn.push_back(decodeURIComponents?
+				StringMacros::decodeURIComponent(inputString.substr(i, j - i)):
+				inputString.substr(i, j - i));
 	}
 
 	// assert that there is one less delimiter than values
@@ -568,11 +573,12 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 std::vector<std::string> StringMacros::getVectorFromString(const std::string&    inputString,
                                                            const std::set<char>& delimiter,
                                                            const std::set<char>& whitespace,
-                                                           std::vector<char>*    listOfDelimiters)
+                                                           std::vector<char>*    listOfDelimiters,
+															bool decodeURIComponents)
 {
 	std::vector<std::string> listToReturn;
 
-	StringMacros::getVectorFromString(inputString, listToReturn, delimiter, whitespace, listOfDelimiters);
+	StringMacros::getVectorFromString(inputString, listToReturn, delimiter, whitespace, listOfDelimiters, decodeURIComponents);
 	return listToReturn;
 }  // end getVectorFromString()
 
