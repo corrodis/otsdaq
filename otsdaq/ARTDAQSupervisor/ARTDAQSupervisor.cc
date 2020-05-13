@@ -1044,7 +1044,6 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 					if(res == NULL)
 					{
 						runner_running_ = false;
-						lk.unlock();
 						PyErr_Print();
 						__SS__ << "Error calling check_proc_heartbeats function" << __E__;
 						__SUP_SS_THROW__;
@@ -1054,7 +1053,6 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 				catch(cet::exception& ex)
 				{
 					runner_running_ = false;
-					lk.unlock();
 					PyErr_Print();
 					__SS__ << "An cet::exception occurred while calling "
 					          "check_proc_heartbeats function: "
@@ -1065,7 +1063,6 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 				catch(std::exception& ex)
 				{
 					runner_running_ = false;
-					lk.unlock();
 					PyErr_Print();
 					__SS__ << "An std::exception occurred while calling "
 					          "check_proc_heartbeats function: "
@@ -1076,13 +1073,13 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 				catch(...)
 				{
 					runner_running_ = false;
-					lk.unlock();
 					PyErr_Print();
 					__SS__ << "An unknown Error occurred while calling runner function" << __E__;
 					__SUP_SS_THROW__;
 					break;
 				}
 
+						lk.unlock();
 				getDAQState_();
 				if(daqinterface_state_ != state_before)
 				{
