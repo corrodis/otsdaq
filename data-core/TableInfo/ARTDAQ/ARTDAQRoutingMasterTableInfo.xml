@@ -11,8 +11,8 @@
 				<COLUMN Type="FixedChoiceData" 	 Name="routingPolicyPluginType" 	 StorageName="ROUTING_POLICY_PLUGIN_TYPE" 		DataType="STRING" 		DataChoices="arbitraryBool=1,NoOp,RoundRobin,CapacityTest"/>
 				<COLUMN Type="Data" 	 Name="tableUpdateIntervalMs" 	 StorageName="TABLE_UPDATE_INTERVAL_MS" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="tableAckRetryCount" 	 StorageName="TABLE_ACK_RETRY_COUNT" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="ChildLink-policyParameters" 	 Name="routingPolicyParametersLink" 	 StorageName="ROUTING_POLICY_PARAMETERS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
-				<COLUMN Type="ChildLinkGroupID-policyParameters" 	 Name="routingPolicyParametersLinkGroupID" 	 StorageName="ROUTING_POLICY_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-policyParameters daqParameters" 	 Name="routingPolicyParametersLink" 	 StorageName="ROUTING_POLICY_PARAMETERS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-policyParameters daqParameters" 	 Name="routingPolicyParametersLinkGroupID" 	 StorageName="ROUTING_POLICY_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-metrics" 	 Name="daqMetricsLink" 	 StorageName="DAQ_METRICS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricTable"/>
 				<COLUMN Type="ChildLinkGroupID-metrics" 	 Name="daqMetricsLinkGroupID" 	 StorageName="DAQ_METRICS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-MetricAlarmThresholds" 	 Name="MetricAlarmThresholdsLink" 	 StorageName="METRIC_ALARM_THRESHOLDS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricAlarmThresholdsTable"/>
