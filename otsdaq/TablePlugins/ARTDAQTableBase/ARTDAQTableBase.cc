@@ -842,6 +842,10 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 						OUT << "use_routing_master: false\n";
 					}
 
+					if (outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput") {
+						info_.subsystems[builderSubsystemID].eventMode = true;
+					}
+
 					POPTAB;
 					OUT << "}\n";  // end routing_table_config
 				}

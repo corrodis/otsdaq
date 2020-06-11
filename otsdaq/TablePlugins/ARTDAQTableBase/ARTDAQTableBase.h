@@ -68,10 +68,11 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		std::set<int> sources;      // by subsystem id
 		int           destination;  // destination subsystem id, 0 := no destination
 
+		bool eventMode; // Whether art sends events or Fragments
 		bool hasRoutingMaster;
 		std::string routingMasterHost;
 
-		SubsystemInfo() : sources(), destination(0), hasRoutingMaster(false), routingMasterHost("") {}
+		SubsystemInfo() : sources(), destination(0),eventMode(false), hasRoutingMaster(false), routingMasterHost("") {}
 	};
 
 	struct ARTDAQInfo

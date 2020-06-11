@@ -430,6 +430,9 @@ void ARTDAQSupervisor::configuringThread() try
 			{
 				o << "Subsystem source: " << sss << std::endl;
 			}
+			if (ss.second.eventMode) {
+				o << "Subsystem fragmentMode: False" << std::endl;
+			}
 			o << std::endl;
 		}
 	}
