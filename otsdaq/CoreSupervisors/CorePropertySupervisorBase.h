@@ -11,14 +11,42 @@
 
 #include "otsdaq/WebUsersUtilities/WebUsers.h"  //for WebUsers::RequestUserInfo
 
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+//#include <xdaq/Application.h>
+//#pragma GCC diagnostic pop
+
+#include "otsdaq/SOAPUtilities/SOAPMessenger.h"
+#include "otsdaq/WorkLoopManager/WorkLoopManager.h"
+
+#include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
+
+#include "otsdaq/CgiDataUtilities/CgiDataUtilities.h"
+#include "otsdaq/SOAPUtilities/SOAPUtilities.h"
+#include "otsdaq/XmlUtilities/HttpXmlDocument.h"
+
+#include "otsdaq/FiniteStateMachine/VStateMachine.h"
+
+#include "otsdaq/MessageFacility/ITRACEController.h"
+#include "otsdaq/WebUsersUtilities/RemoteWebUsers.h"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
+#include "otsdaq/Macros/XDAQApplicationMacros.h"
+#include "xgi/Method.h"
+
+#include <toolbox/fsm/FailedEvent.h>
+
+#include <xdaq/NamespaceURI.h>
+#include <xoap/Method.h>
 
 namespace ots
 {
 // clang-format off
+
+class ITRACEController;
 
 // CorePropertySupervisorBase
 //	This class provides supervisor property get and set functionality. It has member
@@ -70,11 +98,16 @@ class CorePropertySupervisorBase
   private:
 	static void 					indicateOtsAlive								(const CorePropertySupervisorBase* properties = 0);
 
+
 	std::string supervisorContextUID_;
 	std::string supervisorApplicationUID_;
 	std::string supervisorConfigurationPath_;
 
+
   protected:
+	xoap::MessageReference 			TRACESupervisorRequest							(xoap::MessageReference message);
+	const std::string&				getTraceLevels									(void);
+
 	// Supervisor Property names
 	//	to access, use CorePropertySupervisorBase::getSupervisorProperty and
 	// CorePropertySupervisorBase::setSupervisorProperty
@@ -206,6 +239,11 @@ class CorePropertySupervisorBase
 	std::string                 		getSupervisorProperty							(const std::string& propertyName);
 	std::string                 		getSupervisorProperty							(const std::string& propertyName, const std::string& defaultValue);
 	WebUsers::permissionLevel_t 		getSupervisorPropertyUserPermissionsThreshold	(const std::string& requestType);
+
+  protected:
+	ITRACEController* 					theTRACEController_; //only define for an app that receives a command
+  private:
+	std::string 						traceLevelsString_;
 };
 
 // clang-format on

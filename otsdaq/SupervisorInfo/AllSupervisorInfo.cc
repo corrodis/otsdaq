@@ -15,7 +15,11 @@ const bool AllSupervisorInfo::MACROMAKER_MODE = ((getenv("MACROMAKER_MODE") == N
                                                      : ((std::string(__ENV__("MACROMAKER_MODE")) == "1") ? true : false));
 
 //==============================================================================
-AllSupervisorInfo::AllSupervisorInfo(void) : theSupervisorInfo_(0), theWizardInfo_(0) {}
+AllSupervisorInfo::AllSupervisorInfo(void)
+: theSupervisorInfo_(nullptr)
+, theWizardInfo_(nullptr)
+, theARTDAQSupervisorInfo_(nullptr)
+{}
 
 //==============================================================================
 AllSupervisorInfo::AllSupervisorInfo(xdaq::ApplicationContext* applicationContext) : AllSupervisorInfo() { init(applicationContext); }
@@ -30,10 +34,12 @@ void AllSupervisorInfo::destroy(void)
 	allFETypeSupervisorInfo_.clear();
 	allDMTypeSupervisorInfo_.clear();
 
-	theSupervisorInfo_ = 0;
-	theWizardInfo_     = 0;
+	theSupervisorInfo_ = nullptr;
+	theWizardInfo_     = nullptr;
+	theARTDAQSupervisorInfo_ = nullptr;
 
 	SupervisorDescriptorInfoBase::destroy();
+
 }  // end destroy()
 
 //==============================================================================
@@ -66,6 +72,9 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	//	2. second pass, organize supervisors
 
 	bool isWizardMode = false;
+	theSupervisorInfo_ = nullptr; //reset
+	theWizardInfo_     = nullptr; //reset
+	theARTDAQSupervisorInfo_ = nullptr; //reset
 
 	// first pass, identify Wiz mode or not
 	//	accept first encountered (wizard or gateway) as the mode
@@ -97,26 +106,66 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 	else
 		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
 	std::unique_ptr<ConfigurationManager> cfgMgr((isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ? 0 : new ConfigurationManager());
-	const XDAQContextTable*               contextConfig = (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ? 0 : cfgMgr->__GET_CONFIG__(XDAQContextTable);
+	const XDAQContextTable*               contextConfig = (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ? nullptr : cfgMgr->__GET_CONFIG__(XDAQContextTable);
+	__COUTV__(contextConfig);
 
+	//For TRACE controllers in normal mode, temporarily make a map by hostname of supervisors
+	std::map<std::string /*hostname*/,std::pair<unsigned int, SupervisorInfo>> TRACEAppMap;
+	std::string name, contextName;
 	// do not involve the Configuration Manager
 	//	as it adds no valid information to the supervisors
 	//	present in wiz mode
 	for(const auto& descriptor : allDescriptors)
 	{
+		name = contextConfig ? contextConfig->getApplicationUID(descriptor.second->getContextDescriptor()->getURL(), descriptor.second->getLocalId())
+				: "" /* config app name */;
+		contextName = contextConfig ? contextConfig->getContextUID(descriptor.second->getContextDescriptor()->getURL()) :
+				"" /* config parent context name */;
+
 		auto /*<iterator,bool>*/ emplacePair = allSupervisorInfo_.emplace(std::pair<unsigned int, SupervisorInfo>(
-		    descriptor.second->getLocalId(),  // descriptor.first,
-		    SupervisorInfo(
-		        descriptor.second /* descriptor */,
-		        contextConfig ? contextConfig->getApplicationUID(descriptor.second->getContextDescriptor()->getURL(), descriptor.second->getLocalId())
-		                      : "" /* config app name */,
-		        contextConfig ? contextConfig->getContextUID(descriptor.second->getContextDescriptor()->getURL()) : "" /* config parent context name */
-		        )));
+				descriptor.second->getLocalId(),  // descriptor.first,
+				SupervisorInfo(
+						descriptor.second /* descriptor */,
+						name,
+						contextName
+				)));
 		if(!emplacePair.second)
 		{
 			__SS__ << "Error! Duplicate Application IDs are not allowed. ID =" << descriptor.second->getLocalId() << __E__;
 			__SS_THROW__;
 		}
+
+
+		//__COUTV__(emplacePair.first->second.getName());
+		//__COUTV__(emplacePair.first->second.getContextName());
+
+		//emplace in TRACEAppMap to find app per host to control trace
+		//NOTE: it will fail if there is already an entry for this hostname (which is what we want - keep one app per host)
+		if(emplacePair.first->second.isTypeARTDAQSupervisor())
+		{
+			//make sure artdaq Supervisor represents its host
+			if(theARTDAQSupervisorInfo_)
+			{
+				__SS__ << "Error! Multiple ARTDAQ Supervisors of class " << XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS
+						<< " found. There can only be one. ID =" << descriptor.second->getLocalId() << __E__;
+				__SS_THROW__;
+			}
+
+			theARTDAQSupervisorInfo_ = &(emplacePair.first->second);
+
+			//since ARTDAQ Supervisor handles TRACE for all children processes, make sure it represents its hostname
+			//NOTE: do not do emplace, because it will fail on collisions!
+//			TRACEAppMap[theARTDAQSupervisorInfo_->getHostname()] =
+//					std::make_pair(
+//							theARTDAQSupervisorInfo_->getId(),
+//							*theARTDAQSupervisorInfo_);
+		}
+		else //all non-ARTDAQ Supervisor are interchangeable TRACE Controllers for a host
+			TRACEAppMap.emplace(std::make_pair(
+					emplacePair.first->second.getHostname(),
+					std::pair<unsigned int, const SupervisorInfo&>(
+							emplacePair.first->second.getId(),
+							emplacePair.first->second)));
 
 		/////////////////////////////////////////////
 		// now organize new descriptor by class...
@@ -131,10 +180,10 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 				       << " found. There can only be one. ID =" << descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
 			}
-			// copy and erase from map
 			theSupervisorInfo_ = &(emplacePair.first->second);
 			continue;
 		}
+
 
 		// check for wizard supervisor
 		// note: necessarily exclusive to other Supervisor types
@@ -146,8 +195,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 				       << " found. There can only be one. ID =" << descriptor.second->getLocalId() << __E__;
 				__SS_THROW__;
 			}
-			// copy and erase from map
 			theWizardInfo_ = &(emplacePair.first->second);
+
 			continue;
 		}
 
@@ -155,21 +204,24 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		// note: not necessarily exclusive to other Supervisor types
 		if(emplacePair.first->second.isTypeFESupervisor())
 		{
-			allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(emplacePair.first->second.getId(), emplacePair.first->second));
+			allFETypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+					emplacePair.first->second.getId(), emplacePair.first->second));
 		}
 
 		// check for DM type, then add to DM group
 		// note: not necessarily exclusive to other Supervisor types
 		if(emplacePair.first->second.isTypeDMSupervisor())
 		{
-			allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(emplacePair.first->second.getId(), emplacePair.first->second));
+			allDMTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+					emplacePair.first->second.getId(), emplacePair.first->second));
 		}
 
 		// check for Logbook type, then add to Logbook group
 		// note: not necessarily exclusive to other Supervisor types
 		if(emplacePair.first->second.isTypeLogbookSupervisor())
 		{
-			allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(emplacePair.first->second.getId(), emplacePair.first->second));
+			allLogbookTypeSupervisorInfo_.emplace(std::pair<unsigned int, const SupervisorInfo&>(
+					emplacePair.first->second.getId(), emplacePair.first->second));
 		}
 
 		// check for MacroMaker type, then add to MacroMaker group
@@ -177,7 +229,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		if(emplacePair.first->second.isTypeMacroMakerSupervisor())
 		{
 			allMacroMakerTypeSupervisorInfo_.emplace(
-			    std::pair<unsigned int, const SupervisorInfo&>(emplacePair.first->second.getId(), emplacePair.first->second));
+			    std::pair<unsigned int, const SupervisorInfo&>(
+			    		emplacePair.first->second.getId(), emplacePair.first->second));
 		}
 
 	}  // end main extraction loop
@@ -199,6 +252,26 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		       << "Neither (or both) were found." << __E__;
 		__SS_THROW__;
 	}
+
+
+	//wrap up TRACE controller map handling
+	{
+		//not create the list of TRACE Controller apps
+		allTraceControllerSupervisorInfo_.clear();
+		for(auto& TRACEApp: TRACEAppMap)
+		{
+			__COUT__ << "TRACE app for hostname '" << TRACEApp.first << "' is CLASS:LID = " <<
+					TRACEApp.second.second.getClass() << ":" << TRACEApp.second.second.getId() << __E__;
+			//NOTE!! Can not copy const SupervisorInfo& from TRACEApp ..
+			//	need to copy from the persistent copy in the allSupervisorInfo
+			allTraceControllerSupervisorInfo_.emplace(
+					std::pair<unsigned int, const SupervisorInfo&>(
+							TRACEApp.second.second.getId(),
+							allSupervisorInfo_.at(TRACEApp.second.second.getId())));
+		}
+		__COUT__ << "TRACE app count = " << allTraceControllerSupervisorInfo_.size() << __E__;
+	}
+
 
 	SupervisorDescriptorInfoBase::destroy();
 
@@ -267,6 +340,18 @@ const SupervisorInfo& AllSupervisorInfo::getWizardInfo(void) const
 }
 //==============================================================================
 XDAQ_CONST_CALL xdaq::ApplicationDescriptor* AllSupervisorInfo::getWizardDescriptor(void) const { return getWizardInfo().getDescriptor(); }
+
+//==============================================================================
+const SupervisorInfo& AllSupervisorInfo::getArtdaqSupervisorInfo(void) const
+{
+	if(!theARTDAQSupervisorInfo_)
+	{
+		__SS__ << "AllSupervisorInfo was not initialized or no Application of type " <<
+					XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS << "  found!" << __E__;
+		__SS_THROW__;
+	}
+	return *theARTDAQSupervisorInfo_;
+} //end getArtdaqSupervisorInfo()
 
 //==============================================================================
 std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand) const

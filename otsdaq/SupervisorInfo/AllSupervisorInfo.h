@@ -37,8 +37,8 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	void destroy(void);
 
 	// BOOLs
-	bool isWizardMode(void) const { return theWizardInfo_ ? true : false; }
-	bool isMacroMakerMode(void) const { return AllSupervisorInfo::MACROMAKER_MODE; }
+	bool isWizardMode		(void) const { return theWizardInfo_ ? true : false; }
+	bool isMacroMakerMode	(void) const { return AllSupervisorInfo::MACROMAKER_MODE; }
 
 	// SETTERs
 	void setSupervisorStatus(xdaq::Application* app, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
@@ -46,28 +46,32 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	void setSupervisorStatus(const unsigned int& id, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
 
 	// GETTERs (so searching and iterating is easier)
-	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo(void) const { return allSupervisorInfo_; }
-	const SupervisorInfoMap&                                getAllFETypeSupervisorInfo(void) const { return allFETypeSupervisorInfo_; }
-	const SupervisorInfoMap&                                getAllDMTypeSupervisorInfo(void) const { return allDMTypeSupervisorInfo_; }
-	const SupervisorInfoMap&                                getAllLogbookTypeSupervisorInfo(void) const { return allLogbookTypeSupervisorInfo_; }
-	const SupervisorInfoMap&                                getAllMacroMakerTypeSupervisorInfo(void) const { return allMacroMakerTypeSupervisorInfo_; }
+	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo				(void) const { return allSupervisorInfo_; }
+	const SupervisorInfoMap&                                getAllFETypeSupervisorInfo			(void) const { return allFETypeSupervisorInfo_; }
+	const SupervisorInfoMap&                                getAllDMTypeSupervisorInfo			(void) const { return allDMTypeSupervisorInfo_; }
+	const SupervisorInfoMap&                                getAllLogbookTypeSupervisorInfo		(void) const { return allLogbookTypeSupervisorInfo_; }
+	const SupervisorInfoMap&                                getAllMacroMakerTypeSupervisorInfo	(void) const { return allMacroMakerTypeSupervisorInfo_; }
+	const SupervisorInfoMap&                                getAllTraceControllerSupervisorInfo	(void) const { return allTraceControllerSupervisorInfo_; }
 
-	const SupervisorInfo& getSupervisorInfo(xdaq::Application* app) const;
-	const SupervisorInfo& getGatewayInfo(void) const;
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getGatewayDescriptor(void) const;
-	const SupervisorInfo&                        getWizardInfo(void) const;
-	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getWizardDescriptor(void) const;
+	const SupervisorInfo& 									getSupervisorInfo					(xdaq::Application* app) const;
+	const SupervisorInfo& 									getGatewayInfo						(void) const;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 			getGatewayDescriptor				(void) const;
+	const SupervisorInfo&                        			getWizardInfo						(void) const;
+	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 			getWizardDescriptor					(void) const;
+	const SupervisorInfo& 									getArtdaqSupervisorInfo				(void) const;
 
-	std::vector<std::vector<const SupervisorInfo*>> getOrderedSupervisorDescriptors(const std::string& stateMachineCommand) const;
+	std::vector<std::vector<const SupervisorInfo*>> 		getOrderedSupervisorDescriptors		(const std::string& stateMachineCommand) const;
 
   private:
-	SupervisorInfo* theSupervisorInfo_;
-	SupervisorInfo* theWizardInfo_;
+	SupervisorInfo* 						theSupervisorInfo_;
+	SupervisorInfo* 						theWizardInfo_;
+	SupervisorInfo* 						theARTDAQSupervisorInfo_;
 
 	std::map<unsigned int /* lid */, SupervisorInfo> allSupervisorInfo_;
-	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
+	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_, allTraceControllerSupervisorInfo_;
 
-	static const bool MACROMAKER_MODE;
+	static const bool 						MACROMAKER_MODE;
+
 };
 
 // clang-format off

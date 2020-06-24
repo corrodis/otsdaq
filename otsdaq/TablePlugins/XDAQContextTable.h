@@ -133,7 +133,7 @@ class XDAQContextTable : public TableBase
 	    LogbookTypeClassNames_, MacroMakerTypeClassNames_, ChatTypeClassNames_,
 	    ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_;
 	static const std::string GATEWAY_SUPERVISOR_CLASS, WIZARD_SUPERVISOR_CLASS,
-	    DEPRECATED_SUPERVISOR_CLASS;
+	    DEPRECATED_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_CLASS;
 }; //end XDAQContextTable class
 }  // namespace ots
 // clang-format on

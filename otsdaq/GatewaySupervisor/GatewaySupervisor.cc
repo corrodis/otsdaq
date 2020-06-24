@@ -2,6 +2,7 @@
 #include "otsdaq/CgiDataUtilities/CgiDataUtilities.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
+#include "otsdaq/MessageFacility/ITRACEController.h"
 #include "otsdaq/SOAPUtilities/SOAPCommand.h"
 #include "otsdaq/SOAPUtilities/SOAPUtilities.h"
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
@@ -88,6 +89,8 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemMessage, "SupervisorSystemMessage", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorSystemLogbookEntry, "SupervisorSystemLogbookEntry", XDAQ_NS_URI);
 	xoap::bind(this, &GatewaySupervisor::supervisorLastTableGroupRequest, "SupervisorLastTableGroupRequest", XDAQ_NS_URI);
+	xoap::bind(this, &GatewaySupervisor::TRACESupervisorRequest, "TRACESupervisorRequest", XDAQ_NS_URI);
+
 
 	init();
 
@@ -97,11 +100,11 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 //==============================================================================
 //	TODO: Lore needs to detect program quit through killall or ctrl+c so that Logbook
-// entry is made when ots is halted
+// entry is made when ots is killed
 GatewaySupervisor::~GatewaySupervisor(void)
 {
 	delete CorePropertySupervisorBase::theConfigurationManager_;
-	makeSystemLogbookEntry("ots halted.");
+	makeSystemLogbookEntry("ots shutdown.");
 }  // end destructor
 
 //==============================================================================
@@ -3392,3 +3395,8 @@ bool GatewaySupervisor::handleAddDesktopIconRequest(const std::string&          
 
 	return success;
 }  // end handleAddDesktopIconRequest()
+
+//==============================================================================
+xoap::MessageReference GatewaySupervisor::TRACESupervisorRequest(xoap::MessageReference message)
+{ return CorePropertySupervisorBase::TRACESupervisorRequest(message);}  // end TRACESupervisorRequest()
+

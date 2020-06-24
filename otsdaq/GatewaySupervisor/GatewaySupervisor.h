@@ -117,31 +117,29 @@ namespace ots
 		void 						checkForAsyncError(void);
 
 		// CorePropertySupervisorBase override functions
-		virtual void 				setSupervisorPropertyDefaults(void) override;  // override to control supervisor specific defaults
-		virtual void 				forceSupervisorPropertyValues(void) override;  // override to force
-																	// supervisor property
-																	// values (and ignore user
-																	// settings)
+		virtual void 					setSupervisorPropertyDefaults					(void) override;  // override to control supervisor specific defaults
+		virtual void 					forceSupervisorPropertyValues					(void) override;  // override to force supervisor property values (and ignore user settings)
 
 	private:
-		unsigned int 				getNextRunNumber(const std::string& fsmName = "");
-		bool 						setNextRunNumber(unsigned int runNumber, const std::string& fsmName = "");
+		unsigned int 					getNextRunNumber								(const std::string& fsmName = "");
+		bool 							setNextRunNumber								(unsigned int runNumber, const std::string& fsmName = "");
 
-		static xoap::MessageReference lastTableGroupRequestHandler(const SOAPParameters& parameters);
-		static void 				launchStartOTSCommand(const std::string& command, ConfigurationManager* cfgMgr);
-		static void 				indicateOtsAlive(const CorePropertySupervisorBase* properties = 0);
+		static xoap::MessageReference 	lastTableGroupRequestHandler					(const SOAPParameters& parameters);
+		static void 					launchStartOTSCommand							(const std::string& command, ConfigurationManager* cfgMgr);
+		static void 					indicateOtsAlive								(const CorePropertySupervisorBase* properties = 0);
+		xoap::MessageReference 			TRACESupervisorRequest							(xoap::MessageReference message);
 
-		static void 				StateChangerWorkLoop(GatewaySupervisor* supervisorPtr);
-		static void 				AppStatusWorkLoop(GatewaySupervisor* supervisorPtr);
+		static void 					StateChangerWorkLoop							(GatewaySupervisor* supervisorPtr);
+		static void 					AppStatusWorkLoop								(GatewaySupervisor* supervisorPtr);
 
-		std::string 				attemptStateMachineTransition(HttpXmlDocument* xmldoc,
-			std::ostringstream* out,
-			const std::string& command,
-			const std::string& fsmName,
-			const std::string& fsmWindowName,
-			const std::string& username,
-			const std::vector<std::string>& parameters);
-		void        				broadcastMessage(xoap::MessageReference msg);
+		std::string 					attemptStateMachineTransition					(HttpXmlDocument* xmldoc,
+																						std::ostringstream* out,
+																						const std::string& command,
+																						const std::string& fsmName,
+																						const std::string& fsmWindowName,
+																						const std::string& username,
+																						const std::vector<std::string>& parameters);
+		void        					broadcastMessage								(xoap::MessageReference msg);
 
 		struct BroadcastMessageIterationsDoneStruct
 		{
@@ -256,47 +254,43 @@ namespace ots
 			std::string& reply,
 			unsigned int           threadIndex = 0);
 
-		bool supervisorGuiHasBeenLoaded_;  // use to indicate first access by user of ots
-										   // since execution
 
-		// Member Variables
+		// Member Variables -----------------------
 
-		static WebUsers   theWebUsers_;
+		bool 				supervisorGuiHasBeenLoaded_;  // use to indicate first access by user of ots since execution
+		static WebUsers   	theWebUsers_;
 
-		WorkLoopManager stateMachineWorkLoopManager_;
-		toolbox::BSem   stateMachineSemaphore_;
+		WorkLoopManager 	stateMachineWorkLoopManager_;
+		toolbox::BSem   	stateMachineSemaphore_;
 
-		std::string activeStateMachineName_;  // when multiple state machines, this is the
-											  // name of the state machine which executed the
-											  // configure transition
-		std::string activeStateMachineWindowName_;
+		std::string 		activeStateMachineName_;  // when multiple state machines, this is the name of the state machine which executed theconfigure transition
+		std::string 		activeStateMachineWindowName_;
 		std::pair<std::string /*group name*/, TableGroupKey>
-			theConfigurationTableGroup_;  // used to track the active configuration group at
-										  // states after the configure state
+							theConfigurationTableGroup_;  // used to track the active configuration group atstates after the configure state
 
-		Iterator   theIterator_;
-		std::mutex stateMachineAccessMutex_;  // for sharing state machine access with
+		Iterator   			theIterator_;
+		std::mutex 			stateMachineAccessMutex_;  // for sharing state machine access with
 											  // iterator thread
-		std::string stateMachineLastCommandInput_;
+		std::string 		stateMachineLastCommandInput_;
 
 		enum
 		{
 			VERBOSE_MUTEX = 0
 		};
 
-		CodeEditor codeEditor_;
+		CodeEditor 			codeEditor_;
 
-		std::mutex   broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
-		unsigned int broadcastCommandMessageIndex_;
-		bool         broadcastIterationsDone_;
-		std::mutex   broadcastIterationBreakpointMutex_;
-		unsigned int broadcastIterationBreakpoint_;  // pause transition when iteration index
+		std::mutex   		broadcastCommandMessageIndexMutex_, broadcastIterationsDoneMutex_;
+		unsigned int 		broadcastCommandMessageIndex_;
+		bool         		broadcastIterationsDone_;
+		std::mutex   		broadcastIterationBreakpointMutex_;
+		unsigned int 		broadcastIterationBreakpoint_;  // pause transition when iteration index
 													 // matches breakpoint index
 
 		// temporary member variable to avoid redeclaration in repetitive functions
-		char tmpStringForConversions_[100];
+		char 				tmpStringForConversions_[100];
 
-		std::string        securityType_;
+		std::string        	securityType_;
 	};
 	// clang-format on
 

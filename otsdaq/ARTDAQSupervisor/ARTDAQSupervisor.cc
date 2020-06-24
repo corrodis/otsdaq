@@ -2,6 +2,7 @@
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
+#include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
 #include "artdaq/ExternalComms/MakeCommanderPlugin.hh"
@@ -144,6 +145,17 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	o << "disable_private_network_bookkeeping: " << std::boolalpha << getSupervisorProperty("disable_private_network_bookkeeping", false) << std::endl;
 
 	o.close();
+
+
+	//destroy current TRACEController and instantiate ARTDAQSupervisorTRACEController
+	if(CorePropertySupervisorBase::theTRACEController_)
+	{
+		__SUP_COUT__ << "Destroying TRACE Controller..." << __E__;
+		delete CorePropertySupervisorBase::theTRACEController_; //destruct current TRACEController
+		CorePropertySupervisorBase::theTRACEController_ = nullptr;
+	}
+	CorePropertySupervisorBase::theTRACEController_ = new ARTDAQSupervisorTRACEController();
+	((ARTDAQSupervisorTRACEController*)CorePropertySupervisorBase::theTRACEController_)->setSupervisorPtr(this);
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
@@ -154,6 +166,44 @@ ARTDAQSupervisor::~ARTDAQSupervisor(void)
 	destroy();
 	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor()
+
+//==============================================================================
+void ARTDAQSupervisor::destroy(void)
+{
+	__SUP_COUT__ << "Destroying..." << __E__;
+
+	if(daqinterface_ptr_ != NULL)
+	{
+		__SUP_COUT__ << "Calling recover transition" << __E__;
+		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+		PyObject*                             pName = PyString_FromString("do_recover");
+		/*PyObject*                             res   =*/ PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+
+		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
+		getDAQState_();
+		while(daqinterface_state_ != "stopped")
+		{
+			getDAQState_();
+			__SUP_COUT__ << "State is " << daqinterface_state_ << ", waiting 1s and retrying..." << __E__;
+			usleep(1000000);
+		}
+
+		Py_XDECREF(daqinterface_ptr_);
+		daqinterface_ptr_ = NULL;
+	}
+
+	Py_Finalize();
+
+	//CorePropertySupervisorBase would destroy, but since it was created here, attempt to destroy
+	if(CorePropertySupervisorBase::theTRACEController_)
+	{
+		__SUP_COUT__ << "Destroying TRACE Controller..." << __E__;
+		delete CorePropertySupervisorBase::theTRACEController_;
+		CorePropertySupervisorBase::theTRACEController_ = nullptr;
+	}
+
+	__SUP_COUT__ << "Destroyed." << __E__;
+}  // end destroy()
 
 //==============================================================================
 void ARTDAQSupervisor::init(void)
@@ -249,35 +299,6 @@ void ARTDAQSupervisor::init(void)
 	start_runner_();
 	__SUP_COUT__ << "Initialized." << __E__;
 }  // end init()
-
-//==============================================================================
-void ARTDAQSupervisor::destroy(void)
-{
-	__SUP_COUT__ << "Destroying..." << __E__;
-
-	if(daqinterface_ptr_ != NULL)
-	{
-		__SUP_COUT__ << "Calling recover transition" << __E__;
-		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
-		PyObject*                             pName = PyString_FromString("do_recover");
-		/*PyObject*                             res   =*/ PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
-
-		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
-		getDAQState_();
-		while(daqinterface_state_ != "stopped")
-		{
-			getDAQState_();
-			__SUP_COUT__ << "State is " << daqinterface_state_ << ", waiting 1s and retrying..." << __E__;
-			usleep(1000000);
-		}
-
-		Py_XDECREF(daqinterface_ptr_);
-		daqinterface_ptr_ = NULL;
-	}
-
-	Py_Finalize();
-	__SUP_COUT__ << "Destroyed." << __E__;
-}  // end destroy()
 
 //==============================================================================
 void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)

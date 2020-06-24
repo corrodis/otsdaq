@@ -1,5 +1,6 @@
 #include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
 
+
 #include <iostream>
 
 using namespace ots;
@@ -35,8 +36,8 @@ CoreSupervisorBase::CoreSupervisorBase(xdaq::ApplicationStub* stub)
 	xoap::bind(this, &CoreSupervisorBase::stateMachineErrorMessageRequest, "StateMachineErrorMessageRequest", XDAQ_NS_URI);
 	xoap::bind(this, &CoreSupervisorBase::workLoopStatusRequestWrapper, "WorkLoopStatusRequest", XDAQ_NS_URI);
 	xoap::bind(this, &CoreSupervisorBase::applicationStatusRequest, "ApplicationStatusRequest", XDAQ_NS_URI);
+	xoap::bind(this, &CoreSupervisorBase::TRACESupervisorRequest, "TRACESupervisorRequest", XDAQ_NS_URI);
 
-	theTRACEController_ = new NullTRACEController();
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor
 
@@ -54,6 +55,7 @@ void CoreSupervisorBase::destroy(void)
 	__SUP_COUT__ << "Destroying..." << __E__;
 	for(auto& it : theStateMachineImplementation_)
 		delete it;
+
 	theStateMachineImplementation_.clear();
 }  // end destroy()
 
@@ -474,7 +476,7 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 			++stateMachinesIterationWorkCount_;               // increment still working count
 		}
 	}
-}
+} //end postStateMachineExecution()
 
 //==============================================================================
 void CoreSupervisorBase::postStateMachineExecutionLoop(void)
@@ -485,7 +487,7 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 		__SUP_COUT__ << stateMachinesIterationWorkCount_ << " state machine implementation(s) flagged for another iteration..." << __E__;
 	else
 		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
-}
+} //end postStateMachineExecutionLoop()
 
 //==============================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event*/)
@@ -914,3 +916,15 @@ catch(...)
 		             << __E__;
 	throw;  // rethrow and hope error is noticed
 }  // end SendAsyncErrorToGateway()
+
+//==============================================================================
+xoap::MessageReference CoreSupervisorBase::TRACESupervisorRequest(xoap::MessageReference message)
+{ return CorePropertySupervisorBase::TRACESupervisorRequest(message);}  // end TRACESupervisorRequest()
+
+
+
+
+
+
+
+

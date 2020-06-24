@@ -1,26 +1,23 @@
 #include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
+#include "otsdaq/MessageFacility/ITRACEController.h"
+#include "otsdaq/MessageFacility/TRACEController.h"
 
 using namespace ots;
 
 const CorePropertySupervisorBase::SupervisorProperties CorePropertySupervisorBase::SUPERVISOR_PROPERTIES = CorePropertySupervisorBase::SupervisorProperties();
 
+// clang-format off
 //==============================================================================
 CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* application)
     : theConfigurationManager_(0)  // new ConfigurationManager)
     , supervisorClass_(application->getApplicationDescriptor()->getClassName())
     , supervisorClassNoNamespace_(
           supervisorClass_.substr(supervisorClass_.find_last_of(":") + 1, supervisorClass_.length() - supervisorClass_.find_last_of(":")))
-    , supervisorContextUID_("UNINITIALIZED_supervisorContextUID")                // MUST BE INITIALIZED
-                                                                                 // INSIDE THE CONTRUCTOR
-                                                                                 // TO THROW EXCEPTIONS
-                                                                                 // on bad conditions
-    , supervisorApplicationUID_("UNINITIALIZED_supervisorApplicationUID")        // MUST BE INITIALIZED INSIDE THE
-                                                                                 // CONTRUCTOR TO THROW EXCEPTIONS on
-                                                                                 // bad conditions
-    , supervisorConfigurationPath_("UNINITIALIZED_supervisorConfigurationPath")  // MUST BE INITIALIZED INSIDE THE
-                                                                                 // CONTRUCTOR TO THROW EXCEPTIONS
-                                                                                 // on bad conditions
+    , supervisorContextUID_("UNINITIALIZED_supervisorContextUID")                // MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
+    , supervisorApplicationUID_("UNINITIALIZED_supervisorApplicationUID")        // MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
+    , supervisorConfigurationPath_("UNINITIALIZED_supervisorConfigurationPath")  // MUST BE INITIALIZED INSIDE THE CONTRUCTOR TO THROW EXCEPTIONS on bad conditions
     , propertiesAreSetup_(false)
+	, theTRACEController_(nullptr)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
@@ -116,12 +113,22 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	theConfigurationManager_->setOwnerApp(CorePropertySupervisorBase::supervisorApplicationUID_);
 
 }  // end constructor
+// clang-format on
 
 //==============================================================================
 CorePropertySupervisorBase::~CorePropertySupervisorBase(void)
 {
+	__SUP_COUT__ << "Destructor." << __E__;
 	if(theConfigurationManager_)
 		delete theConfigurationManager_;
+
+	if(theTRACEController_)
+	{
+		__SUP_COUT__ << "Destroying TRACE Controller..." << __E__;
+		delete theTRACEController_;
+		theTRACEController_ = nullptr;
+	}
+	__SUP_COUT__ << "Destructed." << __E__;
 }  // end destructor
 
 //==============================================================================
@@ -268,7 +275,7 @@ bool CorePropertySupervisorBase::doPermissionsGrantAccess(std::map<std::string, 
 	// if here, no access group match found
 	// so denied
 	return false;
-}  // end doPermissionsGrantAccess
+}  // end doPermissionsGrantAccess()
 
 //==============================================================================
 void CorePropertySupervisorBase::checkSupervisorPropertySetup()
@@ -336,7 +343,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	__SUP_COUT__ << "Final supervisor property settings:" << __E__;
 	for(auto& property : propertyMap_)
 		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
-}
+} //end checkSupervisorPropertySetup()
 
 //==============================================================================
 // getSupervisorTreeNode ~
@@ -349,7 +356,7 @@ ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void) try
 		__SUP_SS_THROW__;
 	}
 	return theConfigurationManager_->getSupervisorNode(supervisorContextUID_, supervisorApplicationUID_);
-}
+} //end getSupervisorTreeNode()
 catch(...)
 {
 	__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through "
@@ -357,7 +364,7 @@ catch(...)
 	                 << "(Did you remember to initialize using CorePropertySupervisorBase::init()?)."
 	                 << " The supervisorContextUID_ = " << supervisorContextUID_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << __E__;
 	throw;
-}
+} //end getSupervisorTreeNode() exception handling
 
 //==============================================================================
 // loadUserSupervisorProperties ~
@@ -394,7 +401,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 	//	__SUP_COUT__ << "Done loading user properties for supervisor '" <<
 	//			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
 	//			"'" << __E__;
-}
+} //end loadUserSupervisorProperties()
 
 //==============================================================================
 void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
@@ -402,7 +409,7 @@ void CorePropertySupervisorBase::setSupervisorProperty(const std::string& proper
 	propertyMap_[propertyName] = propertyValue;
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 	//			"] = " << propertyMap_[propertyName] << __E__;
-}
+} //end setSupervisorProperty()
 
 //==============================================================================
 void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
@@ -410,7 +417,7 @@ void CorePropertySupervisorBase::addSupervisorProperty(const std::string& proper
 	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 	//			"] = " << propertyMap_[propertyName] << __E__;
-}
+} //end addSupervisorProperty()
 
 //==============================================================================
 // getSupervisorProperty
@@ -427,8 +434,10 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 		__SS_THROW__;  //__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
-}
+} //end getSupervisorProperty()
 
+//==============================================================================
+// getSupervisorProperty
 std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string& propertyName, const std::string& defaultValue)
 {
 	// check if need to setup properties
@@ -441,7 +450,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 		return defaultValue;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
-}
+} //end getSupervisorProperty()
 
 //==============================================================================
 // getSupervisorPropertyUserPermissionsThreshold
@@ -461,7 +470,7 @@ WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUse
 	//		__SS_THROW__; //__SUP_SS_THROW__;
 	//	}
 	//	return it->second;
-}
+} //end getSupervisorPropertyUserPermissionsThreshold()
 
 //==============================================================================
 // getRequestUserInfo ~
@@ -541,4 +550,92 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 	}  //**** end LOGIN GATEWAY CODE ***//
 
 	// completed user info, for the request type, is returned to caller
-}
+} //end getRequestUserInfo()
+
+//==============================================================================
+xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::MessageReference message)
+{
+	__SUP_COUT__ << "$$$$$$$$$$$$$$$$$" << __E__;
+
+	// receive request parameters
+	SOAPParameters parameters;
+	parameters.addParameter("Request");
+
+	__SUP_COUT__ << "Received TRACE message: " << SOAPUtilities::translate(message) << __E__;
+
+	SOAPUtilities::receive(message, parameters);
+	std::string request = parameters.getValue("Request");
+
+	__SUP_COUT__ << "request: " << request << __E__;
+
+	// request types:
+	//	GetTraceLevels
+	//	SetTraceLevels
+
+	SOAPParameters retParameters;
+	try
+	{
+		if(request == "GetTraceLevels")
+		{
+			retParameters.addParameter("TRACEList", getTraceLevels());
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
+		else
+		{
+			__SUP_SS__ << "Unrecognized request received! '" << request << "'" << __E__;
+			__SUP_SS_THROW__;
+		}
+	}
+	catch(const std::runtime_error& e)
+	{
+		__SUP_SS__ << "Error occurred handling request: " << e.what() << __E__;
+		__SUP_COUT_ERR__ << ss.str();
+		retParameters.addParameter("Error", ss.str());
+	}
+	catch(...)
+	{
+		__SUP_SS__ << "Error occurred handling request." << __E__;
+		__SUP_COUT_ERR__ << ss.str();
+		retParameters.addParameter("Error", ss.str());
+	}
+
+	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailRequest", retParameters);
+
+}  // end TRACESupervisorRequest()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::getTraceLevels()
+{
+	__COUT__ << "getTraceLevels()" << __E__;
+
+	traceLevelsString_ = ""; //reset;
+
+	if(!theTRACEController_)
+	{
+		__COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+
+	}
+
+	//typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap =
+	ITRACEController::HostTraceLevelMap traceHostMap = theTRACEController_->getTraceLevels();
+	for(const std::pair<std::string,
+			ITRACEController::TraceLevelMap>& traceMap: traceHostMap)
+	{
+		__COUTV__(traceMap.first);
+		traceLevelsString_ += ";" + traceMap.first;
+		for(const std::pair<std::string,
+				ITRACEController::TraceMasks>& traceMask: traceMap.second)
+		{
+			__COUTV__(traceMask.first);
+			__COUTV__(traceMask.second);
+			traceLevelsString_ += "," + traceMask.first +
+					",M:" + std::to_string(traceMask.second.M) +
+					",S:" + std::to_string(traceMask.second.S) +
+					",T:" + std::to_string(traceMask.second.T);
+		}
+
+	}
+	__COUT__ << "end getTraceLevels()" << __E__;
+	return traceLevelsString_;
+} //end getTraceLevels()

@@ -16,6 +16,7 @@ using namespace ots;
 const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS = "ots::Supervisor";  // still allowed for now, in StartOTS
 const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS 	= "ots::GatewaySupervisor";
 const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  	= "ots::WizardSupervisor";
+const std::string XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS  	= "ots::ARTDAQSupervisor";
 const std::set<std::string> XDAQContextTable::FETypeClassNames_ 		= { "ots::FESupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
 const std::set<std::string> XDAQContextTable::DMTypeClassNames_ 		= { "ots::DataManagerSupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
 const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ 	= { "ots::LogbookSupervisor"};
@@ -83,16 +84,11 @@ std::string XDAQContextTable::getContextAddress(const std::string& contextUID, b
 		{
 			if(wantHttp)
 				return context.address_;
-			auto address = context.address_;
-			if(address.find("http://") == 0)
-			{
-				address = address.replace(0, 7, "");
-			}
-			if(address.find("https://") == 0)
-			{
-				address = address.replace(0, 8, "");
-			}
-			return address;
+			size_t i = context.address_.find("://");
+			if(i == std::string::npos)
+				i = 0;
+			else i += 3;
+			return context.address_.substr(i);
 		}
 	}
 	return "";

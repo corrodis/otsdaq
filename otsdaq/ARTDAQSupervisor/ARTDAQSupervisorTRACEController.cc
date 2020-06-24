@@ -1,18 +1,19 @@
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
 #include <string>
 
-ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController() {}
+ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController()
+{}
 
-ots::ITRACEController::HostTraceLevelMap ots::ARTDAQSupervisorTRACEController::GetTraceLevels()
+const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEController::getTraceLevels()
 {
-	HostTraceLevelMap output;
+	traceLevelsMap_.clear(); //reset
 	if(theSupervisor_)
 	{
 		auto commanders = theSupervisor_->makeCommandersFromProcessInfo();
 
 		for(auto& comm : commanders)
 		{
-			if(output.count(comm.first.host) == 0)
+			if(traceLevelsMap_.count(comm.first.host) == 0)
 			{
 				auto lvlstring = comm.second->send_trace_get("ALL");
 				auto lvls      = ARTDAQSupervisor::tokenize_(lvlstring);
@@ -25,18 +26,19 @@ ots::ITRACEController::HostTraceLevelMap ots::ARTDAQSupervisorTRACEController::G
 
 					iss >> name >> lvlM >> lvlS >> lvlT;
 
-					output[comm.first.host][name].M = lvlM;
-					output[comm.first.host][name].S = lvlS;
-					output[comm.first.host][name].T = lvlT;
+					traceLevelsMap_[comm.first.host][name].M = lvlM;
+					traceLevelsMap_[comm.first.host][name].S = lvlS;
+					traceLevelsMap_[comm.first.host][name].T = lvlT;
 				}
 			}
 		}
 	}
+	ots::ITRACEController::addTraceLevelsForThisHost();
 
-	return output;
-}
+	return traceLevelsMap_;
+} //end getTraceLevels()
 
-void ots::ARTDAQSupervisorTRACEController::SetTraceLevelMask(std::string trace_name, TraceMasks const& lvl, std::string host)
+void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& trace_name, TraceMasks const& lvl, const std::string& host)
 {
 	if(theSupervisor_)
 	{
@@ -53,4 +55,4 @@ void ots::ARTDAQSupervisorTRACEController::SetTraceLevelMask(std::string trace_n
 			}
 		}
 	}
-}
+} //end setTraceLevelMask()

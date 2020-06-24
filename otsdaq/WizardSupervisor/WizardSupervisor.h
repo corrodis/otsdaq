@@ -32,6 +32,7 @@ namespace ots
 {
 // clang-format off
 class HttpXmlDocument;
+class ITRACEController;
 
 // WizardSupervisor
 //	This class is a xdaq application.
@@ -61,21 +62,22 @@ class WizardSupervisor : public xdaq::Application, public SOAPMessenger
 	void 				request(xgi::Input* in, xgi::Output* out);
 	void 				requestIcons(xgi::Input* in, xgi::Output* out);
 
-	void        editSecurity(xgi::Input* in, xgi::Output* out);
-	void        UserSettings(xgi::Input* in, xgi::Output* out);
-	void        tooltipRequest(xgi::Input* in, xgi::Output* out);
-	void        toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out);
-	std::string validateUploadFileType(const std::string fileType);
-	void        cleanUpPreviews();
-	void        savePostPreview(std::string&                        subject,
+	void        		editSecurity(xgi::Input* in, xgi::Output* out);
+	void        		UserSettings(xgi::Input* in, xgi::Output* out);
+	void        		tooltipRequest(xgi::Input* in, xgi::Output* out);
+	void        		toggleSecurityCodeGeneration(xgi::Input* in, xgi::Output* out);
+	std::string 		validateUploadFileType(const std::string fileType);
+	void        		cleanUpPreviews();
+	void        		savePostPreview(std::string&                        subject,
 	                            std::string&                        text,
 	                            const std::vector<cgicc::FormFile>& files,
 	                            std::string                         creator,
 	                            HttpXmlDocument*                    xmldoc = nullptr);
 
 	// External Supervisor XOAP handlers
-	xoap::MessageReference supervisorSequenceCheck(xoap::MessageReference msg);
-	xoap::MessageReference supervisorLastTableGroupRequest(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorSequenceCheck(xoap::MessageReference msg);
+	xoap::MessageReference 		supervisorLastTableGroupRequest(xoap::MessageReference msg);
+
 
   private:
 	std::string              				securityCode_;

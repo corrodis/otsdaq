@@ -15,6 +15,7 @@ cet_make(LIBRARY_NAME CoreSupervisors
          FiniteStateMachine
          CgiDataUtilities
          WebUsersUtilities
+         MessageFacility
          SupervisorInfo
          SOAPUtilities
          XmlUtilities

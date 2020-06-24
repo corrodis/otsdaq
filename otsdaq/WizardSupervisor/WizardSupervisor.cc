@@ -1,9 +1,11 @@
 #include "otsdaq/WizardSupervisor/WizardSupervisor.h"
 
 #include "otsdaq/GatewaySupervisor/GatewaySupervisor.h"
+#include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
 
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
+#include "otsdaq/MessageFacility/ITRACEController.h"
 
 #include <xdaq/NamespaceURI.h>
 #include "otsdaq/CgiDataUtilities/CgiDataUtilities.h"
@@ -91,7 +93,7 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
     , supervisorClassNoNamespace_(
           supervisorClass_.substr(supervisorClass_.find_last_of(":") + 1, supervisorClass_.length() - supervisorClass_.find_last_of(":")))
 {
-	__COUT__ << "Constructor started." << __E__;
+	__COUT__ << "Constructor." << __E__;
 
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
@@ -113,11 +115,21 @@ WizardSupervisor::WizardSupervisor(xdaq::ApplicationStub* s)
 	generateURL();
 	GatewaySupervisor::indicateOtsAlive();
 
-	__COUT__ << "Constructor complete." << __E__;
+	__COUT__ << "Constructed." << __E__;
 }  // end constructor()
+//==============================================================================
+WizardSupervisor::~WizardSupervisor(void)
+{
+	__COUT__ << "Destructor." << __E__;
+	destroy();
+	__COUT__ << "Destructed." << __E__;
+}
 
 //==============================================================================
-WizardSupervisor::~WizardSupervisor(void) { destroy(); }
+void WizardSupervisor::destroy(void)
+{
+	// called by destructor
+} //end destroy()
 
 //==============================================================================
 void WizardSupervisor::init(void)
@@ -333,12 +345,6 @@ void WizardSupervisor::printURL(WizardSupervisor* ptr, std::string securityCode)
 		         << "/urn:xdaq-application:lid=" << ptr->getApplicationDescriptor()->getLocalId() << "/Verify?code=" << securityCode << std::endl;
 	}
 }  // end printURL()
-
-//==============================================================================
-void WizardSupervisor::destroy(void)
-{
-	// called by destructor
-}
 
 //==============================================================================
 void WizardSupervisor::tooltipRequest(xgi::Input* in, xgi::Output* out)
@@ -1005,3 +1011,9 @@ void WizardSupervisor::savePostPreview(
 	if(xmldoc) xmldoc->addTextElementToData(XML_PREVIEW_INDEX,"1"); //1 indicates is a
 	preview post*/
 }
+
+
+
+
+
+

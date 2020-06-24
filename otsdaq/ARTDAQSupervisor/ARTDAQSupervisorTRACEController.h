@@ -12,10 +12,10 @@ class ARTDAQSupervisorTRACEController : public ITRACEController
 	ARTDAQSupervisorTRACEController();
 	virtual ~ARTDAQSupervisorTRACEController() { theSupervisor_ = nullptr; }
 
-	HostTraceLevelMap GetTraceLevels() final;
-	void              SetTraceLevelMask(std::string trace_name, TraceMasks const& lvl, std::string host = "localhost") final;
+	const ITRACEController::HostTraceLevelMap& getTraceLevels() final;
+	void              setTraceLevelMask(const std::string& trace_name, TraceMasks const& lvl, const std::string& host = "localhost") final;
 
-	void SetSupervisorPtr(ARTDAQSupervisor* ptr) { theSupervisor_ = ptr; }
+	void setSupervisorPtr(ARTDAQSupervisor* ptr) { theSupervisor_ = ptr; }
 
   private:
 	ARTDAQSupervisor* theSupervisor_;

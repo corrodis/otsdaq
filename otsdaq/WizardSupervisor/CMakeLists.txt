@@ -6,6 +6,7 @@ cet_make(LIBRARY_NAME WizardSupervisor
 		 TableCore
 		 SupervisorInfo
 		 GatewaySupervisor
+		 CoreSupervisors
 		 CgiDataUtilities
 		 WebUsersUtilities
 		 CodeEditor

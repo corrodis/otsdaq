@@ -25,3 +25,20 @@ void SupervisorInfo::clear(void)
 	contextName_       = "";
 	status_            = SupervisorInfo::APP_STATUS_UNKNOWN;
 }  // end clear()
+
+//=====================================================================================
+std::string SupervisorInfo::extractHostname(const std::string& URL)
+{
+	//__COUTV__(URL);
+	size_t i = URL.find("://");
+	if(i == std::string::npos)
+		i = 0;
+	else i += 3;
+	//__COUTV__(i);
+	size_t j = URL.find(":",i);
+	if(j != std::string::npos)
+		j -= i;
+	//__COUTV__(j);
+	//__COUTV__(URL.substr(i,j));
+	return URL.substr(i,j);
+} //end extractHostname

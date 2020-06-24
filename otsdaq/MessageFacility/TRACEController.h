@@ -7,11 +7,12 @@ namespace ots
 {
 class TRACEController : public ITRACEController
 {
-	TRACEController();
+public:
+	TRACEController():ITRACEController() {};
 	virtual ~TRACEController() = default;
 
-	virtual HostTraceLevelMap GetTraceLevels();
-	virtual void              SetTraceLevelMask(std::string name, TraceMasks const& lvl, std::string hostname = "localhost");
+	virtual const ITRACEController::HostTraceLevelMap& 	getTraceLevels		(void);
+	virtual void              							setTraceLevelMask	(const std::string& name, TraceMasks const& lvl, const std::string& hostname = "localhost");
 };
 }
 

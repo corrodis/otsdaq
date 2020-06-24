@@ -12,8 +12,6 @@
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 
 #include "otsdaq/FiniteStateMachine/VStateMachine.h"
-
-#include "otsdaq/MessageFacility/ITRACEController.h"
 #include "otsdaq/WebUsersUtilities/RemoteWebUsers.h"
 
 #pragma GCC diagnostic push
@@ -56,7 +54,7 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	void destroy(void);
 
-	 unsigned int 		getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
+	 unsigned int 					getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
 
 	// Here are the common web request handlers:
 	//	defaultPage returns the public html page
@@ -65,36 +63,37 @@ class CoreSupervisorBase : public xdaq::Application,
 	// get  the security wrapper for free)
 	//		- The security setting defaults can be setup or forced by overriding
 	// setSupervisorPropertyDefaults and forceSupervisorProperties
-	virtual void 			defaultPage						(xgi::Input* in, xgi::Output* out);
-	virtual void 			request							(const std::string&               requestType,
-															cgicc::Cgicc&                    cgiIn,
-															HttpXmlDocument&                 xmlOut,
-															const WebUsers::RequestUserInfo& userInfo);
-	virtual void 			nonXmlRequest					(const std::string&               requestType,
-															   cgicc::Cgicc&                    cgiIn,
-															   std::ostream&                    out,
-															   const WebUsers::RequestUserInfo& userInfo);
-	virtual std::string 	getStatusProgressDetail			(void);
+	virtual void 					defaultPage						(xgi::Input* in, xgi::Output* out);
+	virtual void 					request							(const std::string&               requestType,
+																	cgicc::Cgicc&                    cgiIn,
+																	HttpXmlDocument&                 xmlOut,
+																	const WebUsers::RequestUserInfo& userInfo);
+	virtual void 					nonXmlRequest					(const std::string&               requestType,
+															   	   	cgicc::Cgicc&                    cgiIn,
+																	std::ostream&                    out,
+																	const WebUsers::RequestUserInfo& userInfo);
+	virtual std::string 			getStatusProgressDetail			(void);
 
   private:
-	xoap::MessageReference workLoopStatusRequestWrapper		(xoap::MessageReference message);
-	void                   defaultPageWrapper				(xgi::Input* in, xgi::Output* out);
-	void                   requestWrapper					(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference 			workLoopStatusRequestWrapper	(xoap::MessageReference message);
+	void                   			defaultPageWrapper				(xgi::Input* in, xgi::Output* out);
+	void                   			requestWrapper					(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference 			TRACESupervisorRequest			(xoap::MessageReference message);
 
   public:
 	// State Machine request handlers
-	void                   stateMachineXgiHandler			(xgi::Input* in, xgi::Output* out);
-	xoap::MessageReference stateMachineXoapHandler			(xoap::MessageReference message);
+	void                   			stateMachineXgiHandler			(xgi::Input* in, xgi::Output* out);
+	xoap::MessageReference 			stateMachineXoapHandler			(xoap::MessageReference message);
 
-	xoap::MessageReference stateMachineStateRequest			(xoap::MessageReference message);
-	xoap::MessageReference stateMachineErrorMessageRequest	(xoap::MessageReference message);
+	xoap::MessageReference 			stateMachineStateRequest		(xoap::MessageReference message);
+	xoap::MessageReference 			stateMachineErrorMessageRequest	(xoap::MessageReference message);
 
-	void sendAsyncErrorToGateway		(const std::string& errMsg, bool isSoftError);
+	void 							sendAsyncErrorToGateway			(const std::string& errMsg, bool isSoftError);
 
-	virtual xoap::MessageReference workLoopStatusRequest		(xoap::MessageReference message);
-	virtual xoap::MessageReference applicationStatusRequest		(xoap::MessageReference message);
+	virtual xoap::MessageReference 	workLoopStatusRequest			(xoap::MessageReference message);
+	virtual xoap::MessageReference 	applicationStatusRequest		(xoap::MessageReference message);
 
-	bool stateMachineThread				(toolbox::task::WorkLoop* workLoop);
+	bool 							stateMachineThread				(toolbox::task::WorkLoop* workLoop);
 
 	virtual void stateInitial			(toolbox::fsm::FiniteStateMachine& fsm);
 	virtual void statePaused			(toolbox::fsm::FiniteStateMachine& fsm);
@@ -117,8 +116,6 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	static const std::string WORK_LOOP_DONE, WORK_LOOP_WORKING;
 
-	void SetTraceController(ITRACEController* tc) { theTRACEController_ = tc;}
-
   protected:
 	WorkLoopManager             stateMachineWorkLoopManager_;
 	toolbox::BSem               stateMachineSemaphore_;
@@ -133,9 +130,7 @@ class CoreSupervisorBase : public xdaq::Application,
 	void              preStateMachineExecutionLoop(void);
 	void              postStateMachineExecutionLoop(void);
 
-	RemoteWebUsers theRemoteWebUsers_;
-
-	ITRACEController* theTRACEController_;
+	RemoteWebUsers 				theRemoteWebUsers_;
 };
 // clang-format on
 }  // namespace ots
