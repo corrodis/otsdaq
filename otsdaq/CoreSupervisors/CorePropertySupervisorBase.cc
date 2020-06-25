@@ -629,10 +629,14 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 		{
 			__COUTV__(traceMask.first);
 			__COUTV__(traceMask.second);
+			//give in 32b chunks since javascript is 32-bit
 			traceLevelsString_ += "," + traceMask.first +
-					",M:" + std::to_string(traceMask.second.M) +
-					",S:" + std::to_string(traceMask.second.S) +
-					",T:" + std::to_string(traceMask.second.T);
+					",M:" + std::to_string((unsigned int)traceMask.second.M) +
+					":" + std::to_string((unsigned int)(traceMask.second.M>>32)) +
+					",S:" + std::to_string((unsigned int)traceMask.second.S) +
+					":" + std::to_string((unsigned int)(traceMask.second.S>>32)) +
+					",T:" + std::to_string((unsigned int)traceMask.second.T) +
+					":" + std::to_string((unsigned int)(traceMask.second.T>>32));
 		}
 
 	}
