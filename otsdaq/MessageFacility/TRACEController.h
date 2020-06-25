@@ -7,13 +7,19 @@ namespace ots
 {
 class TRACEController : public ITRACEController
 {
-public:
-	TRACEController():ITRACEController() {};
+  public:
+	TRACEController() : ITRACEController(){};
 	virtual ~TRACEController() = default;
 
-	virtual const ITRACEController::HostTraceLevelMap& 	getTraceLevels		(void);
-	virtual void              							setTraceLevelMask	(const std::string& name, TraceMasks const& lvl, const std::string& hostname = "localhost");
+	virtual const HostTraceLevelMap& getTraceLevels();
+	virtual void              setTraceLevelMask(std::string const& name, TraceMasks const& lvl, std::string const& hostname = "localhost");
+
+	virtual bool getIsTriggered();
+	virtual void setTriggerEnable(size_t entriesAfterTrigger);
+
+	virtual void                   resetTraceBuffer();
+	virtual void                   enableTrace();
 };
-}
+}  // namespace ots
 
 #endif  // OTSDAQ_MESSAGEFACILITY_TRACECONTROLLER_H
