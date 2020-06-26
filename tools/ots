@@ -374,6 +374,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
     killprocs	
     
     #now hard kill:
+	killall -9 art &>/dev/null 2>&1 #hide output
 	killall -9 boardreader &>/dev/null 2>&1 #hide output
 	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
 	killall -9 datalogger &>/dev/null 2>&1 #hide output
