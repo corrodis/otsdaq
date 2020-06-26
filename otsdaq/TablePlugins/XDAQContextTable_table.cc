@@ -533,6 +533,7 @@ std::string XDAQContextTable::getContextOfApplication(ConfigurationManager* conf
 	} //end context search loop
 
 	__SS__ << "Application '" << appUID << "' search found no parent context!" << __E__;
+	//ss << StringMacros::stackTrace() << __E__;
 	__SS_THROW__;
 } //end getContextOfApplication()
 
