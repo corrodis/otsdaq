@@ -26,9 +26,10 @@ const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEContro
 
 					iss >> name >> lvlM >> lvlS >> lvlT;
 
-					traceLevelsMap_[comm.first.host][name].M = lvlM;
-					traceLevelsMap_[comm.first.host][name].S = lvlS;
-					traceLevelsMap_[comm.first.host][name].T = lvlT;
+					//PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled by ARTDAQ supervisor.
+					traceLevelsMap_["artdaq.." + comm.first.host][name].M = lvlM;
+					traceLevelsMap_["artdaq.." + comm.first.host][name].S = lvlS;
+					traceLevelsMap_["artdaq.." + comm.first.host][name].T = lvlT;
 				}
 			}
 		}
@@ -38,21 +39,30 @@ const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEContro
 	return traceLevelsMap_;
 } //end getTraceLevels()
 
-void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& trace_name, TraceMasks const& lvl, const std::string& host)
+void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& label, TraceMasks const& lvl,
+		const std::string& host /*=localhost*/, std::string const& mode /*= "ALL"*/)
 {
 	if(theSupervisor_)
 	{
 		auto commanders = theSupervisor_->makeCommandersFromProcessInfo();
 
+		bool allMode = mode == "ALL";
+
 		for(auto& comm : commanders)
 		{
-			if(comm.first.host == host)
+			//PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled by ARTDAQ supervisor.
+			if("artdaq.." + comm.first.host == host)
 			{
-				comm.second->send_trace_set(trace_name, "M", std::to_string(lvl.M));
-				comm.second->send_trace_set(trace_name, "S", std::to_string(lvl.S));
-				comm.second->send_trace_set(trace_name, "T", std::to_string(lvl.T));
-				break;
+				if(allMode || mode == "FAST")
+					comm.second->send_trace_set(label, "M", std::to_string(lvl.M));
+				if(allMode || mode == "SLOW")
+					comm.second->send_trace_set(label, "S", std::to_string(lvl.S));
+				if(allMode || mode == "TRIGGER")
+					comm.second->send_trace_set(label, "T", std::to_string(lvl.T));
+				return;
 			}
 		}
 	}
+
+	ots::ITRACEController::setTraceLevelsForThisHost(label, lvl, mode);
 } //end setTraceLevelMask()

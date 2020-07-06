@@ -107,6 +107,8 @@ class CorePropertySupervisorBase
   protected:
 	xoap::MessageReference 			TRACESupervisorRequest							(xoap::MessageReference message);
 	const std::string&				getTraceLevels									(void);
+	const std::string&				setTraceLevels									(std::string const& host, std::string const& mode, std::string const& labelsStr, uint32_t setValueMSB, uint32_t setValueLSB);
+	const std::string&				setIndividualTraceLevels						(std::string const& host, std::string const& mode, std::string const& labelValuesStr);
 
 	// Supervisor Property names
 	//	to access, use CorePropertySupervisorBase::getSupervisorProperty and

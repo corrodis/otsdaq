@@ -107,10 +107,11 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		__COUT__ << "Initializing info for Normal mode XDAQ context..." << __E__;
 	std::unique_ptr<ConfigurationManager> cfgMgr((isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ? 0 : new ConfigurationManager());
 	const XDAQContextTable*               contextConfig = (isWizardMode || AllSupervisorInfo::MACROMAKER_MODE) ? nullptr : cfgMgr->__GET_CONFIG__(XDAQContextTable);
-	__COUTV__(contextConfig);
+	//__COUTV__(contextConfig);
 
 	//For TRACE controllers in normal mode, temporarily make a map by hostname of supervisors
-	std::map<std::string /*hostname*/,std::pair<unsigned int, SupervisorInfo>> TRACEAppMap;
+	//std::map<std::string /*hostname*/,std::pair<unsigned int, SupervisorInfo>> TRACEAppMap;
+
 	std::string name, contextName;
 	// do not involve the Configuration Manager
 	//	as it adds no valid information to the supervisors
@@ -139,7 +140,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		//__COUTV__(emplacePair.first->second.getName());
 		//__COUTV__(emplacePair.first->second.getContextName());
 
-		//emplace in TRACEAppMap to find app per host to control trace
+		//emplace in allTraceControllerSupervisorInfo_ to find app per host to control trace
 		//NOTE: it will fail if there is already an entry for this hostname (which is what we want - keep one app per host)
 		if(emplacePair.first->second.isTypeARTDAQSupervisor())
 		{
@@ -155,17 +156,21 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 			//since ARTDAQ Supervisor handles TRACE for all children processes, make sure it represents its hostname
 			//NOTE: do not do emplace, because it will fail on collisions!
-//			TRACEAppMap[theARTDAQSupervisorInfo_->getHostname()] =
+//			allTraceControllerSupervisorInfo_[theARTDAQSupervisorInfo_->getHostname()] =
+//					allSupervisorInfo_.at(theARTDAQSupervisorInfo_->getId());
 //					std::make_pair(
 //							theARTDAQSupervisorInfo_->getId(),
 //							*theARTDAQSupervisorInfo_);
 		}
-		else //all non-ARTDAQ Supervisor are interchangeable TRACE Controllers for a host
-			TRACEAppMap.emplace(std::make_pair(
-					emplacePair.first->second.getHostname(),
-					std::pair<unsigned int, const SupervisorInfo&>(
-							emplacePair.first->second.getId(),
-							emplacePair.first->second)));
+//		else //all non-ARTDAQ Supervisor are interchangeable TRACE Controllers for a host
+//			allTraceControllerSupervisorInfo_.emplace(std::make_pair(
+//					emplacePair.first->second.getHostname(),
+//					emplacePair.first->second));
+//			TRACEAppMap.emplace(std::make_pair(
+//					emplacePair.first->second.getHostname(),
+//					std::pair<unsigned int, const SupervisorInfo&>(
+//							emplacePair.first->second.getId(),
+//							emplacePair.first->second)));
 
 		/////////////////////////////////////////////
 		// now organize new descriptor by class...
@@ -256,18 +261,39 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 	//wrap up TRACE controller map handling
 	{
-		//not create the list of TRACE Controller apps
+		//now create the list of TRACE Controller apps (one per host, but priority to artdaq supervisor)
 		allTraceControllerSupervisorInfo_.clear();
-		for(auto& TRACEApp: TRACEAppMap)
+
+		if(theARTDAQSupervisorInfo_) //priority to artdaq supervisor
 		{
-			__COUT__ << "TRACE app for hostname '" << TRACEApp.first << "' is CLASS:LID = " <<
-					TRACEApp.second.second.getClass() << ":" << TRACEApp.second.second.getId() << __E__;
-			//NOTE!! Can not copy const SupervisorInfo& from TRACEApp ..
-			//	need to copy from the persistent copy in the allSupervisorInfo
-			allTraceControllerSupervisorInfo_.emplace(
-					std::pair<unsigned int, const SupervisorInfo&>(
-							TRACEApp.second.second.getId(),
-							allSupervisorInfo_.at(TRACEApp.second.second.getId())));
+			__COUT__ << "ARTDAQ TRACE app for hostname '" <<
+					theARTDAQSupervisorInfo_->getHostname() << "' is CLASS:LID = " <<
+					theARTDAQSupervisorInfo_->getClass() << ":" <<
+					theARTDAQSupervisorInfo_->getId() << __E__;
+
+			allTraceControllerSupervisorInfo_.emplace(std::make_pair(
+					theARTDAQSupervisorInfo_->getHostname(),
+					*theARTDAQSupervisorInfo_));
+		}
+
+		//the use emplace, because it will fail insert on collisions!
+		for(auto& TRACEApp: allSupervisorInfo_)
+		{
+			//NOTE!! need to copy const SupervisorInfo& from the persistent copy in the allSupervisorInfo
+			if(allTraceControllerSupervisorInfo_.emplace(
+					std::pair<std::string, const SupervisorInfo&>(
+					TRACEApp.second.getHostname(),
+					allSupervisorInfo_.at(TRACEApp.first))).second)
+			{
+				__COUT__ << "TRACE app for hostname '" <<
+						TRACEApp.second.getHostname() << "' is CLASS:LID = " <<
+						TRACEApp.second.getClass() << ":" <<
+						TRACEApp.second.getId() << __E__;
+			}
+//			allTraceControllerSupervisorInfo_.emplace(
+//					std::pair<unsigned int, const SupervisorInfo&>(
+//							TRACEApp.second.second.getId(),
+//							allSupervisorInfo_.at(TRACEApp.second.second.getId())));
 		}
 		__COUT__ << "TRACE app count = " << allTraceControllerSupervisorInfo_.size() << __E__;
 	}

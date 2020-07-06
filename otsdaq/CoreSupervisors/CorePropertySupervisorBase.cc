@@ -580,6 +580,38 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			retParameters.addParameter("TRACEList", getTraceLevels());
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
+		else if(request == "SetTraceLevels")
+		{
+			parameters.addParameter("IndividualValues");
+			parameters.addParameter("Host");
+			parameters.addParameter("SetMode");
+			parameters.addParameter("Labels");
+			parameters.addParameter("SetValueMSB");
+			parameters.addParameter("SetValueLSB");
+			SOAPUtilities::receive(message, parameters);
+
+			int individualValues = parameters.getValueAsInt("IndividualValues");
+			std::string host = parameters.getValue("Host");
+			std::string setMode = parameters.getValue("SetMode");
+			std::string labelsStr = parameters.getValue("Labels");
+			int setValueMSB = parameters.getValueAsInt("SetValueMSB");
+			int setValueLSB = parameters.getValueAsInt("SetValueLSB");
+			__SUP_COUTV__(individualValues);
+			__SUP_COUTV__(host);
+			__SUP_COUTV__(setMode);
+			__SUP_COUTV__(setValueMSB);
+			__SUP_COUTV__(setValueLSB);
+			__SUP_COUTV__(labelsStr);
+
+			if(individualValues)
+				retParameters.addParameter("TRACEList", setIndividualTraceLevels(
+					host,setMode,labelsStr));
+			else
+				retParameters.addParameter("TRACEList", setTraceLevels(
+					host,setMode,labelsStr,setValueMSB,setValueLSB));
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+
+		}
 		else
 		{
 			__SUP_SS__ << "Unrecognized request received! '" << request << "'" << __E__;
@@ -599,20 +631,20 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 		retParameters.addParameter("Error", ss.str());
 	}
 
-	return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "FailRequest", retParameters);
+	return SOAPUtilities::makeSOAPMessageReference("TRACEFault", retParameters);
 
 }  // end TRACESupervisorRequest()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::getTraceLevels()
 {
-	__COUT__ << "getTraceLevels()" << __E__;
+	__SUP_COUT__ << "getTraceLevels()" << __E__;
 
 	traceLevelsString_ = ""; //reset;
 
 	if(!theTRACEController_)
 	{
-		__COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
 		theTRACEController_ = new TRACEController();
 
 	}
@@ -622,13 +654,13 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 	for(const std::pair<std::string,
 			ITRACEController::TraceLevelMap>& traceMap: traceHostMap)
 	{
-		__COUTV__(traceMap.first);
+		//__COUTV__(traceMap.first);
 		traceLevelsString_ += ";" + traceMap.first;
 		for(const std::pair<std::string,
 				ITRACEController::TraceMasks>& traceMask: traceMap.second)
 		{
-			__COUTV__(traceMask.first);
-			__COUTV__(traceMask.second);
+			//__COUTV__(traceMask.first);
+			//__COUTV__(traceMask.second);
 			//give in 32b chunks since javascript is 32-bit
 			traceLevelsString_ += "," + traceMask.first +
 					",M:" + std::to_string((unsigned int)(traceMask.second.M>>32)) +
@@ -637,9 +669,84 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 					":" + std::to_string((unsigned int)traceMask.second.S) +
 					":T:" + std::to_string((unsigned int)(traceMask.second.T>>32)) +
 					":" + std::to_string((unsigned int)traceMask.second.T);
-		}
-
-	}
-	__COUT__ << "end getTraceLevels()" << __E__;
+		} //end label loop
+	} //end host loop
+	__SUP_COUT__ << "end getTraceLevels()" << __E__;
 	return traceLevelsString_;
 } //end getTraceLevels()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::setTraceLevels(std::string const& host,
+			std::string const& mode, std::string const& labelsStr,
+			uint32_t setValueMSB, uint32_t setValueLSB)
+{
+	__SUP_COUT__ << "setTraceLevels()" << __E__;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+
+	}
+
+	ITRACEController::TraceMasks setMask;
+	bool allMode = mode == "ALL";
+	if(allMode || mode == "FAST")
+		setMask.M = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+	if(allMode || mode == "SLOW")
+		setMask.S = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+	if(allMode || mode == "TRIGGER")
+		setMask.T = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+
+	std::vector<std::string /*labels*/> labels;
+	StringMacros::getVectorFromString(
+			labelsStr,labels,{','});
+	for(const auto& label:labels)
+	{
+		__SUP_COUTV__(label);
+		theTRACEController_->setTraceLevelMask(label,setMask,host,mode);
+	}
+
+	__SUP_COUT__ << "end setTraceLevels()" << __E__;
+	return getTraceLevels();
+} //end setTraceLevels()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::string const& host,
+			std::string const& mode, std::string const& labelValuesStr)
+{
+	__SUP_COUT__ << "setIndividualTraceLevels()" << __E__;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+	}
+
+	ITRACEController::TraceMasks setMask;
+	bool allMode = mode == "ALL";
+	bool fastMode = mode == "FAST";
+	bool slowMode = mode == "SLOW";
+	bool triggerMode = mode == "TRIGGER";
+
+	std::vector<std::string /*labels,msb,lsb*/> labelValues;
+	StringMacros::getVectorFromString(
+			labelValuesStr,labelValues,{','});
+	for(unsigned int i=0; i<labelValues.size();i+=3 /*label,msb,lsb*/)
+	{
+		__SUP_COUT__ << "Label = " << labelValues[i] << " msb/lsb " <<
+				labelValues[i+1] << "/" << labelValues[i+2] << __E__;
+
+		if(allMode || fastMode)
+			setMask.M = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+		if(allMode || slowMode)
+			setMask.S = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+		if(allMode || triggerMode)
+			setMask.T = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+
+		theTRACEController_->setTraceLevelMask(labelValues[i],setMask,host,mode);
+	}
+
+	__SUP_COUT__ << "end setIndividualTraceLevels()" << __E__;
+	return getTraceLevels();
+} //end setTraceLevels()
