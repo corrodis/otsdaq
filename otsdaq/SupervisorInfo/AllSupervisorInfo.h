@@ -51,7 +51,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	const SupervisorInfoMap&                                getAllDMTypeSupervisorInfo			(void) const { return allDMTypeSupervisorInfo_; }
 	const SupervisorInfoMap&                                getAllLogbookTypeSupervisorInfo		(void) const { return allLogbookTypeSupervisorInfo_; }
 	const SupervisorInfoMap&                                getAllMacroMakerTypeSupervisorInfo	(void) const { return allMacroMakerTypeSupervisorInfo_; }
-	const SupervisorInfoMap&                                getAllTraceControllerSupervisorInfo	(void) const { return allTraceControllerSupervisorInfo_; }
+	const std::map<std::string /*hostname*/, const SupervisorInfo&>&   getAllTraceControllerSupervisorInfo	(void) const { return allTraceControllerSupervisorInfo_; }
 
 	const SupervisorInfo& 									getSupervisorInfo					(xdaq::Application* app) const;
 	const SupervisorInfo& 									getGatewayInfo						(void) const;
@@ -68,7 +68,9 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	SupervisorInfo* 						theARTDAQSupervisorInfo_;
 
 	std::map<unsigned int /* lid */, SupervisorInfo> allSupervisorInfo_;
-	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_, allTraceControllerSupervisorInfo_;
+	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
+	//,
+	std::map<std::string /*hostname*/, const SupervisorInfo&> allTraceControllerSupervisorInfo_;
 
 	static const bool 						MACROMAKER_MODE;
 

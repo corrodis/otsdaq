@@ -12,18 +12,18 @@ class ARTDAQSupervisorTRACEController : public ITRACEController
 	ARTDAQSupervisorTRACEController();
 	virtual ~ARTDAQSupervisorTRACEController() { theSupervisor_ = nullptr; }
 
-	const ITRACEController::HostTraceLevelMap& getTraceLevels() final;
-	void setTraceLevelMask(const std::string& trace_name, TraceMasks const& lvl, const std::string& host = "localhost") final;
+	const ITRACEController::HostTraceLevelMap& 	getTraceLevels		(void) final;
+	virtual void              					setTraceLevelMask	(std::string const& label, TraceMasks const& lvl, std::string const& hostname = "localhost", std::string const& mode = "ALL") final;
 
-	void setSupervisorPtr(ARTDAQSupervisor* ptr) { theSupervisor_ = ptr; }
+	void 										setSupervisorPtr	(ARTDAQSupervisor* ptr) { theSupervisor_ = ptr; }
 
 
 	// These functions are defaulted because ARTDAQSupervisorTRACEController doesn't have direct access to the ARTDAQ TRACE Buffers
-	virtual bool getIsTriggered() { return false; }
-	virtual void setTriggerEnable(size_t) {}
+	virtual bool 								getIsTriggered		(void) { return false; }
+	virtual void 								setTriggerEnable	(size_t) {}
 
-	virtual void                   resetTraceBuffer() {}
-	virtual void                   enableTrace() {}
+	virtual void                   				resetTraceBuffer	(void) {}
+	virtual void                   				enableTrace			(void) {}
 
   private:
 	ARTDAQSupervisor* theSupervisor_;
