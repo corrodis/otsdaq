@@ -1,3 +1,6 @@
+#include "TRACE/tracemf.h"
+#define TRACE_NAME "ARTDAQTableBase"
+
 #include <fhiclcpp/ParameterSet.h>
 #include <fhiclcpp/detail/print_mode.h>
 #include <fhiclcpp/intermediate_table.h>
@@ -159,10 +162,15 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 
 	try
 	{
+	  
+		TLOG(TLVL_INFO) << "parsing document:"<< inFile;
 		fhicl::intermediate_table tbl;
 		fhicl::parse_document(inFile, policy, tbl);
+		TLOG(TLVL_TRACE) << "document:"<< inFile << " parsed";
+
 		fhicl::ParameterSet pset;
 		fhicl::make_ParameterSet(tbl, pset);
+		TLOG(TLVL_TRACE) << "got pset from table:";
 
 		std::ofstream ofs{outFile};
 		ofs << pset.to_indented_string(0);  // , fhicl::detail::print_mode::annotated); // Only really useful for debugging

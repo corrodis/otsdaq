@@ -8,7 +8,7 @@
 #include <sstream>   //for stringstream, std::stringbuf
 
 #define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
-#include "tracemf.h"
+#include "TRACE/tracemf.h"
 
 // take filename only after srcs/ (this gives by repo name)
 // use 'builtin' to try to define at compile time
