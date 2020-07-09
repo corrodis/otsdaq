@@ -692,11 +692,11 @@ const std::string& CorePropertySupervisorBase::setTraceLevels(std::string const&
 	ITRACEController::TraceMasks setMask;
 	bool allMode = mode == "ALL";
 	if(allMode || mode == "FAST")
-		setMask.M = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+		setMask.M = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
 	if(allMode || mode == "SLOW")
-		setMask.S = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+		setMask.S = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
 	if(allMode || mode == "TRIGGER")
-		setMask.T = ((uint64_t(setValueMSB))<<32) | (uint64_t(setValueLSB));
+		setMask.T = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
 
 	std::vector<std::string /*labels*/> labels;
 	StringMacros::getVectorFromString(
@@ -738,11 +738,11 @@ const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::str
 				labelValues[i+1] << "/" << labelValues[i+2] << __E__;
 
 		if(allMode || fastMode)
-			setMask.M = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+			setMask.M = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
 		if(allMode || slowMode)
-			setMask.S = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+			setMask.S = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
 		if(allMode || triggerMode)
-			setMask.T = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(atoi(labelValues[i+2].c_str())));
+			setMask.T = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
 
 		theTRACEController_->setTraceLevelMask(labelValues[i],setMask,host,mode);
 	}
