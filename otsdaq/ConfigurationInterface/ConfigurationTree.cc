@@ -2401,9 +2401,9 @@ std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority, bo
 
 	if(!tableView_)
 	{
-		__SS__ << "Can not get children names of '" << getValueAsString() << "' with null configuration view pointer!" << __E__;
+		__SS__ << "Can not get children names of '" << getFieldName() << ":" << getValueAsString() << "' with null configuration view pointer!" << __E__;
 		if(isLinkNode() && isDisconnected())
-			ss << " This node is a disconnected link to " << getDisconnectedTableName() << __E__;
+			ss << " This node is a disconnected link to " << getDisconnectedTableName() << "(" << getDisconnectedLinkID() << ")" << __E__;
 		__SS_ONLY_THROW__;
 	}
 

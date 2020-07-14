@@ -1134,7 +1134,7 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		__COUT__ << "Using Mock-up view" << __E__;
+		//__COUT__ << "Using Mock-up view" << __E__;
 		tableViews_.emplace(std::make_pair(tmpVersion,TableView(tableName_)));
 		tableViews_.at(tmpVersion).copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
 	}

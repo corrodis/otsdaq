@@ -760,7 +760,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 		return;
 	}
 
-	__COUT__ << __COUT_HDR_P__ << "Adding tree record '" << node.getValueAsString() << "' fields..." << __E__;
+	//__COUT__ << __COUT_HDR_P__ << "Adding tree record '" << node.getValueAsString() << "' fields..." << __E__;
 
 	if(depth == (unsigned int)-1)
 		depth = 10;
@@ -801,7 +801,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 		// skip last 3 fields that are always common
 		for(unsigned int i = 0; i < fields.size() - 3; ++i)
 		{
-			__COUT__ << fields[i].first << __E__;
+		  //__COUT__ << fields[i].first << __E__;
 
 			if(fields[i].second.isLinkNode())
 			{
