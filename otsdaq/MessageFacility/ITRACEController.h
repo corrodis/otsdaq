@@ -44,7 +44,19 @@ class ITRACEController
 	//=====================================
 	std::string getTraceBufferDump	(std::string const& grepFilter = "")
 	{
-		std::string command = "trace_cntl show";//"tshow | grep \"" + grepFilter + "\" | tdelta";
+		std::string command = "trace_cntl show";
+		std::string safeGrep = "";
+		for(unsigned int i=0;i<grepFilter.size();++i)
+			if((grepFilter[i] >= 'a' && grepFilter[i] <= 'z') ||
+					(grepFilter[i] >= 'A' && grepFilter[i] <= 'Z') ||
+					(grepFilter[i] >= '0' && grepFilter[i] <= '9') ||
+					(grepFilter[i] == '-' || grepFilter[i] == '_'))
+				safeGrep += grepFilter[i];
+
+		//command += " | grep \"" + safeGrep + "\"";
+		//command += " | tdelta";
+		//command += " | test -n \"${PAGER-}\" && trace_delta \"$@\" | $PAGER || trace_delta \"$@\";";
+		// try source $TRACE_BIN/trace_functions.sh; tshow | tdelta
 		TLOG(TLVL_DEBUG) << "getTraceBufferDump command: " << command << " " << grepFilter;
 		return StringMacros::exec(command.c_str());
 	} //end getTraceBufferDump()

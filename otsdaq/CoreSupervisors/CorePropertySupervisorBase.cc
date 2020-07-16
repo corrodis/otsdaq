@@ -578,6 +578,7 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 		if(request == "GetTraceLevels")
 		{
 			retParameters.addParameter("TRACEList", getTraceLevels());
+			retParameters.addParameter("TRACEHostnameList", traceReturnHostString_);
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
 		else if(request == "SetTraceLevels")
@@ -621,6 +622,8 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 		{
 			parameters.addParameter("Host");
 			parameters.addParameter("EntriesAfterTrigger");
+			SOAPUtilities::receive(message, parameters);
+
 			std::string host = parameters.getValue("Host");
 			int entriesAfterTrigger = parameters.getValueAsInt("EntriesAfterTrigger");
 			__SUP_COUTV__(host);
@@ -631,18 +634,36 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 		else if(request == "ResetTRACE")
 		{
 			parameters.addParameter("Host");
+			SOAPUtilities::receive(message, parameters);
+
 			std::string host = parameters.getValue("Host");
 			__SUP_COUTV__(host);
 			retParameters.addParameter("TRACETriggerStatus", resetTRACE(host));
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
+		else if(request == "EnableTRACE")
+		{
+			parameters.addParameter("Host");
+			parameters.addParameter("SetEnable");
+			SOAPUtilities::receive(message, parameters);
+
+			std::string host = parameters.getValue("Host");
+			bool enable = parameters.getValueAsInt("SetEnable")?true:false;
+			__SUP_COUTV__(host);
+			__SUP_COUTV__(enable);
+
+			retParameters.addParameter("TRACETriggerStatus", enableTRACE(host,enable));
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
 		else if(request == "GetSnapshot")
 		{
 			parameters.addParameter("Host");
+			SOAPUtilities::receive(message, parameters);
+
 			std::string host = parameters.getValue("Host");
 			__SUP_COUTV__(host);
-			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
 			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host));
+			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
 		else
@@ -674,6 +695,7 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 	__SUP_COUT__ << "getTraceLevels()" << __E__;
 
 	traceReturnString_ = ""; //reset;
+	traceReturnHostString_ = ""; //reset;
 
 	if(!theTRACEController_)
 	{
@@ -691,12 +713,11 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 		//__COUTV__(traceMap.first);
 
 
-		//NOTE: this may cause problems once we start going through artdaq Supervisor
-		// but hostname resolution here is not the same as xdaq context name resolution
-		if(traceMap.first.find("artdaq..") == 0)
-			traceReturnString_ += ";" + traceMap.first;
-		//else specify host at receiving requester position
-		//traceReturnString_ += ";" + traceMap.first;
+		//NOTE: TRACE hostname resolution is not necessarily the same as xdaq context name resolution
+		// so return TRACE hostname resolution so a map can be generated at the controller
+
+		traceReturnHostString_ = ";" + traceMap.first;
+		traceReturnString_ += ";" + traceMap.first;
 
 		for(const std::pair<std::string,
 				ITRACEController::TraceMasks>& traceMask: traceMap.second)
@@ -847,6 +868,21 @@ const std::string& CorePropertySupervisorBase::resetTRACE(std::string const& hos
 } //end resetTRACE()
 
 //==============================================================================
+const std::string& CorePropertySupervisorBase::enableTRACE(std::string const& host, bool enable)
+{
+	__SUP_COUT__ << "enableTRACE() " << host << " " << enable << __E__;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+	}
+	theTRACEController_->enableTrace(enable);
+	__SUP_COUT__ << "end enableTRACE()" << __E__;
+	return getTraceTriggerStatus();
+} //end enableTRACE()
+
+//==============================================================================
 const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string const& host)
 {
 	__SUP_COUT__ << "getTraceSnapshot()" << host << __E__;
@@ -863,7 +899,14 @@ const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string cons
 	traceReturnString_ = theTRACEController_->getTraceBufferDump();
 	//std::cout << traceReturnString_ << __E__;
 
-	__SUP_COUT__ << "end getTraceSnapshot() Bytes" << traceReturnString_.size() << __E__;
+	const size_t MAX_SZ = 100000;
+	if(traceReturnString_.size() > MAX_SZ)
+	{
+		__SUP_COUT__ << "Trancating from " << traceReturnString_.size() << " to " << MAX_SZ << __E__;
+		traceReturnString_.resize(MAX_SZ);
+		traceReturnString_ += "\n...TRUNCATED";
+	}
+	__SUP_COUT__ << "end getTraceSnapshot() Bytes = " << traceReturnString_.size() << __E__;
 	return traceReturnString_;
 } //end getTraceSnapshot()
 

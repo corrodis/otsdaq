@@ -112,6 +112,7 @@ class CorePropertySupervisorBase
 	const std::string&				getTraceTriggerStatus							(void);
 	const std::string&				setTraceTriggerEnable							(std::string const& host, size_t entriesAfterTrigger);
 	const std::string&				resetTRACE										(std::string const& host);
+	const std::string&				enableTRACE										(std::string const& host, bool enable);
 	const std::string&				getTraceSnapshot								(std::string const& host);
 
 	// Supervisor Property names
@@ -249,7 +250,7 @@ class CorePropertySupervisorBase
   protected:
 	ITRACEController* 					theTRACEController_; //only define for an app that receives a command
   private:
-	std::string 						traceReturnString_;
+	std::string 						traceReturnString_, traceReturnHostString_;
 };
 
 // clang-format on
