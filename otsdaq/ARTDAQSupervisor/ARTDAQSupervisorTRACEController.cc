@@ -7,6 +7,8 @@ ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController()
 const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEController::getTraceLevels()
 {
 	traceLevelsMap_.clear(); //reset
+
+	ots::ITRACEController::addTraceLevelsForThisHost();
 	if(theSupervisor_)
 	{
 		auto commanders = theSupervisor_->makeCommandersFromProcessInfo();
@@ -34,7 +36,6 @@ const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEContro
 			}
 		}
 	}
-	ots::ITRACEController::addTraceLevelsForThisHost();
 
 	return traceLevelsMap_;
 } //end getTraceLevels()

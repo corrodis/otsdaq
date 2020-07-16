@@ -682,13 +682,22 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 
 	}
 
+
 	//typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap =
 	ITRACEController::HostTraceLevelMap traceHostMap = theTRACEController_->getTraceLevels();
 	for(const std::pair<std::string,
 			ITRACEController::TraceLevelMap>& traceMap: traceHostMap)
 	{
 		//__COUTV__(traceMap.first);
-		traceReturnString_ += ";" + traceMap.first;
+
+
+		//NOTE: this may cause problems once we start going through artdaq Supervisor
+		// but hostname resolution here is not the same as xdaq context name resolution
+		if(traceMap.first.find("artdaq..") == 0)
+			traceReturnString_ += ";" + traceMap.first;
+		//else specify host at receiving requester position
+		//traceReturnString_ += ";" + traceMap.first;
+
 		for(const std::pair<std::string,
 				ITRACEController::TraceMasks>& traceMask: traceMap.second)
 		{
