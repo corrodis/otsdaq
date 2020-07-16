@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include "TRACE/trace.h"
+#include "otsdaq/Macros/StringMacros.h"
 
 namespace ots
 {
@@ -38,7 +39,23 @@ class ITRACEController
 	virtual void 						setTriggerEnable	(size_t entriesAfterTrigger) = 0; // pure virtual
 
 	virtual void                   		resetTraceBuffer	(void) = 0;	// pure virtual
-	virtual void                   		enableTrace			(void) = 0;	// pure virtual
+	virtual void                   		enableTrace			(bool enable = true) = 0;	// pure virtual
+
+	//=====================================
+	std::string getTraceBufferDump	(std::string const& grepFilter = "")
+	{
+		std::string command = "trace_cntl show";//"tshow | grep \"" + grepFilter + "\" | tdelta";
+		TLOG(TLVL_DEBUG) << "getTraceBufferDump command: " << command << " " << grepFilter;
+		return StringMacros::exec(command.c_str());
+	} //end getTraceBufferDump()
+
+	//=====================================
+	std::string getHostnameString(void)
+	{
+		char hostname_c[HOST_NAME_MAX];
+		gethostname(hostname_c, HOST_NAME_MAX);
+		return std::string(hostname_c);
+	} //end getHostnameString()
 
   protected:
 	//=====================================
@@ -88,14 +105,6 @@ class ITRACEController
 				TRACE_CNTL("lvlmskTg", lvl.T);
 		}
 	}  //end setTraceLevelsForThisHost()
-
-	//=====================================
-	std::string getHostnameString(void)
-	{
-		char hostname_c[HOST_NAME_MAX];
-		gethostname(hostname_c, HOST_NAME_MAX);
-		return std::string(hostname_c);
-	} //end getHostnameString()
 
 	HostTraceLevelMap traceLevelsMap_;
 };

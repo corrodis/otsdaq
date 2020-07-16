@@ -43,8 +43,8 @@ void ots::TRACEController::resetTraceBuffer()
 } // end resetTraceBuffer()
 
 //==============================================================================
-void ots::TRACEController::enableTrace()
+void ots::TRACEController::enableTrace(bool enable /* = true */)
 {
-	TRACE_CNTL("modeM", 1);
-	TRACE_CNTL("modeS", 1);
+	TRACE_CNTL("modeM", enable?1:0);
+	TRACE_CNTL("modeS", enable?1:0);
 } // end enableTrace()

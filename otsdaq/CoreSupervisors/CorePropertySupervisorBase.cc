@@ -612,6 +612,39 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 
 		}
+		else if(request == "GetTriggerStatus")
+		{
+			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
+		else if(request == "SetTriggerEnable")
+		{
+			parameters.addParameter("Host");
+			parameters.addParameter("EntriesAfterTrigger");
+			std::string host = parameters.getValue("Host");
+			int entriesAfterTrigger = parameters.getValueAsInt("EntriesAfterTrigger");
+			__SUP_COUTV__(host);
+			__SUP_COUTV__(entriesAfterTrigger);
+			retParameters.addParameter("TRACETriggerStatus", setTraceTriggerEnable(host,entriesAfterTrigger));
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
+		else if(request == "ResetTRACE")
+		{
+			parameters.addParameter("Host");
+			std::string host = parameters.getValue("Host");
+			__SUP_COUTV__(host);
+			retParameters.addParameter("TRACETriggerStatus", resetTRACE(host));
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
+		else if(request == "GetSnapshot")
+		{
+			parameters.addParameter("Host");
+			std::string host = parameters.getValue("Host");
+			__SUP_COUTV__(host);
+			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
+			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host));
+			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
+		}
 		else
 		{
 			__SUP_SS__ << "Unrecognized request received! '" << request << "'" << __E__;
@@ -640,7 +673,7 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 {
 	__SUP_COUT__ << "getTraceLevels()" << __E__;
 
-	traceLevelsString_ = ""; //reset;
+	traceReturnString_ = ""; //reset;
 
 	if(!theTRACEController_)
 	{
@@ -655,14 +688,14 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 			ITRACEController::TraceLevelMap>& traceMap: traceHostMap)
 	{
 		//__COUTV__(traceMap.first);
-		traceLevelsString_ += ";" + traceMap.first;
+		traceReturnString_ += ";" + traceMap.first;
 		for(const std::pair<std::string,
 				ITRACEController::TraceMasks>& traceMask: traceMap.second)
 		{
 			//__COUTV__(traceMask.first);
 			//__COUTV__(traceMask.second);
 			//give in 32b chunks since javascript is 32-bit
-			traceLevelsString_ += "," + traceMask.first +
+			traceReturnString_ += "," + traceMask.first +
 					",M:" + std::to_string((unsigned int)(traceMask.second.M>>32)) +
 					":" + std::to_string((unsigned int)traceMask.second.M) +
 					":S:" + std::to_string((unsigned int)(traceMask.second.S>>32)) +
@@ -672,7 +705,7 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 		} //end label loop
 	} //end host loop
 	__SUP_COUT__ << "end getTraceLevels()" << __E__;
-	return traceLevelsString_;
+	return traceReturnString_;
 } //end getTraceLevels()
 
 //==============================================================================
@@ -750,3 +783,80 @@ const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::str
 	__SUP_COUT__ << "end setIndividualTraceLevels()" << __E__;
 	return getTraceLevels();
 } //end setTraceLevels()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::getTraceTriggerStatus()
+{
+	__SUP_COUT__ << "getTraceTriggerStatus()" << __E__;
+
+	traceReturnString_ = ""; //reset;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+
+	}
+
+	bool isTriggered = theTRACEController_->getIsTriggered();
+	traceReturnString_ += ";" + theTRACEController_->getHostnameString() +
+			"," + (isTriggered?"1":"0");
+
+	__SUP_COUT__ << "end getTraceTriggerStatus() " << traceReturnString_ << __E__;
+	return traceReturnString_;
+} //end getTraceTriggerStatus()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::setTraceTriggerEnable(std::string const& host, size_t entriesAfterTrigger)
+{
+	__SUP_COUT__ << "setTraceTriggerEnable() " << host << __E__;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+	}
+	theTRACEController_->setTriggerEnable(entriesAfterTrigger);
+	__SUP_COUT__ << "end setTraceTriggerEnable()" << __E__;
+	return getTraceTriggerStatus();
+} //end setTraceTriggerEnable()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::resetTRACE(std::string const& host)
+{
+	__SUP_COUT__ << "resetTRACE() " << host << __E__;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+	}
+	theTRACEController_->resetTraceBuffer();
+	theTRACEController_->enableTrace();
+	__SUP_COUT__ << "end resetTRACE()" << __E__;
+	return getTraceTriggerStatus();
+} //end resetTRACE()
+
+//==============================================================================
+const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string const& host)
+{
+	__SUP_COUT__ << "getTraceSnapshot()" << host << __E__;
+
+	traceReturnString_ = ""; //reset;
+
+	if(!theTRACEController_)
+	{
+		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
+		theTRACEController_ = new TRACEController();
+
+	}
+
+	traceReturnString_ = theTRACEController_->getTraceBufferDump();
+	//std::cout << traceReturnString_ << __E__;
+
+	__SUP_COUT__ << "end getTraceSnapshot() Bytes" << traceReturnString_.size() << __E__;
+	return traceReturnString_;
+} //end getTraceSnapshot()
+
+
+

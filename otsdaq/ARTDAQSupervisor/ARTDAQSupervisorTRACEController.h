@@ -23,7 +23,7 @@ class ARTDAQSupervisorTRACEController : public ITRACEController
 	virtual void 								setTriggerEnable	(size_t) {}
 
 	virtual void                   				resetTraceBuffer	(void) {}
-	virtual void                   				enableTrace			(void) {}
+	virtual void                   				enableTrace			(bool enable = true) {if(enable) std::cout << "using enable" << std::endl;} //FIXME
 
   private:
 	ARTDAQSupervisor* theSupervisor_;

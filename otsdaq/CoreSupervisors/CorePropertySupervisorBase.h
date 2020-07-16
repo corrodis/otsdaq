@@ -109,6 +109,10 @@ class CorePropertySupervisorBase
 	const std::string&				getTraceLevels									(void);
 	const std::string&				setTraceLevels									(std::string const& host, std::string const& mode, std::string const& labelsStr, uint32_t setValueMSB, uint32_t setValueLSB);
 	const std::string&				setIndividualTraceLevels						(std::string const& host, std::string const& mode, std::string const& labelValuesStr);
+	const std::string&				getTraceTriggerStatus							(void);
+	const std::string&				setTraceTriggerEnable							(std::string const& host, size_t entriesAfterTrigger);
+	const std::string&				resetTRACE										(std::string const& host);
+	const std::string&				getTraceSnapshot								(std::string const& host);
 
 	// Supervisor Property names
 	//	to access, use CorePropertySupervisorBase::getSupervisorProperty and
@@ -245,7 +249,7 @@ class CorePropertySupervisorBase
   protected:
 	ITRACEController* 					theTRACEController_; //only define for an app that receives a command
   private:
-	std::string 						traceLevelsString_;
+	std::string 						traceReturnString_;
 };
 
 // clang-format on

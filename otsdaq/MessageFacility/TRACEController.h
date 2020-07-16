@@ -18,7 +18,7 @@ class TRACEController : public ITRACEController
 	virtual void 						setTriggerEnable	(size_t entriesAfterTrigger);
 
 	virtual void                   		resetTraceBuffer	(void);
-	virtual void                   		enableTrace			(void);
+	virtual void                   		enableTrace			(bool enable = true);
 };
 }  // namespace ots
 
