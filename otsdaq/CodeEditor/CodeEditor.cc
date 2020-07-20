@@ -103,13 +103,13 @@ catch (...)
 // safePathString
 std::string CodeEditor::safePathString(const std::string& path)
 {
-	//__COUTV__(path);
+	__COUTV__(path);
 	// remove all non ascii and non /, -, _,, space
 	std::string fullpath = "";
 	for (unsigned int i = 0; i < path.length(); ++i)
 		if ((path[i] >= 'a' && path[i] <= 'z') || (path[i] >= 'A' && path[i] <= 'Z') || path[i] >= '_' || path[i] >= '-' || path[i] >= ' ' || path[i] >= '/')
 			fullpath += path[i];
-	//__COUTV__(fullpath);
+	__COUTV__(fullpath);
 	if (!fullpath.length())
 	{
 		__SS__ << "Invalid path '" << fullpath << "' found!" << __E__;

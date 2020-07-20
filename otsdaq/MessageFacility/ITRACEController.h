@@ -42,22 +42,62 @@ class ITRACEController
 	virtual void                   		enableTrace			(bool enable = true) = 0;	// pure virtual
 
 	//=====================================
-	std::string getTraceBufferDump	(std::string const& grepFilter = "")
+	std::string getTraceBufferDump	(std::string const& filterFor = "", std::string const& filterOut = "")
 	{
-		std::string command = "trace_cntl show";
+		std::string command = "";//"trace_cntl show";
+
+		std::vector<std::string> grepArr;
+		StringMacros::getVectorFromString(filterFor,grepArr,{','});
+
 		std::string safeGrep = "";
-		for(unsigned int i=0;i<grepFilter.size();++i)
-			if((grepFilter[i] >= 'a' && grepFilter[i] <= 'z') ||
-					(grepFilter[i] >= 'A' && grepFilter[i] <= 'Z') ||
-					(grepFilter[i] >= '0' && grepFilter[i] <= '9') ||
-					(grepFilter[i] == '-' || grepFilter[i] == '_'))
-				safeGrep += grepFilter[i];
+		for(const auto& grepVal : grepArr)
+		{
+			std::cout << "grepVal = " << grepVal << std::endl;
+
+			if(grepVal.size() < 3) continue;
+
+			safeGrep += " | grep ";//\\\"";
+			for(unsigned int i=0;i<grepVal.size();++i)
+				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
+						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
+						(grepVal[i] >= '0' && grepVal[i] <= '9') ||
+						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
+						(grepVal[i] == '-' || grepVal[i] == '_'))
+					safeGrep += grepVal[i];
+			safeGrep += "";//"\\\"";
+		}
+		std::cout << "safeGrep = " << safeGrep << std::endl;
+
+		grepArr.clear(); //reset
+		StringMacros::getVectorFromString(filterOut,grepArr,{','});
+
+		for(const auto& grepVal : grepArr)
+		{
+			std::cout << "grepVal = " << grepVal << std::endl;
+
+			if(grepVal.size() < 3) continue;
+
+			safeGrep += " | grep -v ";//\\\"";
+			for(unsigned int i=0;i<grepVal.size();++i)
+				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
+						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
+						(grepVal[i] >= '0' && grepVal[i] <= '9') ||
+						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
+						(grepVal[i] == '-' || grepVal[i] == '_'))
+					safeGrep += grepVal[i];
+			safeGrep += "";//"\\\"";
+		}
+		std::cout << "safeGrep = " << safeGrep << std::endl;
 
 		//command += " | grep \"" + safeGrep + "\"";
 		//command += " | tdelta";
 		//command += " | test -n \"${PAGER-}\" && trace_delta \"$@\" | $PAGER || trace_delta \"$@\";";
 		// try source $TRACE_BIN/trace_functions.sh; tshow | tdelta
-		TLOG(TLVL_DEBUG) << "getTraceBufferDump command: " << command << " " << grepFilter;
+		command += " source $TRACE_BIN/trace_functions.sh; tshow ";
+		//command += " | grep Console ";// 2>/dev/null ;
+		command += safeGrep;
+		command += " | tdelta -d 1 ";
+		TLOG(TLVL_DEBUG) << "getTraceBufferDump command: " << command;
 		return StringMacros::exec(command.c_str());
 	} //end getTraceBufferDump()
 

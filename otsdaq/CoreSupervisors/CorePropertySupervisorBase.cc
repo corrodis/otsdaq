@@ -658,11 +658,17 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 		else if(request == "GetSnapshot")
 		{
 			parameters.addParameter("Host");
+			parameters.addParameter("FilterForCSV");
+			parameters.addParameter("FilterOutCSV");
 			SOAPUtilities::receive(message, parameters);
 
 			std::string host = parameters.getValue("Host");
+			std::string filterFor = parameters.getValue("FilterForCSV");
+			std::string filterOut = parameters.getValue("FilterOutCSV");
 			__SUP_COUTV__(host);
-			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host));
+			__SUP_COUTV__(filterFor);
+			__SUP_COUTV__(filterOut);
+			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host,filterFor,filterOut));
 			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
@@ -883,7 +889,7 @@ const std::string& CorePropertySupervisorBase::enableTRACE(std::string const& ho
 } //end enableTRACE()
 
 //==============================================================================
-const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string const& host)
+const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string const& host, std::string const& filterFor, std::string const& filterOut)
 {
 	__SUP_COUT__ << "getTraceSnapshot()" << host << __E__;
 
@@ -896,15 +902,20 @@ const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string cons
 
 	}
 
-	traceReturnString_ = theTRACEController_->getTraceBufferDump();
+	traceReturnString_ = theTRACEController_->getTraceBufferDump(filterFor,filterOut);
 	//std::cout << traceReturnString_ << __E__;
 
-	const size_t MAX_SZ = 100000;
+	const size_t MAX_SZ = 200000;
 	if(traceReturnString_.size() > MAX_SZ)
 	{
-		__SUP_COUT__ << "Trancating from " << traceReturnString_.size() << " to " << MAX_SZ << __E__;
+		__SUP_COUT__ << "Truncating from " << traceReturnString_.size() << " to " << MAX_SZ << __E__;
 		traceReturnString_.resize(MAX_SZ);
 		traceReturnString_ += "\n...TRUNCATED";
+	}
+	else if(traceReturnString_.size() == 0)
+	{
+		__SUP_COUT__ << "Empty snapshot" << __E__;
+		traceReturnString_ = "Empty TRACE snapshot.";
 	}
 	__SUP_COUT__ << "end getTraceSnapshot() Bytes = " << traceReturnString_.size() << __E__;
 	return traceReturnString_;

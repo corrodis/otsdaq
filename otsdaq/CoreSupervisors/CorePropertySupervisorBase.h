@@ -113,7 +113,7 @@ class CorePropertySupervisorBase
 	const std::string&				setTraceTriggerEnable							(std::string const& host, size_t entriesAfterTrigger);
 	const std::string&				resetTRACE										(std::string const& host);
 	const std::string&				enableTRACE										(std::string const& host, bool enable);
-	const std::string&				getTraceSnapshot								(std::string const& host);
+	const std::string&				getTraceSnapshot								(std::string const& host, std::string const& filterFor, std::string const& filterOut);
 
 	// Supervisor Property names
 	//	to access, use CorePropertySupervisorBase::getSupervisorProperty and
