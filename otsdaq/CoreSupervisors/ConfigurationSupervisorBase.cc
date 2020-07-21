@@ -492,35 +492,42 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 	if(!allowDuplicates)
 	{
 		__COUT__ << "Checking for duplicate groups..." << __E__;
-		TableGroupKey foundKey = cfgMgr->findTableGroup(groupName, groupMembers, groupAliases);
-
-		if(!foundKey.isInvalid())
+		try
 		{
-			// return found equivalent key
-			xmlOut.addTextElementToData("TableGroupName", groupName);
-			xmlOut.addTextElementToData("TableGroupKey", foundKey.toString());
-
-			if(lookForEquivalent)
+			TableGroupKey foundKey = cfgMgr->findTableGroup(groupName, groupMembers, groupAliases);
+	
+			if(!foundKey.isInvalid())
 			{
-				__COUT__ << "Found equivalent group key (" << foundKey << ") for " << groupName << "." << __E__;
-				// allow this equivalent group to be the response without an error
-				xmlOut.addTextElementToData("foundEquivalentKey", "1");  // indicator
-
-				// insert get table info
-				handleGetTableGroupXML(xmlOut, cfgMgr, groupName, foundKey, ignoreWarnings);
-				return;
+				// return found equivalent key
+				xmlOut.addTextElementToData("TableGroupName", groupName);
+				xmlOut.addTextElementToData("TableGroupKey", foundKey.toString());
+	
+				if(lookForEquivalent)
+				{
+					__COUT__ << "Found equivalent group key (" << foundKey << ") for " << groupName << "." << __E__;
+					// allow this equivalent group to be the response without an error
+					xmlOut.addTextElementToData("foundEquivalentKey", "1");  // indicator
+	
+					// insert get table info
+					handleGetTableGroupXML(xmlOut, cfgMgr, groupName, foundKey, ignoreWarnings);
+					return;
+				}
+				else  // treat as error, if not looking for equivalent
+				{
+					__COUT__ << "Treating duplicate group as error." << __E__;
+					__SS__ << ("Failed to create table group: " + groupName + ". It is a duplicate of an existing group key (" + foundKey.toString() + ")");
+					__COUT_ERR__ << ss.str() << __E__;
+					xmlOut.addTextElementToData("Error", ss.str());
+					return;
+				}
 			}
-			else  // treat as error, if not looking for equivalent
-			{
-				__COUT__ << "Treating duplicate group as error." << __E__;
-				__SS__ << ("Failed to create table group: " + groupName + ". It is a duplicate of an existing group key (" + foundKey.toString() + ")");
-				__COUT_ERR__ << ss.str() << __E__;
-				xmlOut.addTextElementToData("Error", ss.str());
-				return;
-			}
+	
+			__COUT__ << "Check for duplicate groups complete." << __E__;
 		}
-
-		__COUT__ << "Check for duplicate groups complete." << __E__;
+		catch(...)
+		{
+			__COUT_WARN__ << "Ignoring errors looking for duplicate groups! Proceeding with new group creation." << __E__;			
+		}
 	}
 
 	// check the group for errors before creating group
