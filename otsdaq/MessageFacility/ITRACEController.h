@@ -56,7 +56,7 @@ class ITRACEController
 
 			if(grepVal.size() < 3) continue;
 
-			safeGrep += " | grep ";//\\\"";
+			safeGrep += " | grep \" ";
 			for(unsigned int i=0;i<grepVal.size();++i)
 				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
 						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
@@ -64,7 +64,7 @@ class ITRACEController
 						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
 						(grepVal[i] == '-' || grepVal[i] == '_'))
 					safeGrep += grepVal[i];
-			safeGrep += "";//"\\\"";
+			safeGrep += " \"";
 		}
 		std::cout << "safeGrep = " << safeGrep << std::endl;
 
@@ -77,7 +77,7 @@ class ITRACEController
 
 			if(grepVal.size() < 3) continue;
 
-			safeGrep += " | grep -v ";//\\\"";
+			safeGrep += " | grep -v \" ";
 			for(unsigned int i=0;i<grepVal.size();++i)
 				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
 						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
@@ -85,7 +85,7 @@ class ITRACEController
 						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
 						(grepVal[i] == '-' || grepVal[i] == '_'))
 					safeGrep += grepVal[i];
-			safeGrep += "";//"\\\"";
+			safeGrep += " \"";
 		}
 		std::cout << "safeGrep = " << safeGrep << std::endl;
 
