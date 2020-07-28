@@ -14,7 +14,7 @@ using namespace ots;
 
 //==============================================================================
 TCPServerBase::TCPServerBase(int serverPort, unsigned int /*maxNumberOfClients*/)
-    : /*fMaxNumberOfClients(maxNumberOfClients),*/ fAccept(true), fAcceptFuture(fAcceptPromise.get_future())
+    : /*fMaxNumberOfClients(maxNumberOfClients),*/ fAccept(true)//, fAcceptFuture(fAcceptPromise.get_future())
 {
 	int opt = 1;  // SO_REUSEADDR - man socket(7)
 	if(::setsockopt(getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) != 0)

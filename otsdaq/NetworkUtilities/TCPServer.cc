@@ -90,7 +90,7 @@ void TCPServer::acceptConnections()
 				break;
 		}
 	}
-	fAcceptPromise.set_value(true);
+	//fAcceptPromise.set_value(true);
 }
 
 //==============================================================================
