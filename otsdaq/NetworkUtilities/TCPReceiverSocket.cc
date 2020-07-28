@@ -30,7 +30,7 @@ std::string TCPReceiverSocket::receivePacket()
 //==============================================================================
 std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int /*timeoutMicroSeconds*/)
 {
-	std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " << getSocketId() << std::endl;
+	//std::cout << __PRETTY_FUNCTION__ << "Receiving Message for socket: " << getSocketId() << std::endl;
 	if(getSocketId() == 0)
 	{
 		throw std::logic_error("Bad socket object (this object was moved)");

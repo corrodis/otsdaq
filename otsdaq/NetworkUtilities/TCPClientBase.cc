@@ -1,4 +1,5 @@
 #include "otsdaq/NetworkUtilities/TCPClientBase.h"
+#include "otsdaq/Macros/CoutMacros.h"
 
 #include <arpa/inet.h>  // inet_aton
 #include <netdb.h>
@@ -7,7 +8,6 @@
 #include <boost/regex.hpp>
 #include <iostream>
 #include <thread>
-#include "otsdaq/Macros/CoutMacros.h"
 
 using namespace ots;
 
@@ -28,21 +28,22 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 {
 	if(fConnected)
 	{
-		__COUT__ << "I am already connected...what is going on?" << std::endl;
-		throw std::runtime_error(std::string("I am already connected...what is going on?"));
-		abort();
+		std::stringstream error;
+		error << "ERROR: This client is already connected. This must never happens. It probably means that the connect method is called multiple times before the TCPClient has been disconnected.";
+		throw std::runtime_error(error.str());
 	}
 
-	__COUT__ << "Connecting Client socket to server name-" << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	//std::cout << __COUT__ << "Connecting Client socket to server name-" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	std::string serverName = fServerIP;
 	resolveServer(fServerIP);
-	__COUT__ << "Connecting Client socket to server ip  -" << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	//std::cout << __COUT__ << "Connecting Client socket to server ip  -" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	int                status = invalidSocketId;
 	struct sockaddr_in serverSocketAddress;
 	serverSocketAddress.sin_family      = AF_INET;
 	serverSocketAddress.sin_port        = htons(fServerPort);
 	serverSocketAddress.sin_addr.s_addr = inet_addr(fServerIP.c_str());
 
+	int totalTries = retry;
 	while(!fConnected && (unsigned int)retry-- > 0)
 	{
 		// __COUT__ << "Trying to connect" << std::endl;
@@ -60,8 +61,10 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 			}
 			else
 			{
-				__COUT__ << "ERROR: Can't connect to " << serverName << " aborting!" << std::endl;
-				break;
+				std::stringstream error;
+				error << "ERROR: Can't connect to " << serverName << ". The server might still be down after " << totalTries*sleepMilliSeconds/1000. << " seconds and "<< totalTries << " connection attempts!";
+				fConnected = false;
+				throw std::runtime_error(error.str());
 			}
 		}
 
@@ -94,7 +97,7 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 		fConnected = true;
 	}
 
-	return true;
+	return fConnected;
 }
 //==============================================================================
 bool TCPClientBase::disconnect(void)
