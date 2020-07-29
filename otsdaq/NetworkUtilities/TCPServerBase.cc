@@ -59,8 +59,9 @@ TCPServerBase::~TCPServerBase(void)
 void TCPServerBase::startAccept(void)
 {
 	fAccept = true;
-	std::thread thread(&TCPServerBase::acceptConnections, this);
-	thread.detach();
+	fAcceptFuture = std::async(std::launch::async, &TCPServerBase::acceptConnections, this);
+//	std::thread thread(&TCPServerBase::acceptConnections, this);
+//	thread.detach();
 }
 
 // An accepts waits for a connection and returns the opened socket number
