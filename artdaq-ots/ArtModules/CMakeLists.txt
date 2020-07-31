@@ -30,13 +30,5 @@ simple_plugin(JSONDispatcher "module"
   MF_MessageLogger
 )
 
-simple_plugin(OtsArtdaqFragmentNamingService "service"
-artdaq_ArtModules_ArtdaqFragmentNamingService_service
-artdaq-core_Data
-artdaq-ots_Overlays
-  art_Framework_Services_Registry
-  MF_MessageLogger
-  fhiclcpp)
-
 install_headers()
 install_source()
