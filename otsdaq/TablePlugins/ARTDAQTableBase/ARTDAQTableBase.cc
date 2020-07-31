@@ -771,7 +771,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 			OUT << "resume_after_timeout: " << (services.getNode("sharedMemoryResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
 			OUT << "}\n\n";
 
-			OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: " << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>())
+			OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: ArtdaqFragmentNamingService helper_plugin: " << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>())
 			    << "}\n\n";
 
 			//--------------------------------------
