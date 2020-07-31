@@ -10,7 +10,7 @@ namespace ots
  * \brief OtsFragmentNameHelper extends ArtdaqFragmentNamingService.
  * This implementation uses artdaq-demo's SystemTypeMap and directly assigns names based on it
  */
-class OtsFragmentNameHelper : public ArtdaqFragmentNameHelper
+class OtsFragmentNameHelper : public artdaq::ArtdaqFragmentNameHelper
 {
   public:
 	/**
@@ -40,4 +40,4 @@ OtsFragmentNameHelper::OtsFragmentNameHelper(std::string                        
 }
 }  // namespace artdaq
 
-DEFINE_ARTDAQ_FRAGMENT_NAME_HELPER(artdaq::OtsFragmentNameHelper)
+DEFINE_ARTDAQ_FRAGMENT_NAME_HELPER(ots::OtsFragmentNameHelper)
