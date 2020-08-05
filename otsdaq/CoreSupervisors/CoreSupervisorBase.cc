@@ -866,9 +866,11 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference /*event*/)
 //	Static -- thread
 //	Send async error or soft error to gateway
 //	Call this as thread so that parent calling function (workloop) can end.
-void CoreSupervisorBase::sendAsyncErrorToGateway(const std::string& errorMessage, bool isSoftError) try
+void CoreSupervisorBase::sendAsyncExceptionToGateway(const std::string& errorMessage, bool isPauseException, bool isStopException) try
 {
-	if(isSoftError)
+	if(isStopException)
+		__SUP_COUT_ERR__ << "Sending Supervisor Async STOP Running Exception... \n" << errorMessage << __E__;
+	else if(isPauseException)
 		__SUP_COUT_ERR__ << "Sending Supervisor Async SOFT Running Error... \n" << errorMessage << __E__;
 	else
 		__SUP_COUT_ERR__ << "Sending Supervisor Async Running Error... \n" << errorMessage << __E__;
@@ -880,7 +882,7 @@ void CoreSupervisorBase::sendAsyncErrorToGateway(const std::string& errorMessage
 	SOAPParameters parameters;
 	parameters.addParameter("ErrorMessage", errorMessage);
 
-	xoap::MessageReference replyMessage = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isSoftError ? "AsyncSoftError" : "AsyncError", parameters);
+	xoap::MessageReference replyMessage = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isStopException ? "AsyncStopException": (isPauseException ? "AsyncPauseException" : "AsyncError"), parameters);
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
@@ -894,9 +896,13 @@ void CoreSupervisorBase::sendAsyncErrorToGateway(const std::string& errorMessage
 }
 catch(const xdaq::exception::Exception& e)
 {
-	if(isSoftError)
+	if(isStopException)
+		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running STOP "
+						"exception back to Gateway: "
+					 << e.what() << __E__;
+	else if(isPauseException)
 		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running SOFT "
-		                "error back to Gateway: "
+		                "exception back to Gateway: "
 		             << e.what() << __E__;
 	else
 		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running "
@@ -906,7 +912,11 @@ catch(const xdaq::exception::Exception& e)
 }
 catch(...)
 {
-	if(isSoftError)
+	if(isStopException)
+		__SUP_COUT__ << "Unknown error encounter indicating Supervisor asynchronous running "
+		                "STOP exception back to Gateway."
+		             << __E__;
+	else if(isPauseException)
 		__SUP_COUT__ << "Unknown error encounter indicating Supervisor asynchronous running "
 		                "SOFT error back to Gateway."
 		             << __E__;

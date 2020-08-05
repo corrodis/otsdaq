@@ -229,14 +229,27 @@
 //========================================================================================================================
 
 //========================================================================================================================
-// declare special ots soft exception
-//	a SOFT exception thrown during running workloop by a state machine plugin will
+// declare special ots soft PAUSE exception
+//	a PAUSE exception thrown during a running workloop by a state machine plugin will
 //	PAUSE the global state machine and allow for manual intervention to resume a run.
 namespace ots
 {
-struct __OTS_SOFT_EXCEPTION__ : public std::exception
+struct __OTS_PAUSE_EXCEPTION__ : public std::exception
 {
-	__OTS_SOFT_EXCEPTION__(const std::string& what) : what_(what) {}
+	__OTS_PAUSE_EXCEPTION__(const std::string& what) : what_(what) {}
+	virtual char const* what() const throw() { return what_.c_str(); }
+	std::string         what_;
+};
+}  // end namespace ots
+//========================================================================================================================
+// declare special ots harder STOP exception
+//	a STOP exception thrown during a running workloop by a state machine plugin will
+//	STOP the global state machine and allow for manual intervention to resume a run.
+namespace ots
+{
+struct __OTS_STOP_EXCEPTION__ : public std::exception
+{
+	__OTS_STOP_EXCEPTION__(const std::string& what) : what_(what) {}
 	virtual char const* what() const throw() { return what_.c_str(); }
 	std::string         what_;
 };

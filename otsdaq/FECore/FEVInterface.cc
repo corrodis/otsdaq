@@ -358,16 +358,22 @@ catch(...)  //
 	// catch all, then rethrow with local variables needed
 	__FE_SS__;
 
-	bool isSoftError = false;
+	bool isPauseException = false;
+	bool isStopException = false;
 
 	try
 	{
 		throw;
 	}
-	catch(const __OTS_SOFT_EXCEPTION__& e)
+	catch(const __OTS_PAUSE_EXCEPTION__& e)
 	{
-		ss << "SOFT Error was caught during slow controls running thread: " << e.what() << std::endl;
-		isSoftError = true;
+		ss << "PAUSE Exception was caught during slow controls running thread: " << e.what() << std::endl;
+		isPauseException = true;
+	}
+	catch(const __OTS_STOP_EXCEPTION__& e)
+	{
+		ss << "STOP Exception was caught during slow controls running thread: " << e.what() << std::endl;
+		isStopException = true;
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -387,11 +393,15 @@ catch(...)  //
 	__FE_COUT_ERR__ << ss.str();
 
 	std::thread(
-	    [](FEVInterface* fe, const std::string errorMessage, bool isSoftError) { FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError); },
+	    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException)
+		{
+			FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
+		},
 	    // pass the values
 	    this /*fe*/,
 	    ss.str() /*errorMessage*/,
-	    isSoftError)
+	    isPauseException,
+		isStopException)
 	    .detach();
 
 	return false;
@@ -405,15 +415,20 @@ catch(...)  //
 //
 //	Note: be careful not to access fe pointer after HALT
 //		has potentially propagated.. because the pointer might be destructed!
-void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& errorMessage, bool isSoftError) try
+void FEVInterface::sendAsyncExceptionToGateway(FEVInterface* fe, const std::string& errorMessage, bool isPauseException, bool isStopException) try
 {
 	std::stringstream feHeader;
 	feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << "\t";
 
-	if(isSoftError)
+	if(isStopException)
 	{
-		__COUT_ERR__ << feHeader.str() << "Sending FE Async SOFT Running Error... \n" << errorMessage << __E__;
-		fe->VStateMachine::parentSupervisor_->setAsyncSoftErrorMessage(errorMessage);
+		__COUT_ERR__ << feHeader.str() << "Sending FE Async STOP Running Exception... \n" << errorMessage << __E__;
+		fe->VStateMachine::parentSupervisor_->setAsyncPauseExceptionMessage(errorMessage);
+	}
+	else if(isPauseException)
+	{
+		__COUT_ERR__ << feHeader.str() << "Sending FE Async PAUSE Running Exception... \n" << errorMessage << __E__;
+		fe->VStateMachine::parentSupervisor_->setAsyncStopExceptionMessage(errorMessage);
 	}
 	else
 		__COUT_ERR__ << feHeader.str() << "Sending FE Async Running Error... \n" << errorMessage << __E__;
@@ -424,7 +439,7 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& 
 	parameters.addParameter("ErrorMessage", errorMessage);
 
 	xoap::MessageReference replyMessage =
-	    fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isSoftError ? "AsyncSoftError" : "AsyncError", parameters);
+	    fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isPauseException ? "AsyncPauseException" : "AsyncError", parameters);
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
@@ -438,7 +453,7 @@ void FEVInterface::sendAsyncErrorToGateway(FEVInterface* fe, const std::string& 
 }
 catch(const xdaq::exception::Exception& e)
 {
-	if(isSoftError)
+	if(isPauseException)
 		__COUT__ << "SOAP message failure indicating front-end asynchronous running SOFT "
 		            "error back to Gateway: "
 		         << e.what() << __E__;
@@ -450,7 +465,7 @@ catch(const xdaq::exception::Exception& e)
 }
 catch(...)
 {
-	if(isSoftError)
+	if(isPauseException)
 		__COUT__ << "Unknown error encounter indicating front-end asynchronous running "
 		            "SOFT error back to Gateway."
 		         << __E__;
@@ -475,16 +490,22 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		// catch all, then rethrow with local variables needed
 		__FE_SS__;
 
-		bool isSoftError = false;
+		bool isPauseException = false;
+		bool isStopException = false;
 
 		try
 		{
 			throw;
 		}
-		catch(const __OTS_SOFT_EXCEPTION__& e)
+		catch(const __OTS_PAUSE_EXCEPTION__& e)
 		{
-			ss << "SOFT Error was caught while running: " << e.what() << std::endl;
-			isSoftError = true;
+			ss << "SOFT Exception was caught while running: " << e.what() << std::endl;
+			isPauseException = true;
+		}
+		catch(const __OTS_STOP_EXCEPTION__& e)
+		{
+			ss << "STOP Exception was caught while running: " << e.what() << std::endl;
+			isStopException = true;
 		}
 		catch(const std::runtime_error& e)
 		{
@@ -503,11 +524,15 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		__FE_COUT_ERR__ << ss.str();
 
 		std::thread(
-		    [](FEVInterface* fe, const std::string errorMessage, bool isSoftError) { FEVInterface::sendAsyncErrorToGateway(fe, errorMessage, isSoftError); },
+		    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException)
+			{
+				FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
+			},
 		    // pass the values
 		    this /*fe*/,
 		    ss.str() /*errorMessage*/,
-		    isSoftError)
+		    isPauseException,
+			isStopException)
 		    .detach();
 
 		return false;

@@ -1270,10 +1270,10 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference /*e*/)
 
 	makeSystemLogbookEntry("Run pausing.");
 
-	// the current message is not for Pause if its due to async failure
-	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	// the current message is not for Pause if its due to async exception, so rename
+	if(RunControlStateMachine::asyncPauseExceptionReceived_)
 	{
-		__COUT_ERR__ << "Broadcasting pause for async SOFT error!" << __E__;
+		__COUT_ERR__ << "Broadcasting pause for async PAUSE exception!" << __E__;
 		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Pause"));
 	}
 	else
@@ -1283,11 +1283,17 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference /*e*/)
 //==============================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference /*e*/)
 {
-	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	if(RunControlStateMachine::asyncPauseExceptionReceived_)
 	{
-		// clear async soft error
-		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
-		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+		// clear async pause error
+		__COUT_INFO__ << "Clearing async PAUSE exception!" << __E__;
+		RunControlStateMachine::asyncPauseExceptionReceived_ = false;
+	}
+	else if(RunControlStateMachine::asyncStopExceptionReceived_)
+	{
+		// clear async stop error
+		__COUT_INFO__ << "Clearing async STOP exception!" << __E__;
+		RunControlStateMachine::asyncStopExceptionReceived_ = false;
 	}
 
 	checkForAsyncError();
@@ -1302,11 +1308,17 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference /*e*/)
 //==============================================================================
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 {
-	if(RunControlStateMachine::asyncSoftFailureReceived_)
+	if(RunControlStateMachine::asyncPauseExceptionReceived_)
 	{
 		// clear async soft error
-		__COUT_INFO__ << "Clearing async SOFT error!" << __E__;
-		RunControlStateMachine::asyncSoftFailureReceived_ = false;
+		__COUT_INFO__ << "Clearing async PAUSE exception!" << __E__;
+		RunControlStateMachine::asyncPauseExceptionReceived_ = false;
+	}
+	else if(RunControlStateMachine::asyncStopExceptionReceived_)
+	{
+		// clear async stop error
+		__COUT_INFO__ << "Clearing async STOP exception!" << __E__;
+		RunControlStateMachine::asyncStopExceptionReceived_ = false;
 	}
 
 	checkForAsyncError();
@@ -1388,7 +1400,15 @@ void GatewaySupervisor::transitionStopping(toolbox::Event::Reference /*e*/)
 
 	makeSystemLogbookEntry("Run stopping.");
 
-	broadcastMessage(theStateMachine_.getCurrentMessage());
+
+	// the current message is not for Stop if its due to async exception, so rename
+	if(RunControlStateMachine::asyncStopExceptionReceived_)
+	{
+		__COUT_ERR__ << "Broadcasting stop for async STOP exception!" << __E__;
+		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Stop"));
+	}
+	else
+		broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionStopping()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2832,15 +2852,23 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				{
 					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
 
-					if(RunControlStateMachine::asyncSoftFailureReceived_)
+					if(RunControlStateMachine::asyncPauseExceptionReceived_)
 					{
-						//__COUTV__(RunControlStateMachine::asyncSoftFailureReceived_);
+						//__COUTV__(RunControlStateMachine::asyncPauseExceptionReceived_);
 						//__COUTV__(RunControlStateMachine::getErrorMessage());
 						xmlOut.addTextElementToData("soft_error", RunControlStateMachine::getErrorMessage());
 					}
 				}
 				else
 					sprintf(tmp, "Next %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(fsmName));
+
+				if(RunControlStateMachine::asyncStopExceptionReceived_)
+				{
+					//__COUTV__(RunControlStateMachine::asyncPauseExceptionReceived_);
+					//__COUTV__(RunControlStateMachine::getErrorMessage());
+					xmlOut.addTextElementToData("soft_error", RunControlStateMachine::getErrorMessage());
+				}
+
 				xmlOut.addTextElementToData("run_number", tmp);
 			}
 		}

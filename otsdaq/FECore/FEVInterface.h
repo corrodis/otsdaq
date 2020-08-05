@@ -78,7 +78,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 
 	void 								runSequenceOfCommands		(const std::string& treeLinkName);
 
-	static void 						sendAsyncErrorToGateway		(FEVInterface* fe, const std::string& errMsg, bool isSoftError);
+	static void 						sendAsyncExceptionToGateway		(FEVInterface* fe, const std::string& errMsg, bool isPauseException, bool isStopException);
 
 	/////////===========================
 	// start State Machine handlers

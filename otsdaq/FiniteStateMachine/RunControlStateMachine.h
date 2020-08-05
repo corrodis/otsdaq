@@ -20,9 +20,14 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	void               reset(void);
 	void               setStateMachineName(const std::string& name) { theStateMachine_.setStateMachineName(name); }
 	const std::string& getErrorMessage(void) const { return theStateMachine_.getErrorMessage(); }
-	void               setAsyncSoftErrorMessage(const std::string& error)
+	void               setAsyncPauseExceptionMessage(const std::string& error)
 	{
-		asyncSoftFailureReceived_ = true;
+		asyncPauseExceptionReceived_ = true;
+		theStateMachine_.setErrorMessage(error);
+	}
+	void               setAsyncStopExceptionMessage(const std::string& error)
+	{
+		asyncStopExceptionReceived_ = true;
 		theStateMachine_.setErrorMessage(error);
 	}
 
@@ -123,7 +128,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	FiniteStateMachine theStateMachine_;
 	ProgressBar        theProgressBar_;
 
-	volatile bool asyncFailureReceived_, asyncSoftFailureReceived_;
+	volatile bool asyncFailureReceived_, asyncPauseExceptionReceived_, asyncStopExceptionReceived_;
 
 	unsigned int iterationIndex_, subIterationIndex_;
 	bool         iterationWorkFlag_, subIterationWorkFlag_;
