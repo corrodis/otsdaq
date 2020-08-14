@@ -1,98 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
-function defineColors ()
-{
-  # Regular Colors
-  Black='\033[0;30m'        # Black
-  Red='\033[0;31m'          # Red
-  Green='\033[0;32m'        # Green
-  Yellow='\033[0;32m'       # \033[0;33m  Yellow -- too hard to see on white (so making green)
-  Blue='\033[0;34m'         # Blue
-  Purple='\033[0;35m'       # Purple
-  Cyan='\033[0;36m'         # Cyan
-  White='\033[0;37m'        # White
+# For now this seems like the simplest way to do this (fixing the output spam) but really the code should be reworked
+# so that it uses here documents instead of 10 lines of echo in a row and common color definitions/printouts are used
+# instead of having to manually add every colorcode to the beginning of each line (but that's a big TODO for later)
 
-  # Bold
-  BBlack='\033[1;30m'       # Black
-  BRed='\033[1;31m'         # Red
-  BGreen='\033[1;32m'       # Green
-  BYellow='\033[1;33m'      # Yellow
-  BBlue='\033[1;34m'        # Blue
-  BPurple='\033[1;35m'      # Purple
-  BCyan='\033[1;36m'        # Cyan
-  BWhite='\033[1;37m'       # White
+# Get color code variables
+source "${SCRIPT_DIR}"/colordefs.sh
 
-  # Underline
-  UBlack='\033[4;30m'       # Black
-  URed='\033[4;31m'         # Red
-  UGreen='\033[4;32m'       # Green
-  UYellow='\033[4;33m'      # Yellow
-  UBlue='\033[4;34m'        # Blue
-  UPurple='\033[4;35m'      # Purple
-  UCyan='\033[4;36m'        # Cyan
-  UWhite='\033[4;37m'       # White
+# trace helper functions
+source "${TRACE_BIN}"/trace_functions.sh
 
-  # Background
-  On_Black='\033[40m'       # Black
-  On_Red='\033[41m'         # Red
-  On_Green='\033[42m'       # Green
-  On_Yellow='\033[43m'      # Yellow
-  On_Blue='\033[44m'        # Blue
-  On_Purple='\033[45m'      # Purple
-  On_Cyan='\033[46m'        # Cyan
-  On_White='\033[47m'       # White
-
-  # High Intensity
-  IBlack='\033[0;90m'       # Black
-  IRed='\033[0;91m'         # Red
-  IGreen='\033[0;92m'       # Green
-  IYellow='\033[0;93m'      # Yellow
-  IBlue='\033[0;94m'        # Blue
-  IPurple='\033[0;95m'      # Purple
-  ICyan='\033[0;96m'        # Cyan
-  IWhite='\033[0;97m'       # White
-
-  # Bold High Intensity
-  BIBlack='\033[1;90m'      # Black
-  BIRed='\033[1;91m'        # Red
-  BIGreen='\033[1;92m'      # Green
-  BIYellow='\033[1;93m'     # Yellow
-  BIBlue='\033[1;94m'       # Blue
-  BIPurple='\033[1;95m'     # Purple
-  BICyan='\033[1;96m'       # Cyan
-  BIWhite='\033[1;97m'      # White
-
-  # High Intensity backgrounds
-  On_IBlack='\033[0;100m'   # Black
-  On_IRed='\033[0;101m'     # Red
-  On_IGreen='\033[0;102m'   # Green
-  On_IYellow='\033[0;103m'  # Yellow
-  On_IBlue='\033[0;104m'    # Blue
-  On_IPurple='\033[0;105m'  # Purple
-  On_ICyan='\033[0;106m'    # Cyan
-  On_IWhite='\033[0;107m'   # White
-
-  Bold=`tput bold -T xterm`          # Select bold mode                  
-  DIM=`tput dim -T xterm`            # Select dim (half-bright) mode     
-  Blink=`tput blink -T xterm`        # Select dim (half-bright) mode 
-  EUNDERLINE=`tput smul -T xterm`    # Enable underline mode             
-  DUNDERLINE=`tput rmul -T xterm`    # Disable underline mode            
-  REV=`tput rev -T xterm`            # Turn on reverse video mode        
-  RstClr='\e[0m'         # Reset color
-#Reset=`tput init -T xterm`         # Reset all
-  Reset=`tput init -T xterm;tput sgr0 -T xterm`         # Reset all
-  EBold=`tput smso -T xterm`         # Enter standout (bold) mode        
-  DBold=`tput rmso -T xterm`         # Exit standout mode              
-}
-
-#trace helper functions
-source $TRACE_BIN/trace_functions.sh
-
-#function toffS () 
-#{ 
-#	${TRACE_BIN}/trace_cntl lvlclr 0 `bitN_to_mask "$@"` 0
-#}
-
+# TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
 	#source /data/ups/setup
@@ -125,11 +43,8 @@ function setupTrace()
 
 export TRACE_FILE=/tmp/trace_buffer_${USER}
 
-
-defineColors
 setupTrace
 		
-
 echo -e "${Reset}"
 echo
 echo "  | "
@@ -142,7 +57,9 @@ echo
 
 ulimit -c unlimited
 
-THIS_HOST=$(hostname -f)
+# This is already setup by setup_ots.sh, plus we actually use bashisms everwhere so $HOSTNAME is actually already here from bash
+# without defining it anyway
+THIS_HOST="${HOSTNAME}"
 HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 #for i in "${!HOSTNAME_ARR[@]}"
 #do
@@ -227,7 +144,8 @@ fi
 #############################
 
 
-
+# TODO: Trace is handled all over the place, the best place for this is actually in setup_ots.sh since that
+# file gets sourced on remote sides so we get a consistent startup environment
 if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tSetting up TRACE defaults..."
 	
@@ -722,7 +640,7 @@ MPI_RUN_CMD=""
 ################## MacroMaker Mode OTS Launch ######################
 ####################################################################
 ####################################################################
-#make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
+# TODO: move to it's own script file
 launchOTSMacromaker() {	
 	
 	#kill all things otsdaq, before launching new things	
@@ -788,6 +706,7 @@ launchOTSMacromaker() {
 	export MACROMAKER_SUPERVISOR_ID=290
 	MAIN_PORT=2015
 
+    # TODO: Handle ports in one place, with special handling for Wiz mode if needed
 	if [ "x$OTS_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_MAIN_PORT}
 	elif [ $USER == rrivera ]; then
@@ -837,7 +756,8 @@ launchOTSMacromaker() {
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
-		
+	
+	# Iris: TODO Quiet is actually quite loud, maybe we should change this to "VERBOSE" if off and "QUIET" doesn't have any echos enabled
 	if [ $QUIET == 1 ]; then
 		echo
 
@@ -923,7 +843,7 @@ export -f launchOTSMacromaker
 ################## Wiz Mode OTS Launch ###########################
 ####################################################################
 ####################################################################
-#make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
+# TODO: Like the ones above and below this should be a seperate script
 launchOTSWiz() {	
 	
 	#kill all things otsdaq, before launching new things	
@@ -949,6 +869,8 @@ launchOTSWiz() {
 	export WIZARD_SUPERVISOR_ID=290	
 	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
+
+    # TODO: This should not be here, this should always be setup prior to running this, we just duplicate (poorly) the work here
 
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
@@ -1169,6 +1091,8 @@ export -f launchOTSWiz
 ################## Normal Mode OTS Launch ##########################
 ####################################################################
 ####################################################################
+# TODO: This should again be it's own script so that code is more manageable and reusable
+
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 #ContextPIDArray is context PID array 
 launchOTS() {
@@ -1704,7 +1628,13 @@ launchOTS() {
 			
 				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-				ssh -XY ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+
+                # Iris: For now until a rewrite happens this is done a little oddly
+                # ots_remote_start is kind of like a weird semi-copy of some of ots.sh, but all it really does it print some remote specific output then invoke ots -s to launch a single node
+                # what we do instead of handling the SSH processes and trying to keep those up when session the user used to launch ots on the gateway is done, we let them detach
+                # and make it so that when sshd on the remote system sends a hup to bash, the important part of ots (the ots -s command) will have been isolated by disowning -h it.
+                # very strange but it should work okay until time is spent on the real solution TM
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
@@ -1789,6 +1719,8 @@ export -f launchOTS
 
 #########################################################
 #########################################################
+# TODO: this should be moved to a common utility library to get it out of the mess of main flow
+
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 printMainURL() {	
 	
@@ -1834,7 +1766,9 @@ printMainURL() {
 	done
 }  #end printMainURL
 export -f printMainURL
-	
+
+# TODO: This should really go into a script instead of a function
+
 #########################################################
 #########################################################
 otsActionHandler() {
@@ -1864,8 +1798,14 @@ otsActionHandler() {
 		
 	FIRST_TIME=1 #to enable url printouts
 	
-	
-	
+	# TODO: Refactor this
+    # I think ideally this would be rolled into XDAQ somehow so that it could be told how to launch processes and then invoke commands to do so, then
+    # a supervisor component could monitor the status in XDAQ instead of trying to guess via the shell/process ids.
+
+    # Short of that I think we should probably split this loop out into it's own script and have it define the inner body as the handler for a SIGHUP which
+    # it would handle as a new command coming in and that would allow it to wait on the SSH children to the remote server and recover them when they die
+    # This is probably what I will do (Iris) if I have the time
+
 	#listen for file commands
 	while true; do
 		#In OTSDAQ_STARTOTS_ACTION_FILE
@@ -2029,6 +1969,7 @@ sleep 3 #so that the terminal comes back after the printouts are done ( in quiet
 
 echo -e "${Reset}"
 echo -e "${Reset}"
+
 
 
 
