@@ -1850,7 +1850,8 @@ void FEVInterfacesManager::runFEMacro(const std::string&                        
 			std::istringstream pairInputStream(splitVal);
 			getline(pairInputStream, argName, ',');
 			getline(pairInputStream, argValue, ',');
-			argsIn.push_back(std::make_pair(argName, argValue));
+			argsIn.push_back(std::make_pair(StringMacros::decodeURIComponent(argName), 
+				StringMacros::decodeURIComponent(argValue)));
 		}
 	}
 
@@ -1883,7 +1884,8 @@ void FEVInterfacesManager::runFEMacro(const std::string&                        
 			__CFG_COUT__ << "argName " << argName << __E__;
 
 			returnStrings.push_back("DEFAULT");  // std::string());
-			argsOut.push_back(FEVInterface::frontEndMacroArg_t(argName, returnStrings[returnStrings.size() - 1]));
+			argsOut.push_back(FEVInterface::frontEndMacroArg_t(
+				StringMacros::decodeURIComponent(argName), returnStrings[returnStrings.size() - 1]));
 			//
 			//			__CFG_COUT__ << argsOut[argsOut.size()-1].first << __E__;
 			__CFG_COUT__ << (uint64_t) & (returnStrings[returnStrings.size() - 1]) << __E__;
