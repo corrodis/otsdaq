@@ -1,7 +1,7 @@
 # Source this to get color code variables to use during output
 # Not sure why this is encapsulated into a function...
 
-function defineColors ()
+defineColors ()
 {
   # Regular Colors
   Black='\033[0;30m'        # Black
@@ -87,3 +87,11 @@ function defineColors ()
 }
 
 defineColors
+
+out() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%h%y.%T') ${IBlue}${HOSTNAME}${RstClr} [${Cyan}${LINENO}${RstClr}]${IBlack}\t${RstClr}$@${RstClr}"; }
+info() { out "${IBlue}$@${RstClr}"; }
+success() { out "${IGreen}$@${RstClr}"; }
+error() { out "${IRed}$@${RstClr}"; } >&2
+warning() { out "${Yellow}$@${RstClr}"; } >&2
+die() { error "$@"; exit 1; }
+

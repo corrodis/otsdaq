@@ -6,7 +6,7 @@ SCRIPT_DIR="$(
 )"
 
 # Get color code variables
-source ${SCRIPT_DIR}/colordefs.sh
+source ${SCRIPT_DIR}/common.sh
 
 # Why is there a giant arrow wasting my scrollback...
 #echo -e "${Reset}"
@@ -20,12 +20,9 @@ source ${SCRIPT_DIR}/colordefs.sh
 #echo 
 
 STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
-echo -e "${Reset}${STARTTIME}  <==  ots started on {${HOSTNAME}}"
-echo 
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME}-ots_remote [${Cyan}${LINENO}${Reset}]\t${Green}=========================== ots REMOTE ============================="
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME}-ots_remote [${Cyan}${LINENO}${Reset}]\tots script path     	= ${SCRIPT_DIR}/ots_remote_start"
-echo -e "${Reset}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME}-ots_remote [${Cyan}${LINENO}${Reset}]\tExpected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
-echo
+out "${Green}=========================== ots REMOTE ============================="
+info "ots script path = ${SCRIPT_DIR}/ots_remote_start"
+info "Expected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
 
 cd ${SCRIPT_DIR}/../../../
 source ${SCRIPT_DIR}/../../../setup_ots.sh
@@ -49,10 +46,6 @@ wait # Wait on it because I think parent launcher script gets angry if SSH comma
 #############################
 
 #############################
-
-echo -e "${Reset}"
-echo -e "${Reset}"
-
 
 
 

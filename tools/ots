@@ -10,8 +10,8 @@ SCRIPT_DIR="$(
  pwd -P 
 )"
 
-# Get color code variables
-source "${SCRIPT_DIR}"/colordefs.sh
+# Get color code variables and other common utility portions of the code
+source "${SCRIPT_DIR}"/common.sh
 
 # trace helper functions
 source "${TRACE_BIN}"/trace_functions.sh
@@ -27,27 +27,10 @@ function setupTrace()
 	
 	#for muting trace
 	export TRACE_NAME=OTSDAQ_TRACE
-	 
-	#type toffS
-	
-	toffS 0-63 -n CONF:OpBase_C
-	toffS 0-63 -n CONF:OpLdStr_C
-	toffS 0-63 -n CONF:CrtCfD_C
-	toffS 0-63 -n COFS:DpFle_C
-	toffS 0-63 -n PRVDR:FileDB_C
-	toffS 0-63 -n PRVDR:FileDBIX_C
-	toffS 0-63 -n JSNU:Document_C
-	toffS 0-63 -n JSNU:DocUtils_C
-	toffS 0-63 -n CONF:LdStrD_C
-	toffS 0-63 -n FileDB:RDWRT_C
-	
-	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
-	
 	export TRACE_LIMIT_MS="0,50,50" #unlimited trace messages
 	#tinfo #show trace info
+	export TRACE_FILE=/tmp/trace_buffer_${USER}
 }
-
-export TRACE_FILE=/tmp/trace_buffer_${USER}
 
 setupTrace
 
@@ -59,10 +42,6 @@ THIS_HOST="${HOSTNAME}"
 HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
 STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
-echo -e "${RstClr}${STARTTIME}  <==  ots started on {${THIS_HOST}}"
-echo 
-echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}=========================== ots ============================="
-
 
 # These are old, aliases are bad except for interactive use and break scripts, also it doesn't change the name so it just makes the script confusing
 # to properly rename the process we need a wrapper script called "ots.exe" that does "exec xdaq.exe with $@ for args" probably not worth it
@@ -76,7 +55,6 @@ export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
 
 #############################
 # setup defaults:
-#
 ISMACROMAKER=0
 ISCONFIG=0
 QUIET=1
@@ -86,66 +64,111 @@ BACKUPLOGS=0
 RELAUNCHCHECK=1
 REMOTELAUNCH=1
 export MACROMAKER_MODE=0
-#
-#############################
-#check for options
-if [[ "$1"  == "--macromaker" || "$2"  == "--macromaker" || "$1"  == "-mm" || "$2"  == "-mm"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}MACRO-MAKER ONLY MODE!${RstClr} ************"
-	ISMACROMAKER=1
-fi
-
-if [[ "$1"  == "--config" || "$1"  == "--configure" || "$1"  == "--wizard" || "$1"  == "--wiz" || "$1"  == "-w" || "$2"  == "--config" || "$2"  == "--configure" || "$2"  == "--wizard" || "$2"  == "--wiz" || "$2"  == "-w" ]]; then	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}WIZ MODE ENABLED!${RstClr} *************"      
-    ISCONFIG=1
-fi
-
-if [[ "$1"  == "--verbose" || "$2"  == "--verbose" || "$1"  == "-v" || "$2"  == "-v"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}VERBOSE MODE ENABLED!${RstClr} ************"
-	QUIET=0
-fi
-
-if [[ "$1"  == "--chrome" || "$2"  == "--chrome" || "$1"  == "-c" || "$2"  == "-c"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}GOOGLE-CHROME LAUNCH ENABLED!${RstClr} ************"
-	CHROME=1
-fi
-
-if [[ "$1"  == "--firefox" || "$2"  == "--firefox" || "$1"  == "-f" || "$2"  == "-f"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}FIREFOX LAUNCH ENABLED!${RstClr} ************"
-	FIREFOX=1
-fi
-
-if [[ "$1"  == "--backup" || "$2"  == "--backup" || "$1"  == "-b" || "$2"  == "-b"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}BACKUP LOGS ENABLED!${RstClr} ************"
-	BACKUPLOGS=1
-fi
-
-if [[ "$1"  == "--relaunch" || "$2"  == "--relaunch" || "$1"  == "-r" || "$2"  == "-r"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}RELUANCH CHECK DISABLED!${RstClr} ************"
-	RELAUNCHCHECK=0
-fi
-
-if [[ "$1"  == "--startremote" || "$2"  == "--startremote" || "$1"  == "-s" || "$2"  == "-s"  ]]; then
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t************* ${RED}REMOTE START PROPAGATION DISABLED!${RstClr} ************"
-	REMOTELAUNCH=0
-fi
-#end check for options
 #############################
 
+# Output startup banner
+out "${Green}=========================== ots ============================="
+
+# Check for options
+while :; do
+	case "$1" in
+	--macromaker | -mm)
+		# Match macro-maker mode
+		info "MACRO-MAKER ONLY MODE!"
+		ISMACROMAKER=1
+		;;
+	--config | --configure | --wizard | --wiz | -w | --config | --configure)
+		# Matches all the different ways that wiz mode can be specified
+		info "WIZ MODE ENABLED!"
+		ISCONFIG=1
+		;;
+	--verbose | -v)
+		# Enable verbose mode (disable quiet mode)
+		info "VERBOSE MODE ENABLED!"
+		QUIET=0
+		;;
+	--chrome | -c)
+		# Enable launching chrome after startup
+		info "CHROME LAUNCH ENABLED!"
+		CHROME=1
+		;;
+	--firefox | -f)
+		# Enable launching firefox after startup
+		info "FIREFOX LAUNCH ENABLED!"
+		FIREFOX=1
+		;;
+	--backup | -b)
+		# Enable backing up of logs before overwriting them?
+		info "BACKUP LOGS ENABLED"
+		BACKUPLOGS=1
+		;;
+	--relaunch | -r)
+		# Disable relaunching functionality
+		info "RELAUNCH CHECK DISABLED!"
+		RELAUNCHCHECK=1
+		;;
+	--startremote | -s)
+		# Disable launching on remote nodes (this flag primarily used for instances when launched from the main gateway)
+		info "REMOTE START PROPAGATION DISABLED!"
+		REMOTELAUNCH=0
+		;;
+	--)
+		# Match '--' which is traditionally used to seperate option flags from program arguments that might start with
+		# a '-' character
+		shift
+		break
+		;;
+	-*)
+		# Match any option starting with '-' that isn't matched by any of the previous rules and alert the user to it
+		# not being handled
+		die "Unsupported option '$1'"
+		;;
+	*)
+		# Match any remaining non-option arguments (or an empty string) which marks the end of arguments
+		break
+		;;
+	esac
+	shift
+done
+
+# TODO: move config down here and output current config if the quiet option isn't set
+# (this prevents multiple outputs if people specify a flag twice)
+
+# Setup trace default config if not specifically disabled
 
 # TODO: Trace is handled all over the place, the best place for this is actually in setup_ots.sh since that
 # file gets sourced on remote sides so we get a consistent startup environment
 if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tSetting up TRACE defaults..."
+	#out "Setting up TRACE defaults..."
 	
 	#=============================
 	#Trace setup and helpful commented lines:
 	export TRACE_MSGMAX=0 #Activating TRACE
+	
 	#echo Turning on all memory tracing via: tonMg 0-63 
 	#tonMg 0-63
+	#type toffS
 	
+	# TODO: What does this do...
+	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
+	
+	# Default setup moved from setup_trace to here so it can be disabled
 	tonMg 0-4  #enable trace to memory
 	tonSg 0-3  #enable trace to slow path (i.e. UDP)
 	toffSg 4-64 #apparently not turned off by default?
+	
+	# Disable some very verbose trace outputs I think?
+	toffS 0-63 -n CONF:OpBase_C
+	toffS 0-63 -n CONF:OpLdStr_C
+	toffS 0-63 -n CONF:CrtCfD_C
+	toffS 0-63 -n COFS:DpFle_C
+	toffS 0-63 -n PRVDR:FileDB_C
+	toffS 0-63 -n PRVDR:FileDBIX_C
+	toffS 0-63 -n JSNU:Document_C
+	toffS 0-63 -n JSNU:DocUtils_C
+	toffS 0-63 -n CONF:LdStrD_C
+	toffS 0-63 -n FileDB:RDWRT_C
+	
 	
 	#enable kernel trace to memory buffer:
 	#+test -f /proc/trace/buffer && { export TRACE_FILE=/proc/trace/buffer; tlvls | grep 'KERNEL 0xffffffff00ffffff' >/dev/null || { tonMg 0-63; toffM 24-31 -nKERNEL; }; }
@@ -173,10 +196,10 @@ OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${THIS_HOS
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd" #the global quit gives exit commonds to the non-gateway StartOTS scripts
 OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd" #the local quit is used to remove other StartOTS calls from the same directory (it catches the case when switching USER_DATA paths)
 
-echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tots script path     = ${SCRIPT_DIR}/ots         "
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
+out "ots script path     = ${SCRIPT_DIR}/ots         "
+#out "ots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
+#out "ots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
+#out "ots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
 echo
  
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
@@ -185,7 +208,7 @@ for SAP_EL in ${SAP_ARR[@]}
 do
 	#echo $SAP_EL
 	SAP_PATH="$SAP_PATH/$SAP_EL"
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$SAP_PATH"
+	#out "$SAP_PATH"
 			
 	mkdir -p $SAP_PATH &>/dev/null #hide output
 done
@@ -201,7 +224,7 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 function killproc
 {
 	pid=$1
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Rev}Killing process ID ${pid}${RstClr}"
+	out "${Red}${Rev}Killing process ID ${pid}${RstClr}"
 	count=10
 	kill -0 ${pid} >/dev/null 2>&1
 	while [ $? -eq 0 ]; do
@@ -221,7 +244,7 @@ export -f killproc
 # function to kill all things ots
 function killprocs 
 {	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tKilling processes $1..."
+	out "Killing processes $1..."
 
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 		pids=`ps aux|grep [o]ts.exe|awk '{print $2}'`
@@ -249,7 +272,7 @@ function killprocs
 
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
+			out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
 			killproc ${contextPID}
 
 		done
@@ -259,7 +282,7 @@ function killprocs
 		
 	sleep 1 #give time for cleanup to occur
 	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDone killing processes $1 ${RstClr}"
+	out "Done killing processes $1 ${RstClr}"
 	
 } #end killprocs
 export -f killprocs
@@ -267,9 +290,9 @@ export -f killprocs
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
 
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}${Rev}******************************************************${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************${RstClr}"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}${Rev}******************************************************${RstClr}"
+	out "${Yellow}${Bold}${Rev}******************************************************${RstClr}"
+	out "${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************${RstClr}"
+    out "${Yellow}${Bold}${Rev}******************************************************${RstClr}"
 	
 	#try to force kill other StartOTS scripts
 	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
@@ -287,7 +310,7 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	killall -9 routing_master &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
 	
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDone with ots killall." 
+    out "Done with ots killall." 
 	
 	#kills self too:
 	killall -9 ots &>/dev/null 2>&1 #hide output
@@ -307,46 +330,46 @@ fi
 #if all defaults, but also an option, then show usage (i.e. unknown option)
 if [[ $ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 1 && $REMOTELAUNCH == 1 && "$1x" != "x" ]]; then
 	echo 
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}Unrecognized parameter(s)${RstClr} ${BIBlue}$1 $2${RstClr} [Note: only two parameters are considered, others are ignored]. "
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${BIGreen}Usage${RstClr}:"
+	out "${Red}${Bold}${Blink}Unrecognized parameter(s)${RstClr} ${BIBlue}$1 $2${RstClr} [Note: only two parameters are considered, others are ignored]. "
+	out "${BIGreen}Usage${RstClr}:"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t******************************************************"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t*************        ots Usage          **************"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t******************************************************"
+	out "******************************************************"
+	out "*************        ots Usage          **************"
+	out "******************************************************"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo kill all otsdaq running processes, please use any of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--killall  --kill  --kx  -k"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t	e.g.: ots --kx"
+	out "To kill all otsdaq running processes, please use any of these options:"
+	out "--killall  --kill  --kx  -k"
+	out "	e.g.: ots --kx"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo start otsdaq in 'wiz mode' please use any of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--configure  --config  --wizard  --wiz  -w"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots --wiz"
+	out "To start otsdaq in 'wiz mode' please use any of these options:"
+	out "--configure  --config  --wizard  --wiz  -w"
+	out "e.g.: ots --wiz"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo start otsdaq with 'verbose mode' enabled, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--verbose  -v"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots --wiz -v     or    ots --verbose"
+	out "To start otsdaq with 'verbose mode' enabled, add one of these options:"
+	out "--verbose  -v"
+	out "e.g.: ots --wiz -v     or    ots --verbose"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo start otsdaq and launch google-chrome, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--chrome  -c"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots --wiz -c     or    ots --chrome"
+	out "To start otsdaq and launch google-chrome, add one of these options:"
+	out "--chrome  -c"
+	out "e.g.: ots --wiz -c     or    ots --chrome"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo start otsdaq and launch firefox, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--firefox  -f"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots --wiz -f     or    ots --firefox"
+	out "To start otsdaq and launch firefox, add one of these options:"
+	out "--firefox  -f"
+	out "e.g.: ots --wiz -f     or    ots --firefox"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo backup and not overwrite previous quiet log files, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--backup  -b"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots -b     or    ots --backup"
+	out "To backup and not overwrite previous quiet log files, add one of these options:"
+	out "--backup  -b"
+	out "e.g.: ots -b     or    ots --backup"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo disable otsdaq startup checking and relaunching, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--relaunch  -r"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots -r     or    ots --relaunch"
+	out "To disable otsdaq startup checking and relaunching, add one of these options:"
+	out "--relaunch  -r"
+	out "e.g.: ots -r     or    ots --relaunch"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo disable otsdaq remote process startup, add one of these options:"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t--startremote  -s"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\te.g.: ots -s     or    ots --startremote"
+	out "To disable otsdaq remote process startup, add one of these options:"
+	out "--startremote  -s"
+	out "e.g.: ots -s     or    ots --startremote"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tExiting ots. Please see usage tips above."
+	out "Exiting ots. Please see usage tips above."
 	echo
 	
 	exit
@@ -394,22 +417,22 @@ fi
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tWEB_PATH=$WEB_PATH"
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSER_WEB_PATH=$USER_WEB_PATH"
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tMaking symbolic link to USER_WEB_PATH"
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
+#out "WEB_PATH=$WEB_PATH"
+#out "USER_WEB_PATH=$USER_WEB_PATH"
+#out "Making symbolic link to USER_WEB_PATH"
+#out "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
 rm $WEB_PATH/UserWebPath &>/dev/null  #delete link first, hide output
 ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #make link, hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
     echo
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}Fatal Error${RstClr}."
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tEnvironment variable ${Cyan}${Bold}USER_DATAr${RstClr} has not been setup!"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo setup, use 'export USER_DATA=<path to user data>'"
+    out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
+    out "Environment variable ${Cyan}${Bold}USER_DATAr${RstClr} has not been setup!"
+    out "To setup, use 'export USER_DATA=<path to user data>'"
     echo
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}Aborting launch${RstClr} "
+    out "(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+    out "${Red}${Bold}${Blink}Aborting launch${RstClr} "
     echo
     
     exit    
@@ -417,14 +440,14 @@ fi
 
 if [ ! -d $USER_DATA ]; then
     echo
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}Fatal Error${RstClr}."
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSER_DATA=$USER_DATA"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tEnvironment variable ${Cyan}${Bold}USER_DATA${RstClr} does not point to a valid directory!"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo setup, use 'export USER_DATA=<path to user data>'"
+    out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
+    out "USER_DATA=$USER_DATA"
+    out "Environment variable ${Cyan}${Bold}USER_DATA${RstClr} does not point to a valid directory!"
+    out "To setup, use 'export USER_DATA=<path to user data>'"
     echo 
     echo
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}Aborting launch${RstClr} "
+    out "(If you do not have a user data folder copy '<path to ots source>/otsdaq-demo/Data' as your starting point.)"
+    out "${Red}${Bold}${Blink}Aborting launch${RstClr} "
     echo
     
     exit   
@@ -437,9 +460,9 @@ if [ ! -e ${USER_DATA}/TableInfo/SlowControlsDashboardSupervisorTableInfo.xml ];
 fi
 
 #print out important environment variables
-echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\$USER_DATA               = ${YELLOW}${USER_DATA}${RstClr}          "
-echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\$ARTDAQ_DATABASE_URI     = ${YELLOW}${Bold}${ARTDAQ_DATABASE_URI}${DBold}${RstClr}"
-echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${RstClr}        "
+out "\$USER_DATA               = ${YELLOW}${USER_DATA}${RstClr}          "
+out "\$ARTDAQ_DATABASE_URI     = ${YELLOW}${Bold}${ARTDAQ_DATABASE_URI}${DBold}${RstClr}"
+out "\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${RstClr}        "
 #end print out important environment variables
 
 echo
@@ -448,7 +471,7 @@ echo
 #check for antiquated artdaq database
 ARTDAQ_DATABASE_TYPE=`echo ${ARTDAQ_DATABASE_URI}|sed 's|:.*||'`
 
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDatabase type = $ARTDAQ_DATABASE_TYPE"
+#out "Database type = $ARTDAQ_DATABASE_TYPE"
 	    
 #if not using filesystem point to a db "services" folder
 if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
@@ -463,25 +486,25 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 
 	if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild ]; then
 	    # Rebuild ARTDAQ_DATABASE indicies
-	    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tRebuilding database indices..."
+	    out "Rebuilding database indices..."
 	    rebuild_database_index >/dev/null 2>&1; rebuild_database_index --uri=${ARTDAQ_DATABASE_URI} >/dev/null 2>&1
 	    
 	    mv ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}.bak.$$		
 	    mv ${ARTDAQ_DATABASE_FILESYSTEM_PATH}_new ${ARTDAQ_DATABASE_FILESYSTEM_PATH}
 	    echo "rebuilt" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild
 	    #else
-	    #	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild file exists, so not rebuilding indices."
+	    #	out "${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild file exists, so not rebuilding indices."
 	fi
 
 	if [ ! -e ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd ]; then	
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUpdating DB to comply with November 2019 changes..."		
+		out "Updating DB to comply with November 2019 changes..."		
 		otsdaq_beautify_artdaq_tables		
 		echo "done" > ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd	
 	fi
 
 	#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
 	if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then
-	    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConverting configuration to table for user data and databases..."
+	    out "Converting configuration to table for user data and databases..."
 	    
 	    #backup because we are scared
 	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
@@ -489,14 +512,14 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    
 	    otsdaq_convert_config_to_table	
 	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
-	    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
 	    
 	    if [ $ISCONFIG == 0 ]; then		
 			exit
 	    fi
 	fi
 	if [ -d ${USER_DATA}/ConfigurationInfo ]; then
-	    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConverting configuration to table for user data and databases..."
+	    out "Converting configuration to table for user data and databases..."
 	    
 	    #backup because we are scared
 	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
@@ -504,7 +527,7 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    
 	    otsdaq_convert_config_to_table
 	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
-	    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
 	    
 	    if [ $ISCONFIG == 0 ]; then		
 			exit
@@ -523,7 +546,7 @@ fi
 
 #check for somewhat-antiquated artdaq 'DAQ' tables and auto-fix
 if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConverting artdaq 'daq' tables in databases..."
+    out "Converting artdaq 'daq' tables in databases..."
     
     #backup because we are scared
     cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12346
@@ -531,7 +554,7 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
     
     otsdaq_convert_artdaq_daq_tables
     echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion
-    echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tConversion complete. You must run wiz mode once now to activate the configuration changes."
+    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
     
     if [ $ISCONFIG == 0 ]; then		
 		exit
@@ -551,7 +574,7 @@ if [ "x$OTSDAQ_DATA" == "x" ];then
 fi
 
 #make directory if it does not exist
-mkdir -p ${OTSDAQ_DATA} || echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tError: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
+mkdir -p ${OTSDAQ_DATA} || out "Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
     export ROOT_BROWSER_PATH=${OTSDAQ_DATA}
@@ -596,7 +619,7 @@ export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #->
 ##############################################################################
 
 
-#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
+#out "ARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
 
 #at end print out connection instructions using MAIN_URL
 MAIN_URL="unknown_url"
@@ -622,11 +645,11 @@ launchOTSMacromaker() {
 
 
 	echo 
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Blue}${REV}                                                       ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Blue}${REV} ***************************************************** ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Blue}${REV} *******  Launching ots in MacroMaker MODE!  ********* ${RstClr}"	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Blue}${REV} ***************************************************** ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Blue}${REV}                                                       ${RstClr}"
+	out "${Blue}${REV}                                                       ${RstClr}"
+	out "${Blue}${REV} ***************************************************** ${RstClr}"
+	out "${Blue}${REV} *******  Launching ots in MacroMaker MODE!  ********* ${RstClr}"	
+	out "${Blue}${REV} ***************************************************** ${RstClr}"
+	out "${Blue}${REV}                                                       ${RstClr}"
 	echo
 		
 	
@@ -636,12 +659,12 @@ launchOTSMacromaker() {
 	if [ $QUIET == 1 ]; then
 	
 		if [[ "x$2" = "x" ]]; then
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tError! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
+			out "Error! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tExample Macro Maker mode usage:"
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			out "Example Macro Maker mode usage:"
+			out "\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			out "To get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
 			
 			exit
 		fi
@@ -654,12 +677,12 @@ launchOTSMacromaker() {
 	else
 	
 		if [[ "x$3" = "x" ]]; then
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tError! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
+			out "Error! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tExample Macro Maker mode usage:"
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+			out "Example Macro Maker mode usage:"
+			out "\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tTo get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+			out "To get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
 			
 			exit
 		fi
@@ -670,7 +693,7 @@ launchOTSMacromaker() {
 			export CONFIGURATION_INIT_FCL="${PWD}/$3"
 		fi
 	fi
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCONFIGURATION_INIT_FCL = ${CONFIGURATION_INIT_FCL}"
+	out "CONFIGURATION_INIT_FCL = ${CONFIGURATION_INIT_FCL}"
 	
 	#setup wiz mode environment variables
 	export FE_SUPERVISOR_ID=280
@@ -704,13 +727,13 @@ launchOTSMacromaker() {
 	
 	#check for mm xml file, if missing download it	
 	if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml ]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDownloading MacroMaker mode context configuration..."
+		out "Downloading MacroMaker mode context configuration..."
 		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/XDAQConfigurations/otsConfiguration_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
 	fi
 	
 	#check for message facility file, if missing download it	
 	if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDownloading MacroMaker mode context configuration..."
+		out "Downloading MacroMaker mode context configuration..."
 		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate	
 	fi
 	
@@ -722,8 +745,8 @@ launchOTSMacromaker() {
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl
 	
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting MacroMaker mode on port ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tMacroMaker mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml"
+	out "Starting MacroMaker mode on port ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
+	out "MacroMaker mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml"
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
@@ -734,12 +757,12 @@ launchOTSMacromaker() {
 
 		if [ $BACKUPLOGS == 1 ]; then
 			DATESTRING=`date +'%s'`
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt ***"
+			out "     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt ***"
 			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt
 		fi
 		
 		echo
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
+		out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
 		echo "xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &"
 		xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &
 	else
@@ -753,7 +776,7 @@ launchOTSMacromaker() {
 		# 4 times quietly, then get louder
 		
 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
 		# Loop 4 times waiting for it to come up
 		for i in {1..4}; do
@@ -767,12 +790,12 @@ launchOTSMacromaker() {
 		
 		# Alert user to the problem and keep trying
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCould not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
+			out "Could not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
 			killproc ${LAST_OTS_PID} 	
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
+				out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
 				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt
 				xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &
 			else
@@ -786,12 +809,12 @@ launchOTSMacromaker() {
 			
 		done
 		
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tVerified successful ots Macro Maker mode context ${THIS_HOST}-${PORT} launch..."
+		out "Verified successful ots Macro Maker mode context ${THIS_HOST}-${PORT} launch..."
 	fi
 	
 	MAIN_URL="http://${THIS_HOST}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tots Macro Maker access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
+	out "\tots Macro Maker access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
 	printMainURL &
 	
@@ -816,11 +839,11 @@ launchOTSWiz() {
 
 
 	echo 
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV}                                                       ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***************************************************** ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***********  Launching ots in WIZ MODE!  ************ ${RstClr}"	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***************************************************** ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV}                                                       ${RstClr}"
+	out "${Red}${REV}                                                       ${RstClr}"
+	out "${Red}${REV} ***************************************************** ${RstClr}"
+	out "${Red}${REV} ***********  Launching ots in WIZ MODE!  ************ ${RstClr}"	
+	out "${Red}${REV} ***************************************************** ${RstClr}"
+	out "${Red}${REV}                                                       ${RstClr}"
 	echo
 		
 	#setup wiz mode environment variables
@@ -876,19 +899,19 @@ launchOTSWiz() {
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
 
 	#this fcl tells the MF library used by ots source how to behave
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	#out "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
 	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 			
 	
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSE_WEB_VIEWER" ${USE_WEB_VIEWER}
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSE_QT_VIEWER" ${USE_QT_VIEWER}
+	#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+	#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
 	
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCONSOLE: Using web console viewer"
+		#out "CONSOLE: Using web console viewer"
 		
 		#start quiet forwarder with wiz receiving port and destination port parameter file
 		cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderWiz.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
@@ -903,11 +926,11 @@ launchOTSWiz() {
 
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t     Backing up logfile to ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt${RstClr}"
+				out "     Backing up logfile to ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt${RstClr}"
 				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt
 			fi
 			
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Message Facility${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt${RstClr}"
+			#out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Message Facility${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt${RstClr}"
 			otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt &
 		#else
 		#	otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
@@ -916,10 +939,10 @@ launchOTSWiz() {
 	fi
 	
 	if [[ $USE_QT_VIEWER == "1" ]]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCONSOLE: Using QT console viewer"
+		out "CONSOLE: Using QT console viewer"
 		if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tError: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
+			out "Error: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!"
 			echo
 
 			exit
@@ -945,8 +968,8 @@ launchOTSWiz() {
 	
 	
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tWiz mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml"
+	out "Starting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
+	out "Wiz mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml"
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
@@ -956,12 +979,12 @@ launchOTSWiz() {
 
 		if [ $BACKUPLOGS == 1 ]; then
 			DATESTRING=`date +'%s'`
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.${DATESTRING}.txt ***"
+			out "     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.${DATESTRING}.txt ***"
 			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.${DATESTRING}.txt
 		fi
 		
 		echo
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
+		out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
 		xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt &
 	else
 		xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &
@@ -984,15 +1007,15 @@ launchOTSWiz() {
 		done
 		unset i
 
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCould not verify successful ots wiz context launch, relaunching ots wiz context..."			
+			out "Could not verify successful ots wiz context launch, relaunching ots wiz context..."			
 			killproc ${LAST_OTS_PID} 
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
+				out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
 				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt
 				xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt &
 			else
@@ -1006,13 +1029,13 @@ launchOTSWiz() {
 	
 		done
 		
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tVerified successful ots wiz context launch..."
+		out "Verified successful ots wiz context launch..."
 	fi
 	
 	################
 	# start node db server
 	
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tARTDAQ_UTILITIES_DIR=" ${ARTDAQ_UTILITIES_DIR}
+	#out "ARTDAQ_UTILITIES_DIR=" ${ARTDAQ_UTILITIES_DIR}
 	#cd $ARTDAQ_UTILITIES_DIR/node.js
 	#as root, once...
 	# chmod +x setupNodeServer.sh 
@@ -1024,8 +1047,8 @@ launchOTSWiz() {
 	
 	MAIN_URL="http://${THIS_HOST}:${PORT}/urn:xdaq-application:lid=$WIZARD_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
 	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tots Wiz Mode access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThe length of the Wiz Mode access code can be changed (default is removed file, length of 4, and not random):\n\t\t\t\t\t\t\t\techo 8 > ${SERVICE_DATA_PATH}/OtsWizardData/sequence.dat"
+	out "\tots Wiz Mode access code = $(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"	
+	out "The length of the Wiz Mode access code can be changed (default is removed file, length of 4, and not random):\n\t\t\t\t\t\t\t\techo 8 > ${SERVICE_DATA_PATH}/OtsWizardData/sequence.dat"
 
 
 	printMainURL &
@@ -1062,7 +1085,7 @@ launchOTS() {
 			#could do something.. but do not delete all Logs!
 			
 			#cleanup log files
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCleaning LOG files at ${OTSDAQ_LOG_DIR} ${RstClr}"
+			#out "Cleaning LOG files at ${OTSDAQ_LOG_DIR} ${RstClr}"
 			#rm -rf ${OTSDAQ_LOG_DIR}/* &>/dev/null 2>&1 #hide output #remove alive file
 		#fi
 		
@@ -1074,17 +1097,17 @@ launchOTS() {
 	fi
 	
 	echo 
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV}                                                       ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV} ***************************************************** ${RstClr}"
+	out "${Purple}${REV}                                                       ${RstClr}"
+	out "${Purple}${REV} ***************************************************** ${RstClr}"
 	if [ $ISGATEWAYLAUNCH == 1 ]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
+		out "${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
 	else
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
+		out "${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
 	fi
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV} ***************************************************** ${RstClr}"
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Purple}${REV}                                                       ${RstClr}"
+	out "${Purple}${REV} ***************************************************** ${RstClr}"
+	out "${Purple}${REV}                                                       ${RstClr}"
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tXDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
+	out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
 	
 	####################################################################
 	########### start console & message facility handling ##############
@@ -1094,7 +1117,7 @@ launchOTS() {
 	
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityGen.fcl
 	#this fcl tells the MF library used by ots source how to behave
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
+	#out "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
 	if [[ $ISGATEWAYLAUNCH == 1 ]]; then
@@ -1102,13 +1125,13 @@ launchOTS() {
 		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 				
 		
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSE_WEB_VIEWER" ${USE_WEB_VIEWER}
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tUSE_QT_VIEWER" ${USE_QT_VIEWER}
+		#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
+		#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
 		
 		
 		if [[ $USE_WEB_VIEWER == "1" ]]; then
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching message facility web console assistant...${RstClr}"
+			out "${Green}${Bold}Launching message facility web console assistant...${RstClr}"
 			
 			#start quiet forwarder with receiving port and destination port parameter file
 			cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
@@ -1118,11 +1141,11 @@ launchOTS() {
 
 				if [ $BACKUPLOGS == 1 ]; then
 					DATESTRING=`date +'%s'`
-					echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tBacking up logfile into ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt${RstClr}"
+					out "Backing up logfile into ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt${RstClr}"
 					mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.${DATESTRING}.txt
 				fi
 				
-				#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Message Facility${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt${RstClr}"
+				#out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Message Facility${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt${RstClr}"
 				otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mf-${THIS_HOST}.txt &
 			#else
 			#	otsConsoleFwd ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg  &
@@ -1131,10 +1154,10 @@ launchOTS() {
 		fi
 		
 		if [[ $USE_QT_VIEWER == "1" ]]; then
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching QT console viewer...${RstClr}"
+			out "${Green}${Bold}Launching QT console viewer...${RstClr}"
 			if [ "x$ARTDAQ_MFEXTENSIONS_DIR" == "x" ]; then #qtviewer library missing!
 				echo
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Error${RstClr}: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!${RstClr}"
+				out "${Red}${Bold}Error${RstClr}: ARTDAQ_MFEXTENSIONS_DIR missing for qtviewer!${RstClr}"
 				echo
 				exit
 			fi
@@ -1189,7 +1212,7 @@ launchOTS() {
 	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
 	
 	#echo
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tXDAQ ARGS PASSED TO xdaq.exe:${RstClr}"
+	#out "XDAQ ARGS PASSED TO xdaq.exe:${RstClr}"
 	#echo ${XDAQ_ARGS}
 	#echo
 	#echo	
@@ -1201,14 +1224,14 @@ launchOTS() {
 	#sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
 
 	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$value${RstClr}"
+	#out "$value${RstClr}"
 	#re="http://(${THIS_HOST}):([0-9]+)"
 	
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""	
 	contextUidRe="ContextUID='(.+)' source"	
 	
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tMATCHING REGEX${RstClr}"
+	#out "MATCHING REGEX${RstClr}"
 	
 	haveXDAQContextPort=false
 	insideContext=false
@@ -1226,12 +1249,12 @@ launchOTS() {
 		if [[ ($line == *"<!--"*) ]]; then		
 			ignore=true
 			
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$line ${RstClr}"
+			#out "$line ${RstClr}"
 			#if a context comment line, extract the context UID
 			if [[ ($line =~ $contextUidRe) ]]; then
 				contextUID=${BASH_REMATCH[1]}
 				
-				#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$contextUID ${RstClr}"
+				#out "$contextUID ${RstClr}"
 			fi
 		fi
 		if [[ ($line == *"-->"*) ]]; then
@@ -1240,7 +1263,7 @@ launchOTS() {
 		if [[ ${ignore} == true ]]; then
 			continue
 		fi
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$line${RstClr}"
+		#out "$line${RstClr}"
 				
 		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
 			if [[ ($line =~ $re) ]]; then
@@ -1257,7 +1280,7 @@ launchOTS() {
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
-				#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t$host $port ${RstClr}"				
+				#out "$host $port ${RstClr}"				
 						
 				if [[ (${BASH_REMATCH[2]} == ${THIS_HOST}) || (${BASH_REMATCH[2]} == ${THIS_HOST}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
@@ -1270,13 +1293,13 @@ launchOTS() {
 					#echo ${BASH_REMATCH[1]}    
 				fi
 			fi
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t------------------------------------------ out"
+			#out "------------------------------------------ out"
 	
 		fi
 		if [[ $line == *"/xc:Context"* ]]; then
 			insideContext=false
 			haveXDAQContextPort=false
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tin ------------------------------------------"
+			#out "in ------------------------------------------"
 		fi
 		if [[ ($insideContext == true) ]]; then 
 			
@@ -1306,16 +1329,16 @@ launchOTS() {
 							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
 
 							if [ $QUIET == 1 ]; then
-								echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								
+								out "${Green}${Bold}Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								
 
 								if [ $BACKUPLOGS == 1 ]; then
 									DATESTRING=`date +'%s'`
-									echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tBacking up logfile into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"
+									out "Backing up logfile into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"
 									mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.${DATESTRING}.txt
 								fi
 								
 
-								echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
+								out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
 								xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 							else
 								xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
@@ -1329,7 +1352,7 @@ launchOTS() {
 								# 4 times quietly, then get louder
 								
 								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
-								#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+								#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 								# Test for start 4 times with short sleep
 								for i in {1..4}; do
@@ -1344,12 +1367,12 @@ launchOTS() {
 								# Alert the user to the problem and keep relaunching
 
 								while [ "x$OTS_IS_ALIVE" == "x" ]; do
-									echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCould not verify successful ots gateway context launch, relaunching ots gateway context..."									
+									out "Could not verify successful ots gateway context launch, relaunching ots gateway context..."									
 									killproc ${LAST_OTS_PID} 
 									sleep 2
 									
 									if [ $QUIET == 1 ]; then
-										echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
+										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
 										echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
 										xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 									else
@@ -1363,18 +1386,18 @@ launchOTS() {
 									
 								done
 								
-								echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tVerified successful ots gateway context ${THIS_HOST}-${port} launch..."
+								out "Verified successful ots gateway context ${THIS_HOST}-${port} launch..."
 							fi
 							
 							GATEWAY_PID=$LAST_OTS_PID													
-							echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tGateway-PID = ${Blue}${Bold}${GATEWAY_PID}${Rev}${RstClr}"
+							out "Gateway-PID = ${Blue}${Bold}${GATEWAY_PID}${Rev}${RstClr}"
 							echo
 							
 							####################################################################
 							########### 		end launch Gateway context	 		############
 							####################################################################
 						else 
-							echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Orange}${Bold}The gateway context is ${host}-${port}, which is not an exact match to this host ${THIS_HOST}!...${RstClr}"
+							out "${Orange}${Bold}The gateway context is ${host}-${port}, which is not an exact match to this host ${THIS_HOST}!...${RstClr}"
 						fi
 					fi
 				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
@@ -1398,20 +1421,20 @@ launchOTS() {
 	####################################################################
 		
 	if [[ (${#xdaqPort[@]} > 0) ]]; then	
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching ${#xdaqPort[@]} additional local non-Gateway Context procesess for host {${THIS_HOST}}...${RstClr}"
+		out "${Green}${Bold}Launching ${#xdaqPort[@]} additional local non-Gateway Context procesess for host {${THIS_HOST}}...${RstClr}"
 	else
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}There are no additional local non-Gateway Context procesess on host {${THIS_HOST}}...${RstClr}"
+		out "${Green}${Bold}There are no additional local non-Gateway Context procesess on host {${THIS_HOST}}...${RstClr}"
 	fi
 	
 	i=0	
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\txdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  	#out "xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 		#echo
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tskipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
+			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
 			i=$(( $i + 1 ))
 			continue
 		fi
@@ -1424,18 +1447,18 @@ launchOTS() {
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`				
 				
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tBacking up logfile to ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"				
+				out "Backing up logfile to ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"				
 				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.${DATESTRING}.txt
 			fi
 		  			
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"			
+			out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"			
 			xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
 		else
 			xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 		fi
 		
 		LAST_OTS_PID=$!
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+		out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
 		
 		TempContextPIDArray+=($LAST_OTS_PID)
 		ContextPIDArray+=($LAST_OTS_PID)
@@ -1458,11 +1481,11 @@ launchOTS() {
 		for port in "${xdaqPort[@]}"
 		do
 		  : 
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\txdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#out "xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 			echo
 				  
 			if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-				#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tskipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				#out "skipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 				i=$(( $i + 1 ))
 				continue
 			fi
@@ -1474,7 +1497,7 @@ launchOTS() {
 		
 			
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
-			#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOTS_IS_ALIVE=${OTS_IS_ALIVE}"
+			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			
 			for i in {1..4}; do
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
@@ -1486,19 +1509,19 @@ launchOTS() {
 			done
 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tCould not verify successful ots non-gateway context launch, relaunching non-gateway context..."
+				out "Could not verify successful ots non-gateway context launch, relaunching non-gateway context..."
 				killproc ${LAST_OTS_PID} 
 				sleep 2
 				
 				if [ $QUIET == 1 ]; then
-					echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
+					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
 					echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
 					xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
 				else
 					xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 				fi
 				LAST_OTS_PID=$!
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tNongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+				out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
 				
 				#test for relaunch
 				sleep 8 #give time before relaunch test
@@ -1506,7 +1529,7 @@ launchOTS() {
 				
 			done 		
 			
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tVerified successful ots non-gateway context ${THIS_HOST}-${port} launch..."
+			out "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch..."
 			#add successful launch to Context PID array	
 			ContextPIDArray+=($LAST_OTS_PID)
 			#ContextPIDArray+=(${TempContextPIDArray[$j]})
@@ -1531,12 +1554,12 @@ launchOTS() {
 		unset remoteLaunchHosts
 		
 		echo
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${RstClr}"
+		out "${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${RstClr}"
 		i=0	
 		for port in "${contextPort[@]}"
 		do
 		  : 
-		  	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\txdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+		  	#out "xdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 			#echo
 			  
 			if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
@@ -1558,15 +1581,15 @@ launchOTS() {
 					continue;
 				fi
 			
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
+				out "\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
+				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 
                 # Iris: For now until a rewrite happens this is done a little oddly
                 # ots_remote_start is kind of like a weird semi-copy of some of ots.sh, but all it really does it print some remote specific output then invoke ots -s to launch a single node
                 # what we do instead of handling the SSH processes and trying to keep those up when session the user used to launch ots on the gateway is done, we let them detach
                 # and make it so that when sshd on the remote system sends a hup to bash, the important part of ots (the ots -s command) will have been isolated by disowning -h it.
                 # very strange but it should work okay until time is spent on the real solution TM
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
@@ -1583,17 +1606,17 @@ launchOTS() {
 		sleep 1 #give time before relaunch test
 		
 		echo
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${RstClr}"
+		#out "${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${RstClr}"
 		i=0	
 		for port in "${contextPort[@]}"
 		do
 		  : 
-		  	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\txdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+		  	#out "xdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 			#echo
 			  
 			#if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
 			
-				#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tChecking remote launch ${contextHostname[$i]}:${port}"
+				#out "\tChecking remote launch ${contextHostname[$i]}:${port}"
 			
 								
 			#fi
@@ -1604,7 +1627,7 @@ launchOTS() {
 	####################################################################
 	
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tDone launching ots Context processes."
+	out "Done launching ots Context processes."
 	echo
 	
 	# Done launching ots contexts
@@ -1614,31 +1637,31 @@ launchOTS() {
 	FIRST_TIME=0 #used to supress printouts
 		
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tNote: This host is ${THIS_HOST}."
+	out "Note: This host is ${THIS_HOST}."
 	
 	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThese are the hosts configured to run ots Context processes: ${contextHostname[@]}"
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThese are the corresponding ports for the Context processes: ${contextPort[@]}"  	 
+		out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
+		out "These are the corresponding ports for the Context processes: ${contextPort[@]}"  	 
 	fi
 	
 	echo
 	  
 	if [[ (${#xdaqPort[@]} == 0) && $gatewayHostname != ${THIS_HOST} ]]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}************************************************************************************${RstClr}"
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}************************************************************************************${RstClr}"
+		out "${Yellow}${Bold}************************************************************************************${RstClr}"
+		out "${Yellow}${Bold}************************************************************************************${RstClr}"
 		
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}${Blink}WARNING${RstClr}: There are no configured processes for hostname ${THIS_HOST}." 
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tAre you sure your configuration is written for ${Red}${Bold}${Blink}${THIS_HOST}${RstClr}?" 
+		out "${Red}${Bold}${Blink}WARNING${RstClr}: There are no configured processes for hostname ${THIS_HOST}." 
+		out "Are you sure your configuration is written for ${Red}${Bold}${Blink}${THIS_HOST}${RstClr}?" 
 		echo
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThese are the hosts configured to run ots applications: ${gatewayHostname} ${xdaqHost[@]}"
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThese are the corresponding ports for the applications: ${gatewayPort} ${xdaqPort[@]}"
+		out "These are the hosts configured to run ots applications: ${gatewayHostname} ${xdaqHost[@]}"
+		out "These are the corresponding ports for the applications: ${gatewayPort} ${xdaqPort[@]}"
 		echo
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tYou can change the configuration for ${THIS_HOST} in wiz mode by..."
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\tGoing to the Configure App   -> click 'Tree-View' next to Active-Context"
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\t-> expand 'XDAQContextTable' -> change 'Address' to set desired host name."
+		out "You can change the configuration for ${THIS_HOST} in wiz mode by..."
+		out "\tGoing to the Configure App   -> click 'Tree-View' next to Active-Context"
+		out "\t-> expand 'XDAQContextTable' -> change 'Address' to set desired host name."
 		
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}************************************************************************************${RstClr}"
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Yellow}${Bold}************************************************************************************${RstClr}"
+		out "${Yellow}${Bold}************************************************************************************${RstClr}"
+		out "${Yellow}${Bold}************************************************************************************${RstClr}"
 		
 	elif [[ $ISGATEWAYLAUNCH == 1 ]]; then
 		printMainURL &	
@@ -1656,7 +1679,7 @@ export -f launchOTS
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 printMainURL() {	
 	
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tprintMainURL()"
+	#out "printMainURL()"
 	
 	#check if ots was aborted
 	#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
@@ -1671,13 +1694,13 @@ printMainURL() {
 	fi
 	
 	if [ $MAIN_URL == "unknown_url" ]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tINFO: No gateway supervisor found for node {${THIS_HOST}}.${RstClr}"
+		out "INFO: No gateway supervisor found for node {${THIS_HOST}}.${RstClr}"
 		exit
 	fi
 	
 	echo
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tOpen the URL below in your Google Chrome or Mozilla Firefox web browser:"	
-	echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t\t(Note: This URL may need to be modified by the user depending on their network configuration)"
+	out "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"	
+	out "\t(Note: This URL may need to be modified by the user depending on their network configuration)"
 		
 	for i in {1..5}
 	do
@@ -1687,7 +1710,7 @@ printMainURL() {
 		#exit
 		#fi		
 		
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Green}${Bold}${EUNDERLINE}${MAIN_URL}${RstClr}"
+		out "${Green}${Bold}${EUNDERLINE}${MAIN_URL}${RstClr}"
 
 		#echo -e "${Reset}"
 		
@@ -1706,7 +1729,7 @@ export -f printMainURL
 otsActionHandler() {
 
     echo		
-	#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting action handler...${RstClr}"
+	#out "Starting action handler...${RstClr}"
 
 	#clear file initially
 	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
@@ -1714,7 +1737,7 @@ otsActionHandler() {
 	
 
 	if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
-		echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tThe script, on ${THIS_HOST}, is the gateway ots script, so it will drive the exit of ots scripts running on other hosts."
+		out "The script, on ${THIS_HOST}, is the gateway ots script, so it will drive the exit of ots scripts running on other hosts."
 
 		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
 		echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
@@ -1752,26 +1775,26 @@ otsActionHandler() {
 		
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
-		#echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
+		#out " command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 		
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tRebuilding..."
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "			
+			out " "
+			out "Rebuilding..."
+			out " "			
 			#echo "1" > mrbresult.num; mrb b > otsdaq_startots_mrbreport.txt && echo "0" > mrbresult.num			
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "
+			out " "
 			#grep -A 1 -B 1 "INFO: Stage build successful." otsdaq_startots_mrbreport.txt
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "
+			out " "
 			sleep 5
 		
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_SHUTDOWN" ]; then
 		
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tShutting down non-gateway contexts..."
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "	
+			out " "
+			out "Shutting down non-gateway contexts..."
+			out " "	
 			
 			#kill all non-Gateway context processes
 			killprocs nongateway
@@ -1779,16 +1802,16 @@ otsActionHandler() {
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "OTS_APP_STARTUP" ]; then
 		
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting up non-gateway contexts..."
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t "	
+			out " "
+			out "Starting up non-gateway contexts..."
+			out " "	
 			
 			launchOTS nongateway #launch all non-gateway apps			
 	
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting otsdaq Wiz mode for host {${THIS_HOST}}..."
+			out "Starting otsdaq Wiz mode for host {${THIS_HOST}}..."
 			echo
 			killprocs
 			
@@ -1800,7 +1823,7 @@ otsActionHandler() {
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_OTS" ]; then
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tStarting otsdaq in normal mode for host {${THIS_HOST}}..."
+			out "Starting otsdaq in normal mode for host {${THIS_HOST}}..."
 			echo
 			killprocs
 			
@@ -1810,8 +1833,8 @@ otsActionHandler() {
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tRemoving unused tables and groups based on active System Aliases..."
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\totsdaq_flatten_system_aliases 0"
+			out "Removing unused tables and groups based on active System Aliases..."
+			out "otsdaq_flatten_system_aliases 0"
 			echo	
 			echo 
 
@@ -1819,11 +1842,11 @@ otsActionHandler() {
 
 				if [ $BACKUPLOGS == 1 ]; then
 					DATESTRING=`date +'%s'`
-					echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.${DATESTRING}.txt ***"
+					out "     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.${DATESTRING}.txt ***"
 					mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.${DATESTRING}.txt
 				fi
 				
-				echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\t${Red}${Bold}Quiet mode${RstClr}. '${Bold}Flattening${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.txt ***  "	
+				out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Flattening${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.txt ***  "	
 				otsdaq_flatten_system_aliases 0 &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-flatten-${THIS_HOST}.txt &
 			else
 				otsdaq_flatten_system_aliases 0 &
@@ -1832,7 +1855,7 @@ otsActionHandler() {
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
 
 			echo
-			echo -e "${RstClr}${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tExit of (stale) ots..." 
+			out "Exit of (stale) ots..." 
 			# Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 			if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
