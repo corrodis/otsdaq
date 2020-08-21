@@ -88,7 +88,7 @@ defineColors ()
 
 defineColors
 
-out() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%h%y.%T') ${IBlue}${HOSTNAME}${RstClr} [${Cyan}${LINENO}${RstClr}]${IBlack}\t${RstClr}$@${RstClr}"; }
+out() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%h%y.%T') ${IBlue}${HOSTNAME}${RstClr} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}$@${RstClr}"; }
 info() { out "${IBlue}$@${RstClr}"; }
 success() { out "${IGreen}$@${RstClr}"; }
 error() { out "${IRed}$@${RstClr}"; } >&2
