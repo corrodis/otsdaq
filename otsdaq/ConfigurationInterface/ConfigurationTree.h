@@ -48,6 +48,8 @@ class ConfigurationTree
 	                  const TableBase* const&            config);
 	~ConfigurationTree(void);
 
+	ConfigurationTree(ConfigurationTree const& a) = default;
+
 	ConfigurationTree& operator=(const ConfigurationTree& a)
 	{
 		__COUT__ << "OPERATOR= COPY CONSTRUCTOR ConfigManager: " << configMgr_

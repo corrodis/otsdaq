@@ -2,13 +2,10 @@
 #define _ots_SOAPMessenger_h
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wcatch-value"
+#if __GNUC__ >= 9
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
-
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
 #include <xcept/tools.h>

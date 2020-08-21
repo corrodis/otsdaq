@@ -39,7 +39,8 @@ link_libraries(
 		$ENV{XDAQ_LIB}/libxoap.so
 		$ENV{XDAQ_LIB}/libxdata.so
 		$ENV{XDAQ_LIB}/libb2innub.so
-		/usr/lib64/libuuid.so
+		uuid
+		elf
 		${Boost_SYSTEM_LIBRARY}
 )
 
