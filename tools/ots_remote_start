@@ -24,8 +24,11 @@ out "${Green}=========================== ots REMOTE ============================
 info "ots script path = ${SCRIPT_DIR}/ots_remote_start"
 info "Expected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
 
-cd ${SCRIPT_DIR}/../../../
-source ${SCRIPT_DIR}/../../../setup_ots.sh
+
+# Have to CD because setup_ots.sh isn't safe to run in other directories than the ots root, die if it didn't work
+cd ${SCRIPT_DIR}/../../../ || die "Couldn't chdir to ots root directory on ${HOSTNAME}"
+# We don't care about the non-error output of this script
+source ./setup_ots.sh >/dev/null </dev/null
 
 # This basically does the work of nohup but since we don't trust that ots isn't a function still we use bash job control
 # detach ots from reading input, send output to log files and then we make it ignore sighup (which would propagate the
