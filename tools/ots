@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# For now this seems like the simplest way to do this (fixing the output spam) but really the code should be reworked
-# so that it uses here documents instead of 10 lines of echo in a row and common color definitions/printouts are used
-# instead of having to manually add every colorcode to the beginning of each line (but that's a big TODO for later)
-
 # Need this earlier to source local scripts
 SCRIPT_DIR="$( 
  cd "$(dirname "$(readlink "$0" || printf %s "$0")")"
@@ -34,20 +30,18 @@ function setupTrace()
 
 setupTrace
 
+# Enable core dumps, by default the soft limit on size is 0, preventing any. Raising it to unlimited before launch specifically
+# enables coredumps for any process run from this point onward in this script
 ulimit -c unlimited
 
-# This is already setup by setup_ots.sh, plus we actually use bashisms everwhere so $HOSTNAME is actually already here from bash
-# without defining it anyway
+# Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
+HOSTNAME=$(hostname -f)
+
+# TODO: Eliminate pointless var
 THIS_HOST="${HOSTNAME}"
 HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
 STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
-
-# These are old, aliases are bad except for interactive use and break scripts, also it doesn't change the name so it just makes the script confusing
-# to properly rename the process we need a wrapper script called "ots.exe" that does "exec xdaq.exe with $@ for args" probably not worth it
-
-#unalias ots.exe #&>/dev/null 2>&1 #hide output
-#alias ots.exe='xdaq.exe' #&>/dev/null #hide output
 
 #export products, used by artdaq daqInterface
 export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
@@ -63,13 +57,16 @@ FIREFOX=0
 BACKUPLOGS=0
 RELAUNCHCHECK=1
 REMOTELAUNCH=1
-export MACROMAKER_MODE=0
+# TODO: Why is just this one exported?
+MACROMAKER_MODE=0
+export MACROMAKER_MODE
 #############################
 
 # Output startup banner
 out "${Green}=========================== ots ============================="
 
 # Check for options
+# TODO: One of the options (I feel like it was -r) seemed to be broken? Not sure what's up with that
 while :; do
 	case "$1" in
 	--macromaker | -mm)
@@ -184,7 +181,8 @@ fi
 
 
 #############################
-#initializing StartOTS action file
+# Initializing StartOTS action file
+
 #attempt to mkdir for full path so that it exists to move the database to
 # assuming mkdir is non-destructive
 #Note: quit file added to universally quit StartOTS scripts originating from same USER_DATA
@@ -221,6 +219,8 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
 #############################
 
+# TODO (Iris): Ideally get rid of these, kill -9 is not something that should be needed
+
 function killproc
 {
 	pid=$1
@@ -242,6 +242,8 @@ export -f killproc
 
 #############################
 # function to kill all things ots
+# TODO (Iris): Using ps and grep isn't a safe way to try to find processes, we should handle shutdown and cleanup
+# in some kind of management process/script that cleans up properly
 function killprocs 
 {	
 	out "Killing processes $1..."
@@ -285,10 +287,12 @@ function killprocs
 	out "Done killing processes $1 ${RstClr}"
 	
 } #end killprocs
+# TODO (Iris): Why do we export this? 
 export -f killprocs
 
 if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
 
+# TODO (Iris): use warn output
 	echo
 	out "${Yellow}${Bold}${Rev}******************************************************${RstClr}"
 	out "${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************${RstClr}"
@@ -300,8 +304,13 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	
     echo  -e "${IBRed}"
     killprocs	
-    
+
+# TODO (Iris): More hard kills... why? Also not even using the defined functions above for some reason    
+# May want to leave these with a note in case they fix broken other code that we can't deal with
+# (we don't know where these are processes come from exactly)
+
     #now hard kill:
+
 	killall -9 art &>/dev/null 2>&1 #hide output
 	killall -9 boardreader &>/dev/null 2>&1 #hide output
 	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
@@ -318,6 +327,8 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	exit
 fi
 
+# TODO (Iris): These should just go behind the verbose flag (and they're already printed after command parsing...)
+
 #KEEP for debugging of defaults
 #echo "ISMACROMAKER $ISMACROMAKER"
 #echo "ISCONFIG $ISCONFIG"
@@ -326,6 +337,8 @@ fi
 #echo "FIREFOX $FIREFOX"
 #echo "BACKUPLOGS $BACKUPLOGS"
 #echo "RELAUNCHCHECK $RELAUNCHCHECK"
+
+# TODO (IRIS): Replace with calling this printout when an unhandled parameter or no parameters set
 
 #if all defaults, but also an option, then show usage (i.e. unknown option)
 if [[ $ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 1 && $REMOTELAUNCH == 1 && "$1x" != "x" ]]; then
@@ -375,17 +388,25 @@ if [[ $ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FI
 	exit
 fi
 
+# TODO (Iris): This is clearly trying to potentially solve an issue but this should essentially always
+# get the fqdn, especially since all this code is commented out
 #SERVER=`hostname -f || ifconfig eth0|grep "inet addr"|cut -d":" -f2|awk '{print $1}'`
 export SUPERVISOR_SERVER=$THIS_HOST #$SERVER
 if [ $ISCONFIG == 1 ]; then
     export OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER=$SUPERVISOR_SERVER
 fi
 
+# TODO (Iris): Verify this is only used internally and get rid of it if it no longer means anything
 #At one point, could be File, Database, DatabaseTest
 #  Now,.. artdaq_database expects File, and the ARTDAQ_DATABASE_URI decides the rest
 export CONFIGURATION_TYPE=File
 
 # Setup environment when building with MRB
+
+# TODO (Iris): All of these do weird things with mrb. But I'm pretty sure MRB would handle this on it's own/in setup_ots.sh
+# Figure out if these are used anymore, the definitions aren't already setup by setup but they seem strange
+
+# TODO (Iris): Fix old syntax comparisions
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
     export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
     export OTSDAQ_DEMO_LIB=${MRB_BUILDDIR}/otsdaq_demo/lib
@@ -414,18 +435,27 @@ if [ "x$USER_WEB_PATH" == "x" ]; then  #setup the location for user web-apps
     export USER_WEB_PATH=$OTSDAQ_DEMO_DIR/UserWebGUI 
 fi
 
+# TODO (Iris): What does this mean? We have USER_WEB_PATH which is set to point to the demo dir's UserWebGUI if it's not setup earlier (would be in setup_ots.sh)
+# then we replace ${WEB_PATH}/UserWebPath with a symbolic link to ${USER_WEB_PATH}.
+
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
+
+# TODO (Iris): Maybe bring these back if user starts in verbose (quiet=0)
 #out "WEB_PATH=$WEB_PATH"
 #out "USER_WEB_PATH=$USER_WEB_PATH"
 #out "Making symbolic link to USER_WEB_PATH"
 #out "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
+
+# TODO (Iris): Use quotes for these and remove forwarding to /dev/null. Also use rm -d to remove empty dirs in case it's created wrong (won't delete user files if there's any though)
+
 rm $WEB_PATH/UserWebPath &>/dev/null  #delete link first, hide output
 ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #make link, hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
+# TODO (Iris): replace with use of die or error functions
     echo
     out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
     out "Environment variable ${Cyan}${Bold}USER_DATAr${RstClr} has not been setup!"
@@ -438,6 +468,7 @@ if [ "x$USER_DATA" == "x" ]; then
     exit    
 fi
 
+# TODO (Iris): Combine this with the above and make similar changes
 if [ ! -d $USER_DATA ]; then
     echo
     out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
@@ -453,25 +484,28 @@ if [ ! -d $USER_DATA ]; then
     exit   
 fi
 
+# TODO (Iris): Quoting
+
 #check for new Slow Controls context table
 if [ ! -e ${USER_DATA}/TableInfo/SlowControlsDashboardSupervisorTableInfo.xml ]; then
 	#if missing, attempt to copy
 	cp ${MRB_SOURCE}/otsdaq/data-core/TableInfo/ContextGroup/SlowControlsDashboardSupervisorTableInfo.xml ${USER_DATA}/TableInfo/
 fi
 
+# TODO (Iris): These should probably always print (but probably should use info function to do so)
 #print out important environment variables
 out "\$USER_DATA               = ${YELLOW}${USER_DATA}${RstClr}          "
 out "\$ARTDAQ_DATABASE_URI     = ${YELLOW}${Bold}${ARTDAQ_DATABASE_URI}${DBold}${RstClr}"
 out "\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${RstClr}        "
 #end print out important environment variables
 
-echo
-echo
-
 #check for antiquated artdaq database
-ARTDAQ_DATABASE_TYPE=`echo ${ARTDAQ_DATABASE_URI}|sed 's|:.*||'`
+ARTDAQ_DATABASE_TYPE=$(echo ${ARTDAQ_DATABASE_URI}|sed 's|:.*||')
 
 #out "Database type = $ARTDAQ_DATABASE_TYPE"
+
+# TODO (Iris): Put this functionality in a seperate script file that gets run here. Failing that maybe we can just stuff it into a function.
+# that will make it easier to remove
 	    
 #if not using filesystem point to a db "services" folder
 if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
@@ -539,11 +573,7 @@ else
 fi	
 		
 
-
-
-
-
-
+# TODO (Iris): Fix the file names and the output prints, otherwise this does exactly what the above should do, 
 #check for somewhat-antiquated artdaq 'DAQ' tables and auto-fix
 if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
     out "Converting artdaq 'daq' tables in databases..."
@@ -561,6 +591,7 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
     fi
 fi
 
+# TODO (Iris): Exports should be after definitions due to weird shell issues
 export TABLE_INFO_PATH=${USER_DATA}/TableInfo
 export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
 export XDAQ_CONFIGURATION_DATA_PATH=${USER_DATA}/XDAQConfigurations
@@ -569,12 +600,17 @@ export LOGBOOK_DATA_PATH=${USER_DATA}/ServiceData/LogbookData
 export PROGRESS_BAR_DATA_PATH=${USER_DATA}/ServiceData/ProgressBarData
 export ROOT_DISPLAY_CONFIG_PATH=${USER_DATA}/RootDisplayConfigData
 
+# TODO (Iris): remove pointless x pattern
 if [ "x$OTSDAQ_DATA" == "x" ];then
     export OTSDAQ_DATA=/tmp
 fi
 
-#make directory if it does not exist
+# Make OTSDAQ_DATA directory if it does not exist
+# TODO (Iris): Switch this to a die so that continuing doesn't occur without it, add quoting
+
 mkdir -p ${OTSDAQ_DATA} || out "Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
+
+# TODO (Iris): remove x patterns
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
     export ROOT_BROWSER_PATH=${OTSDAQ_DATA}
@@ -588,9 +624,11 @@ if [ "x${ARTDAQ_OUTPUT_DIR}" == "x" ]; then
     export ARTDAQ_OUTPUT_DIR="${USER_DATA}/ArtdaqData"
 fi
 
+# TODO (Iris): quoting
+
 if [ ! -d $ARTDAQ_OUTPUT_DIR ]; then
 	if [ ! -L $ARTDAQ_OUTPUT_DIR ]; then
-	    mkdir -p $ARTDAQ_OUTPUT_DIR
+		mkdir -p $ARTDAQ_OUTPUT_DIR
 	else
 		mkdir -p `readlink -f $ARTDAQ_OUTPUT_DIR`
 	fi
@@ -598,13 +636,14 @@ fi
 
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
 	if [ ! -L $OTSDAQ_LOG_DIR ]; then
-	    mkdir -p $OTSDAQ_LOG_DIR
+		mkdir -p $OTSDAQ_LOG_DIR
 	else
 		mkdir -p `readlink -f $OTSDAQ_LOG_DIR`
 	fi
 fi
-export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
+# TODO (Iris): Why do we need a LOG_ROOT that's different from LOG_DIR?
+export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
 	if [ ! -L ${USER_DATA}/MessageFacilityConfigurations ]; then
@@ -1407,7 +1446,7 @@ launchOTS() {
 					xdaqContextUID+=($contextUID)				
 					haveXDAQContextPort=true
 				fi
-				
+ 				
 			  #IF THERE IS AT LEAST ONE NOT ARTDAQ APP THEN I CAN GET OUT OF THIS CONTEXT AND RUN XDAQ ONCE JUST FOR THIS
 			  #insideContext=false #RAR commented because need Super Supervisor connection LID for URL
 			  #echo $line          
@@ -1584,12 +1623,13 @@ launchOTS() {
 				out "\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 
-                # Iris: For now until a rewrite happens this is done a little oddly
+
                 # ots_remote_start is kind of like a weird semi-copy of some of ots.sh, but all it really does it print some remote specific output then invoke ots -s to launch a single node
                 # what we do instead of handling the SSH processes and trying to keep those up when session the user used to launch ots on the gateway is done, we let them detach
                 # and make it so that when sshd on the remote system sends a hup to bash, the important part of ots (the ots -s command) will have been isolated by disowning -h it.
                 # very strange but it should work okay until time is spent on the real solution TM
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				
+			 ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}"  &
 				
 				
 				#add host to remote launch host list
@@ -1776,7 +1816,9 @@ otsActionHandler() {
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
 		#out " command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
+		# TODO (Iris): Replace with case statement
 		
+		echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 			echo

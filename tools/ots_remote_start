@@ -38,9 +38,10 @@ source ${SCRIPT_DIR}/../../../setup_ots.sh
 # probably should try to extracate those into otsenv.sh
 
 # Ignore SIGHUP (passed down to children)
-trap '' HUP
-ots -s >/dev/null 2>&1 </dev/null & #disable remote launch to avoid infinite loop
-wait # Wait on it because I think parent launcher script gets angry if SSH commands die even though it can't manage them properly
+# trap '' HUP
+#exec </dev/null
+ots -s #disable remote launch to avoid infinite loop
+#wait # Wait on it because I think parent launcher script gets angry if SSH commands die even though it can't manage them properly
 
 #done initializing StartOTS action file
 #############################
