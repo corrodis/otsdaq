@@ -13,3 +13,4 @@ obj/*
 *_action_quit**.tmp
 *.bk
 *.tmp
+.StartOTS_*.cmd

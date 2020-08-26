@@ -1,6 +1,7 @@
 cet_script(
 	#setupOtsEnvironment.sh
 	#StartOTS.sh
+	common.sh
 	ots
 	ots_remote_start
 	otsdaq_convert_config_to_table
