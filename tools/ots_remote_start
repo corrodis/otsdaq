@@ -8,18 +8,7 @@ SCRIPT_DIR="$(
 # Get color code variables
 source ${SCRIPT_DIR}/common.sh
 
-# Why is there a giant arrow wasting my scrollback...
-#echo -e "${Reset}"
-#echo
-#echo "  | "
-#echo "  | "
-#echo "  | "
-#echo " _|_"
-#echo " \ /"
-#echo "  V "
-#echo 
-
-STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
+STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another (TODO (Iris): Use something like PID since hostname is printed too
 out "${Green}=========================== ots REMOTE ============================="
 info "ots script path = ${SCRIPT_DIR}/ots_remote_start"
 info "Expected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
@@ -27,29 +16,13 @@ info "Expected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
 
 # Have to CD because setup_ots.sh isn't safe to run in other directories than the ots root, die if it didn't work
 cd ${SCRIPT_DIR}/../../../ || die "Couldn't chdir to ots root directory on ${HOSTNAME}"
-# We don't care about the non-error output of this script
+
+# We don't care about the non-error output of this script because it gets shown on the remote's launching terminal
 source ./setup_ots.sh >/dev/null </dev/null
 
-# This basically does the work of nohup but since we don't trust that ots isn't a function still we use bash job control
-# detach ots from reading input, send output to log files and then we make it ignore sighup (which would propagate the
-# signal to the child ssh running on remote nodes and make them exit which stops the remote ots script)
-
-# TODO: Future better solution that actually handles this as a tree and tries to keep the SSH connections up so it can know if the ots/xdaq instances have died
-# and can actually restart them without having to constantly ask
-
-# NOTE: Because of this "solution" we don't have the log directory which is actually setup and used in ots.sh only even though otsenv.sh setup the paths
-# probably should try to extracate those into otsenv.sh
-
-# Ignore SIGHUP (passed down to children)
-# trap '' HUP
-#exec </dev/null
-ots -s #disable remote launch to avoid infinite loop
-#wait # Wait on it because I think parent launcher script gets angry if SSH commands die even though it can't manage them properly
-
-#done initializing StartOTS action file
-#############################
-
-#############################
+# TODO (Iris): This should probably specify a special "remote launched" flag to handle that seperately from the -s case
+# Exec since this is the last thing this script does and we don't need a pointless fork (plus the process stays the same for ssh)
+exec ots -s #disable remote launch to avoid infinite loop
 
 
 

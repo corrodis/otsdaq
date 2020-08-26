@@ -42,7 +42,7 @@ setupTrace
 ulimit -c unlimited
 
 # Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
-HOSTNAME=$(hostname -f)
+HOSTNAME="$(hostname -f)"
 
 # TODO: Eliminate pointless var
 THIS_HOST="${HOSTNAME}"
@@ -1629,14 +1629,9 @@ launchOTS() {
 			
 				out "\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
-
-
-                # ots_remote_start is kind of like a weird semi-copy of some of ots.sh, but all it really does it print some remote specific output then invoke ots -s to launch a single node
-                # what we do instead of handling the SSH processes and trying to keep those up when session the user used to launch ots on the gateway is done, we let them detach
-                # and make it so that when sshd on the remote system sends a hup to bash, the important part of ots (the ots -s command) will have been isolated by disowning -h it.
-                # very strange but it should work okay until time is spent on the real solution TM
 				
-			 ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				# still kind of messy but this will at least work correctly now
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
