@@ -7,7 +7,7 @@ SCRIPT_DIR="$(
 )"
 
 # Get color code variables and other common utility portions of the code
-source "${SCRIPT_DIR}"/common.sh
+source "${SCRIPT_DIR}"/common.sh ots
 
 # trace helper functions
 source "${TRACE_BIN}"/trace_functions.sh
@@ -64,9 +64,9 @@ FIREFOX=0
 BACKUPLOGS=0
 RELAUNCHCHECK=1
 REMOTELAUNCH=1
-# TODO: Why is just this one exported?
+ISREMOTE=0
 MACROMAKER_MODE=0
-export MACROMAKER_MODE
+export MACROMAKER_MODE #this environment variable is used by source code 
 #############################
 
 # Output startup banner
@@ -115,6 +115,12 @@ while :; do
 		# Disable launching on remote nodes (this flag primarily used for instances when launched from the main gateway)
 		info "REMOTE START PROPAGATION DISABLED!"
 		REMOTELAUNCH=0
+		;;
+	--isremote | -x)
+		# Reduce printouts vs mode where remote start propagation is disabled, though same behavior
+		#info "REMOTE START PROPAGATION DISABLED!"
+		REMOTELAUNCH=0
+		ISREMOTE=1
 		;;
 	--)
 		# Match '--' which is traditionally used to seperate option flags from program arguments that might start with
@@ -201,11 +207,12 @@ OTSDAQ_STARTOTS_ACTION_FILE="${USER_DATA}/ServiceData/StartOTS_action_${THIS_HOS
 OTSDAQ_STARTOTS_QUIT_FILE="${USER_DATA}/ServiceData/StartOTS_action_quit.cmd" #the global quit gives exit commonds to the non-gateway StartOTS scripts
 OTSDAQ_STARTOTS_LOCAL_QUIT_FILE=".StartOTS_action_quit.cmd" #the local quit is used to remove other StartOTS calls from the same directory (it catches the case when switching USER_DATA paths)
 
-out "ots script path     = ${SCRIPT_DIR}/ots         "
-#out "ots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
-#out "ots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
-#out "ots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
-
+if [ $ISREMOTE == 0 ]; then
+	out "ots script path     = ${SCRIPT_DIR}/ots         "
+	#out "ots action path     = ${OTSDAQ_STARTOTS_ACTION_FILE}    "
+	#out "ots quit path       = ${OTSDAQ_STARTOTS_QUIT_FILE}      "
+	#out "ots local quit path = ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE}"
+fi
  
 SAP_ARR=$(echo "${USER_DATA}/ServiceData" | tr '/' "\n")
 SAP_PATH=""
@@ -231,7 +238,11 @@ echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 function killproc
 {
 	pid=$1
-	out "${Red}${Rev}Killing process ID ${pid}${RstClr}"
+	
+	if [ $ISREMOTE == 0 ]; then
+		out "${Red}${Rev}Killing process ID ${pid}${RstClr}"
+	fi
+	
 	count=10
 	kill -0 ${pid} >/dev/null 2>&1
 	while [ $? -eq 0 ]; do
@@ -253,8 +264,11 @@ export -f killproc
 # in some kind of management process/script that cleans up properly
 function killprocs 
 {	
-	out "Killing processes $1..."
-
+	
+	if [ $ISREMOTE == 0 ]; then
+		out "Killing processes $1..."
+	fi
+	
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 		pids=`ps aux|grep [o]ts.exe|awk '{print $2}'`
 		for pid in $pids;do
@@ -281,7 +295,11 @@ function killprocs
 
 		for contextPID in "${ContextPIDArray[@]}"
 		do
-			out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
+			
+			if [ $ISREMOTE == 0 ]; then
+				out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
+			fi
+			
 			killproc ${contextPID}
 
 		done
@@ -291,7 +309,10 @@ function killprocs
 		
 	sleep 1 #give time for cleanup to occur
 	
-	out "Done killing processes $1 ${RstClr}"
+	
+	if [ $ISREMOTE == 0 ]; then
+		out "Done killing processes $1 ${RstClr}"
+	fi
 	
 } #end killprocs
 # TODO (Iris): Why do we export this? 
@@ -499,11 +520,12 @@ if [ ! -e ${USER_DATA}/TableInfo/SlowControlsDashboardSupervisorTableInfo.xml ];
 	cp ${MRB_SOURCE}/otsdaq/data-core/TableInfo/ContextGroup/SlowControlsDashboardSupervisorTableInfo.xml ${USER_DATA}/TableInfo/
 fi
 
-# TODO (Iris): These should probably always print (but probably should use info function to do so)
 #print out important environment variables
-out "\$USER_DATA               = ${YELLOW}${USER_DATA}${RstClr}          "
-out "\$ARTDAQ_DATABASE_URI     = ${YELLOW}${Bold}${ARTDAQ_DATABASE_URI}${DBold}${RstClr}"
-out "\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${RstClr}        "
+if [ $ISREMOTE == 0 ]; then
+	info "\$USER_DATA               = ${YELLOW}${USER_DATA}${RstClr}          "
+	info "\$ARTDAQ_DATABASE_URI     = ${YELLOW}${Bold}${ARTDAQ_DATABASE_URI}${DBold}${RstClr}"
+	info "\$OTSDAQ_DATA             = ${YELLOW}${OTSDAQ_DATA}${RstClr}        "
+fi
 #end print out important environment variables
 
 #check for antiquated artdaq database
@@ -1142,18 +1164,21 @@ launchOTS() {
 		killprocs
 	fi
 	
+	if [ $ISREMOTE == 0 ]; then
 
-	out "${Purple}${REV}                                                       ${RstClr}"
-	out "${Purple}${REV} ***************************************************** ${RstClr}"
-	if [ $ISGATEWAYLAUNCH == 1 ]; then
-		out "${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
-	else
-		out "${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
+		out "${Purple}${REV}                                                       ${RstClr}"
+		out "${Purple}${REV} ***************************************************** ${RstClr}"
+		if [ $ISGATEWAYLAUNCH == 1 ]; then
+			out "${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
+		else
+			out "${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
+		fi
+		out "${Purple}${REV} ***************************************************** ${RstClr}"
+		out "${Purple}${REV}                                                       ${RstClr}"
+	
+		out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
+		
 	fi
-	out "${Purple}${REV} ***************************************************** ${RstClr}"
-	out "${Purple}${REV}                                                       ${RstClr}"
-
-	out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
 	
 	####################################################################
 	########### start console & message facility handling ##############
@@ -1177,7 +1202,9 @@ launchOTS() {
 		
 		if [[ $USE_WEB_VIEWER == "1" ]]; then
 
-			out "${Green}${Bold}Launching message facility web console assistant...${RstClr}"
+			if [ $ISREMOTE == 0 ]; then
+				out "${Green}${Bold}Launching message facility web console assistant...${RstClr}"
+			fi
 			
 			#start quiet forwarder with receiving port and destination port parameter file
 			cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
@@ -1367,6 +1394,8 @@ launchOTS() {
 							########### 		launch Gateway context	 	 		############
 							####################################################################
 							
+							out #empty line
+							
 							#cleanup alive files
 							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive* &>/dev/null 2>&1 #hide output #remove alive file
 
@@ -1437,6 +1466,7 @@ launchOTS() {
 							
 							GATEWAY_PID=$LAST_OTS_PID													
 							out "Gateway-PID = ${Blue}${Bold}${GATEWAY_PID}${Rev}${RstClr}"
+							out #empty line
 
 							
 							####################################################################
@@ -1477,7 +1507,6 @@ launchOTS() {
 	do
 	  : 
 	  	#out "xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
 			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
@@ -1487,7 +1516,7 @@ launchOTS() {
 
 		#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
-							
+		
 		if [ $QUIET == 1 ]; then		  
 
 			if [ $BACKUPLOGS == 1 ]; then
@@ -1668,9 +1697,9 @@ launchOTS() {
 	fi #end remote launch handling
 	####################################################################
 	
-
-	out "Done launching ots Context processes."
-
+	if [ $ISREMOTE == 0 ]; then
+		out "Done launching ots Context processes."
+	fi
 	
 	# Done launching ots contexts
 	####################################################################
@@ -1678,8 +1707,9 @@ launchOTS() {
 
 	FIRST_TIME=0 #used to supress printouts
 		
-
-	out "Note: This host is ${THIS_HOST}."
+	if [ $ISREMOTE == 0 ]; then
+		out "Note: This host is ${THIS_HOST}."
+	fi
 	
 	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
 		out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
@@ -1732,11 +1762,16 @@ printMainURL() {
 	if [ $QUIET == 0 ]; then
 		sleep 5 #give a little more time before injecting printouts in scrolling printouts
 	else
-		sleep 3 #give a little time for other StartOTS printouts to occur (so this one is last)  
+		sleep 4 #give a little time for other StartOTS printouts to occur (so this one is last)  
 	fi
 	
+	echo #empty line
+	echo #empty line
+	
 	if [ $MAIN_URL == "unknown_url" ]; then
-		out "INFO: No gateway supervisor found for node {${THIS_HOST}}.${RstClr}"
+		if [ $ISREMOTE == 0 ]; then
+			out "INFO: No gateway supervisor found for node {${THIS_HOST}}.${RstClr}"
+		fi
 		exit
 	fi
 	

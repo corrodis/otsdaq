@@ -6,7 +6,7 @@ SCRIPT_DIR="$(
 )"
 
 # Get color code variables
-source ${SCRIPT_DIR}/common.sh
+source ${SCRIPT_DIR}/common.sh ots_remote_start
 
 STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another (TODO (Iris): Use something like PID since hostname is printed too
 out "${Green}=========================== ots REMOTE ============================="
@@ -20,9 +20,9 @@ cd ${SCRIPT_DIR}/../../../ || die "Couldn't chdir to ots root directory on ${HOS
 # We don't care about the non-error output of this script because it gets shown on the remote's launching terminal
 source ./setup_ots.sh >/dev/null </dev/null
 
-# TODO (Iris): This should probably specify a special "remote launched" flag to handle that seperately from the -s case
+# -x is a special "remote launched" flag to handle that similarly to the -s case but with less printouts
 # Exec since this is the last thing this script does and we don't need a pointless fork (plus the process stays the same for ssh)
-exec ots -s #disable remote launch to avoid infinite loop
+exec ots -x #disable remote launch to avoid infinite loop
 
 
 
