@@ -930,26 +930,37 @@ void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 //==============================================================================
 void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		", Error event type: " << e->type() << __E__;
+
+	//xdaq 15_14_0_3 broke what() by return c_str() on a temporary string
+	// https://gitlab.cern.ch/cmsos/core/-/blob/release_15_14_0_3/xcept/src/common/Exception.cc
 
 	// extract error message and save for user interface access
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
+	xcept::Exception& failedException = failedEvent.getException();
+	__COUT__ << "History of errors: " << failedException.size() << __E__;
+	__COUT__ << "Failed Message: " << failedException.rbegin()->at("message") << __E__;
+	//__COUT__ << "Failed Message: " << failedException.message() << __E__;
+	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
-	__SS__;
+	__SS__;	
 
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
 	{
 		ss << "\nAn asynchronous failure was encountered."
 		   << ".\n\nException:\n"
-		   << failedEvent.getException().what() << __E__;
+		   << failedException.rbegin()->at("message") << __E__;
+		   //<< failedEvent.getException().what() << __E__;
 		RunControlStateMachine::asyncFailureReceived_ = false;  // clear async error
 	}
 	else
 	{
 		ss << "\nFailure performing transition from " << failedEvent.getFromState() << "-" << theStateMachine_.getStateName(failedEvent.getFromState())
-		   << " to " << failedEvent.getToState() << "-" << theStateMachine_.getStateName(failedEvent.getToState()) << ".\n\nException:\n"
-		   << failedEvent.getException().what() << __E__;
+		   << " to " << failedEvent.getToState() << "-" << theStateMachine_.getStateName(failedEvent.getToState()) << ".\n\nException:\n" 
+		   << failedException.rbegin()->at("message") << __E__;
+		   //<< failedEvent.getException().what() << __E__;
 	}
 
 	__COUT_ERR__ << "\n" << ss.str();
@@ -1582,7 +1593,6 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 				       << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n Error Message = " << error << __E__;
 
 				__COUT_ERR__ << ss.str() << __E__;
-				__MOUT_ERR__ << ss.str() << __E__;
 
 				if(command == "Error")
 					return true;  // do not throw exception and exit loop if informing all
@@ -1601,7 +1611,6 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 				          "re-initializing or restarting otsdaq."
 				       << __E__;
 				__COUT_ERR__ << ss.str();
-				__MOUT_ERR__ << ss.str();
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			}
 		}  // end error response handling
@@ -1947,12 +1956,13 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		//	The threads should already be done with all work.
 		//	If broadcastMessage scope ends, then the
 		//	thread struct will be destructed, and the thread will
-		//	crash on next access attempt (thought we probably do not care).
+		//	crash on next access attempt (though we probably do not care).
 		for(unsigned int i = 0; i < numberOfThreads; ++i)
 			broadcastThreadStructs[i].exitThread_ = true;
 		usleep(100 * 1000 /*100ms*/);  // sleep for exit time
 
 		throw;  // re-throw
+		
 	}
 
 	if(numberOfThreads)
