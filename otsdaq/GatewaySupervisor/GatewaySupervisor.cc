@@ -64,7 +64,31 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
-	__COUT__ << __E__;
+	__COUT__ << "Constructing" << __E__;
+	
+	if(0) //to test xdaq exception what
+	{
+		std::stringstream ss;
+		ss << "This is a test" << std::endl;
+		try
+		{		
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+		}
+		catch(const toolbox::fsm::exception::Exception& e)
+		{
+			std::cout << "1Message: " << e.rbegin()->at("message") << std::endl;
+			std::cout << "2Message: " << e.message() << std::endl;
+			std::cout << "3Message: " << e.what() << std::endl;
+			std::string what =  e.what();			
+			std::cout << "4Message: " << what << std::endl;
+			if(what != e.message())
+			{
+				std::cout << "Mismatch!" << std::endl;
+				throw;
+			}
+		}
+	}
+	
 
 	// attempt to make directory structure (just in case)
 	mkdir((std::string(__ENV__("SERVICE_DATA_PATH"))).c_str(), 0755);
@@ -939,8 +963,8 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	// extract error message and save for user interface access
 	toolbox::fsm::FailedEvent& failedEvent = dynamic_cast<toolbox::fsm::FailedEvent&>(*e);
 	xcept::Exception& failedException = failedEvent.getException();
-	__COUT__ << "History of errors: " << failedException.size() << __E__;
-	__COUT__ << "Failed Message: " << failedException.rbegin()->at("message") << __E__;
+	//__COUT__ << "History of errors: " << failedException.size() << __E__;
+	//__COUT__ << "Failed Message: " << failedException.rbegin()->at("message") << __E__;
 	//__COUT__ << "Failed Message: " << failedException.message() << __E__;
 	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
@@ -1961,8 +1985,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 			broadcastThreadStructs[i].exitThread_ = true;
 		usleep(100 * 1000 /*100ms*/);  // sleep for exit time
 
-		throw;  // re-throw
-		
+		throw;  // re-throw		
 	}
 
 	if(numberOfThreads)

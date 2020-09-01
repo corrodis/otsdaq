@@ -56,6 +56,7 @@ export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
 
 #############################
 # setup defaults:
+KILLALL=0
 ISMACROMAKER=0
 ISCONFIG=0
 QUIET=1
@@ -70,7 +71,10 @@ export MACROMAKER_MODE #this environment variable is used by source code
 #############################
 
 # Output startup banner
-out "${Green}=========================== ots ============================="
+
+if [ "$1" != "-x" ]; then
+	out "${Green}=========================== ots ============================="
+fi
 
 # Check for options
 # TODO: One of the options (I feel like it was -r) seemed to be broken? Not sure what's up with that
@@ -122,6 +126,10 @@ while :; do
 		REMOTELAUNCH=0
 		ISREMOTE=1
 		;;
+	--killall | --kill | --kx | -k)
+		info "KILL OTS!"
+		KILLALL=1
+		;;
 	--)
 		# Match '--' which is traditionally used to seperate option flags from program arguments that might start with
 		# a '-' character
@@ -131,6 +139,46 @@ while :; do
 	-*)
 		# Match any option starting with '-' that isn't matched by any of the previous rules and alert the user to it
 		# not being handled
+		
+		out
+		out "******************************************************"
+		out "*************        ots Usage          **************"
+		out "******************************************************"	
+		out
+		out "To kill all otsdaq running processes, please use any of these options:"
+		out "--killall  --kill  --kx  -k"
+		out "	e.g.: ots --kx"
+		out
+		out "To start otsdaq in 'wiz mode' please use any of these options:"
+		out "--configure  --config  --wizard  --wiz  -w"
+		out "	e.g.: ots --wiz"
+		out
+		out "To start otsdaq with 'verbose mode' enabled, add one of these options:"
+		out "--verbose  -v"
+		out "	e.g.: ots --wiz -v     or    ots --verbose"
+		out
+		out "To start otsdaq and launch google-chrome, add one of these options:"
+		out "--chrome  -c"
+		out "	e.g.: ots --wiz -c     or    ots --chrome"
+		out
+		out "To start otsdaq and launch firefox, add one of these options:"
+		out "--firefox  -f"
+		out "	e.g.: ots --wiz -f     or    ots --firefox"
+		out
+		out "To backup and not overwrite previous quiet log files, add one of these options:"
+		out "--backup  -b"
+		out "	e.g.: ots -b     or    ots --backup"
+		out
+		out "To disable otsdaq startup checking and relaunching, add one of these options:"
+		out "--relaunch  -r"
+		out "	e.g.: ots -r     or    ots --relaunch"
+		out
+		out "To disable otsdaq remote process startup, add one of these options:"
+		out "--startremote  -s"
+		out "	e.g.: ots -s     or    ots --startremote"
+		out
+		out "Exiting ots. Please see usage tips above."		
+		out
 		die "Unsupported option '$1'"
 		;;
 	*)
@@ -228,6 +276,7 @@ done
 #exit any old action loops
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
+
 #done initializing StartOTS action file
 #############################
 
@@ -309,35 +358,7 @@ function killprocs
 		
 	sleep 1 #give time for cleanup to occur
 	
-	
-	if [ $ISREMOTE == 0 ]; then
-		out "Done killing processes $1 ${RstClr}"
-	fi
-	
-} #end killprocs
-# TODO (Iris): Why do we export this? 
-export -f killprocs
-
-if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "-k" ]]; then
-
-# TODO (Iris): use warn output
-
-	out "${Yellow}${Bold}${Rev}******************************************************${RstClr}"
-	out "${Yellow}${Bold}${Rev}*************       kill otsdaq!        **************${RstClr}"
-    out "${Yellow}${Bold}${Rev}******************************************************${RstClr}"
-	
-	#try to force kill other StartOTS scripts
-	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
-	echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
-	
-    echo  -e "${IBRed}"
-    killprocs	
-
-# TODO (Iris): More hard kills... why? Also not even using the defined functions above for some reason    
-# May want to leave these with a note in case they fix broken other code that we can't deal with
-# (we don't know where these are processes come from exactly)
-
-    #now hard kill:
+    #now hard kill any processes that may be stuck and detached:
 
 	killall -9 art &>/dev/null 2>&1 #hide output
 	killall -9 boardreader &>/dev/null 2>&1 #hide output
@@ -347,7 +368,30 @@ if [[ "$1"  == "--killall" || "$1"  == "--kill" || "$1"  == "--kx" || "$1"  == "
 	killall -9 routing_master &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
 	
-    out "Done with ots killall." 
+	if [ $ISREMOTE == 0 ]; then
+		out "Done killing processes $1 ${RstClr}"
+	fi
+	
+} #end killprocs
+# TODO (Iris): Why do we export this? 
+export -f killprocs
+
+
+if [[ $KILLALL != 0 ]]; then
+
+	out "${Yellow}${Bold}${REV}******************************************************${RstClr}"
+	out "${Yellow}${Bold}${REV}*************       kill otsdaq!        **************${RstClr}"
+    out "${Yellow}${Bold}${REV}******************************************************${RstClr}"
+	
+	#try to force kill other StartOTS scripts
+	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+	#echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+	echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+	
+    echo  -e "${IBRed}"
+    killprocs	
+	
+    out "Done with ots kill-all." 
 	
 	#kills self too:
 	killall -9 ots &>/dev/null 2>&1 #hide output
@@ -366,55 +410,6 @@ fi
 #echo "BACKUPLOGS $BACKUPLOGS"
 #echo "RELAUNCHCHECK $RELAUNCHCHECK"
 
-# TODO (IRIS): Replace with calling this printout when an unhandled parameter or no parameters set
-
-#if all defaults, but also an option, then show usage (i.e. unknown option)
-if [[ $ISMACROMAKER == 0 && $ISCONFIG == 0 && $QUIET == 1 && $CHROME == 0 && $FIREFOX == 0 && $BACKUPLOGS == 0 && $RELAUNCHCHECK == 1 && $REMOTELAUNCH == 1 && "$1x" != "x" ]]; then
-
-	out "${Red}${Bold}${Blink}Unrecognized parameter(s)${RstClr} ${BIBlue}$1 $2${RstClr} [Note: only two parameters are considered, others are ignored]. "
-	out "${BIGreen}Usage${RstClr}:"
-
-	out "******************************************************"
-	out "*************        ots Usage          **************"
-	out "******************************************************"
-
-	out "To kill all otsdaq running processes, please use any of these options:"
-	out "--killall  --kill  --kx  -k"
-	out "	e.g.: ots --kx"
-
-	out "To start otsdaq in 'wiz mode' please use any of these options:"
-	out "--configure  --config  --wizard  --wiz  -w"
-	out "e.g.: ots --wiz"
-
-	out "To start otsdaq with 'verbose mode' enabled, add one of these options:"
-	out "--verbose  -v"
-	out "e.g.: ots --wiz -v     or    ots --verbose"
-
-	out "To start otsdaq and launch google-chrome, add one of these options:"
-	out "--chrome  -c"
-	out "e.g.: ots --wiz -c     or    ots --chrome"
-
-	out "To start otsdaq and launch firefox, add one of these options:"
-	out "--firefox  -f"
-	out "e.g.: ots --wiz -f     or    ots --firefox"
-
-	out "To backup and not overwrite previous quiet log files, add one of these options:"
-	out "--backup  -b"
-	out "e.g.: ots -b     or    ots --backup"
-
-	out "To disable otsdaq startup checking and relaunching, add one of these options:"
-	out "--relaunch  -r"
-	out "e.g.: ots -r     or    ots --relaunch"
-
-	out "To disable otsdaq remote process startup, add one of these options:"
-	out "--startremote  -s"
-	out "e.g.: ots -s     or    ots --startremote"
-
-	out "Exiting ots. Please see usage tips above."
-
-	
-	exit
-fi
 
 # TODO (Iris): This is clearly trying to potentially solve an issue but this should essentially always
 # get the fqdn, especially since all this code is commented out
@@ -1206,7 +1201,7 @@ launchOTS() {
 		if [[ $USE_WEB_VIEWER == "1" ]]; then
 
 			if [ $ISREMOTE == 0 ]; then
-				out "${Green}${Bold}Launching message facility web console assistant...${RstClr}"
+				info "Launching message facility web console assistant...${RstClr}"
 			fi
 			
 			#start quiet forwarder with receiving port and destination port parameter file
@@ -1411,7 +1406,7 @@ launchOTS() {
 							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
 
 							if [ $QUIET == 1 ]; then
-								out "${Green}${Bold}Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								
+								info "Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								
 
 								if [ $BACKUPLOGS == 1 ]; then
 									DATESTRING=`date +'%s'`
@@ -1504,7 +1499,7 @@ launchOTS() {
 	####################################################################
 		
 	if [[ (${#xdaqPort[@]} > 0) ]]; then	
-		out "${Green}${Bold}Launching ${#xdaqPort[@]} additional local non-Gateway Context procesess for host {${THIS_HOST}}...${RstClr}"
+		info "Launching ${#xdaqPort[@]} additional local non-Gateway Context procesess for host {${THIS_HOST}}...${RstClr}"
 	else
 		out "${Green}${Bold}There are no additional local non-Gateway Context procesess on host {${THIS_HOST}}...${RstClr}"
 	fi
@@ -1635,8 +1630,8 @@ launchOTS() {
 		
 		unset remoteLaunchHosts
 		
-		out
-		out "${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${RstClr}"
+		out #blank line
+		info "Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${RstClr}"
 		i=0	
 		for port in "${contextPort[@]}"
 		do
@@ -1813,25 +1808,28 @@ export -f printMainURL
 otsActionHandler() {
 
 
-	#out "Starting action handler...${RstClr}"
+	out "Starting action handler..."
 
-	#clear file initially
-	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
-	echo "0" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE 
-	
 
 	if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
 		out "The script, on ${THIS_HOST}, is the gateway ots script, so it will drive the exit of ots scripts running on other hosts."
 
 		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
-		echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+		echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 		
 		#time for other stale StartOTS to quit
 		sleep 5
+		
+		#clear files initially
+		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
 		echo "0" > $OTSDAQ_STARTOTS_QUIT_FILE
 		echo "0" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	else
 		sleep 10 #non masters sleep for a while, to give time to quit stale scripts
+		
+		#clear files initially
+		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+		echo "0" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE 
 	fi	
 		
 	FIRST_TIME=1 #to enable url printouts
@@ -1859,10 +1857,10 @@ otsActionHandler() {
 		
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
-		#out " command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
+		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 		# TODO (Iris): Replace with case statement
 		
-		echo "message loop on ${HOSTNAME}"	
+		#echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 
@@ -1938,21 +1936,27 @@ otsActionHandler() {
 				otsdaq_flatten_system_aliases 0 &
 			fi		
 						
-		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP" ]]; then
+		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
 
 
 			out "Exit of (stale) ots..." 
 			# Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 			if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
 				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
-				echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+				echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 			fi
+			
+			killprocs	
 
+			if [ $ISREMOTE == 1 ]; then
+				out "Done killing (stale) processes"
+			fi
+			
 		    exit
 			
 		elif [[ "${OTSDAQ_STARTOTS_ACTION:-"0"}" != "0"  || "${OTSDAQ_STARTOTS_QUIT:-"0"}" != "0" || "${OTSDAQ_STARTOTS_LOCAL_QUIT:-"0"}" != "0" ]]; then
 		
-			echo -e "${STARTTIME}-"`date +"%h%y.%T"` "${HOSTNAME_ARR[0]}-ots [${Cyan}${LINENO}${RstClr}]\tExiting ots.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
+			out "Exiting ots.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
 			
 		fi
@@ -1966,7 +1970,11 @@ export -f otsActionHandler
 
 #functions have been declared
 #now launch things
-out
+
+if [ $ISREMOTE == 0 ]; then
+	out #blank line
+fi
+
 if [ $ISMACROMAKER == 1 ]; then
 	launchOTSMacromaker $1 $2 $3
 	exit
@@ -1975,22 +1983,26 @@ elif [ $ISCONFIG == 1 ]; then
 else
 	launchOTS  #only launch gateway once.. on shutdown and startup others can relaunch
 fi
-out
+
+if [ $ISREMOTE == 0 ]; then
+	out #blank line
+fi
 
 sleep 2 #attempt to avoid false starts by xdaq 
 #after gateway node has been decided and xdaq has been launched, start action handler
-exec >/dev/null 2>&1 </dev/null # output redirections stop getting a SIGTTOU when run remotely which will kill us
 otsActionHandler &
+
+exec >/dev/null 2>&1 </dev/null # output redirections stop getting a SIGTTOU when run remotely which will kill us
 
 #launch chrome here if enabled
 if [ $CHROME == 1 ]; then
-	sleep 3 #give time for server to be live
+	sleep 3 #give time for server to be alive
 	google-chrome $MAIN_URL &
 fi
 
 #launch firefox here if enabled
 if [ $FIREFOX == 1 ]; then
-	sleep 3 #give time for server to be live
+	sleep 3 #give time for server to be alive
 	firefox $MAIN_URL &
 fi
 
