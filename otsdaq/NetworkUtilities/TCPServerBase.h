@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <vector>
+//#include <thread>
+#include <atomic>
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
 namespace ots
@@ -12,7 +14,7 @@ namespace ots
 class TCPServerBase : public TCPSocket
 {
   public:
-	TCPServerBase(int serverPort, unsigned int maxNumberOfClients);
+	TCPServerBase(int serverPort, unsigned int maxNumberOfClients = 0);//Means as many unsigned allows
 	virtual ~TCPServerBase(void);
 
 	void startAccept(void);
@@ -36,17 +38,19 @@ class TCPServerBase : public TCPSocket
 	}
 
 	//std::promise<bool>        fAcceptPromise;
-	std::map<int, TCPSocket*> fConnectedClients;
-	const int                 E_SHUTDOWN = 0;
+	std::map<int, TCPSocket*>        fConnectedClients;
+	std::map<int, std::future<void>> fConnectedClientsFuture;
+	const int                        E_SHUTDOWN = 0;
 
   private:
-	void closeClientSockets(void);
+	void closeClientSockets(void);//This one will also wait until the socket thread is done!
 	int  accept            (bool blocking = true);
 	void shutdownAccept    (void);
 
 	const int         fMaxConnectionBacklog = 5;
-	//unsigned int      fMaxNumberOfClients;
+	unsigned int      fMaxNumberOfClients;
 	std::atomic_bool  fAccept;
+//	std::thread       fAcceptThread;
 	std::future<void> fAcceptFuture;
 };
 }
