@@ -35,7 +35,7 @@ TCPSocket::~TCPSocket()
 //==============================================================================
 void TCPSocket::open(void)
 {
-	if(fSocketId == invalidSocketId && (fSocketId = ::socket(PF_INET, SOCK_STREAM, 0)) == invalidSocketId)
+	if(fSocketId == invalidSocketId && (fSocketId = ::socket(AF_INET, SOCK_STREAM, 0)) == invalidSocketId)
 		throw std::runtime_error(std::string("Bad socket: ") + strerror(errno));
 }
 

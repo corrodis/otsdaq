@@ -9,15 +9,22 @@
 #include <errno.h>   // errno
 #include <string.h>  // errno
 #include <iostream>
+#include <sys/socket.h>
+
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+// #include <netdb.h>
+
 
 using namespace ots;
 
 //==============================================================================
-TCPServerBase::TCPServerBase(int serverPort, unsigned int /*maxNumberOfClients*/)
-    : /*fMaxNumberOfClients(maxNumberOfClients),*/ fAccept(true)//, fAcceptFuture(fAcceptPromise.get_future())
+TCPServerBase::TCPServerBase(int serverPort, unsigned int maxNumberOfClients)
+    : fMaxNumberOfClients(maxNumberOfClients)
+	, fAccept(true)
 {
 	int opt = 1;  // SO_REUSEADDR - man socket(7)
-	if(::setsockopt(getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) != 0)
+	if(::setsockopt(getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) == -1)
 	{
 		close();
 		throw std::runtime_error(std::string("Setsockopt: ") + strerror(errno));
@@ -34,13 +41,16 @@ TCPServerBase::TCPServerBase(int serverPort, unsigned int /*maxNumberOfClients*/
 		close();
 		throw std::runtime_error(std::string("Bind: ") + strerror(errno));
 	}
+    //freeaddrinfo(serverAddr); // all done with this structure
 
 	if(::listen(getSocketId(), fMaxConnectionBacklog) != 0)
 	{
 		close();
 		throw std::runtime_error(std::string("Listen: ") + strerror(errno));
 	}
-	startAccept();
+	//CANNOT GO IN THE CONSTRUCTOR OR IT MIGHT START BEFORE THE CHILD CLASS CONSTRUCTOR IS FULLY CONSTRUCTED 
+	//THIS MIGHT RESULT IN THE CALL OF THE VIRTUAL TCPServerBase::acceptConnections
+	//startAccept();
 }
 
 //==============================================================================
@@ -48,20 +58,25 @@ TCPServerBase::~TCPServerBase(void)
 {
 	std::cout << __PRETTY_FUNCTION__ << "Shutting down accept for socket: " << getSocketId() << std::endl;
 	shutdownAccept();
-	while(fAcceptFuture.wait_for(std::chrono::milliseconds(100)) != std::future_status::ready)
-		std::cout << __PRETTY_FUNCTION__ << "Server accept still running" << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << "Closing connected client sockets for socket: " << getSocketId() << std::endl;
+	while(fAcceptFuture.valid() && fAcceptFuture.wait_for(std::chrono::milliseconds(100)) != std::future_status::ready)
+	{
+	 	std::cout << __PRETTY_FUNCTION__ << "Server accept still running" << std::endl;
+		shutdownAccept();
+	}
+	//std::cout << __PRETTY_FUNCTION__ << "Closing connected client sockets for socket: " << getSocketId() << std::endl;
 	closeClientSockets();
-	std::cout << __PRETTY_FUNCTION__ << "Closed all sockets connected to server: " << getSocketId() << std::endl;
+	//std::cout << __PRETTY_FUNCTION__ << "Closed all sockets connected to server: " << getSocketId() << std::endl;
 }
 
 //==============================================================================
 void TCPServerBase::startAccept(void)
 {
+	std::cout << __PRETTY_FUNCTION__ << "Begin startAccept" << std::endl;
 	fAccept = true;
 	fAcceptFuture = std::async(std::launch::async, &TCPServerBase::acceptConnections, this);
-//	std::thread thread(&TCPServerBase::acceptConnections, this);
-//	thread.detach();
+	//std::thread thread = std::thread(&TCPServerBase::acceptConnections, this);
+	//thread.detach();
+	std::cout << __PRETTY_FUNCTION__ << "Done startAccept" << std::endl;
 }
 
 // An accepts waits for a connection and returns the opened socket number
@@ -74,12 +89,24 @@ int TCPServerBase::accept(bool blocking)
 		throw std::logic_error("Accept called on a bad socket object (this object was moved)");
 	}
 
-	struct sockaddr_storage serverStorage;
-	socklen_t addr_size = sizeof serverStorage;
+    struct sockaddr_storage clientAddress; // connector's address information
+    socklen_t clientAddressSize = sizeof(clientAddress);
 	int clientSocket = invalidSocketId;
 	if (blocking)
 	{
-		clientSocket = ::accept(getSocketId(), (struct sockaddr *)&serverStorage, &addr_size);
+		//std::cout << __PRETTY_FUNCTION__ << "Number of connected clients: " << fConnectedClients.size() << std::endl;
+		//clientSocket = ::accept4(getSocketId(),(struct sockaddr *)&clientAddress,  &clientAddressSize, 0);
+		while(1)
+		{
+			clientSocket = ::accept(getSocketId(), (struct sockaddr *)&clientAddress, &clientAddressSize);
+			if(fAccept && fMaxNumberOfClients> 0 && fConnectedClients.size() >= fMaxNumberOfClients)
+			{
+				send(clientSocket, "Too many clients connected!", 27, 0);
+				::shutdown(clientSocket, SHUT_WR);
+				continue;
+			}
+			break;
+		}
 		std::cout << __LINE__<< "] " << __PRETTY_FUNCTION__ << "fAccept? " << fAccept << std::endl;
 		if (!fAccept)
 		{
@@ -130,26 +157,39 @@ int TCPServerBase::accept(bool blocking)
 }
 
 //==============================================================================
+//This method is called in the distructor so I need to wait for the threads to be done!
 void TCPServerBase::closeClientSockets(void)
 {
 	for(auto& socket : fConnectedClients)
 	{
 		socket.second->sendClose();
+		fConnectedClientsFuture[socket.first].wait();//Waiting for client thread
+		// while(fConnectedClientsFuture[socket.first].wait_for(std::chrono::microseconds(1)) != std::future_status::ready)
+    	// 	std::cout << __PRETTY_FUNCTION__ << "waiting for client thread socket: " << socket.first << std::endl;
 		delete socket.second;
 	}
 	fConnectedClients.clear();
+	fConnectedClientsFuture.clear();
 }
 
 //==============================================================================
 void TCPServerBase::closeClientSocket(int socket)
 {
-	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	//This method is called inside the thread itself so it cannot call the removeClientSocketFuture!!!
+	auto it = fConnectedClients.find(socket);
+	if(it != fConnectedClients.end())
+	{
 		if(it->second->getSocketId() == socket)
 		{
 			it->second->sendClose();
 			delete it->second;
-			fConnectedClients.erase(it--);
+			fConnectedClients.erase(it);
 		}
+		else
+		{
+			throw std::runtime_error(std::string("SocketId in fConnectedClients != socketId in TCPSocket! Impossible!!!"));
+		}
+	}
 }
 
 //==============================================================================
@@ -169,8 +209,10 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 		}
 		catch(const std::exception& e)
 		{
+			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			delete it->second;
+			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			fConnectedClients.erase(it--);
 		}
 	}
@@ -188,7 +230,9 @@ void TCPServerBase::broadcast(const char* message, std::size_t length)
 		}
 		catch (const std::exception &e)
 		{
-			//std::cout << __PRETTY_FUNCTION__ << "Connection closed with the server! Stop writing!" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -206,7 +250,9 @@ void TCPServerBase::broadcast(const std::string& message)
 		}
 		catch(const std::exception& e)
 		{
+			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -224,7 +270,9 @@ void TCPServerBase::broadcast(const std::vector<char>& message)
 		}
 		catch(const std::exception& e)
 		{
+			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -242,7 +290,9 @@ void TCPServerBase::broadcast(const std::vector<uint16_t>& message)
 		}
 		catch(const std::exception& e)
 		{
+			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
+			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}

@@ -18,7 +18,8 @@ void TCPPublishServer::acceptConnections()
 	{
 		try
 		{
-			__attribute__((unused)) TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
+			// __attribute__((unused)) TCPTransmitterSocket* clientSocket = acceptClient<TCPTransmitterSocket>();
+			acceptClient<TCPTransmitterSocket>();
 		}
 		catch(int e)
 		{

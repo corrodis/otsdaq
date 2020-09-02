@@ -3,6 +3,7 @@
 
 #include <string>
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
+#include <iostream>
 
 namespace ots
 {
@@ -23,6 +24,7 @@ class TCPServer : public TCPServerBase
 	void           connectClient(TCPTransceiverSocket* clientSocket);
 	struct timeval fReceiveTimeout;
 	struct timeval fSendTimeout;
+	bool           fInDestructor;
 };
 }
 
