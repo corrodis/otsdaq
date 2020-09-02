@@ -1450,7 +1450,10 @@ launchOTS() {
 									
 									if [ $QUIET == 1 ]; then
 										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
-										echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										
+										echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										echo -e "\n\nAttempting restart on extracted host ${host} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										
 										xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 									else
 										xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
@@ -1535,7 +1538,10 @@ launchOTS() {
 		fi
 		
 		LAST_OTS_PID=$!
-		out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+		
+		if [ $ISREMOTE == 0 ]; then
+			out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+		fi
 		
 		TempContextPIDArray+=($LAST_OTS_PID)
 		ContextPIDArray+=($LAST_OTS_PID)
@@ -1592,13 +1598,17 @@ launchOTS() {
 				
 				if [ $QUIET == 1 ]; then
 					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
-					echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
+					echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
+					echo -e "\n\nAttempting restart on extracted host '${xdaqHost[$i]}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
 					xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
 				else
 					xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
 				fi
 				LAST_OTS_PID=$!
-				out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+				
+				if [ $ISREMOTE == 0 ]; then
+					out "Nongateway-PID = ${Blue}${Bold}${LAST_OTS_PID}${Rev}${RstClr}"
+				fi
 				
 				#test for relaunch
 				sleep 8 #give time before relaunch test
@@ -1807,14 +1817,15 @@ export -f printMainURL
 #########################################################
 otsActionHandler() {
 
-
-	out "Starting action handler..."
-
+	out "Starting action handler on ${THIS_HOST}..."
 
 	if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
 		out "The script, on ${THIS_HOST}, is the gateway ots script, so it will drive the exit of ots scripts running on other hosts."
 
-		echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+		if [ $REMOTELAUNCH == 1 ]; then #only kill other ots scripts if remote launch was enabled
+			echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+		fi
+		
 		echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 		
 		#time for other stale StartOTS to quit
@@ -1939,13 +1950,8 @@ otsActionHandler() {
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
 
 
-			out "Exit of (stale) ots..." 
-			# Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
-			if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
-				echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
-				echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
-			fi
-			
+			out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
+						
 			killprocs	
 
 			if [ $ISREMOTE == 1 ]; then
@@ -1954,7 +1960,7 @@ otsActionHandler() {
 			
 		    exit
 			
-		elif [[ "${OTSDAQ_STARTOTS_ACTION:-"0"}" != "0"  || "${OTSDAQ_STARTOTS_QUIT:-"0"}" != "0" || "${OTSDAQ_STARTOTS_LOCAL_QUIT:-"0"}" != "0" ]]; then
+		elif [[ "${OTSDAQ_STARTOTS_ACTION:-"0"}" != "0"  || "${OTSDAQ_STARTOTS_QUIT:-"0"}" != "0" ]]; then
 		
 			out "Exiting ots.. Unrecognized command !=0 in Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"			
 			exit
@@ -1990,9 +1996,10 @@ fi
 
 sleep 2 #attempt to avoid false starts by xdaq 
 #after gateway node has been decided and xdaq has been launched, start action handler
+exec
 otsActionHandler &
 
-exec >/dev/null 2>&1 </dev/null # output redirections stop getting a SIGTTOU when run remotely which will kill us
+#exec >/dev/null 2>&1 </dev/null # output redirections stop getting a SIGTTOU when run remotely which will kill us
 
 #launch chrome here if enabled
 if [ $CHROME == 1 ]; then
