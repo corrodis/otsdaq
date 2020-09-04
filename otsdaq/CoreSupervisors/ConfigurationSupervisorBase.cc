@@ -724,6 +724,13 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 			}
 		}
+		else
+		{			
+			// add all other sorted keys for this groupName
+			for(auto& keyInOrder : sortedKeys)
+					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
+		}
+			
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
