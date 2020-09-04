@@ -239,7 +239,8 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			else
 				appChild.second.getNode(colApplication_.colGroup_).getValue(contexts_.back().applications_.back().group_);
 
-			appChild.second.getNode(colApplication_.colModule_).getValue(contexts_.back().applications_.back().module_);
+			//keep module env variable!! so do getValueAsString()
+			contexts_.back().applications_.back().module_ = appChild.second.getNode(colApplication_.colModule_).getValueAsString();
 
 			// force deprecated Supervisor to GatewaySupervisor class
 			if(contexts_.back().applications_.back().class_ == XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS)

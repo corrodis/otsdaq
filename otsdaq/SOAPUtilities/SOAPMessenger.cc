@@ -79,7 +79,7 @@ xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::Ap
 	try
 	{
 		message->getMimeHeaders()->setHeader("Content-Location", d->getURN());
-		message->getMimeHeaders()->setHeader("xdaq-pthttp-connection-timeout", "2");
+		message->getMimeHeaders()->setHeader("xdaq-pthttp-connection-timeout", "30" /*seconds*/);
 
 		//__COUT__ << d->getURN() << __E__;
 		//__COUT__ << SOAPUtilities::translate(message) << __E__;

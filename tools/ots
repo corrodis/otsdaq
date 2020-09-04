@@ -1636,7 +1636,7 @@ launchOTS() {
 		########### 	   Lunch of remote non-Gateway contexts			############
 		############################################################################	
 		
-		remoteHostCount=$((${#contextHostname[@]} -1))
+		remoteHostCount=$((${#contextHostname[@]} -1 - ${#xdaqPort[@]}))
 		
 		unset remoteLaunchHosts
 		
