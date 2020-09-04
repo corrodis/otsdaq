@@ -341,6 +341,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		{
 			TableGroupKey::getGroupNameAndKey(fullName, name, key);
 			cacheGroupKey(name, key);
+			
 		}
 
 		// for each group get member map & comment, author, time, and type for latest key
@@ -755,10 +756,10 @@ void ConfigurationManagerRW::cacheGroupKey(const std::string& groupName, TableGr
 {
 	allGroupInfo_[groupName].keys_.emplace(key);
 
-	//	__SS__ << "Now keys are: " << __E__;
-	//	for(auto& key:allGroupInfo_[groupName].keys_)
-	//		ss << "\t" << key << __E__;
-	//	__COUT__ << ss.str() << __E__;
+//	__SS__ << "Now keys are: " << __E__;
+//	for(auto& key:allGroupInfo_[groupName].keys_)
+//		ss << "\t" << key << __E__;
+//	__COUT__ << ss.str() << __E__;
 }  // end cacheGroupKey()
 
 //==============================================================================
