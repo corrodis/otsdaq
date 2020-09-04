@@ -76,12 +76,12 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 		}
 		catch(const toolbox::fsm::exception::Exception& e)
 		{
-			std::cout << "1Message: " << e.rbegin()->at("message") << std::endl;
-			std::cout << "2Message: " << e.message() << std::endl;
-			std::cout << "3Message: " << e.what() << std::endl;
-			std::string what =  e.what();			
-			std::cout << "4Message: " << what << std::endl;
-			if(what != e.message())
+		  //std::cout << "1Message: " << e.rbegin()->at("message") << std::endl;
+		  //std::cout << "2Message: " << e.message() << std::endl;
+			//std::cout << "3Message: " << e.what() << std::endl;
+			//std::string what =  e.what();			
+			//std::cout << "4Message: " << what << std::endl;
+			//if(what != e.message())
 			{
 				std::cout << "Mismatch!" << std::endl;
 				throw;
@@ -975,7 +975,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	{
 		ss << "\nAn asynchronous failure was encountered."
 		   << ".\n\nException:\n"
-		   << failedException.rbegin()->at("message") << __E__;
+		   << failedException.message() << __E__; //rbegin()->at("message") << __E__;
 		   //<< failedEvent.getException().what() << __E__;
 		RunControlStateMachine::asyncFailureReceived_ = false;  // clear async error
 	}
@@ -983,7 +983,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	{
 		ss << "\nFailure performing transition from " << failedEvent.getFromState() << "-" << theStateMachine_.getStateName(failedEvent.getFromState())
 		   << " to " << failedEvent.getToState() << "-" << theStateMachine_.getStateName(failedEvent.getToState()) << ".\n\nException:\n" 
-		   << failedException.rbegin()->at("message") << __E__;
+		   << failedException.message() << __E__; //rbegin()->at("message") << __E__;
 		   //<< failedEvent.getException().what() << __E__;
 	}
 

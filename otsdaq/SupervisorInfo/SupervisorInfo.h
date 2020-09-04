@@ -7,6 +7,8 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wcatch-value"
 #if __GNUC__ >= 9
 #pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
