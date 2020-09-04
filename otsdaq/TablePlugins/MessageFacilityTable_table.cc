@@ -115,7 +115,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				child.second.getNode(COL_WEB_PORT0).getValue(fwdPort);
 				child.second.getNode(COL_WEB_IP).getValue(fwdIP);
 
-				fclSs << "udp: {\n";
+				fclSs << "otsConsole: {\n";
 				fclSs << "\t"
 				      << "type: UDP\n";
 				fclSs << "\t"
@@ -165,7 +165,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				child.second.getNode(COL_QT_PORT).getValue(fwdPort);
 				child.second.getNode(COL_QT_IP).getValue(fwdIP);
 
-				fclSs << "udp: {\n";
+				fclSs << "otsViewer: {\n";
 				fclSs << "\t"
 				      << "type: UDP\n";
 				fclSs << "\t"
