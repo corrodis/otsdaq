@@ -321,7 +321,7 @@ void ConfigurationManager::restoreActiveTableGroups(bool               throwErro
 			               0 /*groupComment       = 0*/,
 			               0 /*groupAuthor        = 0*/,
 			               0 /*groupCreateTime    = 0*/,
-			               0 /*doNotLoadMember    = false*/,
+			               0 /*doNotLoadMembers   = false*/,
 			               0 /*groupTypeString    = 0*/,
 			               0 /*groupAliases       = 0*/,
 			               onlyLoadIfBackboneOrContext /*onlyLoadIfBackboneOrContext = false*/
@@ -936,7 +936,7 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath, 
 			                       &groupComment,
 			                       &groupAuthor,
 			                       &groupCreateTime,
-			                       true /*doNotLoadMember*/,
+			                       true /*doNotLoadMembers*/,
 			                       0 /*groupTypeString*/,
 			                       &groupAliases);
 
@@ -1146,7 +1146,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 //
 //	if progressBar != 0, then do step handling, for finer granularity
 //
-// 	if(doNotLoadMember) return memberMap; //this is useful if just getting group metadata
+// 	if(doNotLoadMembers) return memberMap; //this is useful if just getting group metadata
 //	else NOTE: active views are changed! (when loading member map)
 //
 //	throws exception on failure.
@@ -1160,7 +1160,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
                                           std::string*                                           groupComment,
                                           std::string*                                           groupAuthor,
                                           std::string*                                           groupCreateTime,
-                                          bool                                                   doNotLoadMember /*=false*/,
+                                          bool                                                   doNotLoadMembers /*=false*/,
                                           std::string*                                           groupTypeString,
                                           std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
                                           bool                                                   onlyLoadIfBackboneOrContext /*=false*/) try
@@ -1343,7 +1343,9 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		//			}
 		//		}
 
-		if(doNotLoadMember)
+		__COUTV__(doNotLoadMembers);
+		__COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
+		if(doNotLoadMembers)
 			return;  // memberMap; //this is useful if just getting group metadata
 
 		// if not already done, determine the type configuration group

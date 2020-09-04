@@ -2320,7 +2320,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 //==============================================================================
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
-	//__COUT__ << "request()" << __E__;
+  //__COUT__ << "request()" << __E__;
 
 	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
 
@@ -2507,10 +2507,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				}
 
 				bool filterMatch;
-
+				
 				for(auto& aliasMapPair : aliasMap)
 				{
-					//__COUT__ << "aliasMapPair.first: " << aliasMapPair.first << __E__;
+				        //__COUT__ << "aliasMapPair.first: " << aliasMapPair.first << __E__;
 
 					filterMatch = true;
 
@@ -2574,7 +2574,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 						                                                                     &groupComment,
 						                                                                     &groupAuthor,
 						                                                                     &groupCreationTime,
-						                                                                     false /*false to not load member map*/);
+						                                                                     true /*doNotLoadMembers*/);
 
 						xmlOut.addTextElementToData("config_comment", groupComment);
 						xmlOut.addTextElementToData("config_author", groupAuthor);
@@ -3141,7 +3141,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 xoap::MessageReference GatewaySupervisor::supervisorCookieCheck(xoap::MessageReference message)
 
 {
-	//__COUT__ << __E__;
+  //__COUT__ << __E__;
 
 	// SOAPUtilities::receive request parameters
 	SOAPParameters parameters;
