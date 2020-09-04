@@ -683,42 +683,52 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 	//		sortedKeys.emplace(key);
 	//	}
 
-	const GroupInfo&               groupInfo  = cfgMgr->getGroupInfo(groupName);
-	const std::set<TableGroupKey>& sortedKeys = groupInfo.keys_;  // rename
-
-	if(groupKey.isInvalid() ||  // if invalid or not found, get latest
-	   sortedKeys.find(groupKey) == sortedKeys.end())
 	{
-		// report error if group key not found
-		if(!groupKey.isInvalid())
+		const GroupInfo&               groupInfo  = cfgMgr->getGroupInfo(groupName);
+		const std::set<TableGroupKey>& sortedKeys = groupInfo.keys_;  // rename
+	
+		if(groupKey.isInvalid() ||  // if invalid or not found, get latest
+		   sortedKeys.find(groupKey) == sortedKeys.end())
 		{
-			// attempt to reload all group info and power through
-			std::string                             accumulatedWarnings;
-			/*const std::map<std::string, TableInfo>& allTableInfo = */cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
-			__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
-
-			__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
-			// xmlOut.addTextElementToData("Error", ss.str());
-
-			ss << "Found keys: " << __E__;
-			for(auto& key : sortedKeys)
-				ss << "\t" << key << __E__;
-			__COUT__ << ss.str() << __E__;
-		}
-		else
-		{
-			if(sortedKeys.size())
-				groupKey = *sortedKeys.rbegin();
-			__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+			// report error if group key not found
+			if(!groupKey.isInvalid())
+			{
+			
+				// attempt to reload all group info and power through
+				std::string                             accumulatedWarnings;
+				/*const std::map<std::string, TableInfo>& allTableInfo = */cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+				__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
+	
+				// xmlOut.addTextElementToData("Error", ss.str());
+							
+				const GroupInfo&               groupInfo2  = cfgMgr->getGroupInfo(groupName);
+				const std::set<TableGroupKey>& sortedKeys2 = groupInfo2.keys_;  // rename
+				
+				__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;			
+				ss << "Her are the found " << sortedKeys2.size() << " '" << groupName << "' keys: " << __E__;
+				for(auto& keyInOrder : sortedKeys2)
+				{	
+					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
+					ss << "\t" << keyInOrder << __E__;
+				}
+				__COUT__ << ss.str() << __E__;
+			}
+			else
+			{
+				if(sortedKeys.size())
+					groupKey = *sortedKeys.rbegin();
+				__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+	
+				// add all other sorted keys for this groupName
+				for(auto& keyInOrder : sortedKeys)
+					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
+			}
 		}
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
 	xmlOut.addTextElementToData("TableGroupKey", groupKey.toString());
 
-	// add all other sorted keys for this groupName
-	for(auto& keyInOrder : sortedKeys)
-		xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 
 	parentEl = xmlOut.addTextElementToData("TableGroupMembers", "");
 

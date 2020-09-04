@@ -23,7 +23,7 @@ struct GroupInfo
 	std::string             latestKeyGroupAuthor_, latestKeyGroupComment_, latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
 	std::map<std::string /*name*/, TableVersion /*version*/> latestKeyMemberMap_;
 
-	TableGroupKey getLatestKey() { return *(keys_.rbegin()); }
+	TableGroupKey getLatestKey() { if(keys_.size()) return *(keys_.rbegin()); else return TableGroupKey(); }
 };
 
 #define Q(X) #X
