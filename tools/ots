@@ -852,7 +852,7 @@ launchOTSMacromaker() {
 		
 		# Alert user to the problem and keep trying
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
-			out "Could not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
+			warning "Could not verify successful ots Macro Maker mode context launch, relaunching ots Macro Maker mode context..."									
 			killproc ${LAST_OTS_PID} 	
 			sleep 2
 			
@@ -871,7 +871,7 @@ launchOTSMacromaker() {
 			
 		done
 		
-		out "Verified successful ots Macro Maker mode context ${THIS_HOST}-${PORT} launch..."
+		info "Verified successful ots Macro Maker mode context ${THIS_HOST}-${PORT} launch..."
 	fi
 	
 	MAIN_URL="http://${THIS_HOST}:${PORT}/urn:xdaq-application:lid=$MACROMAKER_SUPERVISOR_ID/Verify?code=$(cat ${SERVICE_DATA_PATH}//OtsWizardData/sequence.out)"
@@ -1072,7 +1072,7 @@ launchOTSWiz() {
 		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
-			out "Could not verify successful ots wiz context launch, relaunching ots wiz context..."			
+			warning "Could not verify successful ots wiz context launch, relaunching ots wiz context..."			
 			killproc ${LAST_OTS_PID} 
 			sleep 2
 			
@@ -1091,7 +1091,7 @@ launchOTSWiz() {
 	
 		done
 		
-		out "Verified successful ots wiz context launch..."
+		info "Verified successful ots wiz context launch..."
 	fi
 	out #blank line
 	
@@ -1444,7 +1444,7 @@ launchOTS() {
 								# Alert the user to the problem and keep relaunching
 
 								while [ "x$OTS_IS_ALIVE" == "x" ]; do
-									out "Could not verify successful ots gateway context launch, relaunching ots gateway context..."									
+									warning "Could not verify successful ots gateway context launch, relaunching ots gateway context..."									
 									killproc ${LAST_OTS_PID} 
 									sleep 2
 									
@@ -1466,7 +1466,7 @@ launchOTS() {
 									
 								done
 								
-								out "Verified successful ots gateway context ${THIS_HOST}-${port} launch..."
+								info "Verified successful ots gateway context ${THIS_HOST}-${port} launch..."
 							fi
 							
 							GATEWAY_PID=$LAST_OTS_PID													
@@ -1592,7 +1592,7 @@ launchOTS() {
 			done
 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
-				out "Could not verify successful ots non-gateway context launch, relaunching non-gateway context..."
+				warning "Could not verify successful ots non-gateway context launch, relaunching non-gateway context..."
 				killproc ${LAST_OTS_PID} 
 				sleep 2
 				
@@ -1616,7 +1616,7 @@ launchOTS() {
 				
 			done 		
 			
-			out "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch..."
+			info "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch..."
 			#add successful launch to Context PID array	
 			ContextPIDArray+=($LAST_OTS_PID)
 			#ContextPIDArray+=(${TempContextPIDArray[$j]})
@@ -1709,9 +1709,9 @@ launchOTS() {
 	fi #end remote launch handling
 	####################################################################
 	
-	if [ $ISREMOTE == 0 ]; then
-		out "Done launching ots Context processes."
-	fi
+	#if [ $ISREMOTE == 0 ]; then
+	#	out "Done launching ots Context processes."
+	#fi
 	
 	# Done launching ots contexts
 	####################################################################
@@ -1719,9 +1719,9 @@ launchOTS() {
 
 	FIRST_TIME=0 #used to supress printouts
 		
-	if [ $ISREMOTE == 0 ]; then
-		out "Note: This host is ${THIS_HOST}."
-	fi
+	#if [ $ISREMOTE == 0 ]; then
+	#	out "Note: This host is ${THIS_HOST}."
+	#fi
 	
 	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
 		out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
@@ -1817,7 +1817,7 @@ export -f printMainURL
 #########################################################
 otsActionHandler() {
 
-	out "Starting action handler on ${THIS_HOST}..."
+	info "Starting action handler on {${THIS_HOST}}..."
 
 	if [[ ($ISCONFIG == 1) || ("${THIS_HOST}" == "${gatewayHostname}") ]]; then
 		out "The script, on ${THIS_HOST}, is the gateway ots script, so it will drive the exit of ots scripts running on other hosts."

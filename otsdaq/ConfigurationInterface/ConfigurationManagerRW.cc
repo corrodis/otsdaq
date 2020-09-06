@@ -445,7 +445,6 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 	}
 
 	__COUT_INFO__ << "Updating persistent active groups to " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..." << __E__;
-	__MOUT_INFO__ << "Updating persistent active groups to " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..." << __E__;
 
 	std::string fn = ConfigurationManager::ACTIVE_GROUPS_FILENAME;
 	FILE*       fp = fopen(fn.c_str(), "w");

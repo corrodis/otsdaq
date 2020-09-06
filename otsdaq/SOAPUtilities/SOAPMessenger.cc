@@ -83,8 +83,8 @@ xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::Ap
 
 		//__COUT__ << d->getURN() << __E__;
 		//__COUT__ << SOAPUtilities::translate(message) << __E__;
-		std::string mystring;
-		message->writeTo(mystring);
+		//std::string mystring;
+		//message->writeTo(mystring);
 		//__COUT__<< mystring << std::endl;
 
 		xoap::MessageReference reply = theApplication_->getApplicationContext()->postSOAP(message, *(theApplication_->getApplicationDescriptor()), *d);
@@ -92,11 +92,11 @@ xoap::MessageReference SOAPMessenger::sendWithSOAPReply(XDAQ_CONST_CALL xdaq::Ap
 	}
 	catch(xdaq::exception::Exception& e)
 	{
-		__COUT_ERR__ << "This application failed to send a SOAP message to " << d->getClassName() << " instance " << d->getInstance()
-		         << " re-throwing exception = " << xcept::stdformat_exception_history(e);
-		std::string mystring;
-		message->writeTo(mystring);
-		__COUT_ERR__ << mystring << std::endl;
+		//__COUT_ERR__ << "This application failed to send a SOAP message to " << d->getClassName() << " instance " << d->getInstance()
+		//         << " re-throwing exception = " << xcept::stdformat_exception_history(e);
+		//std::string mystring;
+		//message->writeTo(mystring);
+		//__COUT_ERR__ << mystring << std::endl;
 		XCEPT_RETHROW(xdaq::exception::Exception, "Failed to send SOAP command.", e);
 	}
 }

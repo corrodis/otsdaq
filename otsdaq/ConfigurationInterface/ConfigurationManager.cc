@@ -603,7 +603,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		}
 	}
 
-	if(isContext && matchCount != contextMemberNames_.size())
+	if((isContext || inContext) && matchCount != contextMemberNames_.size())
 	{
 		__SS__ << "This group is an incomplete match to a Context group: "
 		       << " Size=" << matchCount << " but should be " << contextMemberNames_.size() << __E__;
@@ -620,7 +620,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		__SS_THROW__;
 	}
 
-	if(isBackbone && matchCount != backboneMemberNames_.size())
+	if((isBackbone || inBackbone) && matchCount != backboneMemberNames_.size())
 	{
 		__SS__ << "This group is an incomplete match to a Backbone group: "
 		       << " Size=" << matchCount << " but should be " << backboneMemberNames_.size() << __E__;
@@ -637,7 +637,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		__SS_THROW__;
 	}
 
-	if(isIterate && matchCount != iterateMemberNames_.size())
+	if((isIterate || inIterate) && matchCount != iterateMemberNames_.size())
 	{
 		__SS__ << "This group is an incomplete match to a Iterate group: "
 		       << " Size=" << matchCount << " but should be " << iterateMemberNames_.size() << __E__;
