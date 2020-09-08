@@ -1668,7 +1668,7 @@ launchOTS() {
 					continue;
 				fi
 			
-				out "\tRemote launch of ots Context processes on host ${contextHostname[$i]}."
+				out "\tRemote launch of ots Context processes on host {${contextHostname[$i]}}."
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 				
 				# still kind of messy but this will at least work correctly now
