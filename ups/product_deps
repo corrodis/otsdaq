@@ -1,6 +1,6 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent otsdaq	v2_05_04_indev
+parent otsdaq	v2_05_04
 defaultqual	e17:s85
 
 # These optional lines define the installed directories where
@@ -17,51 +17,54 @@ bindir      fq_dir      bin
 fcldir      -
 
 #
-product		 version	optional
-artdaq              v3_09_01
-artdaq_database     v1_04_88
-xdaq                v14_12_0
-artdaq_daqinterface v3_09_01
-smc_compiler        v6_6_0      -nq-      only_for_build
-cetbuildtools       v7_17_01    -        only_for_build
+product				version		optional
+artdaq				v3_09_01b	s101
+artdaq				v3_09_01	s96
+artdaq				v3_09_01	s87
+artdaq				v3_09_01	s85
+artdaq_database		v1_04_88a	s101
+artdaq_database		v1_04_88	s96
+artdaq_database		v1_04_88	s87
+artdaq_database		v1_04_88	s85
+xdaq				v14_12_0a
+artdaq_daqinterface	v3_09_01
+smc_compiler		v6_6_0		-nq-	only_for_build
+cetbuildtools		v7_17_01	-		only_for_build
 end_product_list
 
-# e6  - with gcc 4.9.1 and -std=c++1y
-# s6  - with art v1_12_05
-# s7  - with art v1_13_01
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
-qualifier    	   artdaq	 	 artdaq_database	xdaq   	    	artdaq_daqinterface		notes
-e20:s100:prof       e20:s100:prof    	 e20:s100:prof 		e20:prof   	-nq-					-std=c++17
-e20:s100:debug      e20:s100:debug   	 e20:s100:debug		e20:debug  	-nq-					-std=c++17
-e19:s100:prof       e19:s100:prof    	 e19:s100:prof 		e19:prof   	-nq-					-std=c++17
-e19:s100:debug      e19:s100:debug   	 e19:s100:debug		e19:debug  	-nq-					-std=c++17
-c7:s100:prof       c7:s100:prof    	 c7:s100:prof 		c7:prof   	-nq-					-std=c++17
-c7:s100:debug      c7:s100:debug   	 c7:s100:debug		c7:debug  	-nq-					-std=c++17
+qualifier			artdaq				artdaq_database		xdaq		artdaq_daqinterface	notes
+e20:s101:prof		e20:s101:prof		e20:s101:prof		e20:prof	-nq-				-std=c++17
+e20:s101:debug		e20:s101:debug		e20:s101:debug		e20:debug	-nq-				-std=c++17
+e19:s101:prof		e19:s101:prof		e19:s101:prof		e19:prof	-nq-				-std=c++17
+e19:s101:debug		e19:s101:debug		e19:s101:debug		e19:debug	-nq-				-std=c++17
+c7:s101:prof		c7:s101:prof		c7:s101:prof		c7:prof		-nq-				-std=c++17
+c7:s101:debug		c7:s101:debug		c7:s101:debug		c7:debug	-nq-				-std=c++17
 
-e19:s96:prof       e19:s96:prof    	 e19:s96:prof 		e19:prof   	-nq-					-std=c++17
-e19:s96:debug      e19:s96:debug   	 e19:s96:debug		e19:debug  	-nq-					-std=c++17
-e19:s96:py2:prof       e19:s96:py2:prof    	 e19:s96:py2:prof 		e19:prof   	-nq-					-std=c++17
-e19:s96:py2:debug      e19:s96:py2:debug   	 e19:s96:py2:debug		e19:debug  	-nq-					-std=c++17
+e19:s96:prof		e19:s96:prof		e19:s96:prof		e19:prof	-nq-				-std=c++17
+e19:s96:debug		e19:s96:debug		e19:s96:debug		e19:debug	-nq-				-std=c++17
+e19:s96:py2:prof	e19:s96:py2:prof	e19:s96:py2:prof	e19:prof	-nq-				-std=c++17
+e19:s96:py2:debug	e19:s96:py2:debug	e19:s96:py2:debug	e19:debug	-nq-				-std=c++17
 
-c7:s96:prof       c7:s96:prof    	 c7:s96:prof 		c7:prof   	-nq-					-std=c++17
-c7:s96:debug      c7:s96:debug   	 c7:s96:debug		c7:debug  	-nq-					-std=c++17
-c7:s96:py2:prof       c7:s96:py2:prof    	 c7:s96:py2:prof 		c7:prof   	-nq-					-std=c++17
-c7:s96:py2:debug      c7:s96:py2:debug   	 c7:s96:py2:debug		c7:debug  	-nq-					-std=c++17
+c7:s96:prof			c7:s96:prof			c7:s96:prof			c7:prof		-nq-				-std=c++17
+c7:s96:debug		c7:s96:debug		c7:s96:debug		c7:debug	-nq-				-std=c++17
+c7:s96:py2:prof		c7:s96:py2:prof		c7:s96:py2:prof		c7:prof		-nq-				-std=c++17
+c7:s96:py2:debug	c7:s96:py2:debug	c7:s96:py2:debug	c7:debug	-nq-				-std=c++17
 
-e19:s87:prof       e19:s87:prof    	 e19:s87:prof 		e19:prof   	-nq-					-std=c++17
-e19:s87:debug      e19:s87:debug   	 e19:s87:debug		e19:debug  	-nq-					-std=c++17
-e17:s87:prof       e17:s87:prof    	 e17:s87:prof 		e17:prof   	-nq-					-std=c++17
-e17:s87:debug      e17:s87:debug   	 e17:s87:debug		e17:debug  	-nq-					-std=c++17
+e19:s87:prof		e19:s87:prof		e19:s87:prof		e19:prof	-nq-				-std=c++17
+e19:s87:debug		e19:s87:debug		e19:s87:debug		e19:debug	-nq-				-std=c++17
+e17:s87:prof		e17:s87:prof		e17:s87:prof		e17:prof	-nq-				-std=c++17
+e17:s87:debug		e17:s87:debug		e17:s87:debug		e17:debug	-nq-				-std=c++17
 
-e17:s85:prof       e17:s85:prof    	 e17:s85:prof 		e17:prof   	-nq-					-std=c++17
-e17:s85:debug      e17:s85:debug   	 e17:s85:debug		e17:debug  	-nq-					-std=c++17
+e17:s85:prof		e17:s85:prof		e17:s85:prof		e17:prof	-nq-				-std=c++17
+e17:s85:debug		e17:s85:debug		e17:s85:debug		e17:debug	-nq-				-std=c++17
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
 
 ### Local Variables:
-### tab-width: 8
+### tab-width: 4
 ### End:
 
-# vi:set ts=8 noexpandtab:
+# vi:set ts=4 noexpandtab:
