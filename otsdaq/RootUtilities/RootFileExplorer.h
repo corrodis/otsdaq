@@ -82,6 +82,7 @@ class RootFileExplorer
                                                   string                fRootPath       ,
                                                   string                fFoldersPath    ,
                                                   string                fHistName       ,
+                                                  string                fRFoldersPath   ,
                                                   string                fFileName       ,
                                                   TFile               * rootFile = NULL  )  ;
                         ~RootFileExplorer        (void                                   ) {;}

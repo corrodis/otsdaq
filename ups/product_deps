@@ -26,7 +26,7 @@ artdaq_database		v1_04_88a	s101
 artdaq_database		v1_04_88	s96
 artdaq_database		v1_04_88	s87
 artdaq_database		v1_04_88	s85
-xdaq				v14_12_0a
+xdaq				v14_12_0
 artdaq_daqinterface	v3_09_01
 smc_compiler		v6_6_0		-nq-	only_for_build
 cetbuildtools		v7_17_01	-		only_for_build

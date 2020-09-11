@@ -3,11 +3,12 @@
 // clang-format off
 //================================================================================================
 RootFileExplorer::RootFileExplorer(
-		                    std::string   fSystemPath ,
-		                    std::string   fRootPath   ,
-                                    std::string   fFoldersPath,
-                                    std::string   fHistName   ,
-                                    std::string   fFileName   ,
+		                    std::string   fSystemPath  ,
+		                    std::string   fRootPath    ,
+                                    std::string   fFoldersPath ,
+                                    std::string   fHistName    ,
+                                    std::string   fRFoldersPath,
+                                    std::string   fFileName    ,
                                     TFile       * rootFile
                                   ) : rootTagName_("ROOT")
 {
@@ -15,12 +16,14 @@ RootFileExplorer::RootFileExplorer(
  fRootPath_      = fRootPath     ;
  fFoldersPath_   = fFoldersPath  ;
  fHistName_      = fHistName     ;
+ fRFoldersPath_  = fRFoldersPath ;
  fFileName_      = fFileName     ;
- STDLINE(std::string("fSystemPath : ")+fSystemPath_ ,ACCyan);
- STDLINE(std::string("fRootPath   : ")+fRootPath_   ,ACCyan);
- STDLINE(std::string("fFoldersPath: ")+fFoldersPath_,ACCyan);
- STDLINE(std::string("fHistName   : ")+fHistName_   ,ACCyan);
- STDLINE(std::string("fFileName   : ")+fFileName_   ,ACCyan);
+ STDLINE(std::string("fSystemPath  : ")+fSystemPath_  ,ACCyan);
+ STDLINE(std::string("fRootPath    : ")+fRootPath_    ,ACCyan);
+ STDLINE(std::string("fFoldersPath : ")+fFoldersPath_ ,ACCyan);
+ STDLINE(std::string("fHistName    : ")+fHistName_    ,ACCyan);
+ STDLINE(std::string("fRFoldersPath: ")+fRFoldersPath_,ACCyan);
+ STDLINE(std::string("fFileName    : ")+fFileName_    ,ACCyan);
  level_          = 0             ;
  counter_        = 0             ;
  debug_          = true          ;
@@ -96,15 +99,19 @@ xercesc::DOMDocument * RootFileExplorer::initialize(bool liveDQMFlag)
 
   ss_.str(""); ss_ << "Main anchor (document): " << rootElement_ ;
   STDLINE(ss_.str(),string(ACCyan)+string(ACReverse)) ;
+  STDLINE(rootFile_->GetName(),string(ACCyan)+string(ACReverse)) ;
 
   this->makeLiveDQMBinaryTree(rootFile_,0,"",NULL) ; 
  } 
  else 
  {
-  rootFile_ = new TFile((fSystemPath_ +string("/") +
-                         fRootPath_   +string("/") +
-                         fFoldersPath_+string("/") +
-                         fFileName_).c_str()      ) ;
+  string fName = fSystemPath_ +string("/") +
+                 fRootPath_   ; 
+  if( fFoldersPath_.length() > 0 ) fName += string("/") + fFoldersPath_; 
+  if( fFileName_   .length() > 0 ) fName += string("/") + fFileName_   ;
+  STDLINE(string("Opening fFileName_: ")+fFileName_, ACYellow) ;
+  STDLINE(string("Opening fName     : ")+fName     , ACYellow) ;
+  rootFile_ = new TFile(fName.c_str()) ;
  
   if( debug_) rootFile_->ls() ;
 
