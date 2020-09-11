@@ -2282,15 +2282,28 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
                                               bool               doNeverShow,
                                               bool               temporarySilence)
 {
-	__COUT__ << "Setting tooltip never show for user '" << username << "' to " << doNeverShow << " (temporarySilence=" << temporarySilence << ")" << __E__;
+	std::string filename;
+	bool isForAll = (srcFile == "ALL" && srcFunc == "ALL" && srcId == "ALL");
 
-	std::string filename = getTooltipFilename(username, srcFile, srcFunc, srcId);
+
+
+	if(isForAll)
+	{
+		__COUT__ << "Disabling ALL tooltips for user '" << username << "' is now set to " << doNeverShow << __E__;
+		filename = getTooltipFilename(username, SILENCE_ALL_TOOLTIPS_FILENAME, "", "");
+	}
+	else
+	{
+		filename = getTooltipFilename(username, srcFile, srcFunc, srcId);
+		__COUT__ << "Setting tooltip never show for user '" << username << "' to " << doNeverShow << " (temporarySilence=" << temporarySilence << ")" << __E__;
+	}
+
 	FILE*       fp       = fopen(filename.c_str(), "w");
 	if(fp)
 	{  // file exists, so do NOT show tooltip
 		if(temporarySilence)
 			fprintf(fp, "%ld", time(0) + 7 /*days*/ * 24 /*hours*/ * 60 * 60);  // mute for a week
-		else if(doNeverShow && username == WebUsers::DEFAULT_ADMIN_USERNAME)
+		else if(!isForAll && doNeverShow && username == WebUsers::DEFAULT_ADMIN_USERNAME)
 		{
 			// admin could be shared account, so max out at 30 days
 			fprintf(fp, "%ld", time(0) + 30 /*days*/ * 24 /*hours*/ * 60 * 60);
@@ -2337,9 +2350,17 @@ void WebUsers::tooltipCheckForUsername(
 	FILE* silencefp = fopen(silencefilename.c_str(), "r");
 	if(silencefp != NULL)
 	{
-		xmldoc->addTextElementToData("ShowTooltip", "0");
-		tooltipSetNeverShowForUsername(username, xmldoc, srcFile, srcFunc, srcId, true, true);
-		return;
+		time_t val;
+		char   line[100];
+		fgets(line, 100, silencefp);
+		sscanf(line, "%ld", &val);
+		fclose(silencefp);
+		if(val == 1)
+		{
+			xmldoc->addTextElementToData("ShowTooltip", "0");
+			//tooltipSetNeverShowForUsername(username, xmldoc, srcFile, srcFunc, srcId, true, true);
+			return;
+		}
 	}
 
 	std::string filename = getTooltipFilename(username, srcFile, srcFunc, srcId);
@@ -2349,7 +2370,6 @@ void WebUsers::tooltipCheckForUsername(
 		time_t val;
 		char   line[100];
 		fgets(line, 100, fp);
-		// int val = fgetc(fp);
 		sscanf(line, "%ld", &val);
 		fclose(fp);
 
@@ -2383,7 +2403,7 @@ void WebUsers::silenceAllUserTooltips(const std::string& username)
 	FILE*       silencefp       = fopen(silencefilename.c_str(), "w");
 	if(silencefp != NULL)
 	{
-		fputs("mute tool tips", silencefp);
+		fputs("1", silencefp);
 		fclose(silencefp);
 	}
 
