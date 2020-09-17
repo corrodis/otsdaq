@@ -1416,9 +1416,9 @@ launchOTS() {
 								
 
 								out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
-								${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 							else
-								${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 							fi
 							
 							LAST_OTS_PID=$!
@@ -1452,11 +1452,11 @@ launchOTS() {
 										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
 										
 										echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
-										echo -e "\n\nAttempting restart on extracted host ${host} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										echo -e "\n\nAttempting restart on extracted host ${THIS_HOST} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
 										
-										${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 									else
-										${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 									fi
 									LAST_OTS_PID=$!
 									
