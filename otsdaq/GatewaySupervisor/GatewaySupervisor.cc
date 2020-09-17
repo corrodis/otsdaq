@@ -2562,6 +2562,15 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
 					xmlOut.addTextElementToData("config_key", TableGroupKey::getFullGroupString(aliasMapPair.second.first, aliasMapPair.second.second).c_str());
 
+					// __COUT__ << "config_alias_comment" << " " <<  CorePropertySupervisorBase::theConfigurationManager_->getNode(
+					// 	ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getNode(aliasMapPair.first).getNode(
+					// 		TableViewColumnInfo::COL_NAME_COMMENT).getValue<std::string>() << __E__;
+					xmlOut.addTextElementToData("config_alias_comment",
+						CorePropertySupervisorBase::theConfigurationManager_->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME)
+							.getNode(aliasMapPair.first)
+							.getNode(TableViewColumnInfo::COL_NAME_COMMENT)
+							.getValue<std::string>());
+
 					std::string groupComment, groupAuthor, groupCreationTime;
 					try
 					{

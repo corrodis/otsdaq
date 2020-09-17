@@ -1789,7 +1789,7 @@ printMainURL() {
 	
 
 	out "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"	
-	out "\t(Note: This URL may need to be modified by the user depending on their network configuration)"
+	out "\t(Note: This URL may need to be modified depending on your network configuration)"
 		
 	for i in {1..5}
 	do
