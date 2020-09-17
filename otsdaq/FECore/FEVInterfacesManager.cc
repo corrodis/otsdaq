@@ -1992,18 +1992,21 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string& superviso
 		__CFG_COUT__ << "FE interface UID = " << it.first << __E__;
 
 		retList += supervisorName + ":" + supervisorLid + ":" + it.second->getInterfaceType() + ":" + it.second->getInterfaceUID();
+		
 
 		for(const auto& macroPair : it.second->getMapOfFEMacroFunctions())
 		{
 			__CFG_COUT__ << "FE Macro name = " << macroPair.first << __E__;
-			retList += ":" + macroPair.first + ":" + std::to_string(macroPair.second.requiredUserPermissions_) + ":" +
-			           std::to_string(macroPair.second.namesOfInputArguments_.size());
+			retList += ":" + macroPair.first + ":" + std::to_string(macroPair.second.requiredUserPermissions_);
+			retList += ":" + StringMacros::encodeURIComponent(macroPair.second.feMacroTooltip_);	
+
+			retList += ":" + std::to_string(macroPair.second.namesOfInputArguments_.size());
 			for(const auto& name : macroPair.second.namesOfInputArguments_)
-				retList += ":" + name;
+				retList += ":" + StringMacros::encodeURIComponent(name);
 
 			retList += ":" + std::to_string(macroPair.second.namesOfOutputArguments_.size());
 			for(const auto& name : macroPair.second.namesOfOutputArguments_)
-				retList += ":" + name;
+				retList += ":" + StringMacros::encodeURIComponent(name);
 		}
 
 		retList += "\n";

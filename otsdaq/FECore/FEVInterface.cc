@@ -554,7 +554,8 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
                                            const std::vector<std::string>& namesOfInputArgs,
                                            const std::vector<std::string>& namesOfOutputArgs,
                                            uint8_t                         requiredUserPermissions,
-                                           const std::string&              allowedCallingFEs)
+                                           const std::string&              allowedCallingFEs,
+										   const std::string&			   feMacroTooltip)
 {
 	if(mapOfFEMacroFunctions_.find(feMacroName) != mapOfFEMacroFunctions_.end())
 	{
@@ -564,8 +565,8 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
 	}
 
 	mapOfFEMacroFunctions_.insert(std::pair<std::string, frontEndMacroStruct_t>(
-	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs)));
-}
+	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs, feMacroTooltip)));
+} // end registerFEMacroFunction()
 
 //==============================================================================
 // getFEMacroConstArgument

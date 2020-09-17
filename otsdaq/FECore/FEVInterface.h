@@ -144,13 +144,15 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		    const std::vector<std::string>& namesOfInputArgs,
 		    const std::vector<std::string>& namesOfOutputArgs,
 		    const uint8_t      				requiredUserPermissions = 1 /*1:=user,255:=admin*/,
-		    const std::string& 				allowedCallingFrontEnds = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/)
+		    const std::string& 				allowedCallingFrontEnds = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/,
+		    const std::string& 				feMacroTooltip = "")
 		    : feMacroName_					(feMacroName)
 		    , macroFunction_				(feMacroFunction)
 		    , namesOfInputArguments_		(namesOfInputArgs)
 		    , namesOfOutputArguments_		(namesOfOutputArgs)
 		    , requiredUserPermissions_		(requiredUserPermissions)
 		    , allowedCallingFrontEnds_		(allowedCallingFrontEnds)
+			, feMacroTooltip_				(feMacroTooltip)
 		{
 		}
 
@@ -159,6 +161,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		const std::vector<std::string> 	namesOfInputArguments_, namesOfOutputArguments_;
 		const uint8_t                  	requiredUserPermissions_;
 		const std::string              	allowedCallingFrontEnds_;
+		const std::string              	feMacroTooltip_;
 	}; //end frontEndMacroStruct_t
 	const std::map<std::string, frontEndMacroStruct_t>& getMapOfFEMacroFunctions(void)
 	{
@@ -272,7 +275,8 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	    const std::vector<std::string>& 							namesOfInputArgs,
 	    const std::vector<std::string>& 							namesOfOutputArgs,
 	    uint8_t            											requiredUserPermissions = 1 /*1:=user,255:=admin*/,
-	    const std::string& 											allowedCallingFEs = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/);
+	    const std::string& 											allowedCallingFEs = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/,
+		const std::string&											feMacroTooltip = "");
 
   public:  // for external specialized template access
 	static const std::string& 		getFEMacroConstArgument		(frontEndMacroConstArgs_t args, const std::string& argName);
