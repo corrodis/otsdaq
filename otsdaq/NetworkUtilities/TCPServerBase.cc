@@ -96,7 +96,7 @@ int TCPServerBase::accept(bool blocking)
 	{
 		//std::cout << __PRETTY_FUNCTION__ << "Number of connected clients: " << fConnectedClients.size() << std::endl;
 		//clientSocket = ::accept4(getSocketId(),(struct sockaddr *)&clientAddress,  &clientAddressSize, 0);
-		while(1)
+		while(true)
 		{
 			clientSocket = ::accept(getSocketId(), (struct sockaddr *)&clientAddress, &clientAddressSize);
 			if(fAccept && fMaxNumberOfClients> 0 && fConnectedClients.size() >= fMaxNumberOfClients)
@@ -162,10 +162,20 @@ void TCPServerBase::closeClientSockets(void)
 {
 	for(auto& socket : fConnectedClients)
 	{
-		socket.second->sendClose();
-		fConnectedClientsFuture[socket.first].wait();//Waiting for client thread
-		// while(fConnectedClientsFuture[socket.first].wait_for(std::chrono::microseconds(1)) != std::future_status::ready)
-    	// 	std::cout << __PRETTY_FUNCTION__ << "waiting for client thread socket: " << socket.first << std::endl;
+		try
+		{
+			socket.second->sendClose();
+		}
+		catch(const std::exception& e)
+		{
+			//I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
+			//Just do nothing!
+			std::cout << __PRETTY_FUNCTION__ << e.what() << '\n';
+		}
+		
+		auto clientThread = fConnectedClientsFuture.find(socket.first);
+		if(clientThread != fConnectedClientsFuture.end())
+			clientThread->second.wait();//Waiting for client thread
 		delete socket.second;
 	}
 	fConnectedClients.clear();
@@ -181,7 +191,16 @@ void TCPServerBase::closeClientSocket(int socket)
 	{
 		if(it->second->getSocketId() == socket)
 		{
-			it->second->sendClose();
+			try
+			{
+				it->second->sendClose();
+			}
+			catch(const std::exception& e)
+			{
+				//I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
+				//Just do nothing!
+				std::cout << __PRETTY_FUNCTION__ << e.what() << '\n';
+			}
 			delete it->second;
 			fConnectedClients.erase(it);
 		}
@@ -210,6 +229,7 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			delete it->second;
 			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
@@ -231,6 +251,7 @@ void TCPServerBase::broadcast(const char* message, std::size_t length)
 		catch (const std::exception &e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
@@ -251,6 +272,7 @@ void TCPServerBase::broadcast(const std::string& message)
 		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
@@ -271,6 +293,7 @@ void TCPServerBase::broadcast(const std::vector<char>& message)
 		catch(const std::exception& e)
 		{
 			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
@@ -290,7 +313,7 @@ void TCPServerBase::broadcast(const std::vector<uint16_t>& message)
 		}
 		catch(const std::exception& e)
 		{
-			std::cout << __PRETTY_FUNCTION__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			std::cout << __PRETTY_FUNCTION__ << "Error: " << e.what() << std::endl;
 			fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
