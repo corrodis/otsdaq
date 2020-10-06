@@ -49,7 +49,7 @@ void FEVInterface::configureSlowControls(void)
 		__GEN_COUT__ << "Metric manager started." << __E__;
 	}
 	else if(!metricMan || !metricMan->Initialized())
-		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << metricMan->Initialized() << __E__;
+		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan?metricMan->Initialized():0) << __E__;
 	else
 		__GEN_COUT__ << "Metric manager already started." << __E__;
 
