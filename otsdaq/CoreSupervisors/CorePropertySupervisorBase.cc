@@ -137,15 +137,25 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	char        portStr[100] = "0";
 	std::string hostname     = "wiz";
 
-	// Note: the environment variable __ENV__("HOSTNAME") fails in multinode ots systems
-	// started through ssh
+	/* Note: the environment variable __ENV__("HOSTNAME") 
+	//	fails in multinode ots systems started through ssh 
+	//	because it will change meaning from host to host
+	*/
 
 	if(properties)
 	{
 		unsigned int port = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Port").getValue<unsigned int>();
+
+		//help the user out if the config has old defaults for port/address
+		//Same as XDAQContextTable_table.cc:extractContexts:L164
+		if(port == 0) //convert 0 to ${OTS_MAIN_PORT}
+			port = atoi(__ENV__("OTS_MAIN_PORT"));
+		
 		sprintf(portStr, "%u", port);
 
 		hostname = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Address").getValue<std::string>();
+		if(hostname == "DEFAULT")  // convert DEFAULT to http://${HOSTNAME}
+			hostname = "http://" +  std::string(__ENV__("HOSTNAME"));
 
 		size_t i = hostname.find("//");
 		if(i != std::string::npos)

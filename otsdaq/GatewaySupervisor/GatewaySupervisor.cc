@@ -217,9 +217,32 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			{
 				// send back status and progress parameters
 				const std::string& err = theSupervisor->theStateMachine_.getErrorMessage();
-				status = err == "" ? (theSupervisor->theStateMachine_.isInTransition() ? theSupervisor->theStateMachine_.getProvenanceStateName()
-				                                                                       : theSupervisor->theStateMachine_.getCurrentStateName())
-				                   : (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
+
+				// status = err == "" ? (theSupervisor->theStateMachine_.isInTransition() ? theSupervisor->theStateMachine_.getProvenanceStateName()
+				//                                                                        : theSupervisor->theStateMachine_.getCurrentStateName())
+				//                    : (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
+				if(err == "")
+				{
+					if(theSupervisor->theStateMachine_.isInTransition())
+					{
+						// attempt to get transition name, otherwise give provenance state
+						try
+						{
+							status = theSupervisor->theStateMachine_.getCurrentTransitionName();
+						}
+						catch(...)
+						{
+							status = theSupervisor->theStateMachine_.getProvenanceStateName();
+						}
+					}
+					else
+						status = theSupervisor->theStateMachine_.getCurrentStateName();
+				}
+				else
+					status = (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
 				progress = theSupervisor->theProgressBar_.readPercentageString();
 
 				try

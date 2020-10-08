@@ -77,8 +77,8 @@ class VStateMachine
 			progress += name_ + ":" + transitionName_;
 		// else Done
 
-		if(progress.size())
-			__COUTV__(progress);
+		//if(progress.size())
+		//	__COUTV__(progress);
 
 		return progress;
 	}  // end getStatusProgressDetail()

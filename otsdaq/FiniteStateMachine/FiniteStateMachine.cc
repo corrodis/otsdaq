@@ -17,7 +17,7 @@ FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
 {
 	__GEN_COUT__ << "Constructing FiniteStateMachine" << std::endl;
-}
+} //end constructor()
 
 //==============================================================================
 FiniteStateMachine::~FiniteStateMachine(void) {}
@@ -32,11 +32,11 @@ toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::strin
 		return stateTransitionTable_[currentState_][transition];
 	else
 	{
-		std::ostringstream error;
-		error << "Cannot find transition name with transition: " << transition << ", unknown!";
-		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
+		__GEN_SS__ << "Cannot find transition name with transition: " << transition << ", unknown!";
+		__GEN_COUT__ << ss.str();
+		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
-}
+} //end getTransitionFinalState()
 
 //==============================================================================
 std::string FiniteStateMachine::getProvenanceStateName(void) { return getStateName(getProvenanceState()); }
@@ -54,17 +54,33 @@ time_t FiniteStateMachine::getTimeInState(void) { return stateEntranceTime_ ? (t
 //==============================================================================
 std::string FiniteStateMachine::getCurrentTransitionName(const std::string& transition)
 {
-	if(stateTransitionNameTable_[currentState_].find(transition) != stateTransitionNameTable_[currentState_].end())
+	// __GEN_COUTV__(stateTransitionNameTable_.size());
+	// __GEN_SS__ << currentState_ << " " << transition <<  " " << currentTransition_ << __E__;
+	// __GEN_COUT__ << ss.str();
+	// __GEN_COUT__ << (stateTransitionNameTable_.find(currentState_) == stateTransitionNameTable_.end()?1:0);
+	// __GEN_COUT__ << (stateTransitionNameTable_.at(currentState_).find(transition) ==
+	// 	 stateTransitionNameTable_.at(currentState_).end()?1:0);
+	// __COUT__ << stateTransitionNameTable_.at(currentState_).at(transition) << __E__;
+
+	// for(auto startState : stateTransitionNameTable_)
+	// {
+	// 	__GEN_COUTV__(getStateName(startState.first));
+	// 	std::cout << startState.first << __E__;
+	// 	for(auto trans : stateTransitionNameTable_.at(startState.first))
+	// 		__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
+	// }
+	if(stateTransitionNameTable_.at(currentState_).find(transition == ""?currentTransition_:transition) != stateTransitionNameTable_.at(currentState_).end())
 	{
-		return stateTransitionNameTable_[currentState_][transition];
+		return stateTransitionNameTable_.at(currentState_).at(transition == ""?currentTransition_:transition);
 	}
 	else
 	{
-		std::ostringstream error;
-		error << "Cannot find transition name with transition: " << transition << ", unknown!";
-		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
+		__GEN_SS__ << "Cannot find transition name from '" <<
+			currentState_ << "' with transition: " << (transition == ""?currentTransition_:transition) << ", unknown!";
+		__GEN_COUT__ << ss.str();
+		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
-}
+} //end getCurrentTransitionName()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from, const std::string& transition)
@@ -79,7 +95,7 @@ std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from
 		error << "Cannot find transition name from " << from << " with transition: " << transition << ", unknown!";
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
 	}
-}
+} //end getTransitionName()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from, const std::string& transition)
@@ -89,7 +105,7 @@ std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State
 		return stateTransitionParameterTable_[from][transition];
 	}
 	return "";
-}
+} //end getTransitionParameter()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionFinalStateName(const std::string& transition) { return getStateName(getTransitionFinalState(transition)); }
@@ -187,6 +203,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		toolbox::Event::Reference event(new toolbox::Event(transition, this));
 		theMessage_ = message;  // Even if it is bad, there can only be 1 transition at a time
 		                        // so this parameter should not change during all transition
+		currentTransition_ = transition;
 
 		this->fireEvent(event);
 	}

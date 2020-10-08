@@ -280,11 +280,37 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 	// send back status and progress parameters
 
 	const std::string& err = theStateMachine_.getErrorMessage();
-	std::string status = err == "" ? (theStateMachine_.isInTransition() ? theStateMachine_.getProvenanceStateName() : theStateMachine_.getCurrentStateName())
-	                               : (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err;
+	// std::string status = err == "" ? (theStateMachine_.isInTransition() ? theStateMachine_.getProvenanceStateName() : theStateMachine_.getCurrentStateName())
+	//                                : (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err;
+
+	// __SUP_COUTV__(theStateMachine_.isInTransition());
+	// __SUP_COUTV__(theStateMachine_.getCurrentTransitionName());
+	// __SUP_COUTV__(theStateMachine_.getProvenanceStateName());
+	// __SUP_COUTV__(theStateMachine_.getCurrentStateName());
+	// __SUP_COUTV__(RunControlStateMachine::theProgressBar_.readPercentageString());
+
 
 	SOAPParameters retParameters;
-	retParameters.addParameter("Status", status);
+	if(err == "")
+	{
+		if(theStateMachine_.isInTransition())
+		{
+			//attempt to get transition name, otherwise give provenance state
+			try
+			{
+				retParameters.addParameter("Status", theStateMachine_.getCurrentTransitionName());
+			}
+			catch(...)
+			{
+				retParameters.addParameter("Status", theStateMachine_.getProvenanceStateName());
+			}
+		}
+		else
+			retParameters.addParameter("Status", theStateMachine_.getCurrentStateName());		
+	}
+	else
+		retParameters.addParameter("Status", (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err);
+
 	retParameters.addParameter("Progress", RunControlStateMachine::theProgressBar_.readPercentageString());
 	retParameters.addParameter("Detail", getStatusProgressDetail());  // call virtual progress detail string generation
 
@@ -328,8 +354,8 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 			detail += ((cnt++) ? ":" : "") + fsmProgressDetail;  // StringMacros::encodeURIComponent(fsmProgressDetail);
 	}
 
-	if(detail.size())
-		__SUP_COUTV__(detail);
+	//if(detail.size())
+	//	__SUP_COUTV__(detail);
 
 	return detail;
 }  // end getStatusProgressDetail()

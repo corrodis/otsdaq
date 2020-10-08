@@ -153,8 +153,8 @@ std::string FEVInterfacesManager::getStatusProgressDetail(void)
 		{
 		}  // ignore errors
 
-	if(progress.size())
-		__CFG_COUTV__(progress);
+	//if(progress.size())
+	//	__CFG_COUTV__(progress);
 
 	return progress;
 }  // end getStatusProgressString()
