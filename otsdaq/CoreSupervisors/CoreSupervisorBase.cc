@@ -293,7 +293,7 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 	SOAPParameters retParameters;
 	if(err == "")
 	{
-		if(theStateMachine_.isInTransition())
+		if(theStateMachine_.isInTransition() || RunControlStateMachine::theProgressBar_.read() < 100)
 		{
 			//attempt to get transition name, otherwise give provenance state
 			try
