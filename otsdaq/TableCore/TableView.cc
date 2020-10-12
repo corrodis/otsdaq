@@ -677,7 +677,9 @@ std::string TableView::validateValueForColumn(const std::string& value, unsigned
 		__SS_THROW__;
 	}
 
-	if (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA && value == columnsInfo_[col].getDefaultValue())
+	if (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA && 
+		//value == columnsInfo_[col].getDefaultValue())
+		value == columnsInfo_[col].getDefaultDefaultValue(columnsInfo_[col].getType(),columnsInfo_[col].getDataType()))
 	{
 		// if type string, fixed choice and DEFAULT, then return string of first choice
 

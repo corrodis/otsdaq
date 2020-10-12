@@ -1568,7 +1568,7 @@ launchOTS() {
 
 				  
 			if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-				#out "skipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				#out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 				i=$(( $i + 1 ))
 				continue
 			fi
@@ -1599,10 +1599,10 @@ launchOTS() {
 				if [ $QUIET == 1 ]; then
 					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
 					echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					echo -e "\n\nAttempting restart on extracted host '${xdaqHost[$i]}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
+					echo -e "\n\nAttempting restart on extracted host '${THIS_HOST}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
 				else
-					${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 				fi
 				LAST_OTS_PID=$!
 				
