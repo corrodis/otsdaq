@@ -1137,13 +1137,6 @@ launchOTS() {
 		ISGATEWAYLAUNCH=0
 		killprocs nongateway
 		
-		unset TempContextPIDArray 
-		unset ContextPIDArray 
-		unset xdaqPort
-		unset xdaqHost
-		unset xdaqContextUID	
-		unset contextPort
-		unset contextHostname
 		
 		#if [ $BACKUPLOGS == 0 ]; then
 			
@@ -1315,6 +1308,15 @@ launchOTS() {
 	gatewayHostname=""
 	gatewayPort=0
 	contextUID=""
+
+
+	unset xdaqPort #reset
+	unset xdaqHost #reset
+	unset xdaqContextUID #reset	
+	unset contextPort #reset	
+	unset contextHostname #reset	
+	unset TempContextPIDArray #reset  
+	unset ContextPIDArray #reset
 
 	####################################################################
 	########### read from context config and launch Gateway ############
@@ -1511,7 +1513,7 @@ launchOTS() {
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  	#out "${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
 			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
@@ -1556,6 +1558,14 @@ launchOTS() {
 		###########  test for relaunch of local non-Gateway contexts	############
 		############################################################################	
 		
+
+		# i=0	
+		# for port in "${xdaqPort[@]}"
+		# do
+		# 	out "${i} ${xdaqPrefix} INTER -h ${xdaqHost[$i]} -p ${port} -pp ${xdaqPort[$i]} &"
+		# 	i=$(( $i + 1 ))
+		# done
+
 		sleep 1 #give time before relaunch test
 		
 		unset ContextPIDArray #reset  
@@ -1564,11 +1574,11 @@ launchOTS() {
 		for port in "${xdaqPort[@]}"
 		do
 		  : 
-			#out "${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			# out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 
 				  
 			if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-				#out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				# out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 				i=$(( $i + 1 ))
 				continue
 			fi
@@ -1576,8 +1586,7 @@ launchOTS() {
 			LAST_OTS_PID=${TempContextPIDArray[$j]}
 			
 			#test for relaunch
-			# 4 times quietly, then get louder
-		
+			# 4 times quietly, then get louder		
 			
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
 			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"

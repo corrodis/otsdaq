@@ -284,7 +284,6 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 	//                                : (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err;
 
 	// __SUP_COUTV__(theStateMachine_.isInTransition());
-	// __SUP_COUTV__(theStateMachine_.getCurrentTransitionName());
 	// __SUP_COUTV__(theStateMachine_.getProvenanceStateName());
 	// __SUP_COUTV__(theStateMachine_.getCurrentStateName());
 	// __SUP_COUTV__(RunControlStateMachine::theProgressBar_.readPercentageString());

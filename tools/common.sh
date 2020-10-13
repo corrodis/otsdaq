@@ -47,7 +47,7 @@ defineColors ()
   IBlack='\033[0;90m'       # Black
   IRed='\033[0;91m'         # Red
   IGreen='\033[0;92m'       # Green
-  IYellow='\033[0;93m'      # Yellow
+  IYellow='\033[0;31m'      #'\033[0;93m'      # Yellow  -- too hard to see on white (so making light red)
   IBlue='\033[0;94m'        # Blue
   IPurple='\033[0;95m'      # Purple
   ICyan='\033[0;96m'        # Cyan

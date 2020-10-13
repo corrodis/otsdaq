@@ -60,23 +60,39 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 	// __GEN_COUT__ << (stateTransitionNameTable_.find(currentState_) == stateTransitionNameTable_.end()?1:0);
 	// __GEN_COUT__ << (stateTransitionNameTable_.at(currentState_).find(transition) ==
 	// 	 stateTransitionNameTable_.at(currentState_).end()?1:0);
-	// __COUT__ << stateTransitionNameTable_.at(currentState_).at(transition) << __E__;
 
-	// for(auto startState : stateTransitionNameTable_)
-	// {
-	// 	__GEN_COUTV__(getStateName(startState.first));
-	// 	std::cout << startState.first << __E__;
-	// 	for(auto trans : stateTransitionNameTable_.at(startState.first))
-	// 		__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
-	// }
-	if(stateTransitionNameTable_.at(currentState_).find(transition == ""?currentTransition_:transition) != stateTransitionNameTable_.at(currentState_).end())
+	for(auto startState : stateTransitionNameTable_)
 	{
-		return stateTransitionNameTable_.at(currentState_).at(transition == ""?currentTransition_:transition);
+		__GEN_COUTV__(getStateName(startState.first));
+		std::cout << startState.first << __E__;
+		for(auto trans : stateTransitionNameTable_.at(startState.first))
+			__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
+	}
+
+	//if looking for current active transition, calculate from provenance state
+	if(transition == "")
+	{
+		if(stateTransitionNameTable_.at(provenanceState_).find(currentTransition_) != 
+								stateTransitionNameTable_.at(provenanceState_).end())	
+			return stateTransitionNameTable_.at(provenanceState_).at(currentTransition_);		
+		else
+		{
+			__GEN_SS__ << "Cannot find transition name from '" <<
+				getProvenanceStateName() << "' with transition: " << currentTransition_ << "...";
+			__GEN_COUT__ << ss.str();
+			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+		}
+	}
+
+	if(stateTransitionNameTable_.at(currentState_).find(transition) != 
+													stateTransitionNameTable_.at(currentState_).end())
+	{
+		return stateTransitionNameTable_.at(currentState_).at(transition);
 	}
 	else
 	{
 		__GEN_SS__ << "Cannot find transition name from '" <<
-			currentState_ << "' with transition: " << (transition == ""?currentTransition_:transition) << ", unknown!";
+			getCurrentStateName() << "' with transition: " << transition << "...";
 		__GEN_COUT__ << ss.str();
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
