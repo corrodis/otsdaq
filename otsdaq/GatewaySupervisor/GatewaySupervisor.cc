@@ -225,7 +225,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 
 				if(err == "")
 				{
-					if(theSupervisor->theStateMachine_.isInTransition())
+					if(theSupervisor->theStateMachine_.isInTransition() || theSupervisor->theProgressBar_.read() < 100)
 					{
 						// attempt to get transition name, otherwise give provenance state
 						try
