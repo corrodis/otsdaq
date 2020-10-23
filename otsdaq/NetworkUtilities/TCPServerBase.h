@@ -37,6 +37,8 @@ class TCPServerBase : public TCPSocket
 		return dynamic_cast<T*>(fConnectedClients[socketId]);
 	}
 
+	void pingActiveClients(void);
+
 	//std::promise<bool>        fAcceptPromise;
 	std::map<int, TCPSocket*>        fConnectedClients;
 	std::map<int, std::future<void>> fConnectedClientsFuture;
