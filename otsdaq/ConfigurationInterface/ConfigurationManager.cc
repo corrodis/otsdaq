@@ -1343,8 +1343,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		//			}
 		//		}
 
-		__COUTV__(doNotLoadMembers);
-		__COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
+		//__COUTV__(doNotLoadMembers);
+		//__COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
 		if(doNotLoadMembers)
 			return;  // memberMap; //this is useful if just getting group metadata
 

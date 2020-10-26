@@ -847,9 +847,9 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 		               key,
 		               false /*doActivate*/,
 		               &compareToMemberMap /*memberMap*/,
-		               0,
-		               0,
-		               0,
+		               0, /*progressBar*/
+		               0, /*accumulatedWarnings*/
+		               0, /*groupComment*/
 		               0,
 		               0, /*null pointers*/
 		               true /*doNotLoadMember*/,

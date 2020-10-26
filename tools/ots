@@ -52,6 +52,7 @@ STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
 
 #export products, used by artdaq daqInterface
 export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
+export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #used by xdaq supervisors to write context xml
 
 
 #############################
@@ -677,10 +678,6 @@ if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
 	fi
 fi
 
-##############################################################################
-export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #-> 
-##############################################################################
-
 
 #out "ARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
 
@@ -1128,10 +1125,14 @@ export -f launchOTSWiz
 ####################################################################
 # TODO: This should again be it's own script so that code is more manageable and reusable
 
+
+
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 #ContextPIDArray is context PID array 
 launchOTS() {
 	
+
+
 	ISGATEWAYLAUNCH=1
 	if [ "x$1" != "x" ]; then #if parameter, then is nongateway launch
 		ISGATEWAYLAUNCH=0
@@ -1152,7 +1153,13 @@ launchOTS() {
 		GATEWAY_PID=-1
 		#kill all things otsdaq, before launching new things	
 		killprocs
+
 	fi
+
+
+	##############################################################################
+	XDAQ_OTS_XML="ots" 	#used for normal mode launch as copy location for stable script launching
+	##############################################################################
 	
 	if [ $ISREMOTE == 0 ]; then
 
@@ -1161,13 +1168,21 @@ launchOTS() {
 		out "${Purple}${REV} ***************************************************** ${RstClr}"
 		if [ $ISGATEWAYLAUNCH == 1 ]; then
 			out "${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
+
+			#copy once in GATEWAY launch so xdaq processes are not writing to file during bash startup
+			cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
 		else
 			out "${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
+
+			#copy once in NON-GATEWAY launch if file not already created (by GATEWAY launch copy)
+			if [ ! -f ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml ]; then
+				cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
+			fi
 		fi
 		out "${Purple}${REV} ***************************************************** ${RstClr}"
 		out "${Purple}${REV}                                                       ${RstClr}"
 		out #blank line
-		out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
+		out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"	
 		
 	fi
 	
@@ -1185,7 +1200,8 @@ launchOTS() {
 	if [[ $ISGATEWAYLAUNCH == 1 ]]; then
 		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
-				
+
+			
 		
 		#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
 		#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
@@ -1276,31 +1292,18 @@ launchOTS() {
 
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 
+
+
 	#create argument to pass to ${xdaqPrefix} xdaq.executable
-	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
-	
+	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"
+	#out "XDAQ ARGS PASSED TO ${xdaqPrefix} xdaq.exe ${XDAQ_ARGS}${RstClr}"
 
-	#out "XDAQ ARGS PASSED TO ${xdaqPrefix} xdaq.exe:${RstClr}"
-	#echo ${XDAQ_ARGS}
-
-
-			
-
-
-	#for Supervisor backwards compatibility, convert to GatewaySupervisor stealthily
-	#sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	#sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-
-	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
-	#out "$value${RstClr}"
-	#re="http://(${THIS_HOST}):([0-9]+)"
-	
+	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml`	
+		
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""	
 	contextUidRe="ContextUID='(.+)' source"	
-	
-	#out "MATCHING REGEX${RstClr}"
-	
+		
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
@@ -1496,7 +1499,7 @@ launchOTS() {
 			  #echo $line          
 			fi
 		fi   
-	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
 		
 
 	####################################################################
