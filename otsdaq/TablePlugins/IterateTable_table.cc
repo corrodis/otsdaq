@@ -19,6 +19,11 @@ const std::string IterateTable::COMMAND_EXECUTE_MACRO          = "EXECUTE_MACRO"
 const std::string IterateTable::COMMAND_MODIFY_ACTIVE_GROUP    = "MODIFY_ACTIVE_GROUP";
 const std::string IterateTable::COMMAND_REPEAT_LABEL           = "REPEAT_LABEL";
 const std::string IterateTable::COMMAND_RUN                    = "RUN";
+const std::string IterateTable::COMMAND_START                  = "START";
+const std::string IterateTable::COMMAND_STOP                   = "STOP";
+const std::string IterateTable::COMMAND_PAUSE                  = "PAUSE";
+const std::string IterateTable::COMMAND_RESUME                 = "RESUME";
+const std::string IterateTable::COMMAND_HALT                   = "HALT";
 
 const std::string IterateTable::ITERATE_TABLE = "IterateTable";
 const std::string IterateTable::PLAN_TABLE    = "IterationPlanTable";

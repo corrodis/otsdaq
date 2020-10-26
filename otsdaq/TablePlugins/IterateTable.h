@@ -42,6 +42,11 @@ class IterateTable : public TableBase
 	static const std::string COMMAND_MODIFY_ACTIVE_GROUP;
 	static const std::string COMMAND_REPEAT_LABEL;
 	static const std::string COMMAND_RUN;
+	static const std::string COMMAND_START;
+	static const std::string COMMAND_STOP;
+	static const std::string COMMAND_PAUSE;
+	static const std::string COMMAND_RESUME;
+	static const std::string COMMAND_HALT;
 
 	static const std::string ITERATE_TABLE;
 	static const std::string PLAN_TABLE;
@@ -61,6 +66,11 @@ class IterateTable : public TableBase
 		m[COMMAND_MODIFY_ACTIVE_GROUP]    = "IterationCommandModifyGroupTable";
 		m[COMMAND_REPEAT_LABEL]           = "IterationCommandRepeatLabelTable";
 		m[COMMAND_RUN]                    = "IterationCommandRunTable";
+		m[COMMAND_START]                  = "";  // no parameters
+		m[COMMAND_STOP]                   = "";  // no parameters
+		m[COMMAND_PAUSE]                  = "";  // no parameters
+		m[COMMAND_RESUME]                 = "";  // no parameters
+		m[COMMAND_HALT]                   = "";  // no parameters
 		return m;
 	}
 

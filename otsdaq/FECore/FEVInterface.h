@@ -101,7 +101,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	virtual void 								halt						(void) { stop(); }
 	virtual void 								pause						(void) { stop(); }
 	virtual void 								resume						(void) { start(""); }
-	virtual bool 								running						(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; }
+	virtual bool 								running						(void) { /*while(WorkLoop::continueWorkLoop_){;}*/ return false; } //return true to have running() called again
 	// end State Machine handlers
 	/////////
 

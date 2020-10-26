@@ -93,6 +93,9 @@ class Iterator
 	static void startCommandRun(IteratorWorkLoopStruct* iteratorStruct);
 	static bool checkCommandRun(IteratorWorkLoopStruct* iteratorStruct);
 
+	static void startCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct, const std::string& transitionCommand);
+	static bool checkCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct, const std::string& finalState);
+
 	static bool haltIterator(Iterator*               iterator,
 	                         IteratorWorkLoopStruct* iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
 
