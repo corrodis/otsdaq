@@ -399,14 +399,24 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 					out << "\t\t<!--\n";
 			}
 
-			sprintf(tmp,
-			        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
-			        "network=\"%s\" group=\"%s\">\n",
-			        app.class_.c_str(),
-			        app.id_,
-			        app.instance_,
-			        app.network_.c_str(),
-			        app.group_.c_str());
+			if(app.class_ == "ots::GatewaySupervisor")  // add otsdaq icons
+				sprintf(tmp,
+				        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
+				        "network=\"%s\" icon=\"/WebPath/images/otsdaqIcons/logo_square.png\" icon16x16=\"/WebPath/images/otsdaqIcons/favicon-16x16.png\" group=\"%s\">\n",
+				        app.class_.c_str(),
+				        app.id_,
+				        app.instance_,
+				        app.network_.c_str(),
+				        app.group_.c_str());
+			else
+				sprintf(tmp,
+				        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
+				        "network=\"%s\" group=\"%s\">\n",
+				        app.class_.c_str(),
+				        app.id_,
+				        app.instance_,
+				        app.network_.c_str(),
+				        app.group_.c_str());
 			out << tmp;
 
 			////////////////////// properties
