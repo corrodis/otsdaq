@@ -275,8 +275,8 @@ void FEVInterfacesManager::halt(void)
 	}
 	postStateMachineExecutionLoop();
 
-	destroy();  // destroy all FE interfaces on halt, must be configured for FE interfaces
-	            // to exist
+	if(!VStateMachine::getSubIterationWork() && !VStateMachine::getIterationWork())
+		destroy();  // destroy all FE interfaces on halt, must be configured for FE interfaces to exist
 
 	__CFG_COUT__ << "Done " << transitionName << " all interfaces." << __E__;
 }  // end halt()
