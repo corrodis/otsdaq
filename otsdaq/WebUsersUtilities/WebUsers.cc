@@ -2588,17 +2588,18 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	if(fp)
 	{
 		fseek(fp, 0, SEEK_END);
-		long        size = ftell(fp);
-		std::string line;
-		line.reserve(size + 1);
+		const long  size = ftell(fp);
+		char* line = new char[size+1]; //std::string with line.reserve(size + 1) does not work for unknown reason
 		rewind(fp);
-		fgets(&line[0], size + 1, fp);
+		fread(line, 1, size, fp);
 		fclose(fp);
+		std::string retVal(line);
+		delete[] line;
 
-		__COUT__ << "Read value " << line << __E__;
+		__COUT__ << "Read value (sz = " << retVal.size() << ") " << retVal << __E__;
 		if(xmldoc)
-			xmldoc->addTextElementToData(safePreferenceName, line);
-		return line;
+			xmldoc->addTextElementToData(safePreferenceName, retVal);
+		return retVal;
 	}
 	else
 		__COUT__ << "Using default value." << __E__;
