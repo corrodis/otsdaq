@@ -10,6 +10,12 @@
 #include "TRACE/trace.h"
 #include "otsdaq/Macros/StringMacros.h"
 
+
+#if TRACE_REVNUM < 1394
+#define traceLvls_p traceNamLvls_p
+#define TRACE_TID2NAME(idx) traceNamLvls_p[idx].name
+#endif
+
 namespace ots
 {
 class ITRACEController
@@ -119,12 +125,12 @@ class ITRACEController
 		unsigned ee = traceControl_p->num_namLvlTblEnts;
 		for(unsigned ii = 0; ii < ee; ++ii)
 		{
-			if(traceNamLvls_p[ii].name[0])
+			if(TRACE_TID2NAME(ii)[0])
 			{
-				std::string name                  = std::string(traceNamLvls_p[ii].name);
-				traceLevelsMap_[hostname][name].M = traceNamLvls_p[ii].M;
-				traceLevelsMap_[hostname][name].S = traceNamLvls_p[ii].S;
-				traceLevelsMap_[hostname][name].T = traceNamLvls_p[ii].T;
+				std::string name                  = std::string(TRACE_TID2NAME(ii));
+				traceLevelsMap_[hostname][name].M = traceLvls_p[ii].M;
+				traceLevelsMap_[hostname][name].S = traceLvls_p[ii].S;
+				traceLevelsMap_[hostname][name].T = traceLvls_p[ii].T;
 			}
 		}
 	}  //end addTraceLevelsForThisHost()
