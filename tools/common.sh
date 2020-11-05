@@ -81,7 +81,7 @@ defineColors ()
   REV=`tput rev -T xterm`            # Turn on reverse video mode        
   RstClr='\e[0m'         # Reset color
 #Reset=`tput init -T xterm`         # Reset all
-  Reset=`tput init -T xterm;tput sgr0 -T xterm`         # Reset all
+  Reset=`tput init -T xterm 2>/dev/null;tput sgr0 -T xterm`         # Reset all
   EBold=`tput smso -T xterm`         # Enter standout (bold) mode        
   DBold=`tput rmso -T xterm`         # Exit standout mode              
 }
