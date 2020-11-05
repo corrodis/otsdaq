@@ -32,12 +32,6 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
 }
 
 //==============================================================================
@@ -46,8 +40,8 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 //==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(1, 1000);
+	TCPSubscribeClient::connect(10,1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -111,7 +105,7 @@ void TCPDataListenerProducer::fastWrite(void)
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
-		std::this_thread::sleep_for(std::chrono::microseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		return;
 	}
 
@@ -122,6 +116,7 @@ void TCPDataListenerProducer::fastWrite(void)
 		else//"Raw" || DEFAULT
 			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 
+		__COUT__ << "Data? " << dataP_->size() << std::endl;
 		if(dataP_->size() == 0)//When it goes in timeout
 			return;
 	}
