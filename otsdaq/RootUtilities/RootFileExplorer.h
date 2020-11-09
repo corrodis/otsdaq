@@ -116,6 +116,7 @@ class RootFileExplorer
   string                                         fFileName_        ;
   string                                         fRFoldersPath_    ;
   string                                         fHistName_        ;
+  string                                         fHistTitle_       ;
   string                                         rootDirectoryName_;
   //std::string::size_type                         LDQM_pos_         ;
   xercesc::DOMImplementation                   * theImplementation_;

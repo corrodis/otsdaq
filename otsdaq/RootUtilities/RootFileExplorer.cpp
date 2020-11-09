@@ -279,7 +279,8 @@ void RootFileExplorer::makeLiveDQMBinaryTree(TDirectory          * currentDir,
     previousAncestor_ = currentDir->GetName() ;
     anchorNodeLast_   = this->populateBinaryTreeNode(anchorNode, string(obj->GetName()), false) ;
     makeLiveDQMBinaryTree(currentDir,level+1,objName,anchorNodeLast_) ;
-    fHistName_ = obj->GetName() ;
+    fHistName_  = obj->GetName () ;
+    fHistTitle_ = obj->GetTitle() ;
     if(theNodes_.find(previousAncestor_) != theNodes_.end()) 
     {
      this->shrinkHierarchyPaths(1) ;
@@ -298,7 +299,7 @@ void RootFileExplorer::makeLiveDQMBinaryTree(TDirectory          * currentDir,
  }
  else
  {
-    STDLINE("No currentDir!!!",string(ACRed)+string(ACReverse)) ;
+  STDLINE("No currentDir!!!",string(ACRed)+string(ACReverse)) ;
  } 
 }
 //================================================================================================
