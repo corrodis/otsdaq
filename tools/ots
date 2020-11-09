@@ -218,7 +218,7 @@ if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 #	${TRACE_BIN}/trace_cntl lvlsetg 0x1f 0 0 # tonMg 0-4
 	${TRACE_BIN}/trace_cntl lvlsetg 0 0xf 0  # tonSg 0-3
 	${TRACE_BIN}/trace_cntl lvlclrg 0 0xfffffffffffffff0 0 # toffSg 4-63
-	{TRACE_BIN}/trace_cntl mode 3   # ton*
+	${TRACE_BIN}/trace_cntl mode 3   # ton*
 	
 	# Disable some very verbose trace outputs I think?
 #	toffS 0-63 -n CONF:OpBase_C
@@ -244,7 +244,7 @@ CONF:OpLdStr_C   0x1ff 0 0
 PRVDR:FileDB_C   0x1ff 0 0
 CONF:OpBase_C    0x1ff 0 0
 " 
-	$TRACE_BIN/trace_cntl namlvlset
+	${TRACE_BIN}/trace_cntl namlvlset
 	
 	
 	#enable kernel trace to memory buffer:
