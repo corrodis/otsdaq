@@ -7,7 +7,7 @@
 using namespace ots;
 
 //==============================================================================
-TCPServer::TCPServer(int serverPort, unsigned int maxNumberOfClients) 
+TCPServer::TCPServer(unsigned int serverPort, unsigned int maxNumberOfClients) 
 : TCPServerBase(serverPort, maxNumberOfClients)
 , fInDestructor(false)
 
