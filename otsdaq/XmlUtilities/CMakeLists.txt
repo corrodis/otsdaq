@@ -6,6 +6,7 @@ cet_make(LIBRARY_NAME XmlUtilities
 	 MF_MessageLogger
 	 artdaq-core_Utilities
 	 ${Boost_REGEX_LIBRARY}
+	 Macros
         )
 
 #get_cmake_property(_variableNames VARIABLES)

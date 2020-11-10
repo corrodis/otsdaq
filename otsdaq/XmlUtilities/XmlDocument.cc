@@ -1,6 +1,7 @@
 #include "otsdaq/XmlUtilities/XmlDocument.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/MessageTools.h"
+#include "otsdaq/Macros/StringMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
@@ -191,6 +192,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
 	}
 	catch (...)  // sometimes see TranscodingException
 	{
+	        std::cout << StringMacros::stackTrace() << std::endl;
 		__COUT_ERR__ << "Error caught attempting to create a text node for this text: " << childText << ". Converting instead to 'Illegal text..'" << std::endl;
 		child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML("Illegal text content blocked.")));
 	}

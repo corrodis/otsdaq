@@ -2584,7 +2584,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	__COUT__ << "Preferences file: " << (dir + fn) << __E__;
 
 	// read from preferences file
-	FILE* fp = fopen((dir + fn).c_str(), "rb");
+	FILE* fp = fopen((dir + fn).c_str(), "r");
 	if(fp)
 	{
 		fseek(fp, 0, SEEK_END);
@@ -2592,8 +2592,12 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 		char* line = new char[size+1]; //std::string with line.reserve(size + 1) does not work for unknown reason
 		rewind(fp);
 		fread(line, 1, size, fp);
+		line[size] = '\0';
 		fclose(fp);
-		std::string retVal(line);
+		std::string retVal(line);// = "";
+		// for(unsigned int i = 0; i<size; ++i)
+		// 	if((line[i] >= 32 && line[i] <= 126) || line[i] == '\t' || line[i] == '\n')
+		// 		retVal += line[i];
 		delete[] line;
 
 		__COUT__ << "Read value (sz = " << retVal.size() << ") " << retVal << __E__;
