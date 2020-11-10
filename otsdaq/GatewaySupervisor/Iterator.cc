@@ -491,6 +491,26 @@ void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	{
 		return startCommandRun(iteratorStruct);
 	}
+	else if(type == IterateTable::COMMAND_START)
+	{
+		return startCommandFSMTransition(iteratorStruct,"Start");
+	}
+	else if(type == IterateTable::COMMAND_STOP)
+	{
+		return startCommandFSMTransition(iteratorStruct,"Stop");
+	}
+	else if(type == IterateTable::COMMAND_PAUSE)
+	{
+		return startCommandFSMTransition(iteratorStruct,"Pause");
+	}
+	else if(type == IterateTable::COMMAND_RESUME)
+	{
+		return startCommandFSMTransition(iteratorStruct,"Resume");
+	}
+	else if(type == IterateTable::COMMAND_HALT)
+	{
+		return startCommandFSMTransition(iteratorStruct,"Halt");
+	}
 	else
 	{
 		__SS__ << "Failed attempt to start unrecognized command type = " << type << __E__;
@@ -565,6 +585,26 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	else if(type == IterateTable::COMMAND_RUN)
 	{
 		return checkCommandRun(iteratorStruct);
+	}
+	else if(type == IterateTable::COMMAND_START)
+	{
+		return checkCommandFSMTransition(iteratorStruct,"Running");
+	}
+	else if(type == IterateTable::COMMAND_STOP)
+	{
+		return checkCommandFSMTransition(iteratorStruct,"Configured");
+	}
+	else if(type == IterateTable::COMMAND_PAUSE)
+	{
+		return checkCommandFSMTransition(iteratorStruct,"Paused");
+	}
+	else if(type == IterateTable::COMMAND_RESUME)
+	{
+		return checkCommandFSMTransition(iteratorStruct,"Running");
+	}
+	else if(type == IterateTable::COMMAND_HALT)
+	{
+		return checkCommandFSMTransition(iteratorStruct,RunControlStateMachine::HALTED_STATE_NAME);
 	}
 	else
 	{
@@ -925,6 +965,42 @@ void Iterator::startCommandConfigureAlias(IteratorWorkLoopStruct* iteratorStruct
 	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
 	__COUT__ << "startCommandConfigureAlias success." << __E__;
 }  // end startCommandConfigureAlias()
+
+//==============================================================================
+void Iterator::startCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct, const std::string& transitionCommand)
+{
+	__COUTV__(transitionCommand);
+
+	iteratorStruct->fsmCommandParameters_.clear();
+
+	std::string errorStr     = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	// execute first transition (may need two in conjunction with checkCommandConfigure())
+
+	__COUTV__(currentState);
+
+	errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(0,
+							0,
+							transitionCommand,
+							iteratorStruct->fsmName_,
+							WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+							WebUsers::DEFAULT_ITERATOR_USERNAME,
+							iteratorStruct->fsmCommandParameters_);
+
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to configure with system alias '"
+		       << (iteratorStruct->fsmCommandParameters_.size() ? iteratorStruct->fsmCommandParameters_[0] : "UNKNOWN")
+		       << "' because of the following error: " << errorStr;
+		__SS_THROW__;
+	}
+
+	// else successfully launched
+	__COUT__ << "FSM in transition = " << iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition() << __E__;
+	__COUT__ << "startCommandFSMTransition success." << __E__;
+}  // end startCommandFSMTransition()
 
 //==============================================================================
 void Iterator::startCommandMacro(IteratorWorkLoopStruct* iteratorStruct, bool isFrontEndMacro)
@@ -1499,7 +1575,52 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 	return false;
-}
+} //end checkCommandConfigure()
+
+//==============================================================================
+// return true if done
+bool Iterator::checkCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct, const std::string& finalState)
+{
+	__COUTV__(finalState);
+
+	sleep(1);  // sleep to give FSM time to transition
+
+	// all RunControlStateMachine access commands should be mutually exclusive with
+	// GatewaySupervisor main thread state machine accesses  should be mutually exclusive
+	// with GatewaySupervisor main thread state machine accesses  lockout the messages
+	// array for the remainder of the scope  this guarantees the reading thread can safely
+	// access the messages
+	if(iteratorStruct->theIterator_->theSupervisor_->VERBOSE_MUTEX)
+		__COUT__ << "Waiting for FSM access" << __E__;
+	std::lock_guard<std::mutex> lock(iteratorStruct->theIterator_->theSupervisor_->stateMachineAccessMutex_);
+	if(iteratorStruct->theIterator_->theSupervisor_->VERBOSE_MUTEX)
+		__COUT__ << "Have FSM access" << __E__;
+
+	if(iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.isInTransition())
+		return false;
+
+	std::string errorStr     = "";
+	std::string currentState = iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getCurrentStateName();
+
+	if(currentState != finalState)
+		errorStr = "Expected to be in " + finalState + ". Unexpectedly, the current state is " + currentState + "." +
+		           ". Last State Machine error message was as follows: " + iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getErrorMessage();
+	else  // else successfully done (in Configured state!)
+	{
+		__COUT__ << "checkCommandFSMTransition complete." << __E__;		
+
+		return true;
+	}
+
+	if(errorStr != "")
+	{
+		__SS__ << "Iterator failed to reach final state '"
+		       << finalState
+		       << "' because of the following error: " << errorStr;
+		__SS_THROW__;
+	}
+	return false;
+} //end checkCommandConfigure()
 
 //==============================================================================
 bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& command, const std::string& parameter)

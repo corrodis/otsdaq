@@ -9,19 +9,12 @@ SCRIPT_DIR="$(
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
-# trace helper functions
-source "${TRACE_BIN}"/trace_functions.sh
-
-# Handle SIGHUP which likely means the ssh connection starting ots was closed and we want to continue with outputs redirected
-handler () {
-	exec >/dev/null 2>&1 </dev/null
-}
-# Install the redirection
-trap 'handler' HUP
- 
 # TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
+	# trace helper functions
+	source "${TRACE_BIN}"/trace_functions.sh
+	
 	#source /data/ups/setup
 	#setup TRACE v3_13_04
 	#ups active
@@ -37,6 +30,13 @@ function setupTrace()
 
 setupTrace
 
+# Handle SIGHUP which likely means the ssh connection starting ots was closed and we want to continue with outputs redirected
+handler () {
+	exec >/dev/null 2>&1 </dev/null
+}
+# Install the redirection
+trap 'handler' HUP
+ 
 # Enable core dumps, by default the soft limit on size is 0, preventing any. Raising it to unlimited before launch specifically
 # enables coredumps for any process run from this point onward in this script
 ulimit -c unlimited
@@ -52,6 +52,7 @@ STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
 
 #export products, used by artdaq daqInterface
 export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
+export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #used by xdaq supervisors to write context xml
 
 
 #############################
@@ -207,25 +208,42 @@ if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 	#tonMg 0-63
 	#type toffS
 	
-	# TODO: What does this do...
-	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
+	# turn on err|warn|dbg|trace
+	#${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
 	
 	# Default setup moved from setup_trace to here so it can be disabled
-	tonMg 0-4  #enable trace to memory
-	tonSg 0-3  #enable trace to slow path (i.e. UDP)
-	toffSg 4-64 #apparently not turned off by default?
+##	tonMg 0-4  #enable trace to memory
+#	tonSg 0-3  #enable trace to slow path (i.e. UDP)
+#	toffSg 4-64 #apparently not turned off by default?
+#	${TRACE_BIN}/trace_cntl lvlsetg 0x1f 0 0 # tonMg 0-4
+#	${TRACE_BIN}/trace_cntl lvlclrg 0 0xffffffffffffffff 0 # toffSg 0-63, clear all
+	${TRACE_BIN}/trace_cntl lvlmskg 0xfff 0x1ff 0  # <memory> <slow> <trigger>, tonSg 0-8 (debug is 8 := TLVL_{FATAL,ALERT,CRIT,ERROR,WARNING,NOTICE,INFO,LOG,DEBUG})
+	${TRACE_BIN}/trace_cntl mode 3   # ton*
 	
 	# Disable some very verbose trace outputs I think?
-	toffS 0-63 -n CONF:OpBase_C
-	toffS 0-63 -n CONF:OpLdStr_C
-	toffS 0-63 -n CONF:CrtCfD_C
-	toffS 0-63 -n COFS:DpFle_C
-	toffS 0-63 -n PRVDR:FileDB_C
-	toffS 0-63 -n PRVDR:FileDBIX_C
-	toffS 0-63 -n JSNU:Document_C
-	toffS 0-63 -n JSNU:DocUtils_C
-	toffS 0-63 -n CONF:LdStrD_C
-	toffS 0-63 -n FileDB:RDWRT_C
+#	toffS 0-63 -n CONF:OpBase_C
+#	toffS 0-63 -n CONF:OpLdStr_C
+#	toffS 0-63 -n CONF:CrtCfD_C
+#	toffS 0-63 -n COFS:DpFle_C
+#	toffS 0-63 -n PRVDR:FileDB_C
+#	toffS 0-63 -n PRVDR:FileDBIX_C
+#	toffS 0-63 -n JSNU:Document_C
+#	toffS 0-63 -n JSNU:DocUtils_C
+#	toffS 0-63 -n CONF:LdStrD_C
+#	toffS 0-63 -n FileDB:RDWRT_C
+
+	TRACE_NAMLVLSET="\
+CONF:LdStrD_C    0x1ff 0 0
+FileDB:RDWRT_C   0x1ff 0 0
+CONF:CrtCfD_C    0x1ff 0 0
+COFS:DpFle_C     0x1ff 0 0
+PRVDR:FileDBIX_C 0x1ff 0 0
+JSNU:DocUtils_C  0x1ff 0 0
+JSNU:Document_C  0x1ff 0 0
+CONF:OpLdStr_C   0x1ff 0 0
+PRVDR:FileDB_C   0x1ff 0 0
+CONF:OpBase_C    0x1ff 0 0
+" ${TRACE_BIN}/trace_cntl namlvlset
 	
 	
 	#enable kernel trace to memory buffer:
@@ -677,10 +695,6 @@ if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
 	fi
 fi
 
-##############################################################################
-export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #-> 
-##############################################################################
-
 
 #out "ARTDAQ_MFEXTENSIONS_DIR=" ${ARTDAQ_MFEXTENSIONS_DIR}
 
@@ -841,7 +855,7 @@ launchOTSMacromaker() {
 		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
 		# Loop 4 times waiting for it to come up
-		for i in {1..4}; do
+		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 1
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
@@ -1059,7 +1073,7 @@ launchOTSWiz() {
 		# 4 times quietly, then get louder
 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
 		
-		for i in {1..4}; do
+		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 1
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
@@ -1128,22 +1142,19 @@ export -f launchOTSWiz
 ####################################################################
 # TODO: This should again be it's own script so that code is more manageable and reusable
 
+
+
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 #ContextPIDArray is context PID array 
 launchOTS() {
 	
+
+
 	ISGATEWAYLAUNCH=1
 	if [ "x$1" != "x" ]; then #if parameter, then is nongateway launch
 		ISGATEWAYLAUNCH=0
 		killprocs nongateway
 		
-		unset TempContextPIDArray 
-		unset ContextPIDArray 
-		unset xdaqPort
-		unset xdaqHost
-		unset xdaqContextUID	
-		unset contextPort
-		unset contextHostname
 		
 		#if [ $BACKUPLOGS == 0 ]; then
 			
@@ -1159,7 +1170,13 @@ launchOTS() {
 		GATEWAY_PID=-1
 		#kill all things otsdaq, before launching new things	
 		killprocs
+
 	fi
+
+
+	##############################################################################
+	XDAQ_OTS_XML="ots" 	#used for normal mode launch as copy location for stable script launching
+	##############################################################################
 	
 	if [ $ISREMOTE == 0 ]; then
 
@@ -1168,13 +1185,21 @@ launchOTS() {
 		out "${Purple}${REV} ***************************************************** ${RstClr}"
 		if [ $ISGATEWAYLAUNCH == 1 ]; then
 			out "${Purple}${REV} ***********       Launching ots!         ************ ${RstClr}"
+
+			#copy once in GATEWAY launch so xdaq processes are not writing to file during bash startup
+			cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
 		else
 			out "${Purple}${REV} *******    Launching ots Non-gateway Apps!    ******* ${RstClr}"
+
+			#copy once in NON-GATEWAY launch if file not already created (by GATEWAY launch copy)
+			if [ ! -f ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml ]; then
+				cp ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
+			fi
 		fi
 		out "${Purple}${REV} ***************************************************** ${RstClr}"
 		out "${Purple}${REV}                                                       ${RstClr}"
 		out #blank line
-		out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"	
+		out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"	
 		
 	fi
 	
@@ -1192,7 +1217,8 @@ launchOTS() {
 	if [[ $ISGATEWAYLAUNCH == 1 ]]; then
 		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
 		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
-				
+
+			
 		
 		#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
 		#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
@@ -1283,31 +1309,18 @@ launchOTS() {
 
 	envString="-genv OTSDAQ_LOG_ROOT ${OTSDAQ_LOG_DIR} -genv ARTDAQ_OUTPUT_DIR ${ARTDAQ_OUTPUT_DIR}"
 
+
+
 	#create argument to pass to ${xdaqPrefix} xdaq.executable
-	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml"
-	
+	export XDAQ_ARGS="${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"
+	#out "XDAQ ARGS PASSED TO ${xdaqPrefix} xdaq.exe ${XDAQ_ARGS}${RstClr}"
 
-	#out "XDAQ ARGS PASSED TO ${xdaqPrefix} xdaq.exe:${RstClr}"
-	#echo ${XDAQ_ARGS}
-
-
-			
-
-
-	#for Supervisor backwards compatibility, convert to GatewaySupervisor stealthily
-	#sed -i s/ots::Supervisor/ots::GatewaySupervisor/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-	#sed -i s/libSupervisor\.so/libGatewaySupervisor\.so/g ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
-
-	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml`	
-	#out "$value${RstClr}"
-	#re="http://(${THIS_HOST}):([0-9]+)"
-	
+	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml`	
+		
 	re="http(s*)://(.+):([0-9]+)"
 	superRe="id=\"([0-9]+)\""	
 	contextUidRe="ContextUID='(.+)' source"	
-	
-	#out "MATCHING REGEX${RstClr}"
-	
+		
 	haveXDAQContextPort=false
 	insideContext=false
 	ignore=false
@@ -1315,6 +1328,15 @@ launchOTS() {
 	gatewayHostname=""
 	gatewayPort=0
 	contextUID=""
+
+
+	unset xdaqPort #reset
+	unset xdaqHost #reset
+	unset xdaqContextUID #reset	
+	unset contextPort #reset	
+	unset contextHostname #reset	
+	unset TempContextPIDArray #reset  
+	unset ContextPIDArray #reset
 
 	####################################################################
 	########### read from context config and launch Gateway ############
@@ -1416,9 +1438,9 @@ launchOTS() {
 								
 
 								out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
-								${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 							else
-								${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 							fi
 							
 							LAST_OTS_PID=$!
@@ -1432,7 +1454,7 @@ launchOTS() {
 								#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 								# Test for start 4 times with short sleep
-								for i in {1..4}; do
+								for t in {1..4}; do
 									if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 										sleep 1
 										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
@@ -1452,11 +1474,11 @@ launchOTS() {
 										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
 										
 										echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
-										echo -e "\n\nAttempting restart on extracted host ${host} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										echo -e "\n\nAttempting restart on extracted host ${THIS_HOST} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
 										
-										${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
 									else
-										${xdaqPrefix} xdaq.exe -h ${host} -p ${port} -e ${XDAQ_ARGS} &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 									fi
 									LAST_OTS_PID=$!
 									
@@ -1494,7 +1516,7 @@ launchOTS() {
 			  #echo $line          
 			fi
 		fi   
-	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_CONFIGURATION_XML}.xml
+	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
 		
 
 	####################################################################
@@ -1511,7 +1533,7 @@ launchOTS() {
 	for port in "${xdaqPort[@]}"
 	do
 	  : 
-	  	#out "${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
 			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
@@ -1556,6 +1578,14 @@ launchOTS() {
 		###########  test for relaunch of local non-Gateway contexts	############
 		############################################################################	
 		
+
+		# i=0	
+		# for port in "${xdaqPort[@]}"
+		# do
+		# 	out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} INTER -h ${xdaqHost[$i]} -p ${port} -pp ${xdaqPort[$i]} &"
+		# 	i=$(( $i + 1 ))
+		# done
+
 		sleep 1 #give time before relaunch test
 		
 		unset ContextPIDArray #reset  
@@ -1564,11 +1594,11 @@ launchOTS() {
 		for port in "${xdaqPort[@]}"
 		do
 		  : 
-			#out "${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 
 				  
 			if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-				#out "skipping context no on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				# out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 				i=$(( $i + 1 ))
 				continue
 			fi
@@ -1576,13 +1606,12 @@ launchOTS() {
 			LAST_OTS_PID=${TempContextPIDArray[$j]}
 			
 			#test for relaunch
-			# 4 times quietly, then get louder
-		
+			# 4 times quietly, then get louder		
 			
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
 			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			
-			for i in {1..4}; do
+			for t in {1..4}; do
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 					sleep 1
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
@@ -1596,13 +1625,13 @@ launchOTS() {
 				killproc ${LAST_OTS_PID} 
 				sleep 2
 				
-				if [ $QUIET == 1 ]; then
+				if [ $QUIET == 1 ]; then					
 					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
 					echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					echo -e "\n\nAttempting restart on extracted host '${xdaqHost[$i]}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
+					echo -e "\n\nAttempting restart on extracted host '${THIS_HOST}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
 				else
-					${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
 				fi
 				LAST_OTS_PID=$!
 				
@@ -1672,7 +1701,7 @@ launchOTS() {
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 				
 				# still kind of messy but this will at least work correctly now
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
@@ -1789,9 +1818,9 @@ printMainURL() {
 	
 
 	out "Open the URL below in your Google Chrome or Mozilla Firefox web browser:"	
-	out "\t(Note: This URL may need to be modified by the user depending on their network configuration)"
+	out "\t(Note: This URL may need to be modified depending on your network configuration)"
 		
-	for i in {1..5}
+	for t in {1..5}
 	do
 		#check if ots was aborted
 		#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"

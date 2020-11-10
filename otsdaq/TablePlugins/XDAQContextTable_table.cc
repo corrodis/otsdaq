@@ -160,9 +160,13 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 		child.second.getNode(colContext_.colId_).getValue(contexts_.back().id_);
 		child.second.getNode(colContext_.colAddress_).getValue(contexts_.back().address_);
 		child.second.getNode(colContext_.colPort_).getValue(contexts_.back().port_);
-		// conversion to default happens at TableView.icc
-		//		if(contexts_.back().port_ == 0) //convert 0 to ${OTS_MAIN_PORT}
-		//			contexts_.back().port_ = atoi(__ENV__("OTS_MAIN_PORT"));
+		
+		//help the user out if the config has old defaults for port/address
+		//Same as CorePropertySupervisorBase.cc:indicateOtsAlive:L156
+		if(contexts_.back().port_ == 0) //convert 0 to ${OTS_MAIN_PORT}
+			contexts_.back().port_ = atoi(__ENV__("OTS_MAIN_PORT"));
+		if(contexts_.back().address_ == "DEFAULT")  // convert DEFAULT to http://${HOSTNAME}
+			contexts_.back().address_ = "http://" +  std::string(__ENV__("HOSTNAME"));
 		if(contexts_.back().port_ < 1024 || contexts_.back().port_ > 49151)
 		{
 			__SS__ << "Illegal xdaq Context port: " << contexts_.back().port_ << ". Port must be between 1024 and 49151." << __E__;
@@ -395,14 +399,24 @@ void XDAQContextTable::outputXDAQXML(std::ostream& out)
 					out << "\t\t<!--\n";
 			}
 
-			sprintf(tmp,
-			        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
-			        "network=\"%s\" group=\"%s\">\n",
-			        app.class_.c_str(),
-			        app.id_,
-			        app.instance_,
-			        app.network_.c_str(),
-			        app.group_.c_str());
+			if(app.class_ == "ots::GatewaySupervisor")  // add otsdaq icons
+				sprintf(tmp,
+				        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
+				        "network=\"%s\" icon=\"/WebPath/images/otsdaqIcons/logo_square.png\" icon16x16=\"/WebPath/images/otsdaqIcons/favicon-16x16.png\" group=\"%s\">\n",
+				        app.class_.c_str(),
+				        app.id_,
+				        app.instance_,
+				        app.network_.c_str(),
+				        app.group_.c_str());
+			else
+				sprintf(tmp,
+				        "\t\t<xc:Application class=\"%s\" id=\"%u\" instance=\"%u\" "
+				        "network=\"%s\" group=\"%s\">\n",
+				        app.class_.c_str(),
+				        app.id_,
+				        app.instance_,
+				        app.network_.c_str(),
+				        app.group_.c_str());
 			out << tmp;
 
 			////////////////////// properties

@@ -47,7 +47,7 @@ defineColors ()
   IBlack='\033[0;90m'       # Black
   IRed='\033[0;91m'         # Red
   IGreen='\033[0;92m'       # Green
-  IYellow='\033[0;93m'      # Yellow
+  IYellow='\033[0;31m'      #'\033[0;93m'      # Yellow  -- too hard to see on white (so making light red)
   IBlue='\033[0;94m'        # Blue
   IPurple='\033[0;95m'      # Purple
   ICyan='\033[0;96m'        # Cyan
@@ -81,7 +81,7 @@ defineColors ()
   REV=`tput rev -T xterm`            # Turn on reverse video mode        
   RstClr='\e[0m'         # Reset color
 #Reset=`tput init -T xterm`         # Reset all
-  Reset=`tput init -T xterm;tput sgr0 -T xterm`         # Reset all
+  Reset=`tput init -T xterm 2>/dev/null;tput sgr0 -T xterm`         # Reset all
   EBold=`tput smso -T xterm`         # Enter standout (bold) mode        
   DBold=`tput rmso -T xterm`         # Exit standout mode              
 }

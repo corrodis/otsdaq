@@ -80,7 +80,8 @@ class TableBase
 																		 std::string /*converted gidB*/>& groupidConversionMap,
 																bool                                      fillRecordConversionMaps,
 																bool                                      applyRecordConversionMaps,
-																bool                                      generateUniqueDataColumns = false);
+																bool                                      generateUniqueDataColumns = false,
+																std::stringstream*						  mergeRepoert = nullptr);
 
 	TableVersion 				createTemporaryView				(TableVersion sourceViewVersion = TableVersion(), TableVersion destTemporaryViewVersion = TableVersion::getNextTemporaryVersion());  // source of -1, from MockUp, else from valid view version
 

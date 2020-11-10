@@ -19,11 +19,12 @@ std::string TCPReceiverSocket::receivePacket()
 	std::string retVal = "";
 	do
 	{
-		//std::cout << __PRETTY_FUNCTION__ << "Receiving..." << fPacket.isEmpty() << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << "Receiving. Packet empty? " << fPacket.isEmpty() << std::endl;
 		fPacket += receive<std::string>();
-		//std::cout << __PRETTY_FUNCTION__ << "Received!" << fPacket.isEmpty() << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << "Received. Is packet empty?" << fPacket.isEmpty() << "-" << retVal << "-" << std::endl;
 	}
 	while(!fPacket.isEmpty() && !fPacket.decode(retVal));
+	// std::cout << __PRETTY_FUNCTION__ << "Message decoded-" << retVal << "- Empty?" << fPacket.isEmpty() << std::endl;
 	return retVal;
 }
 
@@ -37,6 +38,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int
 	}
 	// std::cout << __PRETTY_FUNCTION__ << "WAITING: " << std::endl;
 	std::size_t dataRead = ::read(getSocketId(), buffer, bufferSize);
+	// std::cout << __PRETTY_FUNCTION__ << "Message-" << buffer << "- Error? " << (dataRead == static_cast<std::size_t>(-1)) << std::endl;
 	if(dataRead == static_cast<std::size_t>(-1))
 	{
 		std::stringstream error;
@@ -88,8 +90,7 @@ std::size_t TCPReceiverSocket::receive(char* buffer, std::size_t bufferSize, int
 		std::cout << __PRETTY_FUNCTION__ << "Connection closed!" << std::endl;
 		throw std::runtime_error("Connection closed");
 	}
-	// std::cout << __PRETTY_FUNCTION__ << "Message received with no errors for socket: "
-	// << getSocketId() << std::endl;
+	// std::cout << __PRETTY_FUNCTION__ << "Message: " << buffer << " -> is error free! Socket: " << getSocketId() << std::endl;
 	return dataRead;
 }
 

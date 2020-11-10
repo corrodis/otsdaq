@@ -49,7 +49,7 @@ void FEVInterface::configureSlowControls(void)
 		__GEN_COUT__ << "Metric manager started." << __E__;
 	}
 	else if(!metricMan || !metricMan->Initialized())
-		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << metricMan->Initialized() << __E__;
+		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan?metricMan->Initialized():0) << __E__;
 	else
 		__GEN_COUT__ << "Metric manager already started." << __E__;
 
@@ -554,7 +554,8 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
                                            const std::vector<std::string>& namesOfInputArgs,
                                            const std::vector<std::string>& namesOfOutputArgs,
                                            uint8_t                         requiredUserPermissions,
-                                           const std::string&              allowedCallingFEs)
+                                           const std::string&              allowedCallingFEs,
+										   const std::string&			   feMacroTooltip)
 {
 	if(mapOfFEMacroFunctions_.find(feMacroName) != mapOfFEMacroFunctions_.end())
 	{
@@ -564,8 +565,8 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
 	}
 
 	mapOfFEMacroFunctions_.insert(std::pair<std::string, frontEndMacroStruct_t>(
-	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs)));
-}
+	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs, feMacroTooltip)));
+} // end registerFEMacroFunction()
 
 //==============================================================================
 // getFEMacroConstArgument

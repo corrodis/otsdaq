@@ -6,10 +6,13 @@
 using namespace ots;
 
 //==============================================================================
-TCPPublishServer::TCPPublishServer(int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
+TCPPublishServer::TCPPublishServer(unsigned int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
 
 //==============================================================================
-TCPPublishServer::~TCPPublishServer(void) {}
+TCPPublishServer::~TCPPublishServer(void)
+{
+//	std::cout << __PRETTY_FUNCTION__ << "Done" << std::endl;
+}
 
 //==============================================================================
 void TCPPublishServer::acceptConnections()

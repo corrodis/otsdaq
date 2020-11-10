@@ -217,9 +217,32 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			{
 				// send back status and progress parameters
 				const std::string& err = theSupervisor->theStateMachine_.getErrorMessage();
-				status = err == "" ? (theSupervisor->theStateMachine_.isInTransition() ? theSupervisor->theStateMachine_.getProvenanceStateName()
-				                                                                       : theSupervisor->theStateMachine_.getCurrentStateName())
-				                   : (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
+
+				// status = err == "" ? (theSupervisor->theStateMachine_.isInTransition() ? theSupervisor->theStateMachine_.getProvenanceStateName()
+				//                                                                        : theSupervisor->theStateMachine_.getCurrentStateName())
+				//                    : (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
+				if(err == "")
+				{
+					if(theSupervisor->theStateMachine_.isInTransition() || theSupervisor->theProgressBar_.read() < 100)
+					{
+						// attempt to get transition name, otherwise give provenance state
+						try
+						{
+							status = theSupervisor->theStateMachine_.getCurrentTransitionName();
+						}
+						catch(...)
+						{
+							status = theSupervisor->theStateMachine_.getProvenanceStateName();
+						}
+					}
+					else
+						status = theSupervisor->theStateMachine_.getCurrentStateName();
+				}
+				else
+					status = (theSupervisor->theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Failed:::") + err;
+
 				progress = theSupervisor->theProgressBar_.readPercentageString();
 
 				try
@@ -2561,6 +2584,15 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 					xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
 					xmlOut.addTextElementToData("config_key", TableGroupKey::getFullGroupString(aliasMapPair.second.first, aliasMapPair.second.second).c_str());
+
+					// __COUT__ << "config_alias_comment" << " " <<  CorePropertySupervisorBase::theConfigurationManager_->getNode(
+					// 	ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getNode(aliasMapPair.first).getNode(
+					// 		TableViewColumnInfo::COL_NAME_COMMENT).getValue<std::string>() << __E__;
+					xmlOut.addTextElementToData("config_alias_comment",
+						CorePropertySupervisorBase::theConfigurationManager_->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME)
+							.getNode(aliasMapPair.first)
+							.getNode(TableViewColumnInfo::COL_NAME_COMMENT)
+							.getValue<std::string>());
 
 					std::string groupComment, groupAuthor, groupCreationTime;
 					try

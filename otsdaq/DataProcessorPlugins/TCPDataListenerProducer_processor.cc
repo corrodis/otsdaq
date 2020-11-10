@@ -40,8 +40,8 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 //==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(1, 1000);
+	TCPSubscribeClient::connect(30,1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -80,7 +80,7 @@ void TCPDataListenerProducer::slowWrite(void)
 	catch(const std::exception& e)
 	{
 		__COUT__ << "Error: " << e.what() << std::endl;
-		;
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 		return;
 	}
 	header_["IPAddress"] = ipAddress_;
@@ -116,13 +116,13 @@ void TCPDataListenerProducer::fastWrite(void)
 		else//"Raw" || DEFAULT
 			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 
-		if(dataP_->size() == 0)
+		if(dataP_->size() == 0)//When it goes in timeout
 			return;
 	}
 	catch(const std::exception& e)
 	{
 		__COUT__ << "Error: " << e.what() << std::endl;
-		;
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return;
 	}
 	(*headerP_)["IPAddress"] = ipAddress_;

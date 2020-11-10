@@ -56,7 +56,9 @@ T TableView::validateValueForColumn(const std::string& value, unsigned int col, 
 	{
 		if(columnsInfo_[col].getDataType() == TableViewColumnInfo::DATATYPE_NUMBER)  // handle numbers
 		{
-			if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA && value == columnsInfo_[col].getDefaultValue())
+			if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA && 
+				//value == columnsInfo_[col].getDefaultValue())
+				value == columnsInfo_[col].getDefaultDefaultValue(columnsInfo_[col].getType(),columnsInfo_[col].getDataType()))
 			{
 				// if type number, fixed choice and 0(default), then return first choice
 
