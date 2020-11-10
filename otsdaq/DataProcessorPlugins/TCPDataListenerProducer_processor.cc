@@ -40,7 +40,7 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 //==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect(10,1000);
+	TCPSubscribeClient::connect(30,1000);
 	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
@@ -105,7 +105,7 @@ void TCPDataListenerProducer::fastWrite(void)
 	if(DataProducer::attachToEmptySubBuffer(dataP_, headerP_) < 0)
 	{
 		__COUT__ << "There are no available buffers! Retrying...after waiting 10 milliseconds!" << std::endl;
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		return;
 	}
 
@@ -116,7 +116,6 @@ void TCPDataListenerProducer::fastWrite(void)
 		else//"Raw" || DEFAULT
 			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 
-		__COUT__ << "Data? " << dataP_->size() << std::endl;
 		if(dataP_->size() == 0)//When it goes in timeout
 			return;
 	}
