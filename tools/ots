@@ -1696,8 +1696,8 @@ launchOTS() {
 				out "\tRemote launch of ots Context processes on host {${contextHostname[$i]}}."
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 				
-				# still kind of messy but this will at least work correctly now
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				# launch ssh remote start (attempt twice)
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
