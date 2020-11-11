@@ -17,13 +17,13 @@ bindir      fq_dir      bin
 fcldir      -
 
 #
-product				version		optional
-artdaq				v3_09_02
-artdaq_database		v1_04_89
-xdaq				v14_12_0
-artdaq_daqinterface	v3_09_01
-smc_compiler		v6_6_0		-nq-	only_for_build
-cetbuildtools		v7_17_01	-		only_for_build
+product             version     optional
+artdaq              v3_09_02
+artdaq_database     v1_04_89
+xdaq                v14_12_0a
+artdaq_daqinterface v3_09_02
+smc_compiler        v6_6_0      -nq-     only_for_build
+cetbuildtools       v7_17_01    -        only_for_build
 end_product_list
 
 # -nq- here means there is no qualifier
