@@ -82,6 +82,7 @@ class RootFileExplorer
                                                   string                fRootPath       ,
                                                   string                fFoldersPath    ,
                                                   string                fHistName       ,
+                                                  string                fRFoldersPath   ,
                                                   string                fFileName       ,
                                                   TFile               * rootFile = NULL  )  ;
                         ~RootFileExplorer        (void                                   ) {;}
@@ -95,7 +96,7 @@ class RootFileExplorer
                                                   xercesc::DOMElement * anchorNode       )  ;
   xercesc::DOMElement  * populateBinaryTreeNode  (xercesc::DOMElement * anchorNode      ,
                                                   std::string           name            ,
-                                                  int                   level           ,
+                                                  //int                   level           ,
                                                   bool                  isLeaf           )  ;
   void                   initializeXMLWriter     (void                                   )  ;
  
@@ -115,6 +116,7 @@ class RootFileExplorer
   string                                         fFileName_        ;
   string                                         fRFoldersPath_    ;
   string                                         fHistName_        ;
+  string                                         fHistTitle_       ;
   string                                         rootDirectoryName_;
   //std::string::size_type                         LDQM_pos_         ;
   xercesc::DOMImplementation                   * theImplementation_;
