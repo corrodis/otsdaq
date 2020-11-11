@@ -1,6 +1,7 @@
 #include "otsdaq/XmlUtilities/XmlDocument.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/MessageTools.h"
+#include "otsdaq/Macros/StringMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
@@ -191,6 +192,7 @@ xercesc::DOMElement* XmlDocument::addTextElementToParent(std::string childName, 
 	}
 	catch (...)  // sometimes see TranscodingException
 	{
+	        std::cout << StringMacros::stackTrace() << std::endl;
 		__COUT_ERR__ << "Error caught attempting to create a text node for this text: " << childText << ". Converting instead to 'Illegal text..'" << std::endl;
 		child->appendChild(theDocument_->createTextNode(CONVERT_TO_XML("Illegal text content blocked.")));
 	}
@@ -923,9 +925,9 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
 	{
 		std::string sName = std::string(entry->d_name);
 		fchar = sName.at(0);
-		if (sName.size() == 2) schar = sName.at(1);
+		if (  sName.size() == 2) schar    = sName.at(1);
 		if (((sName.size() == 1) && fchar == '.') ||
-			((sName.size() == 2) && schar == '.'))
+	            ((sName.size() == 2) && schar == '.'))
 		{
 			continue; // do not consider . and .. pseudo-folders
 		}
@@ -937,10 +939,8 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
 				fRootPath +
 				std::string("/") +
 				fThisFolderPath_;
-			if (hierarchyPaths_.size() > 0) STDLINE(std::string("Before push_back: ") + hierarchyPaths_.back(), std::string(ACGreen) + std::string(ACReverse));
 			hierarchyPaths_.push_back(std::string(entry->d_name) + std::string(""));
 			fFoldersPath_ += hierarchyPaths_.back() + "/";
-			STDLINE(std::string("Before push_back: ") + hierarchyPaths_.back(), std::string(ACRed) + std::string(ACReverse));
 			xercesc::DOMElement* node = this->populateBinaryTreeNode(
 				anchorNode,
 				std::string(entry->d_name),
@@ -948,7 +948,6 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
 				false
 			);
 			this->makeDirectoryBinaryTree(fSystemPath, fRootPath, indent + 1, node);
-			STDLINE(std::string("Before popBack: ") + hierarchyPaths_.back(), std::string(ACGreen) + std::string(ACReverse));
 			if (hierarchyPaths_.size() > 0) hierarchyPaths_.pop_back();
 			if (hierarchyPaths_.size() > 0)
 			{
@@ -959,7 +958,6 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
 				fFoldersPath_ = "/";
 			}
 
-			STDLINE(std::string("After  popBack: ") + fFoldersPath_, std::string(ACRed) + std::string(ACReverse));
 		}
 		else
 		{
@@ -969,8 +967,12 @@ void XmlDocument::makeDirectoryBinaryTree(std::string           fSystemPath,
 			if (boost::regex_search(newFullPath, what, re))
 			{
 				fFileName_ = std::string(entry->d_name);
-				STDLINE(std::string("fFileName: ") + fFileName_, std::string(ACCyan) + std::string(ACReverse));
-				/*xercesc::DOMElement* node = */this->populateBinaryTreeNode(
+                                fFoldersPath_ = "" ;
+                                for(unsigned int i=0; i<hierarchyPaths_.size(); ++i)
+                                {
+                                 fFoldersPath_ += hierarchyPaths_[i] + std::string("/") ;
+                                }
+                                this->populateBinaryTreeNode(
 					anchorNode,
 					fFileName_,
 					indent,
@@ -1014,7 +1016,6 @@ xercesc::DOMElement* XmlDocument::populateBinaryTreeNode(xercesc::DOMElement* an
 		anchorNode->appendChild(nodes);
 	}
 	//  }
-
 	xercesc::DOMElement* node = theDocument_->createElement(xercesc::XMLString::transcode("node"));
 	nodes->appendChild(node);
 
@@ -1054,7 +1055,7 @@ xercesc::DOMElement* XmlDocument::populateBinaryTreeNode(xercesc::DOMElement* an
 		fFileOrHistName = theDocument_->createElement(xercesc::XMLString::transcode("fFileName"));
 		fileOrDirNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()));
 		thisFolderNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(name.c_str()));
-		ss_.str(""); ss_ << "name: " << ACRed << fThisFolderPath_ << ACPlain << "/" << ACGreen << name;
+		ss_.str(""); ss_ << "name: " << ACRed << name << ACPlain << "/" << ACGreen << name;
 		STDLINE(ss_.str(), "");
 	}
 	else
@@ -1063,7 +1064,8 @@ xercesc::DOMElement* XmlDocument::populateBinaryTreeNode(xercesc::DOMElement* an
 		fFileOrHistName = theDocument_->createElement(xercesc::XMLString::transcode("fFileName"));
 		fileOrDirNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(blank.c_str()));
 		thisFolderNameVal = theDocument_->createTextNode(xercesc::XMLString::transcode(fThisFolderPath_.c_str()));
-		STDLINE(std::string("name           : "), ACCyan);
+		ss_.str(""); ss_ << "name: " << ACRed << fThisFolderPath_ << ACPlain << "/" << ACGreen << name;
+		STDLINE(ss_.str(), "");
 	}
 
 	node->appendChild(fFileOrHistName);
