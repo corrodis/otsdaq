@@ -2594,10 +2594,7 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 		fread(line, 1, size, fp);
 		line[size] = '\0';
 		fclose(fp);
-		std::string retVal(line);// = "";
-		// for(unsigned int i = 0; i<size; ++i)
-		// 	if((line[i] >= 32 && line[i] <= 126) || line[i] == '\t' || line[i] == '\n')
-		// 		retVal += line[i];
+		std::string retVal(line, size);
 		delete[] line;
 
 		__COUT__ << "Read value (sz = " << retVal.size() << ") " << retVal << __E__;
