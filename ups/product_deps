@@ -18,14 +18,8 @@ fcldir      -
 
 #
 product				version		optional
-artdaq				v3_09_01b	s101
-artdaq				v3_09_01	s96
-artdaq				v3_09_01	s87
-artdaq				v3_09_01	s85
-artdaq_database		v1_04_88a	s101
-artdaq_database		v1_04_88	s96
-artdaq_database		v1_04_88	s87
-artdaq_database		v1_04_88	s85
+artdaq				v3_09_02
+artdaq_database		v1_04_89
 xdaq				v14_12_0
 artdaq_daqinterface	v3_09_01
 smc_compiler		v6_6_0		-nq-	only_for_build
