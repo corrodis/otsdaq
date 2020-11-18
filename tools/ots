@@ -337,19 +337,19 @@ function killprocs
 	fi
 	
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
-		pids=`ps aux|grep [o]ts.exe|awk '{print $2}'`
+		pids=`ps aux|grep [o]ts.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [x]daq.exe|awk '{print $2}'`
+		pids=`ps aux|grep [x]daq.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [o]tsConsoleFwd|awk '{print $2}'`
+		pids=`ps aux|grep [o]tsConsoleFwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [m]f_rcv_n_fwd|awk '{print $2}'`
+		pids=`ps aux|grep [m]f_rcv_n_fwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
@@ -413,6 +413,8 @@ if [[ $KILLALL != 0 ]]; then
 	
 	#kills self too:
 	killall -9 ots &>/dev/null 2>&1 #hide output
+	killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
+	killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
 	
 	exit
 fi
