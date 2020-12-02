@@ -32,12 +32,6 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
-	std::cout << __PRETTY_FUNCTION__ << dataType_ << std::endl;
 }
 
 //==============================================================================
@@ -46,8 +40,8 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 //==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect();
-	TCPSubscribeClient::setReceiveTimeout(1, 1000);
+	TCPSubscribeClient::connect(30,1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
 

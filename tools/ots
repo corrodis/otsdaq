@@ -9,19 +9,12 @@ SCRIPT_DIR="$(
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
-# trace helper functions
-source "${TRACE_BIN}"/trace_functions.sh
-
-# Handle SIGHUP which likely means the ssh connection starting ots was closed and we want to continue with outputs redirected
-handler () {
-	exec >/dev/null 2>&1 </dev/null
-}
-# Install the redirection
-trap 'handler' HUP
- 
 # TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
+	# trace helper functions
+	source "${TRACE_BIN}"/trace_functions.sh
+	
 	#source /data/ups/setup
 	#setup TRACE v3_13_04
 	#ups active
@@ -37,6 +30,13 @@ function setupTrace()
 
 setupTrace
 
+# Handle SIGHUP which likely means the ssh connection starting ots was closed and we want to continue with outputs redirected
+handler () {
+	exec >/dev/null 2>&1 </dev/null
+}
+# Install the redirection
+trap 'handler' HUP
+ 
 # Enable core dumps, by default the soft limit on size is 0, preventing any. Raising it to unlimited before launch specifically
 # enables coredumps for any process run from this point onward in this script
 ulimit -c unlimited
@@ -208,25 +208,42 @@ if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 	#tonMg 0-63
 	#type toffS
 	
-	# TODO: What does this do...
-	${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
+	# turn on err|warn|dbg|trace
+	#${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
 	
 	# Default setup moved from setup_trace to here so it can be disabled
-	tonMg 0-4  #enable trace to memory
-	tonSg 0-3  #enable trace to slow path (i.e. UDP)
-	toffSg 4-64 #apparently not turned off by default?
+##	tonMg 0-4  #enable trace to memory
+#	tonSg 0-3  #enable trace to slow path (i.e. UDP)
+#	toffSg 4-64 #apparently not turned off by default?
+#	${TRACE_BIN}/trace_cntl lvlsetg 0x1f 0 0 # tonMg 0-4
+#	${TRACE_BIN}/trace_cntl lvlclrg 0 0xffffffffffffffff 0 # toffSg 0-63, clear all
+	${TRACE_BIN}/trace_cntl lvlmskg 0xfff 0x1ff 0  # <memory> <slow> <trigger>, tonSg 0-8 (debug is 8 := TLVL_{FATAL,ALERT,CRIT,ERROR,WARNING,NOTICE,INFO,LOG,DEBUG})
+	${TRACE_BIN}/trace_cntl mode 3   # ton*
 	
 	# Disable some very verbose trace outputs I think?
-	toffS 0-63 -n CONF:OpBase_C
-	toffS 0-63 -n CONF:OpLdStr_C
-	toffS 0-63 -n CONF:CrtCfD_C
-	toffS 0-63 -n COFS:DpFle_C
-	toffS 0-63 -n PRVDR:FileDB_C
-	toffS 0-63 -n PRVDR:FileDBIX_C
-	toffS 0-63 -n JSNU:Document_C
-	toffS 0-63 -n JSNU:DocUtils_C
-	toffS 0-63 -n CONF:LdStrD_C
-	toffS 0-63 -n FileDB:RDWRT_C
+#	toffS 0-63 -n CONF:OpBase_C
+#	toffS 0-63 -n CONF:OpLdStr_C
+#	toffS 0-63 -n CONF:CrtCfD_C
+#	toffS 0-63 -n COFS:DpFle_C
+#	toffS 0-63 -n PRVDR:FileDB_C
+#	toffS 0-63 -n PRVDR:FileDBIX_C
+#	toffS 0-63 -n JSNU:Document_C
+#	toffS 0-63 -n JSNU:DocUtils_C
+#	toffS 0-63 -n CONF:LdStrD_C
+#	toffS 0-63 -n FileDB:RDWRT_C
+
+	TRACE_NAMLVLSET="\
+CONF:LdStrD_C    0x1ff 0 0
+FileDB:RDWRT_C   0x1ff 0 0
+CONF:CrtCfD_C    0x1ff 0 0
+COFS:DpFle_C     0x1ff 0 0
+PRVDR:FileDBIX_C 0x1ff 0 0
+JSNU:DocUtils_C  0x1ff 0 0
+JSNU:Document_C  0x1ff 0 0
+CONF:OpLdStr_C   0x1ff 0 0
+PRVDR:FileDB_C   0x1ff 0 0
+CONF:OpBase_C    0x1ff 0 0
+" ${TRACE_BIN}/trace_cntl namlvlset
 	
 	
 	#enable kernel trace to memory buffer:
@@ -320,19 +337,19 @@ function killprocs
 	fi
 	
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
-		pids=`ps aux|grep [o]ts.exe|awk '{print $2}'`
+		pids=`ps aux|grep [o]ts.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [x]daq.exe|awk '{print $2}'`
+		pids=`ps aux|grep [x]daq.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [o]tsConsoleFwd|awk '{print $2}'`
+		pids=`ps aux|grep [o]tsConsoleFwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
-		pids=`ps aux|grep [m]f_rcv_n_fwd|awk '{print $2}'`
+		pids=`ps aux|grep [m]f_rcv_n_fwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid
 		done
@@ -396,6 +413,8 @@ if [[ $KILLALL != 0 ]]; then
 	
 	#kills self too:
 	killall -9 ots &>/dev/null 2>&1 #hide output
+	killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
+	killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
 	
 	exit
 fi
@@ -1683,8 +1702,8 @@ launchOTS() {
 				out "\tRemote launch of ots Context processes on host {${contextHostname[$i]}}."
 				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
 				
-				# still kind of messy but this will at least work correctly now
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				# launch ssh remote start (attempt twice)
+				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list

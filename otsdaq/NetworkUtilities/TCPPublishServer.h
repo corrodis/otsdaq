@@ -8,7 +8,7 @@ namespace ots
 class TCPPublishServer : public TCPServerBase
 {
   public:
-	TCPPublishServer(int serverPort, unsigned int maxNumberOfClients = -1);
+	TCPPublishServer(unsigned int serverPort, unsigned int maxNumberOfClients = -1);
 	virtual ~TCPPublishServer(void);
 
   protected:
