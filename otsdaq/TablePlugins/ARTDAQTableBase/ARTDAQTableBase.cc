@@ -557,8 +557,8 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	}
 	if(info_.subsystems[readerSubsystemID].hasRoutingMaster)
 	{
-		OUT << "use_routing_master: true\n";
-		OUT << "routing_master_hostname: \"" << info_.subsystems[readerSubsystemID].routingMasterHost << "\"\n";
+		OUT << "use_routing_manager: true\n";
+		OUT << "routing_manager_hostname: \"" << info_.subsystems[readerSubsystemID].routingMasterHost << "\"\n";
 		OUT << "table_update_port: 0\n";
 		OUT << "table_update_address: \"0.0.0.0\"\n";
 		OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -568,7 +568,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	}
 	else
 	{
-		OUT << "use_routing_master: false\n";
+		OUT << "use_routing_manager: false\n";
 	}
 
 	POPTAB;
@@ -710,13 +710,13 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 			if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
 			{
-				OUT << "use_routing_master: true\n";
-				OUT << "routing_master_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
+				OUT << "use_routing_manager: true\n";
+				OUT << "routing_manager_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
 				OUT << "routing_token_port: 0\n";
 			}
 			else
 			{
-				OUT << "use_routing_master: false\n";
+				OUT << "use_routing_manager: false\n";
 			}
 			POPTAB;
 			OUT << "}\n";  // end routing_token_config
@@ -827,17 +827,18 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					OUT << "routing_table_config: {\n";
 					PUSHTAB;
 
-					auto builderSubsystemID   = 1;
+					auto mySubsystemID   = 1;
+					auto destinationSubsystemID = 1;
 					auto builderSubsystemLink = receiverNode.getNode("SubsystemLink");
 					if(!builderSubsystemLink.isDisconnected())
 					{
-						builderSubsystemID = getSubsytemId(builderSubsystemLink);
+						mySubsystemID = getSubsytemId(builderSubsystemLink);
 					}
-					builderSubsystemID = info_.subsystems[builderSubsystemID].destination;
-					if(info_.subsystems[builderSubsystemID].hasRoutingMaster)
+					destinationSubsystemID = info_.subsystems[mySubsystemID].destination;
+					if(info_.subsystems[destinationSubsystemID].hasRoutingMaster)
 					{
-						OUT << "use_routing_master: true\n";
-						OUT << "routing_master_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
+						OUT << "use_routing_manager: true\n";
+						OUT << "routing_manager_hostname: \"" << info_.subsystems[destinationSubsystemID].routingMasterHost << "\"\n";
 						OUT << "table_update_port: 0\n";
 						OUT << "table_update_address: \"0.0.0.0\"\n";
 						OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -847,11 +848,11 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 					}
 					else
 					{
-						OUT << "use_routing_master: false\n";
+						OUT << "use_routing_manager: false\n";
 					}
 
 					if (outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput") {
-						info_.subsystems[builderSubsystemID].eventMode = true;
+						info_.subsystems[mySubsystemID].eventMode = true;
 					}
 
 					POPTAB;
@@ -1198,7 +1199,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	POPTAB;
 	OUT << "}\n";
 
-	OUT << "use_routing_master: true\n";
+	OUT << "use_routing_manager: true\n";
 
 	auto        routingMasterSubsystemID   = 1;
 	auto        routingMasterSubsystemLink = routingMasterNode.getNode("SubsystemLink");
@@ -1216,7 +1217,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	}
 
 	// Bookkept parameters
-	OUT << "routing_master_hostname: \"" << rmHost << "\"\n";
+	OUT << "routing_manager_hostname: \"" << rmHost << "\"\n";
 	OUT << "sender_ranks: []\n";
 	OUT << "table_update_port: 0\n";
 	OUT << "table_update_address: \"0.0.0.0\"\n";
@@ -1396,7 +1397,7 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 			{
 				__COUT__ << "Routing Master " << rmUID << " is disabled." << __E__;
 			}
-		}  // end routing master loop
+		}  // end routing manager loop
 	}
 }  // end extractRoutingMastersInfo()
 
@@ -2364,7 +2365,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 			                                                       artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
 			                                                       artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
 
-			// create group link to routing masters
+			// create group link to routing managers
 			artdaqSupervisorTable.tableView_->setValueAsString(
 			    ARTDAQ_ROUTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
 			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
@@ -2694,7 +2695,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				    artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.DISPATCHER));
 			}
 
-			// create group link to routing masters
+			// create group link to routing managers
 			if(artdaqSupervisorTable.tableView_
 			       ->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_)] ==
 			   TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
