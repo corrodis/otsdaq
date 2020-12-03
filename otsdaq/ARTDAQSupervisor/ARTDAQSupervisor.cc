@@ -810,34 +810,79 @@ catch(...)
 //==============================================================================
 void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference /*event*/) try
 {
-	__SUP_COUT__ << "Starting..." << __E__;
+	__SUP_COUT__ << "transitionStarting" << __E__;
+
+	//first time launch thread because artdaq Supervisor may take a while
+	if(RunControlStateMachine::getIterationIndex() == 0 && RunControlStateMachine::getSubIterationIndex() == 0)
 	{
-		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
-		getDAQState_();
-		__SUP_COUT__ << "Status before start: " << daqinterface_state_ << __E__;
-		auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
+		thread_error_message_ = "";
+		thread_progress_bar_.resetProgressBar(0);
+		last_thread_progress_update_ = time(0);  // initialize timeout timer
 
-		PyObject* pName      = PyString_FromString("do_start_running");
-		int       run_number = std::stoi(runNumber);
-		PyObject* pStateArgs = PyInt_FromLong(run_number);
-		PyObject* res        = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pStateArgs, NULL);
+		// start configuring thread
+		std::thread(&ARTDAQSupervisor::startingThread, this).detach();
 
-		if(res == NULL)
+		__SUP_COUT__ << "Starting thread started." << __E__;
+
+		RunControlStateMachine::indicateSubIterationWork();
+	}
+	else  // not first time
+	{
+		std::string errorMessage;
 		{
-			PyErr_Print();
-			__SS__ << "Error calling start transition" << __E__;
-			__SUP_SS_THROW__;
+			std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+			errorMessage = thread_error_message_;             // theStateMachine_.getErrorMessage();
 		}
-		getDAQState_();
-		__SUP_COUT__ << "Status after start: " << daqinterface_state_ << __E__;
-		if(daqinterface_state_ != "running")
+		int progress = thread_progress_bar_.read();
+		__SUP_COUTV__(errorMessage);
+		__SUP_COUTV__(progress);
+		__SUP_COUTV__(thread_progress_bar_.isComplete());
+
+		// check for done and error messages
+		if(errorMessage == "" &&  // if no update in 600 seconds, give up
+		   time(0) - last_thread_progress_update_ > 600)
 		{
-			__SS__ << "DAQInterface start transition failed!" << __E__;
-			__SUP_SS_THROW__;
+			__SUP_SS__ << "There has been no update from the start thread for " << (time(0) - last_thread_progress_update_)
+			           << " seconds, assuming something is wrong and giving up! "
+			           << "Last progress received was " << progress << __E__;
+			errorMessage = ss.str();
+		}
+
+		if(errorMessage != "")
+		{
+			__SUP_SS__ << "Error was caught in starting thread: " << errorMessage << __E__;
+			__SUP_COUT_ERR__ << "\n" << ss.str();
+
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
+			                                         ss.str() /* message*/,
+			                                         "CoreSupervisorBase::transitionStarting" /*module*/,
+			                                         __LINE__ /*line*/,
+			                                         __FUNCTION__ /*function*/
+			);
+		}
+
+		if(!thread_progress_bar_.isComplete())
+		{
+			RunControlStateMachine::indicateSubIterationWork();
+
+			if(last_thread_progress_read_ != progress)
+			{
+				last_thread_progress_read_   = progress;
+				last_thread_progress_update_ = time(0);
+			}
+
+			sleep(1 /*seconds*/);
+		}
+		else
+		{
+			__SUP_COUT_INFO__ << "Complete starting transition!" << __E__;
+			__SUP_COUTV__(getProcessInfo_());
 		}
 	}
-	start_runner_();
-	__SUP_COUT__ << "Started." << __E__;
+
+	return;
+
 }  // end transitionStarting()
 catch(const std::runtime_error& e)
 {
@@ -850,6 +895,80 @@ catch(...)
 	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
 	__SS_THROW__;
 }  // end transitionStarting() error handling
+
+//==============================================================================
+void ARTDAQSupervisor::startingThread() try
+{
+	const std::string& uid =
+	    theConfigurationManager_
+	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" + CorePropertySupervisorBase::getSupervisorUID() + "/" + "LinkToSupervisorTable")
+	        .getValueAsString();
+
+	__COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node" << __E__;
+	const std::string mfSubject_ = supervisorClassNoNamespace_ + "-" + uid;
+	__GEN_COUT__ << "Starting..." << __E__;
+
+	thread_progress_bar_.step();
+	stop_runner_();
+	{
+		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+		getDAQState_();
+		__GEN_COUT__ << "Status before start: " << daqinterface_state_ << __E__;
+		auto runNumber = SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("RunNumber");
+
+		thread_progress_bar_.step();
+
+		PyObject* pName      = PyString_FromString("do_start_running");
+		int       run_number = std::stoi(runNumber);
+		PyObject* pStateArgs = PyInt_FromLong(run_number);
+		PyObject* res        = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pStateArgs, NULL);
+
+		thread_progress_bar_.step();
+
+		if(res == NULL)
+		{
+			PyErr_Print();
+			__SS__ << "Error calling start transition" << __E__;
+			__GEN_SS_THROW__;
+		}
+		getDAQState_();
+
+		thread_progress_bar_.step();
+
+		__GEN_COUT__ << "Status after start: " << daqinterface_state_ << __E__;
+		if(daqinterface_state_ != "running")
+		{
+			__SS__ << "DAQInterface start transition failed!" << __E__;
+			__GEN_SS_THROW__;
+		}
+
+		thread_progress_bar_.step();
+	}
+	start_runner_();
+	thread_progress_bar_.step();
+
+	__GEN_COUT__ << "Started." << __E__;
+	thread_progress_bar_.complete();
+
+}  // end startingThread()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while Starting: " << e.what() << __E__;
+	__COUT_ERR__ << "\n" << ss.str();
+	std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+	thread_error_message_ = ss.str();
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while Starting. Please checked the logs." << __E__;
+	__COUT_ERR__ << "\n" << ss.str();
+
+	artdaq::ExceptionHandler(artdaq::ExceptionHandlerRethrow::no, ss.str());
+
+	std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
+	thread_error_message_ = ss.str();
+}  // end startingThread() error handling
+
 
 //==============================================================================
 void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference /*event*/) try

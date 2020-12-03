@@ -58,6 +58,7 @@ namespace ots
 		static std::list<std::string> tokenize_(std::string const& input);
 	private:
 		void 			configuringThread(void);
+		void 			startingThread(void);
 
 		PyObject* daqinterface_ptr_;
 		std::recursive_mutex  			daqinterface_mutex_;
