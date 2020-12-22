@@ -1,11 +1,16 @@
 #include "otsdaq/ARTDAQOnlineMonitor/ARTDAQOnlineMonitorSupervisor.h"
 
-#include <boost/thread.hpp>
-#include "artdaq-core/Utilities/TimeUtils.hh"
-#include "artdaq-core/Utilities/ExceptionHandler.hh"
+#include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 
+#include "artdaq-core/Utilities/ExceptionHandler.hh"
+#include "artdaq-core/Utilities/TimeUtils.hh"
+
+#include <boost/thread.hpp>
+#include <boost/filesystem.hpp>
 #include <signal.h>
 #include <sys/wait.h>
+
+#define FAKE_CONFIG_NAME "ots_config"
 
 //==============================================================================
 ots::ARTDAQOnlineMonitorSupervisor::ARTDAQOnlineMonitorSupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
@@ -76,12 +81,25 @@ void ots::ARTDAQOnlineMonitorSupervisor::transitionConfiguring(toolbox::Event::R
 		    SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupName"),
 		    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupKey")));
 
-		__COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << std::endl;
+		__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << std::endl;
 
 		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
-		ConfigurationTree configLinkNode = theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+		ConfigurationTree theSupervisorNode = getSupervisorTableNode();
+		std::string       instanceName      = theSupervisorNode.getNode("MonitorInstanceName").getValue();
 
+		__SUP_COUT__ << "Building configuration directory" << __E__;
+
+		boost::system::error_code ignored;
+		boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
+		mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
+
+		// Generate Online Monitor FHICL
+		ARTDAQTableBase::outputOnlineMonitorFHICL(theSupervisorNode);
+
+		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Monitor, instanceName).c_str(),
+		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + instanceName + ".fcl").c_str());
+		config_file_name_ = ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + instanceName + ".fcl";
 	}
 	// catch(...)
 	//{

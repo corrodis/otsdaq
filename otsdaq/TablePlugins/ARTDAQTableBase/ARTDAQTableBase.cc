@@ -162,11 +162,10 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 
 	try
 	{
-	  
-		TLOG(TLVL_INFO) << "parsing document:"<< inFile;
+		TLOG(TLVL_INFO) << "parsing document:" << inFile;
 		fhicl::intermediate_table tbl;
 		fhicl::parse_document(inFile, policy, tbl);
-		TLOG(TLVL_TRACE) << "document:"<< inFile << " parsed";
+		TLOG(TLVL_TRACE) << "document:" << inFile << " parsed";
 
 		fhicl::ParameterSet pset;
 		fhicl::make_ParameterSet(tbl, pset);
@@ -745,347 +744,7 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		PUSHTAB;
 
-		//--------------------------------------
-		// handle services
-		//__COUT__ << "Filling art.services" << __E__;
-		auto services = art.getNode("servicesLink");
-		if(!services.isDisconnected())
-		{
-			OUT << "services: {\n";
-
-			PUSHTAB;
-
-			//--------------------------------------
-			// handle services @table:: parameters
-			insertParameters(out,
-			                 tabStr,
-			                 commentStr,
-			                 services.getNode("ServicesParametersLink"),
-			                 "daqParameter" /*parameterType*/,
-			                 true /*onlyInsertAtTableParameters*/,
-			                 false /*includeAtTableParameters*/);
-
-			OUT << "ArtdaqSharedMemoryServiceInterface: { service_provider: ArtdaqSharedMemoryService \n";
-
-			OUT << "waiting_time: " << services.getNode("sharedMemoryWaitingTime").getValue() << "\n";
-			OUT << "resume_after_timeout: " << (services.getNode("sharedMemoryResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
-			OUT << "}\n\n";
-
-			OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: ArtdaqFragmentNamingService helper_plugin: " << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>())
-			    << "}\n\n";
-
-			//--------------------------------------
-			// handle services NOT @table:: parameters
-			insertParameters(out,
-			                 tabStr,
-			                 commentStr,
-			                 services.getNode("ServicesParametersLink"),
-			                 "daqParameter" /*parameterType*/,
-			                 false /*onlyInsertAtTableParameters*/,
-			                 false /*includeAtTableParameters*/);
-
-			POPTAB;
-			OUT << "}\n\n";  // end services
-		}
-
-		//--------------------------------------
-		// handle outputs
-		//__COUT__ << "Filling art.outputs" << __E__;
-		auto outputs = art.getNode("outputsLink");
-		if(!outputs.isDisconnected())
-		{
-			OUT << "outputs: {\n";
-
-			PUSHTAB;
-
-			auto outputPlugins = outputs.getChildren();
-			for(auto& outputPlugin : outputPlugins)
-			{
-				if(!outputPlugin.second.status())
-					PUSHCOMMENT;
-
-				OUT << outputPlugin.second.getNode("outputKey").getValue() << ": {\n";
-				PUSHTAB;
-
-				std::string moduleType = insertModuleType(out, tabStr, commentStr, outputPlugin.second.getNode("outputModuleType"));
-
-				//--------------------------------------
-				// handle ALL output parameters
-				insertParameters(out,
-				                 tabStr,
-				                 commentStr,
-				                 outputPlugin.second.getNode("outputModuleParameterLink"),
-				                 "outputParameter" /*parameterType*/,
-				                 false /*onlyInsertAtTableParameters*/,
-				                 true /*includeAtTableParameters*/);
-
-				if(outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput" ||
-				   outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput")
-				{
-					OUT << "destinations: {\n";
-					OUT << "}\n\n";  // end destinations
-					OUT << "routing_table_config: {\n";
-					PUSHTAB;
-
-					auto mySubsystemID   = 1;
-					auto destinationSubsystemID = 1;
-					auto builderSubsystemLink = receiverNode.getNode("SubsystemLink");
-					if(!builderSubsystemLink.isDisconnected())
-					{
-						mySubsystemID = getSubsytemId(builderSubsystemLink);
-					}
-					destinationSubsystemID = info_.subsystems[mySubsystemID].destination;
-					if(info_.subsystems[destinationSubsystemID].hasRoutingMaster)
-					{
-						OUT << "use_routing_manager: true\n";
-						OUT << "routing_manager_hostname: \"" << info_.subsystems[destinationSubsystemID].routingMasterHost << "\"\n";
-						OUT << "table_update_port: 0\n";
-						OUT << "table_update_address: \"0.0.0.0\"\n";
-						OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
-						OUT << "table_acknowledge_port : 0\n";
-						OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
-						OUT << "routing_retry_count: " << routingRetryCount << "\n";
-					}
-					else
-					{
-						OUT << "use_routing_manager: false\n";
-					}
-
-					if (outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput") {
-						info_.subsystems[mySubsystemID].eventMode = true;
-					}
-
-					POPTAB;
-					OUT << "}\n";  // end routing_table_config
-				}
-
-				POPTAB;
-				OUT << "}\n\n";  // end output module
-
-				if(!outputPlugin.second.status())
-					POPCOMMENT;
-			}
-
-			POPTAB;
-			OUT << "}\n\n";  // end outputs
-		}
-
-		//--------------------------------------
-		// handle physics
-		//__COUT__ << "Filling art.physics" << __E__;
-		auto physics = art.getNode("physicsLink");
-		if(!physics.isDisconnected())
-		{
-			///////////////////////
-			OUT << "physics: {\n";
-
-			PUSHTAB;
-
-			//--------------------------------------
-			// handle only @table:: physics parameters
-			insertParameters(out,
-			                 tabStr,
-			                 commentStr,
-			                 physics.getNode("physicsOtherParametersLink"),
-			                 "physicsParameter" /*parameterType*/,
-			                 true /*onlyInsertAtTableParameters*/,
-			                 false /*includeAtTableParameters*/);
-
-			auto analyzers = physics.getNode("analyzersLink");
-			if(!analyzers.isDisconnected())
-			{
-				///////////////////////
-				OUT << "analyzers: {\n";
-
-				PUSHTAB;
-
-				auto modules = analyzers.getChildren();
-				for(auto& module : modules)
-				{
-					if(!module.second.status())
-						PUSHCOMMENT;
-
-					//--------------------------------------
-					// handle only @table:: analyzer parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("analyzerModuleParameterLink"),
-					                 "analyzerParameter" /*parameterType*/,
-					                 true /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					OUT << module.second.getNode("analyzerKey").getValue() << ": {\n";
-					PUSHTAB;
-					insertModuleType(out, tabStr, commentStr, module.second.getNode("analyzerModuleType"));
-
-					//--------------------------------------
-					// handle NOT @table:: producer parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("analyzerModuleParameterLink"),
-					                 "analyzerParameter" /*parameterType*/,
-					                 false /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					POPTAB;
-					OUT << "}\n\n";  // end analyzer module
-
-					if(!module.second.status())
-						POPCOMMENT;
-				}
-				POPTAB;
-				OUT << "}\n\n";  // end analyzer
-			}
-
-			auto producers = physics.getNode("producersLink");
-			if(!producers.isDisconnected())
-			{
-				///////////////////////
-				OUT << "producers: {\n";
-
-				PUSHTAB;
-
-				auto modules = producers.getChildren();
-				for(auto& module : modules)
-				{
-					if(!module.second.status())
-						PUSHCOMMENT;
-
-					//--------------------------------------
-					// handle only @table:: producer parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("producerModuleParameterLink"),
-					                 "producerParameter" /*parameterType*/,
-					                 true /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					OUT << module.second.getNode("producerKey").getValue() << ": {\n";
-					PUSHTAB;
-
-					insertModuleType(out, tabStr, commentStr, module.second.getNode("producerModuleType"));
-
-					//--------------------------------------
-					// handle NOT @table:: producer parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("producerModuleParameterLink"),
-					                 "producerParameter" /*parameterType*/,
-					                 false /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					POPTAB;
-					OUT << "}\n\n";  // end producer module
-
-					if(!module.second.status())
-						POPCOMMENT;
-				}
-				POPTAB;
-				OUT << "}\n\n";  // end producer
-			}
-
-			auto filters = physics.getNode("filtersLink");
-			if(!filters.isDisconnected())
-			{
-				///////////////////////
-				OUT << "filters: {\n";
-
-				PUSHTAB;
-
-				auto modules = filters.getChildren();
-				for(auto& module : modules)
-				{
-					if(!module.second.status())
-						PUSHCOMMENT;
-
-					//--------------------------------------
-					// handle only @table:: filter parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("filterModuleParameterLink"),
-					                 "filterParameter" /*parameterType*/,
-					                 true /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					OUT << module.second.getNode("filterKey").getValue() << ": {\n";
-					PUSHTAB;
-
-					insertModuleType(out, tabStr, commentStr, module.second.getNode("filterModuleType"));
-
-					//--------------------------------------
-					// handle NOT @table:: filter parameters
-					insertParameters(out,
-					                 tabStr,
-					                 commentStr,
-					                 module.second.getNode("filterModuleParameterLink"),
-					                 "filterParameter" /*parameterType*/,
-					                 false /*onlyInsertAtTableParameters*/,
-					                 false /*includeAtTableParameters*/);
-
-					POPTAB;
-					OUT << "}\n\n";  // end filter module
-
-					if(!module.second.status())
-						POPCOMMENT;
-				}
-				POPTAB;
-				OUT << "}\n\n";  // end filter
-			}
-
-			//--------------------------------------
-			// handle NOT @table:: physics parameters
-			insertParameters(out,
-			                 tabStr,
-			                 commentStr,
-			                 physics.getNode("physicsOtherParametersLink"),
-			                 "physicsParameter" /*parameterType*/,
-			                 false /*onlyInsertAtTableParameters*/,
-			                 false /*includeAtTableParameters*/);
-
-			POPTAB;
-			OUT << "}\n\n";  // end physics
-		}
-
-		//--------------------------------------
-		// handle source
-		//__COUT__ << "Filling art.source" << __E__;
-		auto source = art.getNode("sourceLink");
-		if(!source.isDisconnected())
-		{
-			OUT << "source: {\n";
-			PUSHTAB;
-			insertModuleType(out, tabStr, commentStr, source.getNode("sourceModuleType"));
-			POPTAB;
-			OUT << "}\n\n";  // end source
-		}
-		else
-		{
-			OUT << "source: {\n";
-			PUSHTAB;
-			OUT << "module_type: ArtdaqInput";
-			POPTAB;
-			OUT << "}\n\n";  // end source
-		}
-
-		//--------------------------------------
-		// handle process_name
-		//__COUT__ << "Writing art.process_name" << __E__;
-		OUT << "process_name: " << art.getNode("ProcessName") << "\n";
-
-		//--------------------------------------
-		// handle art @table:: art add on parameters
-		insertParameters(out,
-		                 tabStr,
-		                 commentStr,
-		                 art.getNode("AddOnParametersLink"),
-		                 "artParameter" /*parameterType*/,
-		                 false /*onlyInsertAtTableParameters*/,
-		                 true /*includeAtTableParameters*/);
+		insertArtProcessBlock(out, tabStr, commentStr, art, receiverNode.getNode("SubsystemLink"), routingTimeoutMs, routingRetryCount);
 
 		POPTAB;
 		OUT << "}\n\n";  // end art
@@ -1105,6 +764,460 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 	//__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
 	out.close();
 }  // end outputDataReceiverFHICL()
+
+//==============================================================================
+// outputOnlineMonitorFHICL
+//	Note: currently selfRank and selfPort are unused by artdaq fcl
+void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiverNode)
+{
+	std::string filename = getFHICLFilename(ARTDAQAppType::Monitor, receiverNode.getValue());
+
+	/////////////////////////
+	// generate xdaq run parameter file
+	std::fstream out;
+
+	std::string tabStr     = "";
+	std::string commentStr = "";
+
+	out.open(filename, std::fstream::out | std::fstream::trunc);
+	if(out.fail())
+	{
+		__SS__ << "Failed to open ARTDAQ fcl file: " << filename << __E__;
+		__SS_THROW__;
+	}
+
+	//--------------------------------------
+	// header
+	OUT << "###########################################################" << __E__;
+	OUT << "#" << __E__;
+	OUT << "# artdaq " << getTypeString(ARTDAQAppType::Monitor) << " fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
+	OUT << "# 	Original filename:              \t" << filename << __E__;
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(ARTDAQAppType::Monitor) << " UID:\t" << receiverNode.getValue() << __E__;
+	OUT << "#" << __E__;
+	OUT << "###########################################################" << __E__;
+	OUT << "\n\n";
+
+	// no primary link to table tree for data receiver node!
+	try
+	{
+		if(receiverNode.isDisconnected())
+		{
+			// create empty fcl
+			OUT << "{}\n\n";
+			out.close();
+			return;
+		}
+	}
+	catch(const std::runtime_error&)
+	{
+		//__COUT__ << "Ignoring error, assume this a valid UID node." << __E__;
+		// error is expected here for UIDs.. so just ignore
+		// this check is valuable if source node is a unique-Link node, rather than UID
+	}
+
+	//--------------------------------------
+	// handle preamble parameters
+	//_COUT__ << "Inserting preamble parameters..." << __E__;
+	insertParameters(out,
+	                 tabStr,
+	                 commentStr,
+	                 receiverNode.getNode("preambleParametersLink"),
+	                 "daqParameter" /*parameterType*/,
+	                 false /*onlyInsertAtTableParameters*/,
+	                 true /*includeAtTableParameters*/);
+
+	//--------------------------------------
+	// handle art
+	//__COUT__ << "Filling art block..." << __E__;
+	auto art = receiverNode.getNode("artLink");
+	if(!art.isDisconnected())
+	{
+		insertArtProcessBlock(out, tabStr, commentStr, art);
+	}
+
+	auto dispatcherArt = receiverNode.getNode("dispatcherArtLink");
+	if(!dispatcherArt.isDisconnected())
+	{
+		OUT << "source.dispatcher_config: {\n";
+
+		PUSHTAB;
+
+		insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
+
+		POPTAB;
+		OUT << "}\n\n";  // end art
+	}
+
+	//--------------------------------------
+	// handle ALL add-on parameters
+	//__COUT__ << "Inserting add-on parameters" << __E__;
+	insertParameters(out,
+	                 tabStr,
+	                 commentStr,
+	                 receiverNode.getNode("addOnParametersLink"),
+	                 "daqParameter" /*parameterType*/,
+	                 false /*onlyInsertAtTableParameters*/,
+	                 true /*includeAtTableParameters*/);
+
+	//__COUT__ << "outputDataReceiverFHICL DONE" << __E__;
+	out.close();
+}  // end outputDataReceiverFHICL()
+
+//==============================================================================
+// insertArtProcessBlock
+//	Note: currently selfRank and selfPort are unused by artdaq fcl
+void ARTDAQTableBase::insertArtProcessBlock(std::ostream&     out,
+                                            std::string&      tabStr,
+                                            std::string&      commentStr,
+                                            ConfigurationTree art,
+                                            ConfigurationTree subsystemLink,
+                                            size_t            routingTimeoutMs,
+                                            size_t            routingRetryCount)
+{
+	//--------------------------------------
+	// handle services
+	//__COUT__ << "Filling art.services" << __E__;
+	auto services = art.getNode("servicesLink");
+	if(!services.isDisconnected())
+	{
+		OUT << "services: {\n";
+
+		PUSHTAB;
+
+		//--------------------------------------
+		// handle services @table:: parameters
+		insertParameters(out,
+		                 tabStr,
+		                 commentStr,
+		                 services.getNode("ServicesParametersLink"),
+		                 "daqParameter" /*parameterType*/,
+		                 true /*onlyInsertAtTableParameters*/,
+		                 false /*includeAtTableParameters*/);
+
+		OUT << "ArtdaqSharedMemoryServiceInterface: { service_provider: ArtdaqSharedMemoryService \n";
+
+		OUT << "waiting_time: " << services.getNode("sharedMemoryWaitingTime").getValue() << "\n";
+		OUT << "resume_after_timeout: " << (services.getNode("sharedMemoryResumeAfterTimeout").getValue<bool>() ? "true" : "false") << "\n";
+		OUT << "}\n\n";
+
+		OUT << "ArtdaqFragmentNamingServiceInterface: { service_provider: ArtdaqFragmentNamingService helper_plugin: "
+		    << (services.getNode("fragmentNamingServiceProvider").getValue<std::string>()) << "}\n\n";
+
+		//--------------------------------------
+		// handle services NOT @table:: parameters
+		insertParameters(out,
+		                 tabStr,
+		                 commentStr,
+		                 services.getNode("ServicesParametersLink"),
+		                 "daqParameter" /*parameterType*/,
+		                 false /*onlyInsertAtTableParameters*/,
+		                 false /*includeAtTableParameters*/);
+
+		POPTAB;
+		OUT << "}\n\n";  // end services
+	}
+
+	//--------------------------------------
+	// handle outputs
+	//__COUT__ << "Filling art.outputs" << __E__;
+	auto outputs = art.getNode("outputsLink");
+	if(!outputs.isDisconnected())
+	{
+		OUT << "outputs: {\n";
+
+		PUSHTAB;
+
+		auto outputPlugins = outputs.getChildren();
+		for(auto& outputPlugin : outputPlugins)
+		{
+			if(!outputPlugin.second.status())
+				PUSHCOMMENT;
+
+			OUT << outputPlugin.second.getNode("outputKey").getValue() << ": {\n";
+			PUSHTAB;
+
+			std::string moduleType = insertModuleType(out, tabStr, commentStr, outputPlugin.second.getNode("outputModuleType"));
+
+			//--------------------------------------
+			// handle ALL output parameters
+			insertParameters(out,
+			                 tabStr,
+			                 commentStr,
+			                 outputPlugin.second.getNode("outputModuleParameterLink"),
+			                 "outputParameter" /*parameterType*/,
+			                 false /*onlyInsertAtTableParameters*/,
+			                 true /*includeAtTableParameters*/);
+
+			if(outputPlugin.second.getNode("outputModuleType").getValue() == "BinaryNetOutput" ||
+			   outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput")
+			{
+				OUT << "destinations: {\n";
+				OUT << "}\n\n";  // end destinations
+				OUT << "routing_table_config: {\n";
+				PUSHTAB;
+
+				auto mySubsystemID          = 1;
+				auto destinationSubsystemID = 1;
+				if(!subsystemLink.isDisconnected())
+				{
+					mySubsystemID = getSubsytemId(subsystemLink);
+				}
+				destinationSubsystemID = info_.subsystems[mySubsystemID].destination;
+				if(info_.subsystems[destinationSubsystemID].hasRoutingMaster)
+				{
+					OUT << "use_routing_manager: true\n";
+					OUT << "routing_manager_hostname: \"" << info_.subsystems[destinationSubsystemID].routingMasterHost << "\"\n";
+					OUT << "table_update_port: 0\n";
+					OUT << "table_update_address: \"0.0.0.0\"\n";
+					OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
+					OUT << "table_acknowledge_port : 0\n";
+					OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
+					OUT << "routing_retry_count: " << routingRetryCount << "\n";
+				}
+				else
+				{
+					OUT << "use_routing_manager: false\n";
+				}
+
+				if(outputPlugin.second.getNode("outputModuleType").getValue() == "RootNetOutput")
+				{
+					info_.subsystems[mySubsystemID].eventMode = true;
+				}
+
+				POPTAB;
+				OUT << "}\n";  // end routing_table_config
+			}
+
+			POPTAB;
+			OUT << "}\n\n";  // end output module
+
+			if(!outputPlugin.second.status())
+				POPCOMMENT;
+		}
+
+		POPTAB;
+		OUT << "}\n\n";  // end outputs
+	}
+
+	//--------------------------------------
+	// handle physics
+	//__COUT__ << "Filling art.physics" << __E__;
+	auto physics = art.getNode("physicsLink");
+	if(!physics.isDisconnected())
+	{
+		///////////////////////
+		OUT << "physics: {\n";
+
+		PUSHTAB;
+
+		//--------------------------------------
+		// handle only @table:: physics parameters
+		insertParameters(out,
+		                 tabStr,
+		                 commentStr,
+		                 physics.getNode("physicsOtherParametersLink"),
+		                 "physicsParameter" /*parameterType*/,
+		                 true /*onlyInsertAtTableParameters*/,
+		                 false /*includeAtTableParameters*/);
+
+		auto analyzers = physics.getNode("analyzersLink");
+		if(!analyzers.isDisconnected())
+		{
+			///////////////////////
+			OUT << "analyzers: {\n";
+
+			PUSHTAB;
+
+			auto modules = analyzers.getChildren();
+			for(auto& module : modules)
+			{
+				if(!module.second.status())
+					PUSHCOMMENT;
+
+				//--------------------------------------
+				// handle only @table:: analyzer parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("analyzerModuleParameterLink"),
+				                 "analyzerParameter" /*parameterType*/,
+				                 true /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				OUT << module.second.getNode("analyzerKey").getValue() << ": {\n";
+				PUSHTAB;
+				insertModuleType(out, tabStr, commentStr, module.second.getNode("analyzerModuleType"));
+
+				//--------------------------------------
+				// handle NOT @table:: producer parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("analyzerModuleParameterLink"),
+				                 "analyzerParameter" /*parameterType*/,
+				                 false /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				POPTAB;
+				OUT << "}\n\n";  // end analyzer module
+
+				if(!module.second.status())
+					POPCOMMENT;
+			}
+			POPTAB;
+			OUT << "}\n\n";  // end analyzer
+		}
+
+		auto producers = physics.getNode("producersLink");
+		if(!producers.isDisconnected())
+		{
+			///////////////////////
+			OUT << "producers: {\n";
+
+			PUSHTAB;
+
+			auto modules = producers.getChildren();
+			for(auto& module : modules)
+			{
+				if(!module.second.status())
+					PUSHCOMMENT;
+
+				//--------------------------------------
+				// handle only @table:: producer parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("producerModuleParameterLink"),
+				                 "producerParameter" /*parameterType*/,
+				                 true /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				OUT << module.second.getNode("producerKey").getValue() << ": {\n";
+				PUSHTAB;
+
+				insertModuleType(out, tabStr, commentStr, module.second.getNode("producerModuleType"));
+
+				//--------------------------------------
+				// handle NOT @table:: producer parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("producerModuleParameterLink"),
+				                 "producerParameter" /*parameterType*/,
+				                 false /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				POPTAB;
+				OUT << "}\n\n";  // end producer module
+
+				if(!module.second.status())
+					POPCOMMENT;
+			}
+			POPTAB;
+			OUT << "}\n\n";  // end producer
+		}
+
+		auto filters = physics.getNode("filtersLink");
+		if(!filters.isDisconnected())
+		{
+			///////////////////////
+			OUT << "filters: {\n";
+
+			PUSHTAB;
+
+			auto modules = filters.getChildren();
+			for(auto& module : modules)
+			{
+				if(!module.second.status())
+					PUSHCOMMENT;
+
+				//--------------------------------------
+				// handle only @table:: filter parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("filterModuleParameterLink"),
+				                 "filterParameter" /*parameterType*/,
+				                 true /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				OUT << module.second.getNode("filterKey").getValue() << ": {\n";
+				PUSHTAB;
+
+				insertModuleType(out, tabStr, commentStr, module.second.getNode("filterModuleType"));
+
+				//--------------------------------------
+				// handle NOT @table:: filter parameters
+				insertParameters(out,
+				                 tabStr,
+				                 commentStr,
+				                 module.second.getNode("filterModuleParameterLink"),
+				                 "filterParameter" /*parameterType*/,
+				                 false /*onlyInsertAtTableParameters*/,
+				                 false /*includeAtTableParameters*/);
+
+				POPTAB;
+				OUT << "}\n\n";  // end filter module
+
+				if(!module.second.status())
+					POPCOMMENT;
+			}
+			POPTAB;
+			OUT << "}\n\n";  // end filter
+		}
+
+		//--------------------------------------
+		// handle NOT @table:: physics parameters
+		insertParameters(out,
+		                 tabStr,
+		                 commentStr,
+		                 physics.getNode("physicsOtherParametersLink"),
+		                 "physicsParameter" /*parameterType*/,
+		                 false /*onlyInsertAtTableParameters*/,
+		                 false /*includeAtTableParameters*/);
+
+		POPTAB;
+		OUT << "}\n\n";  // end physics
+	}
+
+	//--------------------------------------
+	// handle source
+	//__COUT__ << "Filling art.source" << __E__;
+	auto source = art.getNode("sourceLink");
+	if(!source.isDisconnected())
+	{
+		OUT << "source: {\n";
+		PUSHTAB;
+		insertModuleType(out, tabStr, commentStr, source.getNode("sourceModuleType"));
+		POPTAB;
+		OUT << "}\n\n";  // end source
+	}
+	else
+	{
+		OUT << "source: {\n";
+		PUSHTAB;
+		OUT << "module_type: ArtdaqInput";
+		POPTAB;
+		OUT << "}\n\n";  // end source
+	}
+
+	//--------------------------------------
+	// handle process_name
+	//__COUT__ << "Writing art.process_name" << __E__;
+	OUT << "process_name: " << art.getNode("ProcessName") << "\n";
+
+	//--------------------------------------
+	// handle art @table:: art add on parameters
+	insertParameters(out,
+	                 tabStr,
+	                 commentStr,
+	                 art.getNode("AddOnParametersLink"),
+	                 "artParameter" /*parameterType*/,
+	                 false /*onlyInsertAtTableParameters*/,
+	                 true /*includeAtTableParameters*/);
+
+}  // end insertArtProcessBlock()
 
 //==============================================================================
 void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingMasterNode,
@@ -2780,7 +2893,7 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 				deleteRecordMap.emplace(std::make_pair(r,       // typeTable.tableView_->getDataView()[i][typeTable.tableView_->getColUID()],
 				                                       true));  // init to delete
 
-			//node instance loop
+			// node instance loop
 			for(auto& nodePair : nodeTypePair.second)
 			{
 				__COUTV__(nodePair.first);
@@ -2963,36 +3076,35 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 							// create artdaq type instance record
 							row = typeTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName);
 
-							//fill defaults properties/parameters here!
+							// fill defaults properties/parameters here!
 							if(nodeTypePair.first == processTypes_.READER)
 							{
 								__COUT__ << "Handling new " << nodeTypePair.first << " defaults!" << __E__;
-								TableEditStruct& daqParameterTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
+								TableEditStruct& daqParameterTable =
+								    configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
 
-								//create group link to daq parameter table
-								typeTable.tableView_->setValueAsString(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE,
-										row,
-										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParameters_));
+								// create group link to daq parameter table
+								typeTable.tableView_->setValueAsString(
+								    ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE,
+								    row,
+								    typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParameters_));
 								std::string daqParameterGroupID = typeTable.tableView_->setUniqueColumnValue(
-										row,
-										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParametersGroupID_),
-										nodeName + "DaqParameters");
+								    row,
+								    typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQReader_.colLinkToDaqParametersGroupID_),
+								    nodeName + "DaqParameters");
 
 								typeTable.tableView_->print();
 
-								//now create parameters at target link
-								const std::vector<std::string> parameterUIDs = {
-										"BoardID",
-										"FragmentID"
-								};
+								// now create parameters at target link
+								const std::vector<std::string> parameterUIDs = {"BoardID", "FragmentID"};
 
 								const std::vector<std::string> parameterNames = {
-										"board_id",                     //"BoardID",
-										"fragment_id",  				//"FragmentID"
+								    "board_id",     //"BoardID",
+								    "fragment_id",  //"FragmentID"
 								};
 								const std::vector<std::string> parameterValues = {
-										"0",                //"BoardID",
-										"0"  				//"FragmentID",
+								    "0",  //"BoardID",
+								    "0"   //"FragmentID",
 								};
 
 								unsigned int parameterRow;
@@ -3005,66 +3117,63 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									daqParameterTable.tableView_->setValueAsString("1", parameterRow, daqParameterTable.tableView_->getColStatus());
 									// set key
 									daqParameterTable.tableView_->setValueAsString(
-											parameterNames[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
+									    parameterNames[i],
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
 									// set value
 									daqParameterTable.tableView_->setValueAsString(
-											parameterValues[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
+									    parameterValues[i],
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
 									// set groupid
 									daqParameterTable.tableView_->setValueAsString(
-											daqParameterGroupID, parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
+									    daqParameterGroupID,
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
 
-								} //end Reader default property create loop
+								}  // end Reader default property create loop
 
 								daqParameterTable.tableView_->init();  // verify new table (throws runtime_errors)
 
-							} //end Reader default property setup
-							else if(nodeTypePair.first == processTypes_.BUILDER ||
-									nodeTypePair.first == processTypes_.LOGGER 	||
-									nodeTypePair.first == processTypes_.DISPATCHER)
+							}  // end Reader default property setup
+							else if(nodeTypePair.first == processTypes_.BUILDER || nodeTypePair.first == processTypes_.LOGGER ||
+							        nodeTypePair.first == processTypes_.DISPATCHER)
 							{
-
 								__COUT__ << "Handling new " << nodeTypePair.first << " defaults!" << __E__;
 
-								//goes through DAQ table
+								// goes through DAQ table
 								TableEditStruct& daqTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_TABLE, true /*markModified*/);
 								// create DAQ record
 								unsigned int daqRecordRow = daqTable.tableView_->addRow(author, true /*incrementUniqueData*/, nodeName + "Daq");
-								std::string daqRecordUID = daqTable.tableView_->getDataView()[daqRecordRow][daqTable.tableView_->getColUID()];
+								std::string  daqRecordUID = daqTable.tableView_->getDataView()[daqRecordRow][daqTable.tableView_->getColUID()];
 
-								//create unique link to daq table
+								// create unique link to daq table
 								typeTable.tableView_->setValueAsString(
-										ARTDAQTableBase::ARTDAQ_DAQ_TABLE,
-										row,
-										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaq_));
+								    ARTDAQTableBase::ARTDAQ_DAQ_TABLE, row, typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaq_));
 								typeTable.tableView_->setValueAsString(
-										daqRecordUID,
-										row,
-										typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaqUID_));
+								    daqRecordUID, row, typeTable.tableView_->findCol(ARTDAQTableBase::colARTDAQNotReader_.colLinkToDaqUID_));
 
-
-								TableEditStruct& daqParameterTable = configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
-								//create group link to daq parameter table
+								TableEditStruct& daqParameterTable =
+								    configGroupEdit.getTableEditStruct(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE, true /*markModified*/);
+								// create group link to daq parameter table
 								daqTable.tableView_->setValueAsString(ARTDAQTableBase::ARTDAQ_DAQ_PARAMETER_TABLE,
-										daqRecordRow,
-										daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParameters_));
+								                                      daqRecordRow,
+								                                      daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParameters_));
 								std::string daqParameterGroupID = daqTable.tableView_->setUniqueColumnValue(
-										daqRecordRow,
-										daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParametersGroupID_),
-										nodeName + "DaqParameters");
+								    daqRecordRow,
+								    daqTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaq_.colLinkToDaqParametersGroupID_),
+								    nodeName + "DaqParameters");
 
-								//now create parameters at target link
-								const std::vector<std::string> parameterUIDs = {
-										"BufferCount",
-										"FragmentsPerEvent"
-								};
+								// now create parameters at target link
+								const std::vector<std::string> parameterUIDs = {"BufferCount", "FragmentsPerEvent"};
 
 								const std::vector<std::string> parameterNames = {
-										"buffer_count",                 //"BufferCount",
-										"expected_fragments_per_event"  //"FragmentsPerEvent"
+								    "buffer_count",                 //"BufferCount",
+								    "expected_fragments_per_event"  //"FragmentsPerEvent"
 								};
 								const std::vector<std::string> parameterValues = {
-										"10",                //"BufferCount",
-										"0"  				//"FragmentsPerEvent",
+								    "10",  //"BufferCount",
+								    "0"    //"FragmentsPerEvent",
 								};
 
 								unsigned int parameterRow;
@@ -3077,21 +3186,26 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 									daqParameterTable.tableView_->setValueAsString("1", parameterRow, daqParameterTable.tableView_->getColStatus());
 									// set key
 									daqParameterTable.tableView_->setValueAsString(
-											parameterNames[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
+									    parameterNames[i],
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterKey_));
 									// set value
 									daqParameterTable.tableView_->setValueAsString(
-											parameterValues[i], parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
+									    parameterValues[i],
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterValue_));
 									// set groupid
 									daqParameterTable.tableView_->setValueAsString(
-											daqParameterGroupID, parameterRow, daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
+									    daqParameterGroupID,
+									    parameterRow,
+									    daqParameterTable.tableView_->findCol(ARTDAQTableBase::colARTDAQDaqParameter_.colDaqParameterGroupID_));
 
-								} //end Reader default property create loop
+								}  // end Reader default property create loop
 
-								daqTable.tableView_->init();  			// verify new table (throws runtime_errors)
-								daqParameterTable.tableView_->init();  	// verify new table (throws runtime_errors)
+								daqTable.tableView_->init();           // verify new table (throws runtime_errors)
+								daqParameterTable.tableView_->init();  // verify new table (throws runtime_errors)
 
-
-							} //end Builder, Logger, Dispatcher default property setup
+							}  // end Builder, Logger, Dispatcher default property setup
 						}
 						else  // set UID
 						{
