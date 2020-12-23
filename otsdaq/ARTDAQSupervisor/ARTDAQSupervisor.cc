@@ -482,6 +482,7 @@ void ARTDAQSupervisor::configuringThread() try
 	{
 		o << "Dispatcher host: " << dispatcher.hostname << std::endl;
 		o << "Dispatcher label: " << dispatcher.label << std::endl;
+		o << "Dispatcher port: " << dispatcher.port << std::endl;
 		if(dispatcher.subsystem != 1)
 		{
 			o << "Dispatcher subsystem: " << dispatcher.subsystem << std::endl;

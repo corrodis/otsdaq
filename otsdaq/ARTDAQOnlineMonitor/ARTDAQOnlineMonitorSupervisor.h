@@ -44,6 +44,8 @@ class ARTDAQOnlineMonitorSupervisor : public CoreSupervisorBase
 	std::atomic<bool>                   restart_art_;
 	bool                                should_restart_art_;
 	int                                 minimum_art_lifetime_s_{5};
+	int                                 partition_;
+	int                                 om_rank_;
 };
 }  // namespace ots
 #endif  // _ots_ARTDAQOnlineMonitorSupervisor_h

@@ -5,15 +5,18 @@
 #include "artdaq-core/Utilities/ExceptionHandler.hh"
 #include "artdaq-core/Utilities/TimeUtils.hh"
 
-#include <boost/thread.hpp>
-#include <boost/filesystem.hpp>
 #include <signal.h>
 #include <sys/wait.h>
+#include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
+XDAQ_INSTANTIATOR_IMPL(ots::ARTDAQOnlineMonitorSupervisor)
 
 #define FAKE_CONFIG_NAME "ots_config"
 
 //==============================================================================
-ots::ARTDAQOnlineMonitorSupervisor::ARTDAQOnlineMonitorSupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
+ots::ARTDAQOnlineMonitorSupervisor::ARTDAQOnlineMonitorSupervisor(xdaq::ApplicationStub* stub)
+    : CoreSupervisorBase(stub), partition_(getSupervisorProperty("partition", 0))
 {
 	__SUP_COUT__ << "Constructor." << __E__;
 
@@ -86,7 +89,7 @@ void ots::ARTDAQOnlineMonitorSupervisor::transitionConfiguring(toolbox::Event::R
 		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true);
 
 		ConfigurationTree theSupervisorNode = getSupervisorTableNode();
-		std::string       instanceName      = theSupervisorNode.getNode("MonitorInstanceName").getValue();
+		om_rank_                            = theSupervisorNode.getNode("MonitorID").getValue<int>();
 
 		__SUP_COUT__ << "Building configuration directory" << __E__;
 
@@ -96,10 +99,11 @@ void ots::ARTDAQOnlineMonitorSupervisor::transitionConfiguring(toolbox::Event::R
 
 		// Generate Online Monitor FHICL
 		ARTDAQTableBase::outputOnlineMonitorFHICL(theSupervisorNode);
+		ARTDAQTableBase::flattenFHICL(ARTDAQTableBase::ARTDAQAppType::Monitor, theSupervisorNode.getValue());
 
-		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Monitor, instanceName).c_str(),
-		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + instanceName + ".fcl").c_str());
-		config_file_name_ = ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + instanceName + ".fcl";
+		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Monitor, theSupervisorNode.getValue()).c_str(),
+		        (ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + theSupervisorNode.getValue() + ".fcl").c_str());
+		config_file_name_ = ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + theSupervisorNode.getValue() + ".fcl";
 	}
 	// catch(...)
 	//{
@@ -301,6 +305,27 @@ void ots::ARTDAQOnlineMonitorSupervisor::RunArt(const std::string& config_file, 
 		{ /* child */
 
 			// Do any child environment setup here
+			std::string envVarKey   = "ARTDAQ_PARTITION_NUMBER";
+			std::string envVarValue = std::to_string(partition_);
+			if(setenv(envVarKey.c_str(), envVarValue.c_str(), 1) != 0)
+			{
+				TLOG(TLVL_ERROR) << "Error setting environment variable \"" << envVarKey << "\" in the environment of a child art process. "
+				                 << "This may result in incorrect TCP port number "
+				                 << "assignments or other issues, and data may "
+				                 << "not flow through the system correctly.";
+			}
+			envVarKey   = "ARTDAQ_APPLICATION_NAME";
+			envVarValue = getSupervisorTableNode().getValue();
+			if(setenv(envVarKey.c_str(), envVarValue.c_str(), 1) != 0)
+			{
+				TLOG(TLVL_DEBUG) << "Error setting environment variable \"" << envVarKey << "\" in the environment of a child art process. ";
+			}
+			envVarKey   = "ARTDAQ_RANK";
+			envVarValue = std::to_string(om_rank_);
+			if(setenv(envVarKey.c_str(), envVarValue.c_str(), 1) != 0)
+			{
+				TLOG(TLVL_DEBUG) << "Error setting environment variable \"" << envVarKey << "\" in the environment of a child art process. ";
+			}
 
 			execvp("art", &args[0]);
 			delete[] filename;

@@ -54,10 +54,11 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		std::string label;
 		std::string hostname;
 		int         subsystem;
+		int port;
 		bool		status;
 
-		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff)
-		: label(l), hostname(h), subsystem(s), status(onOff) {}
+		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff, int p = -1)
+		: label(l), hostname(h), subsystem(s), port(p), status(onOff) {}
 	};
 
 	struct SubsystemInfo

@@ -768,9 +768,9 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 //==============================================================================
 // outputOnlineMonitorFHICL
 //	Note: currently selfRank and selfPort are unused by artdaq fcl
-void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiverNode)
+void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorNode)
 {
-	std::string filename = getFHICLFilename(ARTDAQAppType::Monitor, receiverNode.getValue());
+	std::string filename = getFHICLFilename(ARTDAQAppType::Monitor, monitorNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file
@@ -793,7 +793,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiver
 	OUT << "# artdaq " << getTypeString(ARTDAQAppType::Monitor) << " fcl configuration file produced by otsdaq." << __E__;
 	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
 	OUT << "# 	Original filename:              \t" << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ " << getTypeString(ARTDAQAppType::Monitor) << " UID:\t" << receiverNode.getValue() << __E__;
+	OUT << "#	otsdaq-ARTDAQ " << getTypeString(ARTDAQAppType::Monitor) << " UID:\t" << monitorNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -801,7 +801,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiver
 	// no primary link to table tree for data receiver node!
 	try
 	{
-		if(receiverNode.isDisconnected())
+		if(monitorNode.isDisconnected())
 		{
 			// create empty fcl
 			OUT << "{}\n\n";
@@ -822,7 +822,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiver
 	insertParameters(out,
 	                 tabStr,
 	                 commentStr,
-	                 receiverNode.getNode("preambleParametersLink"),
+	                 monitorNode.getNode("preambleParametersLink"),
 	                 "daqParameter" /*parameterType*/,
 	                 false /*onlyInsertAtTableParameters*/,
 	                 true /*includeAtTableParameters*/);
@@ -830,23 +830,49 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiver
 	//--------------------------------------
 	// handle art
 	//__COUT__ << "Filling art block..." << __E__;
-	auto art = receiverNode.getNode("artLink");
+	auto art = monitorNode.getNode("artLink");
 	if(!art.isDisconnected())
 	{
 		insertArtProcessBlock(out, tabStr, commentStr, art);
 	}
 
-	auto dispatcherArt = receiverNode.getNode("dispatcherArtLink");
-	if(!dispatcherArt.isDisconnected())
+	auto dispatcherLink = monitorNode.getNode("dispatcherLink");
+	if(!dispatcherLink.isDisconnected())
 	{
-		OUT << "source.dispatcher_config: {\n";
+		std::string monitorHost    = monitorNode.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
+		std::string dispatcherHost = dispatcherLink.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
+		OUT << "source.dispatcherHost: " << dispatcherHost << "\n";
+		int dispatcherPort = dispatcherLink.getNode("DispatcherPort").getValue<int>();
+		OUT << "source.dispatcherPort: " << dispatcherPort << "\n";
 
+		int om_rank        = monitorNode.getNode("MonitorID").getValue<int>();
+		int disp_fake_rank = om_rank + 1;
+
+		size_t      max_fragment_size    = monitorNode.getNode("max_fragment_size_words").getValueWithDefault(0x100000);
+		std::string transfer_plugin_type = monitorNode.getNode("transfer_plugin_type").getValueWithDefault("Autodetect");
+
+		OUT << "TransferPluginConfig: {\n";
 		PUSHTAB;
-
-		insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
-
+		OUT << "transferPluginType: " << transfer_plugin_type << "\n";
+		OUT << "host_map: [{ rank: " << disp_fake_rank << " host: \"" << dispatcherHost << "\"}, { rank: " << om_rank << " host: \"" << monitorHost << "\"}]\n";
+		OUT << " max_fragment_size_words: " << max_fragment_size << "\n";
+		OUT << "source_rank: " << disp_fake_rank << "\n";
+		OUT << " destination_rank: " << om_rank << "\n";
 		POPTAB;
-		OUT << "}\n\n";  // end art
+		OUT << "}\n";
+		OUT << "source.transfer_plugin: @local::TransferPluginConfig \n";
+		auto dispatcherArt = monitorNode.getNode("dispatcherArtLink");
+		if(!dispatcherArt.isDisconnected())
+		{
+			OUT << "source.dispatcher_config: {\n";
+
+			PUSHTAB;
+
+			insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
+
+			POPTAB;
+			OUT << "}\n\n";  // end art
+		}
 	}
 
 	//--------------------------------------
@@ -855,7 +881,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& receiver
 	insertParameters(out,
 	                 tabStr,
 	                 commentStr,
-	                 receiverNode.getNode("addOnParametersLink"),
+	                 monitorNode.getNode("addOnParametersLink"),
 	                 "daqParameter" /*parameterType*/,
 	                 false /*onlyInsertAtTableParameters*/,
 	                 true /*includeAtTableParameters*/);
@@ -987,6 +1013,10 @@ void ARTDAQTableBase::insertArtProcessBlock(std::ostream&     out,
 
 				POPTAB;
 				OUT << "}\n";  // end routing_table_config
+			}
+			if(outputPlugin.second.getNode("outputModuleType").getValue() == "TransferOutput")
+			{
+				OUT << "transfer_plugin: @local::TransferPluginConfig \n";
 			}
 
 			POPTAB;
@@ -1772,6 +1802,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 			if(getStatusFalseNodes || dispatcher.second.status())
 			{
 				std::string dispatcherHost = dispatcher.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
+				int         dispatcherPort = dispatcher.second.getNode("DispatcherPort").getValue<int>();
 
 				auto              dispatcherSubsystemID   = 1;
 				ConfigurationTree dispatcherSubsystemLink = dispatcher.second.getNode(ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
@@ -1811,7 +1842,7 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 				__COUT__ << "Found Dispatcher with UID " << dispatcherUID << ", DAQInterface Hostname " << dispatcherHost << ", and Subsystem "
 				         << dispatcherSubsystemID << __E__;
 				info_.processes[ARTDAQAppType::Dispatcher].emplace_back(
-				    dispatcherUID, dispatcherHost, dispatcherSubsystemID, ARTDAQAppType::Dispatcher, dispatcher.second.status());
+				    dispatcherUID, dispatcherHost, dispatcherSubsystemID, ARTDAQAppType::Dispatcher, dispatcher.second.status(), dispatcherPort);
 
 				if(doWriteFHiCL)
 				{
