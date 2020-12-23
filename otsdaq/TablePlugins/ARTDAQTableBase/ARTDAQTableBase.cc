@@ -834,6 +834,13 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 	if(!art.isDisconnected())
 	{
 		insertArtProcessBlock(out, tabStr, commentStr, art);
+		OUT <<  "services.message: { " << artdaq::generateMessageFacilityConfiguration(mf::GetApplicationName().c_str(), true, false) << "}\n";
+		OUT << "services.message.destinations.file: {type: \"GenFile\" threshold: \"INFO\" seperator: \"-\"" 
+			<< " pattern: \"" << monitorNode.getValue() << "-%?H%t-%p.log"
+		    << "\""
+		    << " timestamp_pattern: \"%Y%m%d%H%M%S\""
+		    << " directory: \"" << __ENV__("OTSDAQ_LOG_ROOT") << "/" << monitorNode.getValue() << "\""
+		    << " append : false }\n";
 	}
 
 	auto dispatcherLink = monitorNode.getNode("dispatcherLink");
@@ -844,6 +851,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 		OUT << "source.dispatcherHost: " << dispatcherHost << "\n";
 		int dispatcherPort = dispatcherLink.getNode("DispatcherPort").getValue<int>();
 		OUT << "source.dispatcherPort: " << dispatcherPort << "\n";
+		OUT << "source.commanderPluginType: xmlrpc\n";
 
 		int om_rank        = monitorNode.getNode("MonitorID").getValue<int>();
 		int disp_fake_rank = om_rank + 1;
@@ -855,9 +863,10 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 		PUSHTAB;
 		OUT << "transferPluginType: " << transfer_plugin_type << "\n";
 		OUT << "host_map: [{ rank: " << disp_fake_rank << " host: \"" << dispatcherHost << "\"}, { rank: " << om_rank << " host: \"" << monitorHost << "\"}]\n";
-		OUT << " max_fragment_size_words: " << max_fragment_size << "\n";
+		OUT << "max_fragment_size_words: " << max_fragment_size << "\n";
 		OUT << "source_rank: " << disp_fake_rank << "\n";
-		OUT << " destination_rank: " << om_rank << "\n";
+		OUT << "destination_rank: " << om_rank << "\n";
+		OUT << "unique_label: " << monitorNode.getValue() << "_to_" << dispatcherLink.getValue() << "\n";
 		POPTAB;
 		OUT << "}\n";
 		OUT << "source.transfer_plugin: @local::TransferPluginConfig \n";
@@ -868,6 +877,8 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 
 			PUSHTAB;
 
+			OUT << "path: " << monitorNode.getNode("dispatcher_path").getValue() << "\n";
+			OUT << "unique_label: " << monitorNode.getValue() << "\n";
 			insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
 
 			POPTAB;

@@ -2,12 +2,12 @@
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
-#include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
 #include "artdaq/DAQdata/Globals.hh"
 #include "artdaq/ExternalComms/MakeCommanderPlugin.hh"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
+#include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
 
 #include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
 
@@ -146,12 +146,11 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 
 	o.close();
 
-
-	//destroy current TRACEController and instantiate ARTDAQSupervisorTRACEController
+	// destroy current TRACEController and instantiate ARTDAQSupervisorTRACEController
 	if(CorePropertySupervisorBase::theTRACEController_)
 	{
 		__SUP_COUT__ << "Destroying TRACE Controller..." << __E__;
-		delete CorePropertySupervisorBase::theTRACEController_; //destruct current TRACEController
+		delete CorePropertySupervisorBase::theTRACEController_;  // destruct current TRACEController
 		CorePropertySupervisorBase::theTRACEController_ = nullptr;
 	}
 	CorePropertySupervisorBase::theTRACEController_ = new ARTDAQSupervisorTRACEController();
@@ -177,7 +176,7 @@ void ARTDAQSupervisor::destroy(void)
 		__SUP_COUT__ << "Calling recover transition" << __E__;
 		std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 		PyObject*                             pName = PyString_FromString("do_recover");
-		/*PyObject*                             res   =*/ PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+		/*PyObject*                             res   =*/PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
 		__SUP_COUT__ << "Making sure that correct state has been reached" << __E__;
 		getDAQState_();
@@ -194,7 +193,7 @@ void ARTDAQSupervisor::destroy(void)
 
 	Py_Finalize();
 
-	//CorePropertySupervisorBase would destroy, but since it was created here, attempt to destroy
+	// CorePropertySupervisorBase would destroy, but since it was created here, attempt to destroy
 	if(CorePropertySupervisorBase::theTRACEController_)
 	{
 		__SUP_COUT__ << "Destroying TRACE Controller..." << __E__;
@@ -386,7 +385,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/
 }  // end transitionConfiguring()
 
 //==============================================================================
-void ARTDAQSupervisor::configuringThread() try
+void ARTDAQSupervisor::configuringThread()
+try
 {
 	const std::string& uid =
 	    theConfigurationManager_
@@ -451,7 +451,8 @@ void ARTDAQSupervisor::configuringThread() try
 			{
 				o << "Subsystem source: " << sss << std::endl;
 			}
-			if (ss.second.eventMode) {
+			if(ss.second.eventMode)
+			{
 				o << "Subsystem fragmentMode: False" << std::endl;
 			}
 			o << std::endl;
@@ -613,13 +614,11 @@ void ARTDAQSupervisor::configuringThread() try
 		__GEN_SS_THROW__;
 	}
 	getDAQState_();
-	// if(daqinterface_state_ != "ready")
-	// {
-	// 	__GEN_SS__ << "DAQInterface config transition failed!" << __E__
-	// 	           << "Supervisor state: "<< daqinterface_state_ <<
-	// __E__;
-	// 	__GEN_SS_THROW__;
-	// }
+	if(daqinterface_state_ != "ready")
+	{
+		__GEN_SS__ << "DAQInterface config transition failed!" << __E__ << "Supervisor state: \"" << daqinterface_state_ << "\" != \"ready\" "<< __E__;
+		__GEN_SS_THROW__;
+	}
 	__GEN_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
 	thread_progress_bar_.complete();
 	__GEN_COUT__ << "Configured." << __E__;
@@ -644,7 +643,8 @@ catch(...)
 }  // end configuringThread() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -719,7 +719,8 @@ catch(...)
 }  // end transitionHalting() exception handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
@@ -738,7 +739,8 @@ catch(...)
 }  // end transitionInitializing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -775,7 +777,8 @@ catch(...)
 }  // end transitionPausing() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -809,11 +812,12 @@ catch(...)
 }  // end transitionResuming() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionStarting(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "transitionStarting" << __E__;
 
-	//first time launch thread because artdaq Supervisor may take a while
+	// first time launch thread because artdaq Supervisor may take a while
 	if(RunControlStateMachine::getIterationIndex() == 0 && RunControlStateMachine::getSubIterationIndex() == 0)
 	{
 		thread_error_message_ = "";
@@ -898,7 +902,8 @@ catch(...)
 }  // end transitionStarting() error handling
 
 //==============================================================================
-void ARTDAQSupervisor::startingThread() try
+void ARTDAQSupervisor::startingThread()
+try
 {
 	const std::string& uid =
 	    theConfigurationManager_
@@ -970,9 +975,9 @@ catch(...)
 	thread_error_message_ = ss.str();
 }  // end startingThread() error handling
 
-
 //==============================================================================
-void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference /*event*/) try
+void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference /*event*/)
+try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
@@ -1223,7 +1228,7 @@ void ots::ARTDAQSupervisor::daqinterfaceRunner_()
 					break;
 				}
 
-						lk.unlock();
+				lk.unlock();
 				getDAQState_();
 				if(daqinterface_state_ != state_before)
 				{

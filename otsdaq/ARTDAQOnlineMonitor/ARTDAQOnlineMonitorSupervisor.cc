@@ -95,6 +95,9 @@ void ots::ARTDAQOnlineMonitorSupervisor::transitionConfiguring(toolbox::Event::R
 
 		boost::system::error_code ignored;
 		boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
+
+		// Make directory for art process logfiles
+		boost::filesystem::create_directory(std::string(__ENV__("OTSDAQ_LOG_ROOT")) + "/" + theSupervisorNode.getValue(), ignored);
 		mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME).c_str(), 0755);
 
 		// Generate Online Monitor FHICL
