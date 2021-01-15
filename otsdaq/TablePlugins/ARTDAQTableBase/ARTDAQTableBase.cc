@@ -878,6 +878,34 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 			PUSHTAB;
 
 			OUT << "path: " << monitorNode.getNode("dispatcher_path").getValue() << "\n";
+			OUT << "filter_paths: [\n";
+
+			PUSHTAB;
+
+			auto filterPathsLink = monitorNode.getNode("filterPathsLink");
+			if(!filterPathsLink.isDisconnected())
+			{
+				///////////////////////
+				auto filterPaths = filterPathsLink.getChildren();
+
+				//__COUTV__(otherParameters.size());
+				for(auto& filterPath : filterPaths)
+				{
+					OUT << "{ ";
+
+					if(!filterPath.second.status())
+						PUSHCOMMENT;
+
+					OUT << "name: " << filterPath.second.getNode("Name").getValue() << " ";
+					OUT << "path: " << filterPath.second.getNode("Path").getValue() << " ";
+					
+					OUT << "}\n";
+					if(!filterPath.second.status())
+						POPCOMMENT;
+
+				}
+			}
+			OUT << "]\n";
 			OUT << "unique_label: " << monitorNode.getValue() << "\n";
 			insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
 
