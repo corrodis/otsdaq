@@ -887,10 +887,13 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 			{
 				///////////////////////
 				auto filterPaths = filterPathsLink.getChildren();
+				bool first       = true;
 
 				//__COUTV__(otherParameters.size());
 				for(auto& filterPath : filterPaths)
 				{
+					if(!first)
+						OUT << ",";
 					OUT << "{ ";
 
 					if(!filterPath.second.status())
