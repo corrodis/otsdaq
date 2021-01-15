@@ -848,7 +848,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 	{
 		std::string monitorHost    = monitorNode.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 		std::string dispatcherHost = dispatcherLink.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
-		OUT << "source.dispatcherHost: " << dispatcherHost << "\n";
+		OUT << "source.dispatcherHost: \"" << dispatcherHost << "\"\n";
 		int dispatcherPort = dispatcherLink.getNode("DispatcherPort").getValue<int>();
 		OUT << "source.dispatcherPort: " << dispatcherPort << "\n";
 		OUT << "source.commanderPluginType: xmlrpc\n";
