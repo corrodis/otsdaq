@@ -905,6 +905,9 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 
 				}
 			}
+
+			POPTAB;
+
 			OUT << "]\n";
 			OUT << "unique_label: " << monitorNode.getValue() << "\n";
 			insertArtProcessBlock(out, tabStr, commentStr, dispatcherArt);
