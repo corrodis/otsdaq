@@ -905,7 +905,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 					OUT << "}\n";
 					if(!filterPath.second.status())
 						POPCOMMENT;
-
+					first = false;
 				}
 			}
 
