@@ -2,6 +2,7 @@ cet_make(LIBRARY_NAME GatewaySupervisor
 		 LIBRARIES
 		 ${XDAQ_BASIC_LIB_LIST}		 
          $ENV{XDAQ_LIB}/libxgi.so
+         $ENV{POSTGRESQL_LIBRARIES}/libpq.so
 		 ConfigurationInterface
 		 SupervisorInfo
          WorkLoopManager

@@ -1389,6 +1389,104 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 	std::string runNumber = parameters.getValue("RunNumber");
 	__COUTV__(runNumber);
 
+	//save run info into database
+	try{
+		int runInfoDbConnStatus_ = 0;
+		//std::string dbname_ = __ENV__("");
+		char* dbname_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE")? getenv("OTSDAQ_RUNINFO_DATABASE") : "prototype_run_info");
+		char* dbhost_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_HOST")? getenv("OTSDAQ_RUNINFO_DATABASE_HOST") : "");
+		char* dbport_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PORT")? getenv("OTSDAQ_RUNINFO_DATABASE_PORT") : "");
+		char* dbuser_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_USER")? getenv("OTSDAQ_RUNINFO_DATABASE_USER") : "");
+		char* dbpwd_  = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PWD")? getenv("OTSDAQ_RUNINFO_DATABASE_PWD") : "");
+
+		//open db connection
+		char runInfoDbConnInfo [1024];
+		sprintf(runInfoDbConnInfo, "dbname=%s host=%s port=%s  \
+		    user=%s password=%s", dbname_, dbhost_, dbport_, dbuser_, dbpwd_);
+		PGconn* runInfoDbConn = PQconnectdb(runInfoDbConnInfo);
+
+		if(PQstatus(runInfoDbConn) == CONNECTION_BAD)
+		{
+			__COUT__ << "Unable to connect to prototype_run_info database!\n" << __E__;
+			PQfinish(runInfoDbConn);
+		}
+		else
+		{
+			__COUT__ << "Connected to prototype_run_info database!\n" << __E__;
+			runInfoDbConnStatus_ = 1;
+		}
+
+		// write run info into db
+		if(runInfoDbConnStatus_ == 1)
+		{
+			PGresult* res;
+			char      buffer[1024];
+			__COUT__ << "Insert new run info in the run_info Database table" << __E__;
+			snprintf(buffer,
+			         sizeof(buffer),
+			         "INSERT INTO public.run_info(				\
+												  run_type		\
+												, user_name		\
+												, host_name		\
+												, start_time	\
+												, note)			\
+												VALUES ('%s','%s','%s',TO_TIMESTAMP(%ld),'%s');",
+			         "T",
+			         __ENV__("MU2E_OWNER"),
+			         __ENV__("HOSTNAME"),
+			         time(NULL),
+			         "note");
+
+			res = PQexec(runInfoDbConn, buffer);
+
+			if(PQresultStatus(res) != PGRES_COMMAND_OK)
+			{
+				__SS__ << "RUN INFO INSERT INTO DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res)
+				       << __E__;
+				PQclear(res);
+				__SS_THROW__;
+			}
+			PQclear(res);
+
+			res = PQexec(runInfoDbConn, "select max(run_number) from public.run_info;");
+
+			if(PQresultStatus(res) != PGRES_TUPLES_OK)
+			{
+				__SS__ << "RUN INFO SELECT FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
+				PQclear(res);
+				__SS_THROW__;
+			}
+
+			if(PQntuples(res) == 1)
+			{
+				runNumber = PQgetvalue(res, 0, 0);
+				std::cout << "runNumber: " << runNumber << std::endl;
+			}
+			else
+			{
+				__SS__ << "RETRIVE RUN NUMBER FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
+				PQclear(res);
+				__SS_THROW__;
+			}
+
+			PQclear(res);
+		}
+
+		//close db connection
+		if(PQstatus(runInfoDbConn) == CONNECTION_OK)
+		{
+			PQfinish(runInfoDbConn);
+			__COUT__ << "prototype_run_info DB CONNECTION CLOSED\n" << __E__;
+		}
+	}
+	catch(...)
+	{
+		//ERROR
+		__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+		       << __E__;
+		__SS_THROW__;
+	}  // End write run info into db
+
 	// check if configuration dump is enabled on configure transition
 	{
 		ConfigurationTree configLinkNode =
