@@ -26,6 +26,9 @@ TCPClientBase::~TCPClientBase(void)
 //==============================================================================
 bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 {
+	std::cout << __PRETTY_FUNCTION__  << "Connecting Client socket to server name-" << fServerIP 
+	<< "-serverPort: " << fServerPort 
+	<< " already connected? " << fConnected << std::endl;
 	if(fConnected)
 	{
 		std::stringstream error;
@@ -33,10 +36,10 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 		throw std::runtime_error(error.str());
 	}
 
-	//std::cout << __COUT__ << "Connecting Client socket to server name-" << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	std::cout << __PRETTY_FUNCTION__   << "Connecting Client socket to server name-" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	std::string serverName = fServerIP;
 	resolveServer(fServerIP);
-	//std::cout << __COUT__ << "Connecting Client socket to server ip  -" << fServerIP << "-serverPort: " << fServerPort << std::endl;
+	__COUT__   << "Connecting Client socket to server ip  -" << fServerIP << "-serverPort: " << fServerPort << std::endl;
 	int                status = invalidSocketId;
 	struct sockaddr_in serverSocketAddress;
 	serverSocketAddress.sin_family      = AF_INET;
@@ -46,15 +49,15 @@ bool TCPClientBase::connect(int retry, unsigned int sleepMilliSeconds)
 	int totalTries = retry;
 	while(!fConnected && (unsigned int)retry-- > 0)
 	{
-		// __COUT__ << "Trying to connect" << std::endl;
+		std::cout << __PRETTY_FUNCTION__   << "Trying to connect" << std::endl;
 		TCPSocket::open();
 		status = ::connect(getSocketId(), (struct sockaddr*)&serverSocketAddress, sizeof(serverSocketAddress));
-		// __COUT__ << "Done Connect" << std::endl;
+		std::cout << __PRETTY_FUNCTION__    << "Done Connect with status: " << status << std::endl;
 		if(status == -1)
 		{
 			if((unsigned int)retry > 0)
 			{
-				__COUT__ << "WARNING: Can't connect to " << serverName << ". The server might still be down...Sleeping "
+				std::cout << __PRETTY_FUNCTION__    << "WARNING: Can't connect to " << serverName << ". The server might still be down...Sleeping "
 				          << sleepMilliSeconds << "ms and then retry " << (unsigned int)retry << " more times." << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(sleepMilliSeconds));
 				continue;

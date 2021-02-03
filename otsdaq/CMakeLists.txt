@@ -2,6 +2,7 @@
 add_subdirectory(ARTDAQDataManager)
 add_subdirectory(ARTDAQReaderCore)
 add_subdirectory(ARTDAQSupervisor)
+add_subdirectory(ARTDAQOnlineMonitor)
 add_subdirectory(BitManipulator)
 add_subdirectory(CgiDataUtilities)
 add_subdirectory(ConfigurationInterface)

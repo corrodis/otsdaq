@@ -4,8 +4,8 @@
 			<VIEW Name="TCP_DATA_LISTENER_PRODUCER_TABLE" Type="File,Database,DatabaseTest" Description="No%20description.">
 				<COLUMN Type="UID" 	 Name="ProcessorUID" 	 StorageName="PROCESSOR_UID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="BufferSize" 	 StorageName="BUFFER_SIZE" 		DataType="NUMBER" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="ServerIPAddress" 	 StorageName="SERVER_IP_ADDRESS" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="ServerPort" 	 StorageName="SERVER_PORT" 		DataType="NUMBER" 		DataChoices=""/>
+        <COLUMN Type="Data" 	 Name="ServerMaxClients" 	 StorageName="SERVER_MAX_CLIENTS" 		DataType="NUMBER" 		DataChoices=""/>
 				<COLUMN Type="FixedChoiceData" 	 Name="DataType" 	 StorageName="DATA_TYPE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,Raw,Packet"/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>

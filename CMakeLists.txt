@@ -127,6 +127,10 @@ add_subdirectory(test)
 FILE(COPY test DESTINATION .)
 INSTALL(DIRECTORY test DESTINATION ${product}/${version})
 
+# data-core
+FILE(COPY data-core DESTINATION .)
+INSTALL(DIRECTORY data-core DESTINATION ${product}/${version})
+
 # ups - table and config files
 add_subdirectory(ups)
 

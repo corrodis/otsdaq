@@ -1,9 +1,9 @@
-#ifndef _ots_TCPDataListenerProducer_h_
-#define _ots_TCPDataListenerProducer_h_
+#ifndef _ots_TCPDataReceiverProducer_h_
+#define _ots_TCPDataReceiverProducer_h_
 
 #include "otsdaq/Configurable/Configurable.h"
 #include "otsdaq/DataManager/DataProducer.h"
-#include "otsdaq/NetworkUtilities/TCPListenServer.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
+#include "otsdaq/NetworkUtilities/TCPSubscribeClient.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
 
 #include <string>
 
@@ -11,15 +11,15 @@ namespace ots
 {
 class ConfigurationTree;
 
-class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPListenServer
+class TCPDataReceiverProducer : public DataProducer, public Configurable, public TCPSubscribeClient
 {
   public:
-	TCPDataListenerProducer(std::string              supervisorApplicationUID,
+	TCPDataReceiverProducer(std::string              supervisorApplicationUID,
 	                        std::string              bufferUID,
 	                        std::string              processorUID,
 	                        const ConfigurationTree& theXDAQContextConfigTree,
 	                        const std::string&       configurationPath);
-	virtual ~TCPDataListenerProducer(void);
+	virtual ~TCPDataReceiverProducer(void);
 	virtual void startProcessingData(std::string runNumber) override;
 	virtual void stopProcessingData(void) override;
 
@@ -34,8 +34,9 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 
+	std::string    ipAddress_;
+	unsigned short port_;
 	std::string    dataType_;
-	unsigned    port_;
 
 	// bool getNextFragment(void);
 };

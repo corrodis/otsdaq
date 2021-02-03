@@ -1,4 +1,4 @@
-#include "otsdaq/NetworkUtilities/TCPPublishServer.h"
+#include "otsdaq/NetworkUtilities/TCPListenServer.h"
 #include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
 
 #include <iostream>
@@ -6,18 +6,21 @@
 using namespace ots;
 
 //==============================================================================
-TCPPublishServer::TCPPublishServer(unsigned int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
-
-//==============================================================================
-TCPPublishServer::~TCPPublishServer(void)
+TCPListenServer::TCPListenServer(unsigned int serverPort, unsigned int maxNumberOfClients)
+    : TCPServerBase(serverPort, maxNumberOfClients)
 {
-//	std::cout << __PRETTY_FUNCTION__ << "Done" << std::endl;
 }
 
 //==============================================================================
-void TCPPublishServer::acceptConnections()
+TCPListenServer::~TCPListenServer(void)
 {
-	while(true)
+	//	std::cout << __PRETTY_FUNCTION__ << "Done" << std::endl;
+}
+
+//==============================================================================
+void TCPListenServer::acceptConnections()
+{
+	while(getAccept())
 	{
 		try
 		{
@@ -34,5 +37,5 @@ void TCPPublishServer::acceptConnections()
 				break;
 		}
 	}
-	//fAcceptPromise.set_value(true);
+	// fAcceptPromise.set_value(true);
 }

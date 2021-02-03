@@ -1,4 +1,4 @@
-#include "otsdaq/DataProcessorPlugins/TCPDataListenerProducer.h"
+#include "otsdaq/DataProcessorPlugins/TCPDataReceiverProducer.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/ProcessorPluginMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
@@ -13,7 +13,7 @@
 using namespace ots;
 
 //==============================================================================
-TCPDataListenerProducer::TCPDataListenerProducer(std::string              supervisorApplicationUID,
+TCPDataReceiverProducer::TCPDataReceiverProducer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
                                                  const ConfigurationTree& theXDAQContextConfigTree,
@@ -24,34 +24,37 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
           supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , TCPListenServer(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>(),
-                      theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerMaxClients").getValue<unsigned>())
+    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>(),
+                         theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
     , dataP_(nullptr)
     , headerP_(nullptr)
-	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
+    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
+	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
 }
 
 //==============================================================================
-TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
+TCPDataReceiverProducer::~TCPDataReceiverProducer(void) {}
 
 //==============================================================================
-void TCPDataListenerProducer::startProcessingData(std::string runNumber)
+void TCPDataReceiverProducer::startProcessingData(std::string runNumber)
 {
-	startAccept();
+	TCPSubscribeClient::connect(30,1000);
+	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
 
 //==============================================================================
-void TCPDataListenerProducer::stopProcessingData(void)
+void TCPDataReceiverProducer::stopProcessingData(void)
 {
 	DataProducer::stopProcessingData();
+	TCPSubscribeClient::disconnect();
 }
 
 //==============================================================================
-bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
-// bool TCPDataListenerProducer::getNextFragment(void)
+bool TCPDataReceiverProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
+// bool TCPDataReceiverProducer::getNextFragment(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_
 	// << " running, because workloop: " << WorkLoop::continueWorkLoop_ << std::endl;
@@ -60,14 +63,14 @@ bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop
 }
 
 //==============================================================================
-void TCPDataListenerProducer::slowWrite(void)
+void TCPDataReceiverProducer::slowWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
 
 	try
 	{
-		data_ = TCPListenServer::receive<std::string>();  // Throws an exception if it fails
+		data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 		if(data_.size() == 0)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1000));
@@ -80,6 +83,7 @@ void TCPDataListenerProducer::slowWrite(void)
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		return;
 	}
+	header_["IPAddress"] = ipAddress_;
 	header_["Port"]      = std::to_string(port_);
 
 	while(DataProducer::write(data_, header_) < 0)
@@ -93,7 +97,7 @@ void TCPDataListenerProducer::slowWrite(void)
 }
 
 //==============================================================================
-void TCPDataListenerProducer::fastWrite(void)
+void TCPDataReceiverProducer::fastWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
@@ -108,9 +112,9 @@ void TCPDataListenerProducer::fastWrite(void)
 	try
 	{
 		if(dataType_ == "Packet")
-			*dataP_ = TCPListenServer::receivePacket();  // Throws an exception if it fails
+			*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
 		else//"Raw" || DEFAULT
-			*dataP_ = TCPListenServer::receive<std::string>();  // Throws an exception if it fails
+			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 
 		if(dataP_->size() == 0)//When it goes in timeout
 			return;
@@ -121,9 +125,10 @@ void TCPDataListenerProducer::fastWrite(void)
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return;
 	}
+	(*headerP_)["IPAddress"] = ipAddress_;
 	(*headerP_)["Port"]      = std::to_string(port_);
 
 	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();
 }
 
-DEFINE_OTS_PROCESSOR(TCPDataListenerProducer)
+DEFINE_OTS_PROCESSOR(TCPDataReceiverProducer)

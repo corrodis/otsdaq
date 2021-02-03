@@ -11,10 +11,10 @@
 
 namespace ots
 {
-class TCPServerBase : public TCPSocket
+class TCPServerBase : public virtual TCPSocket
 {
   public:
-	TCPServerBase(int serverPort, unsigned int maxNumberOfClients = 0);//Means as many unsigned allows
+	TCPServerBase(unsigned int serverPort, unsigned int maxNumberOfClients = 0);//Means as many unsigned allows
 	virtual ~TCPServerBase(void);
 
 	void startAccept(void);
@@ -43,6 +43,7 @@ class TCPServerBase : public TCPSocket
 	std::map<int, TCPSocket*>        fConnectedClients;
 	std::map<int, std::future<void>> fConnectedClientsFuture;
 	const int                        E_SHUTDOWN = 0;
+	bool                             getAccept() { return fAccept.load(); }
 
   private:
 	void closeClientSockets(void);//This one will also wait until the socket thread is done!
@@ -51,6 +52,7 @@ class TCPServerBase : public TCPSocket
 
 	const int         fMaxConnectionBacklog = 5;
 	unsigned int      fMaxNumberOfClients;
+	unsigned int      fServerPort;
 	std::atomic_bool  fAccept;
 //	std::thread       fAcceptThread;
 	std::future<void> fAcceptFuture;
