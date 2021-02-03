@@ -1,4 +1,4 @@
-#include "otsdaq/DataProcessorPlugins/TCPDataListenerProducer.h"
+#include "otsdaq/DataProcessorPlugins/TCPDataReceiverProducer.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/ProcessorPluginMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
@@ -13,7 +13,7 @@
 using namespace ots;
 
 //==============================================================================
-TCPDataListenerProducer::TCPDataListenerProducer(std::string              supervisorApplicationUID,
+TCPDataReceiverProducer::TCPDataReceiverProducer(std::string              supervisorApplicationUID,
                                                  std::string              bufferUID,
                                                  std::string              processorUID,
                                                  const ConfigurationTree& theXDAQContextConfigTree,
@@ -35,10 +35,10 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
 }
 
 //==============================================================================
-TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
+TCPDataReceiverProducer::~TCPDataReceiverProducer(void) {}
 
 //==============================================================================
-void TCPDataListenerProducer::startProcessingData(std::string runNumber)
+void TCPDataReceiverProducer::startProcessingData(std::string runNumber)
 {
 	TCPSubscribeClient::connect(30,1000);
 	TCPSubscribeClient::setReceiveTimeout(1, 0);
@@ -46,15 +46,15 @@ void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 }
 
 //==============================================================================
-void TCPDataListenerProducer::stopProcessingData(void)
+void TCPDataReceiverProducer::stopProcessingData(void)
 {
 	DataProducer::stopProcessingData();
 	TCPSubscribeClient::disconnect();
 }
 
 //==============================================================================
-bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
-// bool TCPDataListenerProducer::getNextFragment(void)
+bool TCPDataReceiverProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
+// bool TCPDataReceiverProducer::getNextFragment(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << DataProcessor::processorUID_
 	// << " running, because workloop: " << WorkLoop::continueWorkLoop_ << std::endl;
@@ -63,7 +63,7 @@ bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop
 }
 
 //==============================================================================
-void TCPDataListenerProducer::slowWrite(void)
+void TCPDataReceiverProducer::slowWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
@@ -97,7 +97,7 @@ void TCPDataListenerProducer::slowWrite(void)
 }
 
 //==============================================================================
-void TCPDataListenerProducer::fastWrite(void)
+void TCPDataReceiverProducer::fastWrite(void)
 {
 	// std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << name_ << " running!" <<
 	// std::endl;
@@ -131,4 +131,4 @@ void TCPDataListenerProducer::fastWrite(void)
 	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();
 }
 
-DEFINE_OTS_PROCESSOR(TCPDataListenerProducer)
+DEFINE_OTS_PROCESSOR(TCPDataReceiverProducer)
