@@ -29,8 +29,6 @@
 #include <sstream>
 #include <string>
 
-#include "/mu2e/ups/postgresql/v12_3b/Linux64bit+3.10-2.17-p383b/include/libpq-fe.h"
-
 // defines used also by OtsConfigurationWizardSupervisor
 #define FSM_LAST_CONFIGURED_GROUP_ALIAS_FILE std::string("FSMLastConfiguredGroupAlias.hist")
 #define FSM_LAST_STARTED_GROUP_ALIAS_FILE std::string("FSMLastStartedGroupAlias.hist")
