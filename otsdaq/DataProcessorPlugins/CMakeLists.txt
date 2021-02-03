@@ -30,6 +30,12 @@ simple_plugin(UDPDataStreamerConsumer "processor"
 	NetworkUtilities
 	${CETLIB}
   )
+  
+simple_plugin(TCPDataReceiverProducer "processor"
+	DataManager
+	NetworkUtilities
+	${CETLIB}
+  )
 
 simple_plugin(TCPDataListenerProducer "processor"
 	DataManager
