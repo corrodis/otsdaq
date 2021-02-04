@@ -401,6 +401,8 @@ try
 
 	thread_progress_bar_.step();
 
+	set_thread_message_("ConfigGen");
+
 	auto info = ARTDAQTableBase::extractARTDAQInfo(
 	    theSupervisorNode,
 	    false /*getStatusFalseNodes*/,
@@ -425,6 +427,7 @@ try
 	}
 
 	thread_progress_bar_.step();
+	set_thread_message_("Writing boot.txt");
 
 	__GEN_COUT__ << "Writing boot.txt" << __E__;
 
@@ -503,6 +506,7 @@ try
 	o.close();
 
 	thread_progress_bar_.step();
+	set_thread_message_("Writing Fhicl Files");
 
 	__GEN_COUT__ << "Building configuration directory" << __E__;
 
@@ -547,6 +551,7 @@ try
 		__GEN_SS_THROW__
 	}
 
+	set_thread_message_("Calling setdaqcomps");
 	__GEN_COUT__ << "Calling setdaqcomps" << __E__;
 	__GEN_COUT__ << "Status before setdaqcomps: " << daqinterface_state_ << __E__;
 	PyObject* pName1 = PyString_FromString("setdaqcomps");
@@ -578,6 +583,7 @@ try
 	__GEN_COUT__ << "Status after setdaqcomps: " << daqinterface_state_ << __E__;
 
 	thread_progress_bar_.step();
+	set_thread_message_("Calling do_boot");
 	__GEN_COUT__ << "Calling do_boot" << __E__;
 	__GEN_COUT__ << "Status before boot: " << daqinterface_state_ << __E__;
 	PyObject* pName2      = PyString_FromString("do_boot");
@@ -601,6 +607,7 @@ try
 	__GEN_COUT__ << "Status after boot: " << daqinterface_state_ << __E__;
 
 	thread_progress_bar_.step();
+	set_thread_message_("Calling do_config");
 	__GEN_COUT__ << "Calling do_config" << __E__;
 	__GEN_COUT__ << "Status before config: " << daqinterface_state_ << __E__;
 	PyObject* pName3      = PyString_FromString("do_config");
@@ -621,11 +628,13 @@ try
 	}
 	__GEN_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
 	thread_progress_bar_.complete();
+	set_thread_message_("Configured");
 	__GEN_COUT__ << "Configured." << __E__;
 
 }  // end configuringThread()
 catch(const std::runtime_error& e)
 {
+	set_thread_message_("ERROR");
 	__SS__ << "Error was caught while configuring: " << e.what() << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 	std::lock_guard<std::mutex> lock(thread_mutex_);  // lock out for remainder of scope
@@ -633,6 +642,7 @@ catch(const std::runtime_error& e)
 }
 catch(...)
 {
+	set_thread_message_("ERROR");
 	__SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 
@@ -646,6 +656,7 @@ catch(...)
 void ARTDAQSupervisor::transitionHalting(toolbox::Event::Reference /*event*/)
 try
 {
+	set_thread_message_("Halting");
 	__SUP_COUT__ << "Halting..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 	getDAQState_();
@@ -665,6 +676,7 @@ try
 	getDAQState_();
 	__SUP_COUT__ << "Status after halt: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Halted." << __E__;
+	set_thread_message_("Halted");
 }  // end transitionHalting()
 catch(const std::runtime_error& e)
 {
@@ -722,9 +734,11 @@ catch(...)
 void ARTDAQSupervisor::transitionInitializing(toolbox::Event::Reference /*event*/)
 try
 {
+	set_thread_message_("Initializing");
 	__SUP_COUT__ << "Initializing..." << __E__;
 	init();
 	__SUP_COUT__ << "Initialized." << __E__;
+	set_thread_message_("Initialized");
 }  // end transitionInitializing()
 catch(const std::runtime_error& e)
 {
@@ -742,6 +756,7 @@ catch(...)
 void ARTDAQSupervisor::transitionPausing(toolbox::Event::Reference /*event*/)
 try
 {
+	set_thread_message_("Pausing");
 	__SUP_COUT__ << "Pausing..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
@@ -763,6 +778,7 @@ try
 	__SUP_COUT__ << "Status after pause: " << daqinterface_state_ << __E__;
 
 	__SUP_COUT__ << "Paused." << __E__;
+	set_thread_message_("Paused");
 }  // end transitionPausing()
 catch(const std::runtime_error& e)
 {
@@ -780,6 +796,7 @@ catch(...)
 void ARTDAQSupervisor::transitionResuming(toolbox::Event::Reference /*event*/)
 try
 {
+	set_thread_message_("Resuming");
 	__SUP_COUT__ << "Resuming..." << __E__;
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 
@@ -798,6 +815,7 @@ try
 	getDAQState_();
 	__SUP_COUT__ << "Status after resume: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Resumed." << __E__;
+	set_thread_message_("Resumed");
 }  // end transitionResuming()
 catch(const std::runtime_error& e)
 {
@@ -913,6 +931,7 @@ try
 	__COUT__ << "Supervisor uid is " << uid << ", getting supervisor table node" << __E__;
 	const std::string mfSubject_ = supervisorClassNoNamespace_ + "-" + uid;
 	__GEN_COUT__ << "Starting..." << __E__;
+	set_thread_message_("Starting");
 
 	thread_progress_bar_.step();
 	stop_runner_();
@@ -951,6 +970,7 @@ try
 		thread_progress_bar_.step();
 	}
 	start_runner_();
+	set_thread_message_("Started");
 	thread_progress_bar_.step();
 
 	__GEN_COUT__ << "Started." << __E__;
@@ -980,6 +1000,7 @@ void ARTDAQSupervisor::transitionStopping(toolbox::Event::Reference /*event*/)
 try
 {
 	__SUP_COUT__ << "Stopping..." << __E__;
+	set_thread_message_("Stopping");
 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
 	getDAQState_();
 	__SUP_COUT__ << "Status before stop: " << daqinterface_state_ << __E__;
@@ -995,6 +1016,7 @@ try
 	getDAQState_();
 	__SUP_COUT__ << "Status after stop: " << daqinterface_state_ << __E__;
 	__SUP_COUT__ << "Stopped." << __E__;
+	set_thread_message_("Stopped");
 }  // end transitionStopping()
 catch(const std::runtime_error& e)
 {
@@ -1030,6 +1052,7 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference /*event*/)
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
 
 }  // end enteringError()
+
 
 //==============================================================================
 void ots::ARTDAQSupervisor::getDAQState_()
