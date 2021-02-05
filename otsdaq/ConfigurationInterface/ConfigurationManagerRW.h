@@ -53,7 +53,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 
 	template<class T>
 	T* 											getConfigurationRW				(std::string name) { return (T*)getTableByName(name); }
-	TableBase*    								getVersionedTableByName			(const std::string& tableName, TableVersion version, bool looseColumnMatching = false, std::string* accumulatedErrors = 0);
+	TableBase*    								getVersionedTableByName			(const std::string& tableName, TableVersion version, bool looseColumnMatching = false, std::string* accumulatedErrors = 0, bool getRawData = false);
 	TableBase*    								getTableByName					(const std::string& tableName);
 	TableGroupKey 								findTableGroup					(const std::string& groupName, 	const std::map<std::string, TableVersion>& 						groupMembers,
 																												const std::map<std::string /*name*/, std::string /*alias*/>& 	groupAliases =	std::map<std::string /*name*/, std::string /*alias*/>());
