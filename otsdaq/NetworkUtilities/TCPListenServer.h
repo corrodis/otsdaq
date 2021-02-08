@@ -2,6 +2,7 @@
 #define _TCPListenServer_h_
 
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
+#include "otsdaq/NetworkUtilities/TCPReceiverSocket.h"
 
 namespace ots
 {

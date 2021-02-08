@@ -94,7 +94,7 @@ void ots::ARTDAQOnlineMonitorSupervisor::transitionConfiguring(toolbox::Event::R
 		__SUP_COUT__ << "Building configuration directory" << __E__;
 
 		boost::system::error_code ignored;
-		boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
+		//		boost::filesystem::remove_all(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME, ignored);
 
 		// Make directory for art process logfiles
 		boost::filesystem::create_directory(std::string(__ENV__("OTSDAQ_LOG_ROOT")) + "/" + theSupervisorNode.getValue(), ignored);
