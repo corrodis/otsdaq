@@ -19,11 +19,14 @@ TCPListenServer::~TCPListenServer(void)
 
 std::string ots::TCPListenServer::receivePacket()
 {
+	if(!fConnectedClients.empty()) {
 	auto it = fConnectedClients.find(lastReceived);
 	if(it == fConnectedClients.end() || ++it == fConnectedClients.end())
 		it = fConnectedClients.begin();
 	lastReceived = it->first;
 	return reinterpret_cast<TCPReceiverSocket*>(it->second)->receivePacket();
+	}
+	throw std::runtime_error("No clients connected!");
 }
 
 //==============================================================================
