@@ -573,8 +573,9 @@ TableBase* ConfigurationManagerRW::getTableByName(const std::string& tableName)
 //	return null pointer on failure, on success return table pointer.
 TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& tableName,
                                                            TableVersion       version,
-                                                           bool               looseColumnMatching /* =false */,
-                                                           std::string*       accumulatedErrors /* =0 */)
+                                                           bool               looseColumnMatching /* = false */,
+                                                           std::string*       accumulatedErrors /* = 0 */,
+														   bool				  getRawData /* = false */)
 {
 	auto it = nameToTableMap_.find(tableName);
 	if(it == nameToTableMap_.end())
@@ -588,17 +589,30 @@ TableBase* ConfigurationManagerRW::getVersionedTableByName(const std::string& ta
 	TableBase* table = it->second;
 
 	if(version.isTemporaryVersion())
+	{
 		table->setActiveView(version);
+
+		if(getRawData)
+		{
+			std::stringstream jsonSs;
+			table->getViewP()->printJSON(jsonSs);
+			table->getViewP()->doGetSourceRawData(true);
+			table->getViewP()->fillFromJSON(jsonSs.str());
+		}
+	}
 	else
+	{		
 		theInterface_->get(table,
-		                   tableName,
-		                   0,
-		                   0,
-		                   false,  // fill w/version
-		                   version,
-		                   false,  // do not reset
-		                   looseColumnMatching,
-		                   accumulatedErrors);
+				tableName,
+				0 /* groupKey */,
+				0 /* groupName */,
+				false /* dontFill */,  //false to fill w/version
+				version,
+				false /* resetConfiguration*/,  // false to not reset
+				looseColumnMatching,
+				getRawData,
+				accumulatedErrors);		
+	}
 	return table;
 }  // end getVersionedTableByName()
 

@@ -84,6 +84,7 @@ class TableView
 	std::map<std::string, unsigned int /*col*/> getColumnNamesMap			(void) const;
 	std::set<std::string /*storage name*/>      getColumnStorageNames		(void) const;
 	const std::vector<std::string /*per col*/>& getDefaultRowValues			(void) const;
+	std::string									getMismatchColumnInfo		(void) const;
 
 	unsigned int       							getNumberOfRows				(void) const;
 	unsigned int       							getNumberOfColumns			(void) const;
@@ -171,6 +172,8 @@ public:
 	void 										setCreationTime				(time_t t);
 	void 										setLastAccessTime			(time_t t = time(0));
 	void 										setLooseColumnMatching		(bool setValue);
+	void 										doGetSourceRawData			(bool setValue);
+	const std::string&							getSourceRawData			(void) { return sourceRawData_; }
 
 	template<class T>  // in included .icc source
 	void 										setVersion					(const T& version);
@@ -240,6 +243,8 @@ public:
 	std::map<std::string, unsigned int>								colLinkGroupIDs_;  // map from child link index to column
 
 	bool                  											fillWithLooseColumnMatching_;
+	bool                  											getSourceRawData_;
+	std::string														sourceRawData_;	
 	unsigned int          											sourceColumnMismatchCount_, sourceColumnMissingCount_;
 	std::set<std::string> 											sourceColumnNames_;
 

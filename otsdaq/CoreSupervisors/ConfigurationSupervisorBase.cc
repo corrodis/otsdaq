@@ -17,6 +17,41 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xml
 		//__SUP_COUT__ << "ActiveGroup " << type.first << " " << type.second.first << "("
 		//<< type.second.second << ")" << __E__;
 	}
+	try //try to get matching group alias for active groups
+	{
+		std::map<std::string, TableVersion> activeVersions = cfgMgr->getActiveVersions();
+		std::string groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
+		if(activeVersions.find(groupAliasesTableName) != activeVersions.end())
+		{
+			//have an active group aliases table at this point
+			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
+	    		cfgMgr->getNode(groupAliasesTableName).getChildren();
+
+			std::string groupName, groupKey, groupComment, groupType;
+			std::string activeGroupName, activeGroupKey;
+			for(auto& type : activeGroupMap)
+			{
+				activeGroupName = type.second.first;
+				activeGroupKey = type.second.second.toString(); 
+				for(auto& aliasNodePair : aliasNodePairs)
+				{					
+					groupName = aliasNodePair.second.getNode("GroupName").getValueAsString();
+					groupKey  = aliasNodePair.second.getNode("GroupKey").getValueAsString();
+					if(groupName == activeGroupName && groupKey == activeGroupKey)
+					{	//found match!
+						xmlOut.addTextElementToData(type.first + "-ActiveGroupAlias", aliasNodePair.first);
+						break;
+					}
+				} //end alias match search loop
+			} //end active group loop
+		} //end handling of matching group alias to active groups
+		//else ignore missing active group alias table or active backbone
+	}
+	catch(...)
+	{
+		__COUT__ << "Ignoring failure getting alias for active groups" << __E__;
+	}
+	
 
 	// always add version tracking bool
 	xmlOut.addTextElementToData("versionTracking", ConfigurationInterface::isVersionTrackingEnabled() ? "ON" : "OFF");
