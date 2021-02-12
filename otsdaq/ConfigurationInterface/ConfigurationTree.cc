@@ -749,6 +749,7 @@ bool ConfigurationTree::isDefaultValue(void) const
 //==============================================================================
 // getDefaultValue
 //	returns default value if is value node
+// TODO: should a function to get if it is min and max value be included here?? 
 const std::string& ConfigurationTree::getDefaultValue(void) const
 {
 	if(!isValueNode())
