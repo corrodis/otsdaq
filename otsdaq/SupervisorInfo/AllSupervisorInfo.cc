@@ -266,7 +266,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 
 		if(theARTDAQSupervisorInfo_) //priority to artdaq supervisor
 		{
-			__COUT__ << "ARTDAQ TRACE app for hostname '" <<
+			__COUT__ << "The ARTDAQ TRACE-controller app for hostname '" <<
 					theARTDAQSupervisorInfo_->getHostname() << "' is CLASS:LID = " <<
 					theARTDAQSupervisorInfo_->getClass() << ":" <<
 					theARTDAQSupervisorInfo_->getId() << __E__;
@@ -276,7 +276,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 					*theARTDAQSupervisorInfo_));
 		}
 
-		//the use emplace, because it will fail insert on collisions!
+		//the use emplace, because it will fail insert on collisions! (and we want to keep artdaq selection above)
 		for(auto& TRACEApp: allSupervisorInfo_)
 		{
 			//NOTE!! need to copy const SupervisorInfo& from the persistent copy in the allSupervisorInfo
@@ -285,7 +285,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 					TRACEApp.second.getHostname(),
 					allSupervisorInfo_.at(TRACEApp.first))).second)
 			{
-				__COUT__ << "TRACE app for hostname '" <<
+				__COUT__ << "The TRACE-controller app for hostname '" <<
 						TRACEApp.second.getHostname() << "' is CLASS:LID = " <<
 						TRACEApp.second.getClass() << ":" <<
 						TRACEApp.second.getId() << __E__;
@@ -295,7 +295,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 //							TRACEApp.second.second.getId(),
 //							allSupervisorInfo_.at(TRACEApp.second.second.getId())));
 		}
-		__COUT__ << "TRACE app count = " << allTraceControllerSupervisorInfo_.size() << __E__;
+		__COUT__ << "TRACE-controller app count = " << allTraceControllerSupervisorInfo_.size() << __E__;
 	}
 
 
@@ -338,7 +338,12 @@ void AllSupervisorInfo::setSupervisorStatus(const unsigned int& id, const std::s
 		__SS__ << "Could not find: " << id << __E__;
 		__SS_THROW__;
 	}
-	it->second.setStatus(status, progress, detail);
+	//non-blocking here, it's ok if the status is not updated (it is probably blocked on purpose, for exampled by the GatewaySupervisor broadcast threads)
+	if(allSupervisorInfoMutex_[id].try_lock())
+	{
+		it->second.setStatus(status, progress, detail);
+		allSupervisorInfoMutex_[id].unlock();
+	}
 }  // end setSupervisorStatus()
 
 //==============================================================================
@@ -426,6 +431,7 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 	//	and other supervisors that do not need state transitions.
 	std::vector<std::vector<const SupervisorInfo*>> retVec;
 	bool                                            createContainer;
+	const std::string whitespace = "                                   ";
 	for(const auto& priorityAppVector : orderedByPriority)
 	{
 		createContainer = true;
@@ -471,7 +477,9 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			}
 			retVec[retVec.size() - 1].push_back(&(it->second));
 
-			__COUT__ << it->second.getName() << " [LID=" << it->second.getId() << "]: "
+			__COUT__ << "\t" << it->second.getName() << " [LID=" << it->second.getId() << "]: "
+					 << (it->second.getName().size() > whitespace.size()?"":whitespace.substr(0,
+					 	whitespace.size()-it->second.getName().size()))
 			         << " priority " << (unsigned int)priorityAppVector.first << " count " << retVec[retVec.size() - 1].size() << __E__;
 		}
 	}  // end equal priority loop

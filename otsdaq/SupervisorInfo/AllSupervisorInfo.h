@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <mutex> /* for recursive_mutex */
 
 #include "otsdaq/SupervisorInfo/SupervisorDescriptorInfoBase.h"
 #include "otsdaq/SupervisorInfo/SupervisorInfo.h"
@@ -29,21 +30,21 @@ typedef std::map<unsigned int, const SupervisorInfo&> SupervisorInfoMap;
 class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 {
   public:
-	AllSupervisorInfo(void);
-	AllSupervisorInfo(xdaq::ApplicationContext* applicationContext);
-	~AllSupervisorInfo(void);
+	AllSupervisorInfo	(void);
+	AllSupervisorInfo	(xdaq::ApplicationContext* applicationContext);
+	~AllSupervisorInfo	(void);
 
-	void init(xdaq::ApplicationContext* applicationContext);
-	void destroy(void);
+	void 													init								(xdaq::ApplicationContext* applicationContext);
+	void 													destroy								(void);
 
 	// BOOLs
-	bool isWizardMode		(void) const { return theWizardInfo_ ? true : false; }
-	bool isMacroMakerMode	(void) const { return AllSupervisorInfo::MACROMAKER_MODE; }
+	bool 													isWizardMode						(void) const { return theWizardInfo_ ? true : false; }
+	bool 													isMacroMakerMode					(void) const { return AllSupervisorInfo::MACROMAKER_MODE; }
 
 	// SETTERs
-	void setSupervisorStatus(xdaq::Application* app, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
-	void setSupervisorStatus(const SupervisorInfo& appInfo, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
-	void setSupervisorStatus(const unsigned int& id, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
+	void 													setSupervisorStatus					(xdaq::Application* app, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
+	void 													setSupervisorStatus					(const SupervisorInfo& appInfo, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
+	void 													setSupervisorStatus					(const unsigned int& id, const std::string& status, const unsigned int progress = 100, const std::string& detail = "");
 
 	// GETTERs (so searching and iterating is easier)
 	const std::map<unsigned int /* lid */, SupervisorInfo>& getAllSupervisorInfo				(void) const { return allSupervisorInfo_; }
@@ -61,18 +62,19 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	const SupervisorInfo& 									getArtdaqSupervisorInfo				(void) const;
 
 	std::vector<std::vector<const SupervisorInfo*>> 		getOrderedSupervisorDescriptors		(const std::string& stateMachineCommand) const;
-
+	std::recursive_mutex&									getSupervisorInfoMutex				(unsigned int lid) { return allSupervisorInfoMutex_[lid]; }
   private:
-	SupervisorInfo* 						theSupervisorInfo_;
-	SupervisorInfo* 						theWizardInfo_;
-	SupervisorInfo* 						theARTDAQSupervisorInfo_;
+	SupervisorInfo* 											theSupervisorInfo_;
+	SupervisorInfo* 											theWizardInfo_;
+	SupervisorInfo* 											theARTDAQSupervisorInfo_;
 
-	std::map<unsigned int /* lid */, SupervisorInfo> allSupervisorInfo_;
-	SupervisorInfoMap allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
+	std::map<unsigned int /* lid */, SupervisorInfo>			allSupervisorInfo_;
+	std::map<unsigned int /* lid */, std::recursive_mutex> 		allSupervisorInfoMutex_; //recursive_mutex so the same thread can lock multiple times (remember to unlock the same amount)
+	SupervisorInfoMap 											allFETypeSupervisorInfo_, allDMTypeSupervisorInfo_, allLogbookTypeSupervisorInfo_, allMacroMakerTypeSupervisorInfo_;
 	//,
-	std::map<std::string /*hostname*/, const SupervisorInfo&> allTraceControllerSupervisorInfo_;
+	std::map<std::string /*hostname*/, const SupervisorInfo&> 	allTraceControllerSupervisorInfo_;
 
-	static const bool 						MACROMAKER_MODE;
+	static const bool 											MACROMAKER_MODE;
 
 };
 

@@ -16,7 +16,7 @@ using namespace ots;
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
 {
-	__GEN_COUT__ << "Constructing FiniteStateMachine" << std::endl;
+	__GEN_COUT__ << "Constructing FiniteStateMachine" << __E__;
 } //end constructor()
 
 //==============================================================================
@@ -61,13 +61,13 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 	// __GEN_COUT__ << (stateTransitionNameTable_.at(currentState_).find(transition) ==
 	// 	 stateTransitionNameTable_.at(currentState_).end()?1:0);
 
-	for(auto startState : stateTransitionNameTable_)
-	{
-		__GEN_COUTV__(getStateName(startState.first));
-		std::cout << startState.first << __E__;
-		for(auto trans : stateTransitionNameTable_.at(startState.first))
-			__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
-	}
+	// for(auto startState : stateTransitionNameTable_)
+	// {
+	// 	__GEN_COUTV__(getStateName(startState.first));
+	// 	std::cout << startState.first << __E__;
+	// 	for(auto trans : stateTransitionNameTable_.at(startState.first))
+	// 		__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
+	// }
 
 	//if looking for current active transition, calculate from provenance state
 	if(transition == "")
@@ -79,7 +79,7 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 		{
 			__GEN_SS__ << "Cannot find transition name from '" <<
 				getProvenanceStateName() << "' with transition: " << currentTransition_ << "...";
-			__GEN_COUT__ << ss.str();
+			__GEN_COUT_ERR__ << ss.str();
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 		}
 	}
@@ -93,7 +93,7 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 	{
 		__GEN_SS__ << "Cannot find transition name from '" <<
 			getCurrentStateName() << "' with transition: " << transition << "...";
-		__GEN_COUT__ << ss.str();
+		__GEN_COUT_ERR__ << ss.str();
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
 } //end getCurrentTransitionName()
@@ -131,7 +131,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 {
 	const xoap::MessageReference message;
 	return execTransition(transition, message);
-}
+} //end execTransition()
 
 //==============================================================================
 // execTransition
@@ -176,7 +176,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 				std::ostringstream error;
 				error << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 				      << ". There was an error: " << e.what();
-				__GEN_COUT_ERR__ << error.str() << std::endl;
+				__GEN_COUT_ERR__ << error.str() << __E__;
 			}
 			inTransition_      = false;
 			stateEntranceTime_ = time(0);
@@ -191,7 +191,6 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	if(inTransition_)
 	{
 		__GEN_COUT_WARN__ << "In transition, and received another transition: " << transition << ". Ignoring..." << __E__;
-
 		return false;
 	}
 	inTransition_             = true;
@@ -204,10 +203,11 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		inTransition_ = false;
 		std::ostringstream error;
 		error << transition << " is not in the list of the transitions from current state " << getStateName(getCurrentState());
-		__GEN_COUT_ERR__ << error.str() << std::endl;
+		__GEN_COUT_ERR__ << error.str() << __E__;
+		__GEN_COUTV__(getErrorMessage());
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
-		//__GEN_COUT__ << error << std::endl;
-		//		__GEN_COUT__ << "Transition?" << inTransition_ << std::endl;
+		//__GEN_COUT__ << error << __E__;
+		//		__GEN_COUT__ << "Transition?" << inTransition_ << __E__;
 		return false;
 	}
 
@@ -230,7 +230,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		std::ostringstream error;
 		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 		           << ". There was an error: " << e.what();
-		__GEN_COUT_ERR__ << ss.str() << std::endl;
+		__GEN_COUT_ERR__ << ss.str() << __E__;
 		// diagService_->reportError(err.str(),DIAGERROR);
 
 		// send state machine to error
@@ -242,7 +242,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 		           << ". There was an unknown error.";
-		__GEN_COUT_ERR__ << ss.str() << std::endl;
+		__GEN_COUT_ERR__ << ss.str() << __E__;
 		// diagService_->reportError(err.str(),DIAGERROR);
 
 		// send state machine to error
@@ -252,7 +252,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	inTransition_      = false;
 	stateEntranceTime_ = time(0);
 	return transitionSuccessful;
-}
+} //end execTransition()
 
 //==============================================================================
 bool FiniteStateMachine::isInTransition(void) { return inTransition_; }
@@ -264,7 +264,7 @@ void FiniteStateMachine::setErrorMessage(const std::string& errMessage, bool app
 		theErrorMessage_ += errMessage;
 	else
 		theErrorMessage_ = errMessage;
-}
+} //end setErrorMessage()
 
 //==============================================================================
 const std::string& FiniteStateMachine::getErrorMessage() const { return theErrorMessage_; }
@@ -275,7 +275,5 @@ void FiniteStateMachine::setInitialState(toolbox::fsm::State state)
 	toolbox::fsm::FiniteStateMachine::setInitialState(state);
 	provenanceState_   = state;
 	stateEntranceTime_ = time(0);
-}
+} //end setInitialState()
 
-//==============================================================================
-const xoap::MessageReference& FiniteStateMachine::getCurrentMessage(void) { return theMessage_; }

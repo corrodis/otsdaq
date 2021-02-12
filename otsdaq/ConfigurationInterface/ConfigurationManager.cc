@@ -710,7 +710,7 @@ void ConfigurationManager::dumpMacroMakerModeFhicl()
 			if(!fe.second.getNode("Status").getValue<bool>())
 				continue;
 
-			__COUTV__(fe.first);
+			//__COUTV__(fe.first);
 
 			OUT << fe.first << ": {" << __E__;
 			PUSHTAB;
@@ -770,7 +770,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 	{
 		if(node.isDisconnected())
 		{
-			__COUT__ << node.getFieldName() << " field is a disconnected link." << __E__;
+			//__COUT__ << node.getFieldName() << " field is a disconnected link." << __E__;
 			return;
 		}
 
@@ -1355,9 +1355,9 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		if(onlyLoadIfBackboneOrContext && groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
 		   groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
-			__COUT_WARN__ << "Not loading group because it is not of type Context or "
-			                 "Backbone (it is type '"
-			              << convertGroupTypeToName(groupType) << "')." << __E__;
+			__COUT__ << "Not loading group because it is not of type Context or "
+			            "Backbone (it is type '"
+			         << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
 		}
 

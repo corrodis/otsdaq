@@ -1,7 +1,7 @@
 #include "artdaq-ots/Overlays/FragmentType.hh"
 #include "artdaq-core/Data/FragmentNameHelper.hh"
 
-#include "TRACE/tracemf.h"
+#include "otsdaq/Macros/CoutMacros.h"
 #define TRACE_NAME "OtsFragmentNameHelper"
 
 namespace ots
