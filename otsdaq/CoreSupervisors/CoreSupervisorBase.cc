@@ -357,10 +357,8 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 	//	__SUP_COUTV__(detail);
 
 	//if empty detail, give last command
-	if(!detail.size())
+	if(!detail.size() && RunControlStateMachine::getLastCommand() != "")
 	{
-		// __SUP_COUT__ << RunControlStateMachine::getLastCommand() << " " << 
-		// 	SOAPUtilities::translate(theStateMachine_.getCurrentMessage()) << __E__;
 		detail = "Last Command: " + RunControlStateMachine::getLastCommand();	
 	}
 
