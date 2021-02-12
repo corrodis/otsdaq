@@ -50,7 +50,7 @@ public:
 	// are as initially defined for table versions aliases, i.e. not converted according
 	// to the metadata groupAliases!
 	virtual std::map<std::string /*name*/,
-	TableVersion /*version*/> 			getTableGroupMembers			(std::string const& /*groupName*/, bool /*includeMetaDataTable*/ = false) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getTableGroupMembers in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
+	TableVersion /*version*/> 				getTableGroupMembers			(std::string const& /*groupName*/, bool /*includeMetaDataTable*/ = false) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call getTableGroupMembers in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 	virtual void 							saveTableGroup					(std::map<std::string /*name*/,TableVersion /*version*/> const& /*tableToVersionMap*/, std::string const& /*groupName*/) const { __SS__; __THROW__(ss.str() + "ConfigurationInterface::... Must only call saveTableGroup in a mode with this functionality implemented (e.g. DatabaseConfigurationInterface)."); }
 
 

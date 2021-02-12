@@ -28,6 +28,7 @@ TableView::TableView(const std::string& tableName)
 	, colStatus_(INVALID)
 	, colPriority_(INVALID)
 	, fillWithLooseColumnMatching_(false)
+	, getSourceRawData_(false)
 	, sourceColumnMismatchCount_(0)
 	, sourceColumnMissingCount_(0)
 {
@@ -1850,6 +1851,9 @@ void TableView::setLastAccessTime(time_t t) { lastAccessTime_ = t; }
 void TableView::setLooseColumnMatching(bool setValue) { fillWithLooseColumnMatching_ = setValue; }
 
 //==============================================================================
+void TableView::doGetSourceRawData(bool setValue) { getSourceRawData_ = setValue; }
+
+//==============================================================================
 void TableView::reset(void)
 {
 	version_ = -1;
@@ -2056,7 +2060,14 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
-	bool dbg = tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
+	bool dbg = false; //tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
+	bool rawData = getSourceRawData_;
+	if(getSourceRawData_) 
+	{ 	//only get source raw data once, then revert member variable
+		__COUTV__(getSourceRawData_);
+		getSourceRawData_ = false;
+		sourceRawData_ = ""; //clear for this fill
+	}
 
 	std::map<std::string /*key*/, unsigned int /*entries/rows*/> keyEntryCountMap;
 	std::vector<std::string>                                     keys;
@@ -2383,6 +2394,7 @@ int TableView::fillFromJSON(const std::string& json)
 				__COUTV__(fillWithLooseColumnMatching_);
 			}
 
+
 			// extract only what we care about
 			// for TableView only care about matching depth 1
 
@@ -2393,7 +2405,27 @@ int TableView::fillFromJSON(const std::string& json)
 				if ((currDepth == 1 && keys[k] == currKey) || (currDepth > 1 && keys[k] == jsonPath[1]))
 					matchedKey = k;
 
-			if (matchedKey != (unsigned int)-1)
+			if(rawData)
+			{
+				//raw data handling fills raw data string with row/col values
+				
+				if(currDepth == 1)
+				{
+					if(matchedKey == CV_JSON_FILL_COMMENT)
+						setComment(currVal);
+					else if(matchedKey == CV_JSON_FILL_AUTHOR)
+						setAuthor(currVal);
+					else if(matchedKey == CV_JSON_FILL_CREATION_TIME)
+						setCreationTime(strtol(currVal.c_str(), 0, 10));
+				}
+				else if(currDepth == 2)
+				{
+					//encode URI component so commas are surviving delimiter
+					sourceRawData_ += StringMacros::encodeURIComponent(currKey) + "," + StringMacros::encodeURIComponent(currVal) + ",";
+					sourceColumnNames_.emplace(currKey);
+				}
+			}
+			else if (matchedKey != (unsigned int)-1)
 			{
 				// std::cout << "New Data for:: key[" << matchedKey << "]-" <<
 				//		keys[matchedKey] << "\n";
@@ -2600,47 +2632,10 @@ int TableView::fillFromJSON(const std::string& json)
 
 	if (!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
-		const std::set<std::string> srcColNames = getSourceColumnNames();
-		__SS__ << "Can not ignore errors because not every column was found in the "
-			"source data!"
-			<< ". Please see the details below:\n\n"
-			<< "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
-			<< getNumberOfColumns() << ". This resulted in a count of " << getSourceColumnMismatch() << " source column mismatches, and a count of "
-			<< getSourceColumnMissing() << " table entries missing in " << getNumberOfRows() << " row(s) of data." << __E__;
-
-		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
-		char        index = 'a';
-		std::string preIndexStr = "";
-		for (auto& srcColName : srcColNames)
-		{
-			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
-			if (index == 'z')  // wrap-around
-			{
-				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
-				index = 'a';
-			}
-			else
-				++index;
-		}
-		ss << __E__;
-
-		std::set<std::string> destColNames = getColumnStorageNames();
-		ss << "\n\nCurrent table column names in ALPHABETICAL order are as follows:\n";
-		index = 'a';
-		preIndexStr = "";
-		for (auto& destColName : destColNames)
-		{
-			ss << "\n\t" << preIndexStr << index << ". " << destColName;
-			if (index == 'z')  // wrap-around
-			{
-				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
-				index = 'a';
-			}
-			else
-				++index;
-		}
-		ss << __E__;
-		ss << StringMacros::stackTrace();
+		__SS__ << "Can not ignore errors because not every column was found in the source data!"
+			<< ". Please see the details below:\n\n" << 
+			getMismatchColumnInfo() <<
+			StringMacros::stackTrace();
 		__SS_ONLY_THROW__;
 	}
 
@@ -2648,6 +2643,63 @@ int TableView::fillFromJSON(const std::string& json)
 
 	return 0;  // success
 }  // end fillFromJSON()
+
+//==============================================================================
+std::string TableView::getMismatchColumnInfo(void) const
+{
+	const std::set<std::string>& 	srcColNames  = getSourceColumnNames();
+	std::set<std::string> 			destColNames = getColumnStorageNames();
+
+	__SS__ << "The source column size was found to be " << srcColNames.size()
+		<< ", and the current number of columns for this table is "
+		<< getNumberOfColumns() << ". This resulted in a count of "
+		<< getSourceColumnMismatch()
+		<< " source column mismatches, and a count of "
+		<< getSourceColumnMissing() << " table entries missing in "
+		<< getNumberOfRows() << " row(s) of data." << __E__;
+	
+
+	ss << "\n\n" << srcColNames.size() << " Source column names in ALPHABETICAL order were as follows:\n";
+	char        index = 'a';
+	std::string preIndexStr = "";
+	for (auto& srcColName : srcColNames)
+	{
+		if(destColNames.find(srcColName) == destColNames.end())
+			ss << "\n\t*** " << preIndexStr << index << ". " << srcColName << " ***";
+		else
+			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
+
+		if (index == 'z')  // wrap-around
+		{
+			preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+			index = 'a';
+		}
+		else
+			++index;
+	}
+	ss << __E__;
+
+	ss << "\n\n" << destColNames.size() << " Current table column names in ALPHABETICAL order are as follows:\n";
+	index = 'a';
+	preIndexStr = "";
+	for (auto& destColName : destColNames)
+	{
+		if(srcColNames.find(destColName) == srcColNames.end())
+			ss << "\n\t*** " << preIndexStr << index << ". " << destColName << " ***";
+		else
+			ss << "\n\t" << preIndexStr << index << ". " << destColName;
+
+		if (index == 'z')  // wrap-around
+		{
+			preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+			index = 'a';
+		}
+		else
+			++index;
+	}
+	ss << __E__;
+	return ss.str();
+} //end getMismatchColumnInfo()
 
 //==============================================================================
 bool TableView::isURIEncodedCommentTheSame(const std::string& comment) const
