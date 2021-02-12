@@ -17,6 +17,8 @@
 					<xs:attribute name="DataType"	 	type="xs:string" />
 					<xs:attribute name="DefaultValue"	type="xs:string" />
 					<xs:attribute name="DataChoices" 	type="xs:string" />
+                                        <xs:attribute name="MinValue"           type="xs:string" />
+                                        <xs:attribute name="MaxValue"           type="xs:string" />
 				</xs:complexType>
 				</xs:element>
 				</xs:sequence>
