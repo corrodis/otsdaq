@@ -618,6 +618,34 @@ void TableView::init(void)
 				// check for link mate (i.e. every child link needs link ID)
 				getChildLink(col, tmpIsGroup, tmpLinkPair);
 			}
+		// check that if number exist then it is limited by min and max, use functions in here for get values different than stof
+			if(columnsInfo_[col].isNumberDataType())
+			{
+				// check for min and max values within the table and if they are empty skips this step
+				std::string minimumValue       = columnsInfo_[col].getMinValue();
+				std::string maximumValue       = columnsInfo_[col].getMaxValue();
+				float       floatMinimumValue1 = std::stof(columnsInfo_[col].getMinValue());
+				float       floatMaximumValue1 = std::stof(columnsInfo_[col].getMaxValue());
+				if(!minimumValue.empty() && !maximumValue.empty() && (floatMinimumValue1 > floatMaximumValue1))
+				{
+					__SS__ << "Minimum value is greater than maximum, check table editor to change this" << __E__;
+					__SS_THROW__;
+				}
+				if(!minimumValue.empty() && !maximumValue.empty() && (minimumValue != maximumValue))
+				{
+					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
+					{
+						// std::cout << "entre al if " << row << " valor de thedataview " << theDataView_[row][col] << std::endl;
+						float valueFromTable = std::stof(theDataView_[row][col]);
+
+						if((valueFromTable < floatMinimumValue1) || (valueFromTable > floatMaximumValue1))
+						{
+							__SS__ << "This value is out of the established limits" << __E__;
+							__SS_THROW__;
+						}
+					}
+				}
+			}
 		}
 
 		// verify child link index uniqueness
@@ -639,6 +667,11 @@ void TableView::init(void)
 				<< childLinkIdLabels.size() << __E__;
 			__SS_THROW__;
 		}
+
+		
+
+
+
 	}
 	catch (...)
 	{
@@ -2845,6 +2878,8 @@ bool TableView::setURIEncodedValue(const std::string& value, const unsigned int&
 		//			__SS_THROW__;
 		//		}
 		theDataView_[r][c] = valueStr;
+
+		// is it here that a new exception should be added to enforce min and max, given that they only appear with number type?
 	}
 	else if (columnsInfo_[c].getDataType() == TableViewColumnInfo::DATATYPE_TIME)
 	{

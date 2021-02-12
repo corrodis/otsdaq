@@ -53,6 +53,10 @@ const std::string TableViewColumnInfo::DATATYPE_STRING_DEFAULT = "DEFAULT";
 const std::string TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT = "No Comment";
 const std::string TableViewColumnInfo::DATATYPE_BOOL_DEFAULT = "0";
 const std::string TableViewColumnInfo::DATATYPE_NUMBER_DEFAULT = "0";
+
+const std::string TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT = "0";
+const std::string TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT = "0";
+
 const std::string TableViewColumnInfo::DATATYPE_TIME_DEFAULT = "0";
 const std::string TableViewColumnInfo::DATATYPE_LINK_DEFAULT = "NO_LINK";
 
@@ -75,11 +79,15 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 	const std::string& dataType,
     const std::string* defaultValue,
 	const std::string& dataChoicesCSV,
+	const std::string* minValue,
+	const std::string* maxValue,
 	std::string* capturedExceptionString)
 	: type_(type), name_(name), storageName_(storageName),
 	  dataType_(/*convert antiquated*/dataType == "VARCHAR2"?DATATYPE_STRING:dataType),
 	  defaultValue_(defaultValue?*defaultValue:getDefaultDefaultValue(type_,dataType_)), //if default pointer, take input default value
 	  dataChoices_(getDataChoicesFromString(dataChoicesCSV)),
+	  minValueGeneral_(minValue?*minValue:getMinDefaultValue(dataType_)),
+	  maxValueGeneral_(maxValue?*maxValue:getMaxDefaultValue(dataType_)),
 	  bitMapInfoP_(0)
 {
 	// verify type
@@ -193,6 +201,8 @@ TableViewColumnInfo::TableViewColumnInfo(const std::string& type,
 			else
 				__SS_THROW__;
 		}
+
+
 
 	//RAR moved to call from initialization of constructor!
 
@@ -316,7 +326,8 @@ TableViewColumnInfo::TableViewColumnInfo(void) {}
 TableViewColumnInfo::TableViewColumnInfo(const TableViewColumnInfo& c)  // copy constructor because of bitmap pointer
 	: type_(c.type_), name_(c.name_), storageName_(c.storageName_),
 	  dataType_(c.dataType_), defaultValue_(c.defaultValue_),
-	  dataChoices_(c.dataChoices_), bitMapInfoP_(0)
+	  dataChoices_(c.dataChoices_), minValueGeneral_(c.minValueGeneral_),  maxValueGeneral_(c.maxValueGeneral_), 
+	  bitMapInfoP_(0)
 {
 	// extract bitmap info if necessary
 	extractBitMapInfo();
@@ -386,6 +397,11 @@ const std::string& TableViewColumnInfo::getType(void) const { return type_; }
 //==============================================================================
 const std::string& TableViewColumnInfo::getDefaultValue(void) const { return defaultValue_; }
 
+const std::string& TableViewColumnInfo::getMinValue(void) const { return minValueGeneral_; }
+
+const std::string& TableViewColumnInfo::getMaxValue(void) const { return maxValueGeneral_; }
+
+
 //==============================================================================
 const std::string& TableViewColumnInfo::getDefaultDefaultValue(const std::string& type, const std::string& dataType)
 {
@@ -413,6 +429,49 @@ const std::string& TableViewColumnInfo::getDefaultDefaultValue(const std::string
 		__SS_THROW__;
 	}
 } //end getDefaultDefaultValue()
+
+//==============================================================================
+//function to get min default value 
+const std::string& TableViewColumnInfo::getMinDefaultValue(const std::string& dataType)
+{
+	 if (dataType == TableViewColumnInfo::DATATYPE_STRING)
+	 	return (TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT);  // default to OFF, NO, FALSE
+	
+	else if (dataType == TableViewColumnInfo::DATATYPE_NUMBER)
+	{
+		return(TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT);
+	}
+	
+	else if (dataType == TableViewColumnInfo::DATATYPE_TIME)
+		return (TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT);
+	else
+	{
+		__SS__ << "\tUnrecognized View data type: " << dataType << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		__SS_THROW__;
+	}
+}
+
+//==============================================================================
+//function to get max default value
+const std::string& TableViewColumnInfo::getMaxDefaultValue(const std::string& dataType)
+{
+	if (dataType == TableViewColumnInfo::DATATYPE_STRING)
+		return (TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT);
+	
+	else if (dataType == TableViewColumnInfo::DATATYPE_NUMBER)
+	{
+		return(TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT);
+	}	
+	else if (dataType == TableViewColumnInfo::DATATYPE_TIME)
+		return (TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT);
+	else
+	{
+		__SS__ << "\tUnrecognized View data type: " << dataType << std::endl;
+		__COUT_ERR__ << "\n" << ss.str();
+		__SS_THROW__;
+	}
+}
 
 //==============================================================================
 std::vector<std::string> TableViewColumnInfo::getAllTypesForGUI(void)
@@ -460,7 +519,7 @@ std::map<std::pair<std::string, std::string>, std::string> TableViewColumnInfo::
 	all[std::pair<std::string, std::string>(DATATYPE_STRING, "*")] = DATATYPE_STRING_DEFAULT;
 	return all;
 }
-
+// TODO check if min and max values need a function called getallminmaxforgui or something like that for someplace
 //==============================================================================
 // isBoolType
 bool TableViewColumnInfo::isBoolType(void) const
