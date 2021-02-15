@@ -462,6 +462,8 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 				continue;  // skip chat supervisor(s)
 			if(it->second.isTypeConsoleSupervisor())
 				continue;  // skip console supervisor(s)
+			if(it->second.isTypeCodeEditorSupervisor())
+				continue;  // skip code editor supervisor(s)
 
 			if(createContainer)  // create container first time
 			{

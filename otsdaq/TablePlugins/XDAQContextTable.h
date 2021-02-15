@@ -84,54 +84,52 @@ class XDAQContextTable : public TableBase
 	// XDAQ Context Column names
 	static struct ColContext
 	{
-		std::string const colContextUID_               = "ContextUID";
-		std::string const colLinkToApplicationTable_   = "LinkToApplicationTable";
-		std::string const colLinkToApplicationGroupID_ = "LinkToApplicationGroupID";
-		std::string const colStatus_  = TableViewColumnInfo::COL_NAME_STATUS;
-		std::string const colId_      = "Id";
-		std::string const colAddress_ = "Address";
-		std::string const colPort_    = "Port";
+		std::string const colContextUID_               	= "ContextUID";
+		std::string const colLinkToApplicationTable_   	= "LinkToApplicationTable";
+		std::string const colLinkToApplicationGroupID_ 	= "LinkToApplicationGroupID";
+		std::string const colStatus_  					= TableViewColumnInfo::COL_NAME_STATUS;
+		std::string const colId_      					= "Id";
+		std::string const colAddress_ 					= "Address";
+		std::string const colPort_    					= "Port";
 	} colContext_;
 
 	// XDAQ App Column names
 	static struct ColApplication
 	{
-		std::string const colApplicationGroupID_    = "ApplicationGroupID";
-		std::string const colApplicationUID_        = "ApplicationUID";
-		std::string const colLinkToSupervisorTable_ = "LinkToSupervisorTable";
-		std::string const colLinkToSupervisorUID_   = "LinkToSupervisorUID";
-		std::string const colStatus_              = TableViewColumnInfo::COL_NAME_STATUS;
-		std::string const colClass_               = "Class";
-		std::string const colId_                  = "Id";
-		std::string const colInstance_            = "Instance";
-		std::string const colNetwork_             = "Network";
-		std::string const colGroup_               = "Group";
-		std::string const colModule_              = "Module";
-		std::string const colConfigurePriority_   = "ConfigurePriority";
-		std::string const colStartPriority_       = "StartPriority";
-		std::string const colStopPriority_        = "StopPriority";
-		std::string const colLinkToPropertyTable_ = "LinkToPropertyTable";
-		std::string const colLinkToPropertyGroupID_ = "LinkToPropertyGroupID";
-
+		std::string const colApplicationGroupID_    	= "ApplicationGroupID";
+		std::string const colApplicationUID_        	= "ApplicationUID";
+		std::string const colLinkToSupervisorTable_ 	= "LinkToSupervisorTable";
+		std::string const colLinkToSupervisorUID_   	= "LinkToSupervisorUID";
+		std::string const colStatus_              		= TableViewColumnInfo::COL_NAME_STATUS;
+		std::string const colClass_               		= "Class";
+		std::string const colId_                  		= "Id";
+		std::string const colInstance_            		= "Instance";
+		std::string const colNetwork_             		= "Network";
+		std::string const colGroup_               		= "Group";
+		std::string const colModule_              		= "Module";
+		std::string const colConfigurePriority_   		= "ConfigurePriority";
+		std::string const colStartPriority_       		= "StartPriority";
+		std::string const colStopPriority_        		= "StopPriority";
+		std::string const colLinkToPropertyTable_ 		= "LinkToPropertyTable";
+		std::string const colLinkToPropertyGroupID_ 	= "LinkToPropertyGroupID";
 	} colApplication_;
 
 	// XDAQ App Property Column names
 	static struct ColApplicationProperty
 	{
-		std::string const colPropertyGroupID_ = "PropertyGroupID";
-		std::string const colPropertyUID_     = "UID";
-		std::string const colStatus_          = TableViewColumnInfo::COL_NAME_STATUS;
-		std::string const colPropertyName_    = "PropertyName";
-		std::string const colPropertyType_    = "PropertyType";
-		std::string const colPropertyValue_   = "PropertyValue";
-
+		std::string const colPropertyGroupID_ 			= "PropertyGroupID";
+		std::string const colPropertyUID_     			= "UID";
+		std::string const colStatus_          			= TableViewColumnInfo::COL_NAME_STATUS;
+		std::string const colPropertyName_    			= "PropertyName";
+		std::string const colPropertyType_    			= "PropertyType";
+		std::string const colPropertyValue_   			= "PropertyValue";
 	} colAppProperty_;
 
 
   public:
 	static const std::set<std::string> FETypeClassNames_, DMTypeClassNames_,
 	    LogbookTypeClassNames_, MacroMakerTypeClassNames_, ChatTypeClassNames_,
-	    ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_;
+	    ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_, CodeEditorTypeClassNames_;
 	static const std::string GATEWAY_SUPERVISOR_CLASS, WIZARD_SUPERVISOR_CLASS,
 	    DEPRECATED_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_CLASS;
 }; //end XDAQContextTable class

@@ -13,20 +13,21 @@ using namespace ots;
 #define XDAQ_RUN_FILE         std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + std::string(__ENV__("XDAQ_CONFIGURATION_XML")) + ".xml"
 #define APP_PRIORITY_FILE     std::string(__ENV__("XDAQ_CONFIGURATION_DATA_PATH")) + "/" + "xdaqAppStateMachinePriority"
 
-const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS = "ots::Supervisor";  // still allowed for now, in StartOTS
-const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS 	= "ots::GatewaySupervisor";
-const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  	= "ots::WizardSupervisor";
-const std::string XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS  	= "ots::ARTDAQSupervisor";
-const std::set<std::string> XDAQContextTable::FETypeClassNames_ 		= { "ots::FESupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
-const std::set<std::string> XDAQContextTable::DMTypeClassNames_ 		= { "ots::DataManagerSupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
-const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ 	= { "ots::LogbookSupervisor"};
-const std::set<std::string> XDAQContextTable::MacroMakerTypeClassNames_ = { "ots::MacroMakerSupervisor"};
-const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ 		= { "ots::ChatSupervisor"};
-const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ 	= { "ots::ConsoleSupervisor"};
-const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ = { "ots::TableGUISupervisor"};
+const std::string XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS 				= "ots::Supervisor";  // still allowed for now, in StartOTS
+const std::string XDAQContextTable::GATEWAY_SUPERVISOR_CLASS 					= "ots::GatewaySupervisor";
+const std::string XDAQContextTable::WIZARD_SUPERVISOR_CLASS  					= "ots::WizardSupervisor";
+const std::string XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS  					= "ots::ARTDAQSupervisor";
+const std::set<std::string> XDAQContextTable::FETypeClassNames_ 				= { "ots::FESupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextTable::DMTypeClassNames_ 				= { "ots::DataManagerSupervisor", "ots::FEDataManagerSupervisor", "ots::ARTDAQFEDataManagerSupervisor"};
+const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ 			= { "ots::LogbookSupervisor"};
+const std::set<std::string> XDAQContextTable::MacroMakerTypeClassNames_ 		= { "ots::MacroMakerSupervisor"};
+const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ 				= { "ots::ChatSupervisor"};
+const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ 			= { "ots::ConsoleSupervisor"};
+const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ 	= { "ots::TableGUISupervisor"};
+const std::set<std::string> XDAQContextTable::CodeEditorTypeClassNames_ 		= { "ots::CodeEditorSupervisor"};
 
 
-const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY = 100;
+const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY 				= 100;
 
 XDAQContextTable::ColContext 				XDAQContextTable::colContext_ 		= XDAQContextTable::ColContext();  // initialize static member
 XDAQContextTable::ColApplication 			XDAQContextTable::colApplication_ 	= XDAQContextTable::ColApplication();  // initialize static member
