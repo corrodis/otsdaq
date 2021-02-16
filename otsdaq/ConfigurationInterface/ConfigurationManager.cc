@@ -104,33 +104,43 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 
 		groupMetadataTable_.setTableName(ConfigurationInterface::GROUP_METADATA_TABLE_NAME);
 		std::vector<TableViewColumnInfo>* colInfo = groupMetadataTable_.getMockupViewP()->getColumnsInfoP();
-
+		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_UID,  // just to make init() happy
 		                                       "UnusedUID",
 		                                       "UNUSED_UID",
 		                                       TableViewColumnInfo::DATATYPE_NUMBER,
 											   0 /*Default*/,
 		                                       "",
+											   0 /*Min*/,
+											   0 /*Max*/,
 		                                       0));
+		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING,
-				   0 /*Default*/, "", 0));
+				   0 /*Default*/, "",0 /*Min*/,0 /*Max*/, 0));
+		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_COMMENT,  // just to make init() happy
 		                                       TableViewColumnInfo::COL_NAME_COMMENT,
 		                                       "COMMENT_DESCRIPTION",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
 											   0 /*Default*/,
 		                                       "",
+											   0 /*Min*/,
+											   0 /*Max*/,
 		                                       0));
+		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_AUTHOR,  // just to make init() happy
 		                                       "GroupAuthor",
 		                                       "AUTHOR",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
 											   0 /*Default*/,
 		                                       "",
+											   0 /*Min*/,
+											   0 /*Max*/,
 		                                       0));
+		// TODO add min/max									   
 		colInfo->push_back(
 		    TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP, "GroupCreationTime", "GROUP_CREATION_TIME", TableViewColumnInfo::DATATYPE_TIME,
-					   0 /*Default*/, "", 0));
+					   0 /*Default*/, "", 0 /*Min*/, 0/*Max*/, 0));
 		auto tmpVersion = groupMetadataTable_.createTemporaryView();
 		groupMetadataTable_.setActiveView(tmpVersion);
 		// only need this one and only row for all time
@@ -710,7 +720,7 @@ void ConfigurationManager::dumpMacroMakerModeFhicl()
 			if(!fe.second.getNode("Status").getValue<bool>())
 				continue;
 
-			__COUTV__(fe.first);
+			//__COUTV__(fe.first);
 
 			OUT << fe.first << ": {" << __E__;
 			PUSHTAB;
@@ -770,7 +780,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 	{
 		if(node.isDisconnected())
 		{
-			__COUT__ << node.getFieldName() << " field is a disconnected link." << __E__;
+			//__COUT__ << node.getFieldName() << " field is a disconnected link." << __E__;
 			return;
 		}
 
@@ -1355,9 +1365,9 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		if(onlyLoadIfBackboneOrContext && groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
 		   groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
-			__COUT_WARN__ << "Not loading group because it is not of type Context or "
-			                 "Backbone (it is type '"
-			              << convertGroupTypeToName(groupType) << "')." << __E__;
+			__COUT__ << "Not loading group because it is not of type Context or "
+			            "Backbone (it is type '"
+			         << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
 		}
 

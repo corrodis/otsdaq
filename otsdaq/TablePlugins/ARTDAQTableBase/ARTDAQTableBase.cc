@@ -1,4 +1,5 @@
-#include "TRACE/tracemf.h"
+
+#include "otsdaq/Macros/CoutMacros.h"
 #define TRACE_NAME "ARTDAQTableBase"
 
 #include <fhiclcpp/ParameterSet.h>

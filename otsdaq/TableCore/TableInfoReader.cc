@@ -53,6 +53,9 @@ TableInfoReader::TableInfoReader(bool allowIllegalColumns) : allowIllegalColumns
 	columnDataTypeAttributeTag_    = xercesc::XMLString::transcode("DataType");
 	columnDataChoicesAttributeTag_ = xercesc::XMLString::transcode("DataChoices");
 	columnDefaultValueAttributeTag_ = xercesc::XMLString::transcode("DefaultValue");
+	columnMinValueAttributeTag_ 	= xercesc::XMLString::transcode("MinValue");
+	columnMaxValueAttributeTag_ 	= xercesc::XMLString::transcode("MaxValue");
+
 }
 
 //==============================================================================
@@ -74,6 +77,8 @@ TableInfoReader::~TableInfoReader(void)
 		xercesc::XMLString::release(&columnDataTypeAttributeTag_);
 		xercesc::XMLString::release(&columnDataChoicesAttributeTag_);
 		xercesc::XMLString::release(&columnDefaultValueAttributeTag_);
+		xercesc::XMLString::release(&columnMinValueAttributeTag_);
+		xercesc::XMLString::release(&columnMaxValueAttributeTag_);
 	}
 	catch(...)
 	{
@@ -333,6 +338,10 @@ std::string TableInfoReader::read(TableBase& table)
 			
 			
 			xercesc::DOMNodeList* columnNodeList = viewElement->getElementsByTagName(columnTag_);
+			
+			
+			//TODO min and max need to be added here.
+			
 			for(XMLSize_t column = 0; column < columnNodeList->getLength(); column++)
 			{
 				//<COLUMN>
@@ -352,13 +361,33 @@ std::string TableInfoReader::read(TableBase& table)
 
 					//__COUT__ << "FOUND default value! " << defaultValue << __E__;
 				}
-//				else
-//				{
-//					__COUT__ << "DID NOT find default value!" << __E__;
-//				}
+				std::string minValue;
+				bool isMinValue = columnElement->getAttributeNode(columnMinValueAttributeTag_)?true:false;
+				if(isMinValue)
+				{
+					minValue =
+							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMinValueAttributeTag_)));
+
+					__COUT__ << "FOUND min value! " << minValue << __E__;
+				}
+				std::string maxValue;
+				bool isMaxValue = columnElement->getAttributeNode(columnMinValueAttributeTag_)?true:false;
+				if(isMaxValue)
+				{
+					maxValue =
+							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMaxValueAttributeTag_)));
+
+					__COUT__ << "FOUND max value! " << maxValue << __E__;
+				}
+				// TODO read min/max, almost done??
+				else
+				{
+					//__COUT__ << "DID NOT find default value! or min and max values!" << __E__;
+				}
 
 				// automatically delete the persistent version of the column info
 				std::string capturedException;
+				// TODO add reading of min / max
 				table.getMockupViewP()->getColumnsInfoP()->push_back(
 				    TableViewColumnInfo(XML_TO_CHAR(columnElement->getAttribute(columnTypeAttributeTag_)),
 				                        XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)),
@@ -366,6 +395,8 @@ std::string TableInfoReader::read(TableBase& table)
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataTypeAttributeTag_)),
 										isDefaultValue?&defaultValue:0,
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataChoicesAttributeTag_)),
+										isMinValue?&minValue:0,
+										isMaxValue?&maxValue:0,
 				                        allowIllegalColumns_ ? &capturedException : 0));  // capture exception string if allowing illegal columns
 
 				// if error detected (this implies allowing illegal columns)

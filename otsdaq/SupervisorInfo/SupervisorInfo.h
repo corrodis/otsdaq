@@ -63,16 +63,17 @@ class SupervisorInfo
 	static const std::string APP_STATUS_UNKNOWN;
 
 	// BOOLs	-------------------
-	bool isGatewaySupervisor(void) const { return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS; }
-	bool isWizardSupervisor(void) const { return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS; }
-	bool isTypeFESupervisor(void) const { return XDAQContextTable::FETypeClassNames_.find(class_) != XDAQContextTable::FETypeClassNames_.end(); }
-	bool isTypeDMSupervisor(void) const { return XDAQContextTable::DMTypeClassNames_.find(class_) != XDAQContextTable::DMTypeClassNames_.end(); }
-	bool isTypeLogbookSupervisor(void) const { return XDAQContextTable::LogbookTypeClassNames_.find(class_) != XDAQContextTable::LogbookTypeClassNames_.end(); }
-	bool isTypeMacroMakerSupervisor(void) const	{ return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) != XDAQContextTable::MacroMakerTypeClassNames_.end(); }
-	bool isTypeConfigurationGUISupervisor(void) const { return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) != XDAQContextTable::ConfigurationGUITypeClassNames_.end(); }
-	bool isTypeChatSupervisor(void) const { return XDAQContextTable::ChatTypeClassNames_.find(class_) != XDAQContextTable::ChatTypeClassNames_.end(); }
-	bool isTypeConsoleSupervisor(void) const { return XDAQContextTable::ConsoleTypeClassNames_.find(class_) != XDAQContextTable::ConsoleTypeClassNames_.end(); }
-	bool isTypeARTDAQSupervisor(void) const { return class_ == XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS; }
+	bool 		isGatewaySupervisor					(void) const { return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS; }
+	bool 		isWizardSupervisor					(void) const { return class_ == XDAQContextTable::WIZARD_SUPERVISOR_CLASS; }
+	bool 		isTypeFESupervisor					(void) const { return XDAQContextTable::FETypeClassNames_.find(class_) != XDAQContextTable::FETypeClassNames_.end(); }
+	bool 		isTypeDMSupervisor					(void) const { return XDAQContextTable::DMTypeClassNames_.find(class_) != XDAQContextTable::DMTypeClassNames_.end(); }
+	bool 		isTypeLogbookSupervisor				(void) const { return XDAQContextTable::LogbookTypeClassNames_.find(class_) != XDAQContextTable::LogbookTypeClassNames_.end(); }
+	bool 		isTypeMacroMakerSupervisor			(void) const { return XDAQContextTable::MacroMakerTypeClassNames_.find(class_) != XDAQContextTable::MacroMakerTypeClassNames_.end(); }
+	bool 		isTypeConfigurationGUISupervisor	(void) const { return XDAQContextTable::ConfigurationGUITypeClassNames_.find(class_) != XDAQContextTable::ConfigurationGUITypeClassNames_.end(); }
+	bool 		isTypeChatSupervisor				(void) const { return XDAQContextTable::ChatTypeClassNames_.find(class_) != XDAQContextTable::ChatTypeClassNames_.end(); }
+	bool 		isTypeConsoleSupervisor				(void) const { return XDAQContextTable::ConsoleTypeClassNames_.find(class_) != XDAQContextTable::ConsoleTypeClassNames_.end(); }
+	bool 		isTypeCodeEditorSupervisor			(void) const { return XDAQContextTable::CodeEditorTypeClassNames_.find(class_) != XDAQContextTable::CodeEditorTypeClassNames_.end(); }
+	bool 		isTypeARTDAQSupervisor				(void) const { return class_ == XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS; }
 
 	// Getters -------------------
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* getDescriptor					(void) const { return descriptor_; }

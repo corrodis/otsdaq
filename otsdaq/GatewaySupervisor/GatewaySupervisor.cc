@@ -248,7 +248,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				try
 				{
 					detail = (theSupervisor->theStateMachine_.isInTransition()
-					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(theSupervisor->stateMachineLastCommandInput_)
+					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(
+									  theSupervisor->stateMachineLastCommandInput_)
 					              : "");
 				}
 				catch(...)
@@ -389,7 +390,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				          "Where Parameter(s) is/are optional."
 				       << __E__;
 				__COUT_INFO__ << ss.str();
-				__MOUT_INFO__ << ss.str();
 			}
 			begin        = 0;
 			commaCounter = 0;
@@ -432,7 +432,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				          "following error: "
 				       << errorStr;
 				__COUT_ERR__ << ss.str();
-				__MOUT_ERR__ << ss.str();
 				if(acknowledgementEnabled)
 					sock.acknowledge(errorStr, true /*verbose*/);
 			}
@@ -440,7 +439,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 			{
 				__SS__ << "Successfully executed state change command '" << command << ".'" << __E__;
 				__COUT_INFO__ << ss.str();
-				__MOUT_INFO__ << ss.str();
 				if(acknowledgementEnabled)
 					sock.acknowledge("Done", true /*verbose*/);
 			}
@@ -917,7 +915,6 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	{
 		__SS__ << "Failure to send Workloop transition command '" << command << "!' An error response '" << reply << "' was received." << __E__;
 		__COUT_ERR__ << ss.str();
-		__MOUT_ERR__ << ss.str();
 	}
 	return false;  // execute once and automatically remove the workloop so in
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
@@ -1514,28 +1511,41 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			         << "Adding iteration parameters " << iteration << "." << subIteration << __E__;
 
 		RunControlStateMachine::theProgressBar_.step();
+	
+		std::string givenAppStatus = theStateMachine_.getCurrentTransitionName(command);
+		unsigned int givenAppProgress = appInfo.getProgress();
+		std::string givenAppDetail = appInfo.getDetail();
+		if(givenAppProgress >= 100) 
+		{
+			givenAppProgress = 0; //reset
+			givenAppDetail = "";
+		}
 
 		if(iteration == 0 && subIteration == 0)
 		{
 			for(unsigned int j = 0; j < 4; ++j)
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command << __E__;
+						<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command << __E__;
+
+			givenAppDetail = "";
 		}
 		else  // else this not the first time through the supervisors
 		{
+			if(givenAppDetail == "")
+				givenAppDetail = std::to_string(iteration) + ":" + std::to_string(subIteration);
 			if(subIteration == 0)
 			{
 				for(unsigned int j = 0; j < 4; ++j)
 					__COUT__ << "Broadcast thread " << threadIndex << "\t"
-					         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
-					         << " (iteration: " << iteration << ")" << __E__;
+							<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
+							<< " (iteration: " << iteration << ")" << __E__;
 			}
 			else
 			{
 				for(unsigned int j = 0; j < 4; ++j)
 					__COUT__ << "Broadcast thread " << threadIndex << "\t"
-					         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
-					         << " (iteration: " << iteration << ", sub-iteration: " << subIteration << ")" << __E__;
+							<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
+							<< " (iteration: " << iteration << ", sub-iteration: " << subIteration << ")" << __E__;
 			}
 		}
 
@@ -1550,27 +1560,36 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		}
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Sending... \t" << SOAPUtilities::translate(message) << std::endl;
+				<< "Sending... \t" << SOAPUtilities::translate(message) << std::endl;
 
 		try  // attempt transmit of transition command
 		{
+			__COUTV__(givenAppStatus);
+			// start recursive mutex scope			
+			std::lock_guard<std::recursive_mutex> lock(
+				allSupervisorInfo_.getSupervisorInfoMutex(appInfo.getId()));
+			//set app status, but leave progress and detail alone
+			allSupervisorInfo_.setSupervisorStatus(appInfo, givenAppStatus, 
+				givenAppProgress, givenAppDetail);
+
+			//for transition attempt, set status for app, in case the request occupies the target app
 			reply = send(appInfo.getDescriptor(), message);
+			//then release mutex here using scope change, to allow the app to start giving its own updates
 		}
 		catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 		{
 			// do not kill whole system if xdaq xoap failure
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId()
-			       << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
-			       << "Xoap message failure. Did the target Supervisor crash? Try "
-			          "re-initializing or restarting otsdaq."
-			       << __E__;
+				<< "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
+				<< "Xoap message failure. Did the target Supervisor crash? Try "
+					"re-initializing or restarting otsdaq."
+				<< __E__;
 			__COUT_ERR__ << ss.str();
-			__MOUT_ERR__ << ss.str();
 
 			try
 			{
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Try again.." << __E__;
+						<< "Try again.." << __E__;
 
 				{
 					// add a second try parameter flag
@@ -1590,22 +1609,22 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 				}
 
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Re-Sending... " << SOAPUtilities::translate(message) << std::endl;
+						<< "Re-Sending... " << SOAPUtilities::translate(message) << std::endl;
 
 				reply = send(appInfo.getDescriptor(), message);
 			}
 			catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 			{
-				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Second try failed.." << __E__;
+				__COUT_ERR__ << "Broadcast thread " << threadIndex << "\t"
+						<< "Second try failed.." << __E__;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			}
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
-			         << "2nd try passed.." << __E__;
+					<< "2nd try passed.." << __E__;
 		}  // end send catch
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Reply received = " << reply << __E__;
+				<< "Reply received = " << reply << __E__;
 
 		if((reply != command + "Done") && (reply != command + "Response") && (reply != command + "Iterate") && (reply != command + "SubIterate"))
 		{
@@ -1613,7 +1632,6 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			       << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
 			       << reply;
 			__COUT_ERR__ << ss.str() << __E__;
-			__MOUT_ERR__ << ss.str() << __E__;
 
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
 			         << "Getting error message..." << __E__;
@@ -1636,7 +1654,7 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 					error = err.str();
 				}
 
-				__SS__ << "Received error from Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '"
+				__SS__ << "Received error message from Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '"
 				       << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n Error Message = " << error << __E__;
 
 				__COUT_ERR__ << ss.str() << __E__;
@@ -3037,7 +3055,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			// sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
-			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
 
 			// gateway launch is different, in that it saves user sessions
 			theWebUsers_.saveActiveSessions();
