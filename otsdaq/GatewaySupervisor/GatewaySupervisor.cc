@@ -855,7 +855,116 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		if(commandParameters.size() == 0)
 		{
 			runNumber = getNextRunNumber();
-			setNextRunNumber(runNumber + 1);
+			//Check if run number should come from db, if so create run info record into database
+			try{
+				ConfigurationTree configLinkNode =
+					CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+				if(!configLinkNode.isDisconnected())
+				{
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+					bool useRunInfoDb = fsmLinkNode.getNode("EnableRunInfoDatabase").getValue<bool>();
+
+					if(useRunInfoDb)
+					{
+						int runInfoDbConnStatus_ = 0;
+						char* dbname_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE")? getenv("OTSDAQ_RUNINFO_DATABASE") : "prototype_run_info");
+						char* dbhost_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_HOST")? getenv("OTSDAQ_RUNINFO_DATABASE_HOST") : "");
+						char* dbport_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PORT")? getenv("OTSDAQ_RUNINFO_DATABASE_PORT") : "");
+						char* dbuser_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_USER")? getenv("OTSDAQ_RUNINFO_DATABASE_USER") : "");
+						char* dbpwd_  = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PWD")? getenv("OTSDAQ_RUNINFO_DATABASE_PWD") : "");
+
+						//open db connection
+						char runInfoDbConnInfo [1024];
+						sprintf(runInfoDbConnInfo, "dbname=%s host=%s port=%s  \
+							user=%s password=%s", dbname_, dbhost_, dbport_, dbuser_, dbpwd_);
+						PGconn* runInfoDbConn = PQconnectdb(runInfoDbConnInfo);
+
+						if(PQstatus(runInfoDbConn) == CONNECTION_BAD)
+						{
+							__COUT__ << "Unable to connect to prototype_run_info database!\n" << __E__;
+							PQfinish(runInfoDbConn);
+						}
+						else
+						{
+							__COUT__ << "Connected to prototype_run_info database!\n" << __E__;
+							runInfoDbConnStatus_ = 1;
+						}
+
+						// write run info into db
+						if(runInfoDbConnStatus_ == 1)
+						{
+							PGresult* res;
+							char      buffer[1024];
+							__COUT__ << "Insert new run info in the run_info Database table" << __E__;
+							snprintf(buffer,
+									sizeof(buffer),
+									"INSERT INTO public.run_info(				\
+																run_type		\
+																, user_name		\
+																, host_name		\
+																, start_time	\
+																, note)			\
+																VALUES ('%s','%s','%s',TO_TIMESTAMP(%ld),'%s');",
+									"T",
+									__ENV__("MU2E_OWNER"),
+									__ENV__("HOSTNAME"),
+									time(NULL),
+									"note");
+
+							res = PQexec(runInfoDbConn, buffer);
+
+							if(PQresultStatus(res) != PGRES_COMMAND_OK)
+							{
+								__SS__ << "RUN INFO INSERT INTO DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res)
+									<< __E__;
+								PQclear(res);
+								__SS_THROW__;
+							}
+							PQclear(res);
+
+							res = PQexec(runInfoDbConn, "select max(run_number) from public.run_info;");
+
+							if(PQresultStatus(res) != PGRES_TUPLES_OK)
+							{
+								__SS__ << "RUN INFO SELECT FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
+								PQclear(res);
+								__SS_THROW__;
+							}
+
+							if(PQntuples(res) == 1)
+							{
+								runNumber = atoi(PQgetvalue(res, 0, 0));
+								__COUTV__(runNumber);
+							}
+							else
+							{
+								__SS__ << "RETRIVE RUN NUMBER FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
+								PQclear(res);
+								__SS_THROW__;
+							}
+
+							PQclear(res);
+						}
+
+						//close db connection
+						if(PQstatus(runInfoDbConn) == CONNECTION_OK)
+						{
+							PQfinish(runInfoDbConn);
+							__COUT__ << "prototype_run_info DB CONNECTION CLOSED\n" << __E__;
+						}
+					}
+				}
+			}
+			catch(...)
+			{
+				//ERROR
+				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+					<< __E__;
+				__SS_THROW__;
+			}  // End write run info into db
+				
+			
+			setNextRunNumber(runNumber + 1);				
 		}
 		else
 		{
@@ -2869,7 +2978,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			else
 				xmlOut.addTextElementToData("transition_progress", "100");
 
-			char tmp[20];
+			//char tmp[20]; old size before adding db run number
+			char tmp[30];
 			sprintf(tmp, "%lu", theStateMachine_.getTimeInState());
 			xmlOut.addTextElementToData("time_in_state", tmp);
 
@@ -2886,7 +2996,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//				theStateMachine_.getProvenanceStateName() << __E__;
 			//		__COUT__ << "theStateMachine_.getCurrentStateName() = " <<
 			//				theStateMachine_.getCurrentStateName() << __E__;
-
+			bool useRunInfoDb = false;
+			
 			if(!theStateMachine_.isInTransition())
 			{
 				std::string stateMachineRunAlias = "Run";  // default to "Run"
@@ -2895,13 +3006,17 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				ConfigurationTree configLinkNode =
 				    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
 
+
 				if(!configLinkNode.isDisconnected())
 				{
 					try  // for backwards compatibility
 					{
 						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
 						if(!fsmLinkNode.isDisconnected())
+						{
 							stateMachineRunAlias = fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
+ 							useRunInfoDb = fsmLinkNode.getNode(fsmName + "/EnableRunInfoDatabase").getValue<bool>();
+						}
 						// else
 						//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
 					}
@@ -2933,7 +3048,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 				if(theStateMachine_.getCurrentStateName() == "Running" || theStateMachine_.getCurrentStateName() == "Paused")
 				{
-					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+					if(useRunInfoDb)
+						sprintf(tmp, "Current %s Number from DB: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+					else
+						sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
 
 					if(RunControlStateMachine::asyncPauseExceptionReceived_)
 					{
@@ -2943,7 +3061,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					}
 				}
 				else
-					sprintf(tmp, "Next %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(fsmName));
+				{
+					if(useRunInfoDb)
+						sprintf(tmp, "Next %s Number from DB.", stateMachineRunAlias.c_str());
+					else
+						sprintf(tmp, "Next %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(fsmName));
+				}
 
 				if(RunControlStateMachine::asyncStopExceptionReceived_)
 				{
