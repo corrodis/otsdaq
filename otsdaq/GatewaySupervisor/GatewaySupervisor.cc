@@ -14,6 +14,8 @@
 
 #include "otsdaq/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer
 
+#include "otsdaq/FiniteStateMachine/RunInfoVInterface.h" // for Run Info plugins
+#include "otsdaq/PluginMakers/MakeRunInfo.h" // for Run Info plugin macro
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -117,8 +119,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 
 	init();
-
-	// exit(1); //keep for valid syntax to exit ots
 
 }  // end constructor
 
@@ -490,6 +490,7 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	//__COUT__ << "after: " << entryText << __E__;
 
 	SOAPParameters parameters("EntryText", entryText);
+
 	// SOAPParametersV parameters(1);
 	// parameters[0].setName("EntryText"); parameters[0].setValue(entryText);
 
@@ -856,104 +857,48 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		{
 			runNumber = getNextRunNumber();
 			//Check if run number should come from db, if so create run info record into database
-			try{
+			try
+			{
 				ConfigurationTree configLinkNode =
 					CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
 				if(!configLinkNode.isDisconnected())
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
-					bool useRunInfoDb = fsmLinkNode.getNode("EnableRunInfoDatabase").getValue<bool>();
-
-					if(useRunInfoDb)
+					std::string runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+					__COUTV__(runInfoPluginType);
+					if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT  && 
+								runInfoPluginType != "No Run Info Plugin")
 					{
-						int runInfoDbConnStatus_ = 0;
-						char* dbname_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE")? getenv("OTSDAQ_RUNINFO_DATABASE") : "prototype_run_info");
-						char* dbhost_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_HOST")? getenv("OTSDAQ_RUNINFO_DATABASE_HOST") : "");
-						char* dbport_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PORT")? getenv("OTSDAQ_RUNINFO_DATABASE_PORT") : "");
-						char* dbuser_ = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_USER")? getenv("OTSDAQ_RUNINFO_DATABASE_USER") : "");
-						char* dbpwd_  = const_cast < char *> (getenv("OTSDAQ_RUNINFO_DATABASE_PWD")? getenv("OTSDAQ_RUNINFO_DATABASE_PWD") : "");
-
-						//open db connection
-						char runInfoDbConnInfo [1024];
-						sprintf(runInfoDbConnInfo, "dbname=%s host=%s port=%s  \
-							user=%s password=%s", dbname_, dbhost_, dbport_, dbuser_, dbpwd_);
-						PGconn* runInfoDbConn = PQconnectdb(runInfoDbConnInfo);
-
-						if(PQstatus(runInfoDbConn) == CONNECTION_BAD)
+						RunInfoVInterface* runInfoInterface = nullptr;
+						try
 						{
-							__COUT__ << "Unable to connect to prototype_run_info database!\n" << __E__;
-							PQfinish(runInfoDbConn);
+							runInfoInterface = makeRunInfo(
+										runInfoPluginType,
+										activeStateMachineName_);
+										// ,
+										// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+										// CorePropertySupervisorBase::getSupervisorConfigurationPath());
 						}
-						else
+						catch(...)
 						{
-							__COUT__ << "Connected to prototype_run_info database!\n" << __E__;
-							runInfoDbConnStatus_ = 1;
 						}
 
-						// write run info into db
-						if(runInfoDbConnStatus_ == 1)
+						if(runInfoInterface == nullptr)
 						{
-							PGresult* res;
-							char      buffer[1024];
-							__COUT__ << "Insert new run info in the run_info Database table" << __E__;
-							snprintf(buffer,
-									sizeof(buffer),
-									"INSERT INTO public.run_info(				\
-																run_type		\
-																, user_name		\
-																, host_name		\
-																, start_time	\
-																, note)			\
-																VALUES ('%s','%s','%s',TO_TIMESTAMP(%ld),'%s');",
-									"T",
-									__ENV__("MU2E_OWNER"),
-									__ENV__("HOSTNAME"),
-									time(NULL),
-									"note");
-
-							res = PQexec(runInfoDbConn, buffer);
-
-							if(PQresultStatus(res) != PGRES_COMMAND_OK)
-							{
-								__SS__ << "RUN INFO INSERT INTO DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res)
-									<< __E__;
-								PQclear(res);
-								__SS_THROW__;
-							}
-							PQclear(res);
-
-							res = PQexec(runInfoDbConn, "select max(run_number) from public.run_info;");
-
-							if(PQresultStatus(res) != PGRES_TUPLES_OK)
-							{
-								__SS__ << "RUN INFO SELECT FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
-								PQclear(res);
-								__SS_THROW__;
-							}
-
-							if(PQntuples(res) == 1)
-							{
-								runNumber = atoi(PQgetvalue(res, 0, 0));
-								__COUTV__(runNumber);
-							}
-							else
-							{
-								__SS__ << "RETRIVE RUN NUMBER FROM DATABASE TABLE FAILED!!! PQ ERROR: " << PQresultErrorMessage(res) << __E__;
-								PQclear(res);
-								__SS_THROW__;
-							}
-
-							PQclear(res);
+							__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+							__SS_THROW__;
 						}
 
-						//close db connection
-						if(PQstatus(runInfoDbConn) == CONNECTION_OK)
-						{
-							PQfinish(runInfoDbConn);
-							__COUT__ << "prototype_run_info DB CONNECTION CLOSED\n" << __E__;
-						}
+						runNumber = runInfoInterface->claimNextRunNumber();
 					}
 				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				//ERROR
+				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+					<< e.what() << __E__;
+				__SS_THROW__;
 			}
 			catch(...)
 			{
@@ -962,13 +907,13 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 					<< __E__;
 				__SS_THROW__;
 			}  // End write run info into db
-				
-			
+							
 			setNextRunNumber(runNumber + 1);				
 		}
 		else
 		{
 			runNumber = std::atoi(commandParameters[0].c_str());
+			setNextRunNumber(runNumber + 1);	
 		}
 		parameters.addParameter("RunNumber", runNumber);
 	}
@@ -1056,28 +1001,202 @@ void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 //==============================================================================
 void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
-
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" from " << theStateMachine_.getProvenanceStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+	
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info	w/HALT
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::HALT);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
 }  // end stateHalted()
 
 //==============================================================================
 void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" from " << theStateMachine_.getProvenanceStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info w/STOP       
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::STOP);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
+
 }  // end stateConfigured()
 
 //==============================================================================
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
-
 {
 	__COUT__ << "Fsm current state: "
-	         << "Failed"
+	         << "Failed" <<
 	         // theStateMachine_.getCurrentStateName() //There may be a race condition here
 	         //	when async errors occur (e.g. immediately in running)
-	         << __E__;
+			 " from " << theStateMachine_.getProvenanceStateName() << __E__;
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info w/ERROR        
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::ERROR);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
+
 }  // end inError()
 
 //==============================================================================
@@ -2470,7 +2589,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 //==============================================================================
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
-  //__COUT__ << "request()" << __E__;
+
 
 	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
 
@@ -2521,6 +2640,17 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 	// gatewayLaunchOTS
 	// gatewayLaunchWiz
+
+	if(0) //leave for debugging
+	{
+		ConfigurationTree configLinkNode =
+						CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+
+		ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
+
+		__COUT__ << "requestType " << requestType << " v" <<
+			(fsmLinkNode.getTableVersion()) << __E__;
+	}
 
 	try
 	{
@@ -2598,8 +2728,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 			std::string stateMachineAliasFilter = "*";  // default to all
 
-			std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> aliasMap =
-			    CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
+			//IMPORTANT -- use temporary ConfigurationManager to get the Active Group Aliases, to avoid changine the Context Configuration tree for the Gateway Supervisor
+			std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> aliasMap;
+			{
+				ConfigurationManager temporaryConfigMgr;
+				aliasMap = temporaryConfigMgr.getActiveGroupAliases();
+			} //end temporary scope for ConfigurationManager to get active group aliases
 
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode =
@@ -3006,16 +3140,22 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				ConfigurationTree configLinkNode =
 				    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
 
-
+				
 				if(!configLinkNode.isDisconnected())
 				{
 					try  // for backwards compatibility
 					{
 						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
+
+						//__COUTV__(fsmLinkNode.getTableVersion());
+
 						if(!fsmLinkNode.isDisconnected())
 						{
 							stateMachineRunAlias = fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
- 							useRunInfoDb = fsmLinkNode.getNode(fsmName + "/EnableRunInfoDatabase").getValue<bool>();
+							std::string runInfoPluginType = fsmLinkNode.getNode(fsmName + "/RunInfoPluginType").getValue<std::string>();
+							if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && 
+								runInfoPluginType != "No Run Info Plugin")
+ 								useRunInfoDb = true;
 						}
 						// else
 						//	__COUT_INFO__ << "FSM Link disconnected." << __E__;

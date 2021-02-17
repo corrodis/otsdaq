@@ -187,18 +187,18 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 		try
 		{
 			__COUTV__(username_);
+
+			// if write access, then load all specified table groups (including configuration group),
+			//	otherwise skip configuration group. Important to consider initForWriteAccess
+			// 	because this may be called before username_ is properly initialized
+			ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ALL_TYPES;
+			if(username_ == ConfigurationManager::READONLY_USER && !initForWriteAccess)
+				onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES;
+
 			// clang-format off
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
 				 "" /*pathToActiveGroupsFile*/,
-
-				 // if write access, then load all specified table groups (including configuration group),
-				 //	otherwise skip configuration group.
-				 (username_ == ConfigurationManager::READONLY_USER) ?
-						 (!initForWriteAccess)  // important to consider initForWriteAccess
-						 // because this may be called before
-						 // username_ is properly initialized
-							: false /*onlyLoadIfBackboneOrContext*/,
-
+				onlyLoadIfBackboneOrContext,
 				 accumulatedWarnings
 			);
 			// clang-format on
@@ -224,7 +224,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 //		the same configurationGroups surviving software system restarts
 void ConfigurationManager::restoreActiveTableGroups(bool               throwErrors /*=false*/,
                                                     const std::string& pathToActiveGroupsFile /*=""*/,
-                                                    bool               onlyLoadIfBackboneOrContext /*= false*/,
+                                                    ConfigurationManager::LoadGroupType     onlyLoadIfBackboneOrContext /*= ConfigurationManager::LoadGroupType::ALL_TYPES */,
                                                     std::string*       accumulatedWarnings /*=0*/)
 {
 	destroyTableGroup("", true);  // deactivate all
@@ -1173,7 +1173,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
                                           bool                                                   doNotLoadMembers /*=false*/,
                                           std::string*                                           groupTypeString,
                                           std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
-                                          bool                                                   onlyLoadIfBackboneOrContext /*=false*/) try
+                                          ConfigurationManager::LoadGroupType                    onlyLoadIfBackboneOrContext /* = ConfigurationManager::LoadGroupType::ALL_TYPES*/) try
 {
 	// clear to defaults
 	if(groupComment)
@@ -1362,10 +1362,19 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		if(!groupTypeString)
 			groupType = getTypeOfGroup(memberMap);
 
-		if(onlyLoadIfBackboneOrContext && groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
-		   groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+		if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES &&
+			groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
+		   	groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
 			__COUT__ << "Not loading group because it is not of type Context or "
+			            "Backbone (it is type '"
+			         << convertGroupTypeToName(groupType) << "')." << __E__;
+			return;
+		}
+		else if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE &&
+		   	groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+		{
+			__COUT__ << "Not loading group because it is not of type "
 			            "Backbone (it is type '"
 			         << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
@@ -1667,14 +1676,14 @@ ConfigurationTree ConfigurationManager::getContextNode(const std::string& contex
 ConfigurationTree ConfigurationManager::getSupervisorNode(const std::string& contextUID, const std::string& applicationUID) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" + contextUID + "/LinkToApplicationTable/" + applicationUID);
-}
+} //end getSupervisorNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getSupervisorTableNode(const std::string& contextUID, const std::string& applicationUID) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" + contextUID + "/LinkToApplicationTable/" + applicationUID +
 	               "/LinkToSupervisorTable");
-}
+} //end getSupervisorTableNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks) const
@@ -1716,7 +1725,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 		return configTree.getNode(childPath, doNotThrowOnBrokenUIDLinks);
 	else
 		return configTree;
-}
+} //end getNode()
 
 //==============================================================================
 // getFirstPathToNode
@@ -1726,7 +1735,7 @@ std::string ConfigurationManager::getFirstPathToNode(const ConfigurationTree& /*
 {
 	std::string path = "/";
 	return path;
-}
+} //end getFirstPathToNode()
 
 //==============================================================================
 // getChildren
@@ -1913,7 +1922,7 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 		__SS_ONLY_THROW__;
 	}
 	return it->second;
-}
+} //end getTableByName()
 
 //==============================================================================
 // loadConfigurationBackbone
@@ -1931,7 +1940,7 @@ TableGroupKey ConfigurationManager::loadConfigurationBackbone()
 	loadTableGroup(theBackboneTableGroup_, *theBackboneTableGroupKey_);
 
 	return *theBackboneTableGroupKey_;
-}
+} //end loadConfigurationBackbone()
 
 // Getters
 //==============================================================================
@@ -2000,14 +2009,18 @@ std::pair<std::string, TableGroupKey> ConfigurationManager::getTableGroupFromAli
 		progressBar->step();
 
 	return std::pair<std::string, TableGroupKey>("", TableGroupKey());
-}
+} //end getTableGroupFromAlias()
 
 //==============================================================================
+//Aliases are pulled from latest active Backbone group
+//  (i.e. the latest activated at the ConfigurationGUISupervisor)!
 std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableGroupKey>> ConfigurationManager::getActiveGroupAliases(void)
 {
-	restoreActiveTableGroups();  // make sure the active configuration backbone is
-	                             // loaded!
-	// loadConfigurationBackbone();
+	restoreActiveTableGroups(
+		false /* throwErrors */,
+    	"" /* pathToActiveGroupsFile */,		
+		ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE);  // make sure the active configuration backbone is
+	                             // loaded from disk (i.e. the latest activated at the ConfigurationGUISupervisor)!
 
 	std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableGroupKey>> retMap;
 
@@ -2018,7 +2031,7 @@ std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableG
 		                                                                TableGroupKey(entryPair.second.getNode("GroupKey").getValueAsString()));
 	}
 	return retMap;
-}
+} //end getActiveGroupAliases()
 
 //==============================================================================
 // getVersionAliases()
@@ -2082,7 +2095,7 @@ std::map<std::string, TableVersion> ConfigurationManager::getActiveVersions(void
 		}
 	}
 	return retMap;
-}
+} //end getActiveVersions()
 
 ////==============================================================================
 // const DACStream& ConfigurationManager::getDACStream(std::string fecName)

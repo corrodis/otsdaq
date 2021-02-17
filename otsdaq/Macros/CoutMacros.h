@@ -215,6 +215,7 @@
 #define __SUP_SS__              std::stringstream ss; ss << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
 #define __SUP_SS_THROW__        { __SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
+//To use __ENV__, will need to include #include "otsdaq/Macros/StringMacros.h"
 #define __ENV__(X) 				StringMacros::otsGetEnvironmentVarable(X, std::string(__SHORTFILE__), __LINE__)
 
 //========================================================================================================================

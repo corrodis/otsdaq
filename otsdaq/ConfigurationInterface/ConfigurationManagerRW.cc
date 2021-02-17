@@ -1556,7 +1556,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 
 		std::string localAccumulatedWarnings;
 		cfgMgr->restoreActiveTableGroups(
-		    false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, false /*onlyLoadIfBackboneOrContext*/, &localAccumulatedWarnings);
+		    false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, ConfigurationManager::LoadGroupType::ALL_TYPES /*onlyLoadIfBackboneOrContext*/, &localAccumulatedWarnings);
 	}
 
 	// activate new groups

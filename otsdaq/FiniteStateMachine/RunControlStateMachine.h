@@ -114,6 +114,8 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 	static const std::string FAILED_STATE_NAME;
 	static const std::string HALTED_STATE_NAME;
+	static const std::string PAUSED_STATE_NAME;
+	static const std::string RUNNING_STATE_NAME;
 
 	unsigned int 				getIterationIndex(void) { return iterationIndex_; }
 	unsigned int 				getSubIterationIndex(void) { return subIterationIndex_; }
