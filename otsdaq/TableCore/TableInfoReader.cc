@@ -340,8 +340,6 @@ std::string TableInfoReader::read(TableBase& table)
 			xercesc::DOMNodeList* columnNodeList = viewElement->getElementsByTagName(columnTag_);
 			
 			
-			//TODO min and max need to be added here.
-			
 			for(XMLSize_t column = 0; column < columnNodeList->getLength(); column++)
 			{
 				//<COLUMN>
@@ -371,7 +369,7 @@ std::string TableInfoReader::read(TableBase& table)
 					__COUT__ << "FOUND min value! " << minValue << __E__;
 				}
 				std::string maxValue;
-				bool isMaxValue = columnElement->getAttributeNode(columnMinValueAttributeTag_)?true:false;
+				bool isMaxValue = columnElement->getAttributeNode(columnMaxValueAttributeTag_)?true:false;
 				if(isMaxValue)
 				{
 					maxValue =

@@ -619,33 +619,52 @@ void TableView::init(void)
 				// check for link mate (i.e. every child link needs link ID)
 				getChildLink(col, tmpIsGroup, tmpLinkPair);
 			}
-		// check that if number exist then it is limited by min and max, use functions in here for get values different than stof
+		 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
 			if(columnsInfo_[col].isNumberDataType())
 			{
-				// check for min and max values within the table and if they are empty skips this step
-				std::string minimumValue       = columnsInfo_[col].getMinValue();
-				std::string maximumValue       = columnsInfo_[col].getMaxValue();
-				float       floatMinimumValue1 = std::stof(columnsInfo_[col].getMinValue());
-				float       floatMaximumValue1 = std::stof(columnsInfo_[col].getMaxValue());
-				if(!minimumValue.empty() && !maximumValue.empty() && (floatMinimumValue1 > floatMaximumValue1))
+				std::string minimumValueString = columnsInfo_[col].getMinValue();
+				std::string maximumValueString = columnsInfo_[col].getMaxValue();
+				double       minimumValue, maximumValue, valueFromTable;
+				bool        minExists = false, maxExists = false;
+				//__COUT__ << "values output1 " << minimumValueString << " another output1 " << maximumValueString << __E__;
+
+				if(!minimumValueString.empty())
+				{
+					std::string envData = StringMacros::convertEnvironmentVariables(minimumValueString);
+					minExists           = StringMacros::getNumber(envData, minimumValue);
+				}
+
+				if(!maximumValueString.empty())
+				{
+					std::string envData1 = StringMacros::convertEnvironmentVariables(maximumValueString);
+					maxExists            = StringMacros::getNumber(envData1, maximumValue);
+				}
+
+				//__COUT__ << "values output" << minimumValue << " another output " << maximumValue << __E__;
+
+				if(minExists && maxExists && minimumValue > maximumValue)
 				{
 					__SS__ << "Minimum value is greater than maximum, check table editor to change this" << __E__;
 					__SS_THROW__;
 				}
-				if(!minimumValue.empty() && !maximumValue.empty() && (minimumValue != maximumValue))
-				{
+
+				if(minExists || maxExists)
 					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 					{
-						// std::cout << "entre al if " << row << " valor de thedataview " << theDataView_[row][col] << std::endl;
-						float valueFromTable = std::stof(theDataView_[row][col]);
-
-						if((valueFromTable < floatMinimumValue1) || (valueFromTable > floatMaximumValue1))
+						getValue(valueFromTable, row, col);
+						if(minExists && valueFromTable < minimumValue)
 						{
-							__SS__ << "This value is out of the established limits" << __E__;
+							__SS__ << "This value is out of the established limits: " <<
+								valueFromTable << " is lower than specified minimum " << minimumValue << __E__;
+							__SS_THROW__;
+						}
+						if(maxExists && valueFromTable > maximumValue)
+						{
+							__SS__ << "This value is out of the established limits: " <<
+								valueFromTable << " is greater than specified maximum " << maximumValue << __E__;
 							__SS_THROW__;
 						}
 					}
-				}
 			}
 		}
 
@@ -668,11 +687,6 @@ void TableView::init(void)
 				<< childLinkIdLabels.size() << __E__;
 			__SS_THROW__;
 		}
-
-		
-
-
-
 	}
 	catch (...)
 	{
