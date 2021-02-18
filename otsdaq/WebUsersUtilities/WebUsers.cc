@@ -1954,7 +1954,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 		if(LoginSessions_[i].startTime_ + LOGIN_SESSION_EXPIRATION_TIME < time(0) ||  // expired
 		   LoginSessions_[i].loginAttempts_ > LOGIN_SESSION_ATTEMPTS_MAX)
 		{
-			__COUT__ << "Found expired login sessions: " << i << " of " << LoginSessions_.size() << __E__;
+			__COUT__ << "Found expired login sessions: #" << (i+1) << " of " << LoginSessions_.size() << __E__;
 				//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
 			 	//LoginSessionAttemptsVector[i] << __E__;
 
@@ -1982,7 +1982,7 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 			//	<< __E__;
 			
 			
-			__COUT__ << "Found expired active sessions: " << i << " of " << ActiveSessions_.size() << __E__;
+			__COUT__ << "Found expired active sessions: #" << (i+1) << " of " << ActiveSessions_.size() << __E__;
 			
 			tmpUid = ActiveSessions_[i].userId_;
 			ActiveSessions_.erase(ActiveSessions_.begin() + i);
