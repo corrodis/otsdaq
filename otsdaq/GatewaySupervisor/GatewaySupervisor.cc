@@ -14,6 +14,8 @@
 
 #include "otsdaq/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer
 
+#include "otsdaq/FiniteStateMachine/RunInfoVInterface.h" // for Run Info plugins
+#include "otsdaq/PluginMakers/MakeRunInfo.h" // for Run Info plugin macro
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -117,8 +119,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 
 
 	init();
-
-	// exit(1); //keep for valid syntax to exit ots
 
 }  // end constructor
 
@@ -248,7 +248,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				try
 				{
 					detail = (theSupervisor->theStateMachine_.isInTransition()
-					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(theSupervisor->stateMachineLastCommandInput_)
+					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(
+									  theSupervisor->stateMachineLastCommandInput_)
 					              : "");
 				}
 				catch(...)
@@ -389,7 +390,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				          "Where Parameter(s) is/are optional."
 				       << __E__;
 				__COUT_INFO__ << ss.str();
-				__MOUT_INFO__ << ss.str();
 			}
 			begin        = 0;
 			commaCounter = 0;
@@ -432,7 +432,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 				          "following error: "
 				       << errorStr;
 				__COUT_ERR__ << ss.str();
-				__MOUT_ERR__ << ss.str();
 				if(acknowledgementEnabled)
 					sock.acknowledge(errorStr, true /*verbose*/);
 			}
@@ -440,7 +439,6 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 			{
 				__SS__ << "Successfully executed state change command '" << command << ".'" << __E__;
 				__COUT_INFO__ << ss.str();
-				__MOUT_INFO__ << ss.str();
 				if(acknowledgementEnabled)
 					sock.acknowledge("Done", true /*verbose*/);
 			}
@@ -492,6 +490,7 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	//__COUT__ << "after: " << entryText << __E__;
 
 	SOAPParameters parameters("EntryText", entryText);
+
 	// SOAPParametersV parameters(1);
 	// parameters[0].setName("EntryText"); parameters[0].setValue(entryText);
 
@@ -857,11 +856,64 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		if(commandParameters.size() == 0)
 		{
 			runNumber = getNextRunNumber();
-			setNextRunNumber(runNumber + 1);
+			//Check if run number should come from db, if so create run info record into database
+			try
+			{
+				ConfigurationTree configLinkNode =
+					CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+				if(!configLinkNode.isDisconnected())
+				{
+					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+					std::string runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+					__COUTV__(runInfoPluginType);
+					if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT  && 
+								runInfoPluginType != "No Run Info Plugin")
+					{
+						RunInfoVInterface* runInfoInterface = nullptr;
+						try
+						{
+							runInfoInterface = makeRunInfo(
+										runInfoPluginType,
+										activeStateMachineName_);
+										// ,
+										// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+										// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+						}
+						catch(...)
+						{
+						}
+
+						if(runInfoInterface == nullptr)
+						{
+							__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+							__SS_THROW__;
+						}
+
+						runNumber = runInfoInterface->claimNextRunNumber();
+					}
+				}
+			}
+			catch(const std::runtime_error& e)
+			{
+				//ERROR
+				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+					<< e.what() << __E__;
+				__SS_THROW__;
+			}
+			catch(...)
+			{
+				//ERROR
+				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+					<< __E__;
+				__SS_THROW__;
+			}  // End write run info into db
+							
+			setNextRunNumber(runNumber + 1);				
 		}
 		else
 		{
 			runNumber = std::atoi(commandParameters[0].c_str());
+			setNextRunNumber(runNumber + 1);	
 		}
 		parameters.addParameter("RunNumber", runNumber);
 	}
@@ -917,7 +969,6 @@ bool GatewaySupervisor::stateMachineThread(toolbox::task::WorkLoop* workLoop)
 	{
 		__SS__ << "Failure to send Workloop transition command '" << command << "!' An error response '" << reply << "' was received." << __E__;
 		__COUT_ERR__ << ss.str();
-		__MOUT_ERR__ << ss.str();
 	}
 	return false;  // execute once and automatically remove the workloop so in
 	               // WorkLoopManager the try workLoop->remove(job_) could be commented
@@ -950,28 +1001,202 @@ void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 //==============================================================================
 void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
-
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" from " << theStateMachine_.getProvenanceStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+	
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info	w/HALT
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::HALT);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
 }  // end stateHalted()
 
 //==============================================================================
 void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" from " << theStateMachine_.getProvenanceStateName() << __E__;
 	__COUT__ << "Fsm is in transition? " << (theStateMachine_.isInTransition() ? "yes" : "no") << __E__;
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info w/STOP       
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::STOP);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
+
 }  // end stateConfigured()
 
 //==============================================================================
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
-
 {
 	__COUT__ << "Fsm current state: "
-	         << "Failed"
+	         << "Failed" <<
 	         // theStateMachine_.getCurrentStateName() //There may be a race condition here
 	         //	when async errors occur (e.g. immediately in running)
-	         << __E__;
+			 " from " << theStateMachine_.getProvenanceStateName() << __E__;
+
+	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+
+	//if coming from Running or Paused, update Run Info w/ERROR        
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME || 
+		theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+						// ,
+						// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
+						// CorePropertySupervisorBase::getSupervisorConfigurationPath());
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::ERROR);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End write run info into db			
+	} //end update Run Info handling
+
 }  // end inError()
 
 //==============================================================================
@@ -1514,28 +1739,41 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			         << "Adding iteration parameters " << iteration << "." << subIteration << __E__;
 
 		RunControlStateMachine::theProgressBar_.step();
+	
+		std::string givenAppStatus = theStateMachine_.getCurrentTransitionName(command);
+		unsigned int givenAppProgress = appInfo.getProgress();
+		std::string givenAppDetail = appInfo.getDetail();
+		if(givenAppProgress >= 100) 
+		{
+			givenAppProgress = 0; //reset
+			givenAppDetail = "";
+		}
 
 		if(iteration == 0 && subIteration == 0)
 		{
 			for(unsigned int j = 0; j < 4; ++j)
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command << __E__;
+						<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command << __E__;
+
+			givenAppDetail = "";
 		}
 		else  // else this not the first time through the supervisors
 		{
+			if(givenAppDetail == "")
+				givenAppDetail = std::to_string(iteration) + ":" + std::to_string(subIteration);
 			if(subIteration == 0)
 			{
 				for(unsigned int j = 0; j < 4; ++j)
 					__COUT__ << "Broadcast thread " << threadIndex << "\t"
-					         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
-					         << " (iteration: " << iteration << ")" << __E__;
+							<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
+							<< " (iteration: " << iteration << ")" << __E__;
 			}
 			else
 			{
 				for(unsigned int j = 0; j < 4; ++j)
 					__COUT__ << "Broadcast thread " << threadIndex << "\t"
-					         << "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
-					         << " (iteration: " << iteration << ", sub-iteration: " << subIteration << ")" << __E__;
+							<< "Sending message to Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << command
+							<< " (iteration: " << iteration << ", sub-iteration: " << subIteration << ")" << __E__;
 			}
 		}
 
@@ -1550,27 +1788,36 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		}
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Sending... \t" << SOAPUtilities::translate(message) << std::endl;
+				<< "Sending... \t" << SOAPUtilities::translate(message) << std::endl;
 
 		try  // attempt transmit of transition command
 		{
+			__COUTV__(givenAppStatus);
+			// start recursive mutex scope			
+			std::lock_guard<std::recursive_mutex> lock(
+				allSupervisorInfo_.getSupervisorInfoMutex(appInfo.getId()));
+			//set app status, but leave progress and detail alone
+			allSupervisorInfo_.setSupervisorStatus(appInfo, givenAppStatus, 
+				givenAppProgress, givenAppDetail);
+
+			//for transition attempt, set status for app, in case the request occupies the target app
 			reply = send(appInfo.getDescriptor(), message);
+			//then release mutex here using scope change, to allow the app to start giving its own updates
 		}
 		catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 		{
 			// do not kill whole system if xdaq xoap failure
 			__SS__ << "Error! Gateway Supervisor can NOT " << command << " Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId()
-			       << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
-			       << "Xoap message failure. Did the target Supervisor crash? Try "
-			          "re-initializing or restarting otsdaq."
-			       << __E__;
+				<< "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
+				<< "Xoap message failure. Did the target Supervisor crash? Try "
+					"re-initializing or restarting otsdaq."
+				<< __E__;
 			__COUT_ERR__ << ss.str();
-			__MOUT_ERR__ << ss.str();
 
 			try
 			{
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Try again.." << __E__;
+						<< "Try again.." << __E__;
 
 				{
 					// add a second try parameter flag
@@ -1590,22 +1837,22 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 				}
 
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Re-Sending... " << SOAPUtilities::translate(message) << std::endl;
+						<< "Re-Sending... " << SOAPUtilities::translate(message) << std::endl;
 
 				reply = send(appInfo.getDescriptor(), message);
 			}
 			catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 			{
-				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Second try failed.." << __E__;
+				__COUT_ERR__ << "Broadcast thread " << threadIndex << "\t"
+						<< "Second try failed.." << __E__;
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			}
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
-			         << "2nd try passed.." << __E__;
+					<< "2nd try passed.." << __E__;
 		}  // end send catch
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Reply received = " << reply << __E__;
+				<< "Reply received = " << reply << __E__;
 
 		if((reply != command + "Done") && (reply != command + "Response") && (reply != command + "Iterate") && (reply != command + "SubIterate"))
 		{
@@ -1613,7 +1860,6 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			       << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n"
 			       << reply;
 			__COUT_ERR__ << ss.str() << __E__;
-			__MOUT_ERR__ << ss.str() << __E__;
 
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
 			         << "Getting error message..." << __E__;
@@ -1636,7 +1882,7 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 					error = err.str();
 				}
 
-				__SS__ << "Received error from Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '"
+				__SS__ << "Received error message from Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '"
 				       << appInfo.getContextName() << "' [URL=" << appInfo.getURL() << "].\n\n Error Message = " << error << __E__;
 
 				__COUT_ERR__ << ss.str() << __E__;
@@ -2343,7 +2589,7 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 //==============================================================================
 void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 {
-  //__COUT__ << "request()" << __E__;
+
 
 	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin","*"); //to avoid block by blocked by CORS policy of browser
 
@@ -2394,6 +2640,17 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 	// gatewayLaunchOTS
 	// gatewayLaunchWiz
+
+	if(0) //leave for debugging
+	{
+		ConfigurationTree configLinkNode =
+						CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+
+		ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
+
+		__COUT__ << "requestType " << requestType << " v" <<
+			(fsmLinkNode.getTableVersion()) << __E__;
+	}
 
 	try
 	{
@@ -2471,8 +2728,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 			std::string stateMachineAliasFilter = "*";  // default to all
 
-			std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> aliasMap =
-			    CorePropertySupervisorBase::theConfigurationManager_->getActiveGroupAliases();
+			//IMPORTANT -- use temporary ConfigurationManager to get the Active Group Aliases, to avoid changine the Context Configuration tree for the Gateway Supervisor
+			std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> aliasMap;
+			{
+				ConfigurationManager temporaryConfigMgr;
+				aliasMap = temporaryConfigMgr.getActiveGroupAliases();
+			} //end temporary scope for ConfigurationManager to get active group aliases
 
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode =
@@ -2851,7 +3112,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			else
 				xmlOut.addTextElementToData("transition_progress", "100");
 
-			char tmp[20];
+			//char tmp[20]; old size before adding db run number
+			char tmp[30];
 			sprintf(tmp, "%lu", theStateMachine_.getTimeInState());
 			xmlOut.addTextElementToData("time_in_state", tmp);
 
@@ -2868,7 +3130,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//				theStateMachine_.getProvenanceStateName() << __E__;
 			//		__COUT__ << "theStateMachine_.getCurrentStateName() = " <<
 			//				theStateMachine_.getCurrentStateName() << __E__;
-
+			bool useRunInfoDb = false;
+			
 			if(!theStateMachine_.isInTransition())
 			{
 				std::string stateMachineRunAlias = "Run";  // default to "Run"
@@ -2877,13 +3140,23 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				ConfigurationTree configLinkNode =
 				    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
 
+				
 				if(!configLinkNode.isDisconnected())
 				{
 					try  // for backwards compatibility
 					{
 						ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
+
+						//__COUTV__(fsmLinkNode.getTableVersion());
+
 						if(!fsmLinkNode.isDisconnected())
+						{
 							stateMachineRunAlias = fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
+							std::string runInfoPluginType = fsmLinkNode.getNode(fsmName + "/RunInfoPluginType").getValue<std::string>();
+							if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && 
+								runInfoPluginType != "No Run Info Plugin")
+ 								useRunInfoDb = true;
+						}
 						// else
 						//	__COUT_INFO__ << "FSM Link disconnected." << __E__;
 					}
@@ -2915,7 +3188,10 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 				if(theStateMachine_.getCurrentStateName() == "Running" || theStateMachine_.getCurrentStateName() == "Paused")
 				{
-					sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+					if(useRunInfoDb)
+						sprintf(tmp, "Current %s Number from DB: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
+					else
+						sprintf(tmp, "Current %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(activeStateMachineName_) - 1);
 
 					if(RunControlStateMachine::asyncPauseExceptionReceived_)
 					{
@@ -2925,7 +3201,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					}
 				}
 				else
-					sprintf(tmp, "Next %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(fsmName));
+				{
+					if(useRunInfoDb)
+						sprintf(tmp, "Next %s Number from DB.", stateMachineRunAlias.c_str());
+					else
+						sprintf(tmp, "Next %s Number: %u", stateMachineRunAlias.c_str(), getNextRunNumber(fsmName));
+				}
 
 				if(RunControlStateMachine::asyncStopExceptionReceived_)
 				{
@@ -3037,7 +3318,6 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			// sessions
 
 			__COUT_WARN__ << requestType << " requestType received! " << __E__;
-			__MOUT_WARN__ << requestType << " requestType received! " << __E__;
 
 			// gateway launch is different, in that it saves user sessions
 			theWebUsers_.saveActiveSessions();

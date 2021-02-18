@@ -68,6 +68,13 @@ class ConfigurationManager
 		CONFIGURATION_TYPE
 	};
 
+	enum class LoadGroupType
+	{
+		ALL_TYPES,
+		ONLY_BACKBONE_OR_CONTEXT_TYPES,
+		ONLY_BACKBONE_TYPE
+	};
+
 	// clang-format off
 
 	static const std::set<std::string>& getContextMemberNames		(void);
@@ -108,7 +115,7 @@ class ConfigurationManager
 	    bool                                                   doNotLoadMember    = false,
 	    std::string*                                           groupTypeString    = 0,
 	    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases       = 0,
-	    bool 												   onlyLoadIfBackboneOrContext = false);
+	    ConfigurationManager::LoadGroupType					   onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ALL_TYPES);
 	void 								loadMemberMap				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap, std::string* accumulateWarnings = 0);
 	TableGroupKey 						loadConfigurationBackbone	(void);
 
@@ -159,7 +166,7 @@ class ConfigurationManager
 	//==============================================================================
 	// Setters/Modifiers
 	std::shared_ptr<TableGroupKey> 		makeTheTableGroupKey		(TableGroupKey key);
-	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", bool onlyLoadIfBackboneOrContext = false, std::string* accumulatedWarnings = 0);
+	void                           		restoreActiveTableGroups	(bool throwErrors = false, const std::string& pathToActiveGroupsFile = "", ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ALL_TYPES, std::string* accumulatedWarnings = 0);
 
 	void 								setOwnerContext				(const std::string& contextUID) { ownerContextUID_ = contextUID; }
 	void 								setOwnerApp					(const std::string& appUID) { ownerAppUID_ = appUID; }
@@ -179,6 +186,9 @@ class ConfigurationManager
 	void 								recursiveTreeToFhicl		(ConfigurationTree node, std::ostream& out, std::string& tabStr, std::string& commentStr, unsigned int depth = -1);
 
 
+  protected: 
+	std::string 										mfSubject_;
+  private:
 	std::string 										username_;  // user of the configuration is READONLY_USER unless using ConfigurationManagerRW
 	ConfigurationInterface*        						theInterface_;
 	std::shared_ptr<TableGroupKey> 						theConfigurationTableGroupKey_, theContextTableGroupKey_, theBackboneTableGroupKey_, theIterateTableGroupKey_;

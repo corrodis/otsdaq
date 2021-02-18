@@ -120,6 +120,8 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				      << "type: UDP\n";
 				fclSs << "\t"
 				      << "threshold: DEBUG\n";
+				// fclSs << "\t" //TODO ==> ADD THIS BACK FOR NEW MF RELEASE ==> 
+				//       << "filename_delimit: \"/src\"\n";
 				fclSs << "\t"
 				      << "port: " << fwdPort << "\n";
 				fclSs << "\t"
@@ -132,7 +134,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				fclSs << "\t"
 				      << "threshold: \"DEBUG\"\n";
 				fclSs << "\t"
-				      << "filename_delimit: \"/srcs/\"\n";
+				      << "filename_delimit: \"/src\"\n";
 				fclSs << "\t"
 				      << "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 
@@ -170,6 +172,8 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				      << "type: UDP\n";
 				fclSs << "\t"
 				      << "threshold: DEBUG\n";
+				// fclSs << "\t" //TODO ==> ADD THIS BACK FOR NEW MF RELEASE ==> 
+				//       << "filename_delimit: \"/src\"\n";
 				fclSs << "\t"
 				      << "port: " << fwdPort << "\n";
 				fclSs << "\t"
@@ -211,7 +215,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 			fclSs << "\t"
 			      << "threshold: \"DEBUG\"\n";
 			fclSs << "\t"
-			      << "filename_delimit: \"/srcs/\"\n";
+			      << "filename_delimit: \"/src\"\n";
 			fclSs << "\t"
 			      << "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
 

@@ -30,7 +30,7 @@ const std::string CodeEditor::OTSDAQ_DATA_PATH = std::string(__ENV__("OTSDAQ_DAT
 // CodeEditor
 CodeEditor::CodeEditor()
 	: ALLOWED_FILE_EXTENSIONS_(
-		{ "h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "dat", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml", "cfg" })
+		{ "h", "hh", "hpp", "hxx", "c", "cc", "cpp", "cxx", "icc", "dat", "txt", "sh", "css", "html", "htm", "js", "py", "fcl", "xml", "xsd", "cfg" })
 {
 	std::string path = CODE_EDITOR_DATA_PATH;
 	DIR* dir = opendir(path.c_str());

@@ -1,4 +1,6 @@
 
+
+#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"

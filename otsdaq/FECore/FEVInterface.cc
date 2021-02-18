@@ -3,6 +3,7 @@
 #include "otsdaq/FECore/FEVInterfacesManager.h"
 #include "otsdaq/NetworkUtilities/UDPDataStreamerBase.h"
 
+#define TRACE_NAME "FEVInterface"
 #include <iostream>
 #include <sstream>
 #include <thread>  //for std::thread

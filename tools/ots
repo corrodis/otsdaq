@@ -198,7 +198,7 @@ done
 # TODO: Trace is handled all over the place, the best place for this is actually in setup_ots.sh since that
 # file gets sourced on remote sides so we get a consistent startup environment
 if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
-	#out "Setting up TRACE defaults..."
+	out "Setting up TRACE defaults..."
 	
 	#=============================
 	#Trace setup and helpful commented lines:

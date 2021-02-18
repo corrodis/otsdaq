@@ -4,6 +4,8 @@
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
 #include "otsdaq/NetworkUtilities/TCPReceiverSocket.h"
 
+#include "TRACE/trace.h"
+
 namespace ots
 {
 class TCPListenServer : public TCPServerBase
@@ -29,6 +31,7 @@ inline T TCPListenServer::receive()
 		if(it == fConnectedClients.end() || ++it == fConnectedClients.end())
 			it = fConnectedClients.begin();
 		lastReceived = it->first;
+		TLOG(25, "TCPListenServer") << "Reading from socket " << lastReceived << ", there are " << fConnectedClients.size() << " clients connected.";
 		return reinterpret_cast<TCPReceiverSocket*>(it->second)->receive<T>();
 	}
 	throw std::runtime_error("No clients connected!");
