@@ -56,14 +56,27 @@ inline void INIT_MF(const char* name)
 	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
 	{
 		FILE* fp = fopen(logFhiclCode, "r");
-		if(fp)
+		unsigned int charCount = 0;
+		while(fp)
 		{
+			++charCount;
 			char line[100];
 			while(fgets(line, 100, fp))
+			{
 				std::cout << line;
+				charCount += strlen(line);
+			}
 			std::cout << __E__;
 
 			fclose(fp);
+			fp = 0;
+
+			if(charCount < 10)
+			{
+				std::cout << "Retry - Was file really empty? " << logFhiclCode << __E__;
+				sleep(1);
+				fp = fopen(logFhiclCode, "r");
+			}
 		}
 	}
 	artdaq::configureMessageFacility(name /*application name*/, false /*cout display*/, true /*enable debug messages*/);
