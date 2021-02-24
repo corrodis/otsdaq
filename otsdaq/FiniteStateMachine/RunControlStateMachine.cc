@@ -19,8 +19,10 @@
 
 using namespace ots;
 
-const std::string RunControlStateMachine::FAILED_STATE_NAME = "Failed";
-const std::string RunControlStateMachine::HALTED_STATE_NAME = "Halted";
+const std::string RunControlStateMachine::FAILED_STATE_NAME 	= "Failed";
+const std::string RunControlStateMachine::HALTED_STATE_NAME 	= "Halted";
+const std::string RunControlStateMachine::PAUSED_STATE_NAME 	= "Paused";
+const std::string RunControlStateMachine::RUNNING_STATE_NAME 	= "Running";
 
 //==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
@@ -34,8 +36,8 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	theStateMachine_.addState('I', "Initial", this, &RunControlStateMachine::stateInitial);
 	theStateMachine_.addState('H', RunControlStateMachine::HALTED_STATE_NAME, this, &RunControlStateMachine::stateHalted);
 	theStateMachine_.addState('C', "Configured", this, &RunControlStateMachine::stateConfigured);
-	theStateMachine_.addState('R', "Running", this, &RunControlStateMachine::stateRunning);
-	theStateMachine_.addState('P', "Paused", this, &RunControlStateMachine::statePaused);
+	theStateMachine_.addState('R', RunControlStateMachine::RUNNING_STATE_NAME, this, &RunControlStateMachine::stateRunning);
+	theStateMachine_.addState('P', RunControlStateMachine::PAUSED_STATE_NAME, this, &RunControlStateMachine::statePaused);
 	theStateMachine_.addState('X', "Shutdown", this, &RunControlStateMachine::stateShutdown);
 	// theStateMachine_.addState('v', "Recovering",  this,
 	// &RunControlStateMachine::stateRecovering);  theStateMachine_.addState('T',

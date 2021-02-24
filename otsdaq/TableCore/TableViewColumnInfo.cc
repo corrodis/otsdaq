@@ -54,8 +54,8 @@ const std::string TableViewColumnInfo::DATATYPE_COMMENT_DEFAULT = "No Comment";
 const std::string TableViewColumnInfo::DATATYPE_BOOL_DEFAULT = "0";
 const std::string TableViewColumnInfo::DATATYPE_NUMBER_DEFAULT = "0";
 
-const std::string TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT = "0";
-const std::string TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT = "0";
+const std::string TableViewColumnInfo::DATATYPE_NUMBER_MIN_DEFAULT = "";
+const std::string TableViewColumnInfo::DATATYPE_NUMBER_MAX_DEFAULT = "";
 
 const std::string TableViewColumnInfo::DATATYPE_TIME_DEFAULT = "0";
 const std::string TableViewColumnInfo::DATATYPE_LINK_DEFAULT = "NO_LINK";
@@ -397,7 +397,7 @@ const std::string& TableViewColumnInfo::getType(void) const { return type_; }
 //==============================================================================
 const std::string& TableViewColumnInfo::getDefaultValue(void) const { return defaultValue_; }
 
-const std::string& TableViewColumnInfo::getMinValue(void) const { return minValueGeneral_; }
+const std::string& TableViewColumnInfo::getMinValue(void) const {return minValueGeneral_; }
 
 const std::string& TableViewColumnInfo::getMaxValue(void) const { return maxValueGeneral_; }
 

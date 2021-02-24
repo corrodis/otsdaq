@@ -120,6 +120,8 @@ struct TableEditStruct
 	bool         createdTemporaryVersion_;  // indicates if temp version was created here
 	bool         modified_;                 // indicates if temp version was modified
 	std::string  tableName_;
+	const std::string mfSubject_;
+
 	/////
 	TableEditStruct()
 	{
@@ -129,6 +131,7 @@ struct TableEditStruct
 	}
 	TableEditStruct(const std::string& tableName, ConfigurationManagerRW* cfgMgr, bool markModified = false)
 	    : createdTemporaryVersion_(false), modified_(markModified), tableName_(tableName)
+		, mfSubject_(cfgMgr->getUsername())
 	{
 		//__COUT__ << "Creating Table-Edit Struct for " << tableName_ << std::endl;
 		table_ = cfgMgr->getTableByName(tableName_);
@@ -172,6 +175,7 @@ public:
 	const TableGroupKey						originalGroupKey_;
 private:
 	ConfigurationManagerRW* 				cfgMgr_;
+	const std::string 						mfSubject_;
 public:
 	/////
 	GroupEditStruct()

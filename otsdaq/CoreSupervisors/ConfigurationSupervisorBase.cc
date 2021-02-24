@@ -966,7 +966,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 	//			);
 
-	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/, "" /*pathToActiveGroupsFile*/, true /*onlyLoadIfBackboneOrContext*/
+	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/, "" /*pathToActiveGroupsFile*/, 
+		ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES /*onlyLoadIfBackboneOrContext*/
 	);
 
 	const std::string backboneGroupName = cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::BACKBONE_TYPE);
@@ -1638,7 +1639,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 
 		// acquire all active groups and ignore errors, so that activateTableGroup does not
 		// erase other active groups
-		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, false /*onlyLoadIfBackboneOrContext*/
+		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, 
+			ConfigurationManager::LoadGroupType::ALL_TYPES /*onlyLoadIfBackboneOrContext*/
 		);
 
 		// activate group
