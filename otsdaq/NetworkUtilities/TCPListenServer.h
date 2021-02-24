@@ -32,7 +32,7 @@ inline T TCPListenServer::receive()
 			it = fConnectedClients.begin();
 		lastReceived = it->first;
 		TLOG(25, "TCPListenServer") << "Reading from socket " << lastReceived << ", there are " << fConnectedClients.size() << " clients connected.";
-		return reinterpret_cast<TCPReceiverSocket*>(it->second)->receive<T>();
+		return dynamic_cast<TCPReceiverSocket*>(it->second)->receive<T>();
 	}
 	throw std::runtime_error("No clients connected!");
 }
