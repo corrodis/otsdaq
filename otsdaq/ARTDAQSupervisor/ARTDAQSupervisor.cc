@@ -1,6 +1,6 @@
 
 
-#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
+#define TRACEMF_USE_VERBATIM 1  // for trace longer path filenames
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisor.hh"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
@@ -31,9 +31,14 @@ static bool                                      sighandler_init = false;
 static void                                      signal_handler(int signum)
 {
 	// Messagefacility may already be gone at this point, TRACE ONLY!
-	TRACE_STREAMER(TLVL_ERROR, &("ARTDAQsupervisor")[0], 0, 0, 0) << "A signal of type " << signum
-	                                                              << " was caught by ARTDAQSupervisor. Shutting down DAQInterface, "
-	                                                                 "then proceeding with default handlers!";
+#if TRACE_REVNUM < 1459
+	TRACE_STREAMER(TLVL_ERROR, &("ARTDAQsupervisor")[0], 0, 0, 0)
+#else
+	TRACE_STREAMER(TLVL_ERROR, TLOG2("ARTDAQsupervisor", 0), 0)
+#endif
+	    << "A signal of type " << signum
+	    << " was caught by ARTDAQSupervisor. Shutting down DAQInterface, "
+	       "then proceeding with default handlers!";
 
 	if(instance)
 		instance->destroy();
@@ -42,7 +47,12 @@ static void                                      signal_handler(int signum)
 	pthread_sigmask(SIG_UNBLOCK, NULL, &set);
 	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 
-	TRACE_STREAMER(TLVL_ERROR, &("SharedMemoryManager")[0], 0, 0, 0) << "Calling default signal handler";
+#if TRACE_REVNUM < 1459
+	TRACE_STREAMER(TLVL_ERROR, &("ARTDAQsupervisor")[0], 0, 0, 0)
+#else
+	TRACE_STREAMER(TLVL_ERROR, TLOG2("ARTDAQsupervisor", 0), 0)
+#endif
+	    << "Calling default signal handler";
 	if(signum != SIGUSR2)
 	{
 		sigaction(signum, &old_actions[signum], NULL);
@@ -625,7 +635,7 @@ try
 	getDAQState_();
 	if(daqinterface_state_ != "ready")
 	{
-		__GEN_SS__ << "DAQInterface config transition failed!" << __E__ << "Supervisor state: \"" << daqinterface_state_ << "\" != \"ready\" "<< __E__;
+		__GEN_SS__ << "DAQInterface config transition failed!" << __E__ << "Supervisor state: \"" << daqinterface_state_ << "\" != \"ready\" " << __E__;
 		__GEN_SS_THROW__;
 	}
 	__GEN_COUT__ << "Status after config: " << daqinterface_state_ << __E__;
@@ -1054,7 +1064,6 @@ void ots::ARTDAQSupervisor::enteringError(toolbox::Event::Reference /*event*/)
 	__SUP_COUT__ << "EnteringError DONE." << __E__;
 
 }  // end enteringError()
-
 
 //==============================================================================
 void ots::ARTDAQSupervisor::getDAQState_()
