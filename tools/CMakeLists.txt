@@ -12,8 +12,7 @@ cet_script(
 
 
 find_ups_product(fhiclcpp v3_20_01)
-find_ups_product(artdaq_database v1_01_00)
-find_ups_product(mongodb v3_4_0)
+find_ups_product(artdaq_database v1_04_93)
 
 include(CetTest)
 cet_enable_asserts()
