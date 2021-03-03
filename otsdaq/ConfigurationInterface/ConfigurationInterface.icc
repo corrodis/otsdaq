@@ -34,9 +34,10 @@ void get(TableBase*&                          table,
          TableVersion                         version             = TableVersion(),
          bool                                 resetConfiguration  = true,
          bool                                 looseColumnMatching = false,
+         bool                                 rawDataOnly 		  = false,
          std::string*                         accumulatedErrors   = 0)
 {
-	bool dbg = tableName == "ARTDAQEventBuilderTable";
+	bool dbg = false; //tableName == "ARTDAQEventBuilderTable";
 
 	if(table == 0)
 	{
@@ -124,7 +125,7 @@ void get(TableBase*&                          table,
 	// take advantage of version possibly being cached
 	if(table->isStored(version))
 	{
-		if(looseColumnMatching)  // clear cached version
+		if(rawDataOnly || looseColumnMatching)  // clear cached version
 			table->eraseView(version);
 		else  // use cached version
 		{
@@ -174,12 +175,18 @@ void get(TableBase*&                          table,
 
 		// loose column matching can be used to ignore column names
 		table->getViewP()->setLooseColumnMatching(looseColumnMatching);
+		table->getViewP()->doGetSourceRawData(rawDataOnly);
 		if(dbg) __COUT__ << tableName << " Table filling...!" << std::endl;
 		fill(table, version);
 		if(dbg) __COUT__ << tableName << " Table filled!" << std::endl;
 		if(looseColumnMatching)
 			table->getViewP()->setLooseColumnMatching(false);
+		table->getViewP()->doGetSourceRawData(false); //make sure it is cleared, although it should have been cleared in TableView::fillFromJSON()
 		table->getViewP()->setLastAccessTime();
+
+		//if raw data only, leave early!
+		if(rawDataOnly)
+			return;
 
 		/////////////////////
 		// verify the new view

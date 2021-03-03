@@ -1,11 +1,11 @@
 #include "otsdaq/WizardSupervisor/WizardSupervisor.h"
 
-#include "otsdaq/GatewaySupervisor/GatewaySupervisor.h"
 #include "otsdaq/CoreSupervisors/CorePropertySupervisorBase.h"
+#include "otsdaq/GatewaySupervisor/GatewaySupervisor.h"
 
 #include "otsdaq/Macros/CoutMacros.h"
-#include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/MessageFacility/ITRACEController.h"
+#include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include <xdaq/NamespaceURI.h>
 #include "otsdaq/CgiDataUtilities/CgiDataUtilities.h"
@@ -14,14 +14,17 @@
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 
+#include <bits/stdc++.h>
 #include <dirent.h>    //for DIR
 #include <sys/stat.h>  // mkdir
-#include <chrono>      // std::chrono::seconds
+#include <boost/filesystem.hpp>
+#include <chrono>  // std::chrono::seconds
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>  // std::this_thread::sleep_for
-
+namespace filesystem = std::filesystem;
 using namespace ots;
 
 // clang-format off
@@ -33,7 +36,7 @@ const std::string WizardSupervisor::SERVICE_DATA_PATH 	= __ENV__("SERVICE_DATA_P
 #define SECURITY_FILE_NAME 				WizardSupervisor::SERVICE_DATA_PATH + "/OtsWizardData/security.dat"
 #define SEQUENCE_FILE_NAME 				WizardSupervisor::SERVICE_DATA_PATH + "/OtsWizardData/sequence.dat"
 #define SEQUENCE_OUT_FILE_NAME 			WizardSupervisor::SERVICE_DATA_PATH + "/OtsWizardData/sequence.out"
-#define USER_IMPORT_EXPORT_PATH 					WizardSupervisor::SERVICE_DATA_PATH + "/"
+#define USER_IMPORT_EXPORT_PATH 		WizardSupervisor::SERVICE_DATA_PATH + "/"
 
 #define XML_STATUS 						"editUserData_status"
 
@@ -129,7 +132,7 @@ WizardSupervisor::~WizardSupervisor(void)
 void WizardSupervisor::destroy(void)
 {
 	// called by destructor
-} //end destroy()
+}  // end destroy()
 
 //==============================================================================
 void WizardSupervisor::init(void)
@@ -729,7 +732,7 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 		Command = cgi("RequestType");  // get command from form, if PreviewEntry
 
 	__COUT__ << Command << std::endl;
-	__COUT__ << "We are vewing Users' Settings!" << std::endl;
+	__COUT__ << "We are viewing Users' Settings!" << std::endl;
 
 	// SECURITY CHECK START ****
 	if(securityCode_.compare(submittedSequence) != 0)
@@ -745,9 +748,9 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 	// SECURITY CHECK END ****
 
 	HttpXmlDocument xmldoc;
-	//uint64_t        activeSessionIndex;
-	std::string     user;
-	//uint8_t         userPermissions;
+	// uint64_t        activeSessionIndex;
+	std::string user;
+	// uint8_t         userPermissions;
 
 	if(Command != "")
 	{
@@ -763,40 +766,78 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 			// save entry and uploads to previewPath / previewPostTempIndex_ /.
 
 			// cleanUpPreviews();
-			//			std::string EntryText = cgi("EntryText");
-			//			__COUT__ << "EntryText " << EntryText <<  std::endl << std::endl;
-			//			std::string EntrySubject = cgi("EntrySubject");
-			//			__COUT__ << "EntrySubject " << EntrySubject <<  std::endl <<
+			// 			std::string EntryText = cgi("EntryText");
+			// 			__COUT__ << "EntryText " << EntryText <<  std::endl << std::endl;
+			// 			std::string EntrySubject = cgi("EntrySubject");
+			// 			__COUT__ << "EntrySubject " << EntrySubject <<  std::endl <<
 			// std::endl;
 
 			// get creator name
 			// std::string creator = user;
-			// CgiDataUtilities::postData(cgi, "file"); CgiDataUtilities::postData(cgi,
-			// "file");//
-			__COUT__ << cgi("Entry") << std::endl;
-			__COUT__ << cgi("Filename") << std::endl;
-			__COUT__ << cgi("Imported_File") << std::endl;
+			// CgiDataUtilities::postData(cgi, "file");//
+			// __COUT__ << cgi("Entry") << std::endl;
+			// __COUT__ << cgi("Filename") << std::endl;
+			// __COUT__ << cgi("Imported_File") << std::endl;
 
+			std::string      pathToTemporalFolder = USER_IMPORT_EXPORT_PATH + "tmp/";
+			filesystem::path temporaryPath        = pathToTemporalFolder;
+
+			if(filesystem::exists(temporaryPath))
+				__COUT__ << temporaryPath << " exists!" << std::endl;
+			else
+			{
+				__COUT__ << temporaryPath << " does not exist! Creating it now. " << std::endl;
+				filesystem::create_directory(temporaryPath);
+			}
+
+			// read the uploaded values
 			const std::vector<cgicc::FormFile> files = cgi.getFiles();
-			__COUT__ << "FormFiles: " << sizeof(files) << std::endl;
-			__COUT__ << "Number of files: " << files.size() << std::endl;
-
+			// __COUT__ << "FormFiles: " << sizeof(files) << std::endl;
+			// __COUT__ << "Number of files: " << files.size() << std::endl;
+			// sets uploaded values in a file with the same name within the structure
 			for(unsigned int i = 0; i < files.size(); ++i)
 			{
-				std::string filename = USER_IMPORT_EXPORT_PATH + files[i].getFilename();
-				__COUT__ << filename << std::endl;
-				std::ofstream myFile;
-				myFile.open(filename.c_str());
-				files[0].writeToStream(myFile);
+				std::string filename = pathToTemporalFolder + files[i].getFilename();
+				//  __SS__ << filename << __E__;
+				//  __COUT_ERR__ << "\n" << ss.str();
+				std::size_t tarFoundFlag   = filename.find(".tar");
+				std::size_t tarGzFoundFlag = filename.find("gz");
+				std::size_t tarBzFoundFlag = filename.find("bz2");
+
+				if(tarFoundFlag != std::string::npos)
+				{
+					if(tarGzFoundFlag != std::string::npos || tarBzFoundFlag != std::string::npos)
+					{
+						__SS__ << "This is not a valid tar file, due to bad extension naming" << __E__;
+						__COUT_ERR__ << "\n" << ss.str();
+					}
+					else
+					{
+						std::ofstream myFile;
+						myFile.open(filename.c_str());
+						files[0].writeToStream(myFile);
+						std::string commandToDecompressUserData = std::string("tar -xvf ") + filename;
+						filesystem::current_path(USER_IMPORT_EXPORT_PATH);
+						system(commandToDecompressUserData.c_str());
+						// std::string resultString = StringMacros::exec(commandToDecompressUserData.c_str());
+						// __COUTV__(resultString);
+						
+					}
+				}
+				else
+				{
+					__SS__ << "This is not a valid tar file for user preferences" << __E__;
+					__COUT_ERR__ << "\n" << ss.str();
+				}
 			}
 
-			__COUT__ << files[0].getFilename() << std::endl;
-			__COUT__ << "********************Files Begin********************" << std::endl;
-			for(unsigned int i = 0; i < files.size(); ++i)
-			{
-				__COUT__ << files[i].getDataType() << std::endl;
-			}
-			__COUT__ << "*********************Files End*********************" << std::endl;
+			// __COUT__ << files[0].getFilename() << std::endl;
+			// __COUT__ << "********************Files Begin********************" << std::endl;
+			// for(unsigned int i = 0; i < files.size(); ++i)
+			// {
+			// 	__COUT__ << files[i].getDataType() << std::endl;
+			// }
+			// __COUT__ << "*********************Files End*********************" << std::endl;
 
 			//			savePostPreview(EntrySubject, EntryText, cgi.getFiles(), creator,
 			//&xmldoc);  else xmldoc.addTextElementToData(XML_STATUS,"Failed - could not
@@ -804,47 +845,32 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 		}
 		else if(Command == "Export")
 		{
-			__SS__ << "This has been commented out due to problems compiling. Contact "
-			          "system admins."
-			       << __E__;
-			__SS_THROW__;
-			//
-			//			__COUT__ << "We are exporting Users' Settings!!!" << std::endl;
-			//			//system('pwd');
-			//
-			//			//Check for a TMP directory; if it doesn't exist, make it
-			//			std::string command = "cd " + USER_IMPORT_EXPORT_PATH;
-			//			std::string pathToTmp = USER_IMPORT_EXPORT_PATH + "/tmp/";
-			//			std::filesystem::path tmp = pathToTmp;
-			//
-			//			exec(command.c_str());
-			//			__COUT__ << exec("pwd") << std::endl;
-			//
-			//
-			//			if(std::filesystem::status_known(tmpDir) ?
-			// std::filesystem::exists(tmpDir) : std::filesystem::exists(tmpDir))
-			//				__COUT__ << pathToTmp << " exists!" << std::endl;
-			//			else
-			//				__COUT__ << pathToTmp << "does not exist! Creating it now. "
-			//<<  std::endl;
-			//
-			//			//Zip current files into TMP directory
-			//			command = std::string("tar -cvf user_settings.tar") +
-			//					std::string("ActiveTableGroups.cfg ") +
-			//					std::string("ConsolePreferences ") +
-			//					std::string("CoreTableInfoNames.dat ") +
-			//					std::string("LoginData ") +
-			//					std::string("OtsWizardData ") +
-			//					std::string("ProgressBarData ");
-			//
-			//
-			//			//return zip
-			//			if(exec("pwd").find(USER_IMPORT_EXPORT_PATH) != std::string::npos)
-			//			{
-			//				__COUT__ << "Found USER_DATA directory " << std::endl;
-			//				system(command.c_str());
-			//				__COUT__ << system("ls") << std::endl;
-			//			}
+			// __SS__ << "This has been commented out due to problems compiling. Contact "
+			//           "system admins."
+			//        << __E__;
+			//__COUT_ERR__ << "\n" << ss.str();
+
+			// // Check for a TMP directory; if it doesn't exist, make it
+			std::string      pathToTemporalFolder = USER_IMPORT_EXPORT_PATH + "tmp/";
+			filesystem::path temporaryPath        = pathToTemporalFolder;
+
+			if(filesystem::exists(temporaryPath))
+				__COUT__ << temporaryPath << " exists!" << std::endl;
+			else
+			{
+				__COUT__ << temporaryPath << " does not exist! Creating it now. " << std::endl;
+				filesystem::create_directory(temporaryPath);
+			}
+			std::string commandToCompressUserData = std::string("tar -cvf user_settings.tar ") + std::string("ActiveTableGroups.cfg ") +
+			                                        std::string("ConsolePreferences ") + std::string("CoreTableInfoNames.dat ") + std::string("LoginData ") +
+			                                        std::string("OtsWizardData ") + std::string("ProgressBarData ");
+
+			filesystem::current_path(USER_IMPORT_EXPORT_PATH);
+			system(commandToCompressUserData.c_str());
+			filesystem::rename("user_settings.tar", "tmp/user_settings.tar");
+			filesystem::current_path(temporaryPath);
+			__COUT__ << system("echo You can find the output on the following path ") << __E__;
+			__COUT__ << system("pwd") << std::endl;
 		}
 		else
 		{
@@ -1011,9 +1037,3 @@ void WizardSupervisor::savePostPreview(
 	if(xmldoc) xmldoc->addTextElementToData(XML_PREVIEW_INDEX,"1"); //1 indicates is a
 	preview post*/
 }
-
-
-
-
-
-

@@ -6,7 +6,7 @@
 				<COLUMN Type="UID" 	 Name="outputUID" 	 StorageName="OUTPUT_UID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="OnOff" 	 Name="Status" 	 StorageName="STATUS" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Data" 	 Name="outputKey" 	 StorageName="OUTPUT_KEY" 		DataType="VARCHAR2" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="outputModuleType" 	 StorageName="OUTPUT_MODULE_TYPE" 		DataType="VARCHAR2" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="outputModuleType" 	 StorageName="OUTPUT_MODULE_TYPE" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=1,RootNetOutput,BinaryNetOutput,RootOutput,RootDAQOut,TransferOutput,FileDumperOutput"/>
 				<COLUMN Type="ChildLink-outputParameters" 	 Name="outputModuleParameterLink" 	 StorageName="OUTPUT_MODULE_PARAMETER_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQOutputModuleParameterTable"/>
 				<COLUMN Type="ChildLinkGroupID-outputParameters" 	 Name="outputModuleParameterLinkGroupID" 	 StorageName="OUTPUT_MODULE_PARAMETER_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>

@@ -1,7 +1,7 @@
 #ifndef _ots_FEVInterface_h_
 #define _ots_FEVInterface_h_
 
-#define TRACE_NAME "FEVInterface"
+#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
 #include "artdaq/DAQdata/Globals.hh"
 
 #include "otsdaq/Configurable/Configurable.h"

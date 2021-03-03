@@ -92,11 +92,15 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 
 	unsigned int i    = 0;
 	unsigned int opsi = 0;
+	unsigned int blankNumberCount = 0;
 	bool         verified;
 	for(const auto& number : numbers)
 	{
 		if(number.size() == 0)
+		{
+			++blankNumberCount;
 			continue;  // skip empty numbers
+		}
 
 		// verify that this number looks like a number
 		//	for integer types, allow hex and binary
@@ -175,7 +179,7 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 		{
 			retValue = tmpValue;
 
-			if(ops.size() == numbers.size())  // then there is a leading operation, so apply
+			if(ops.size() == numbers.size() - blankNumberCount)  // then there is a leading operation, so apply
 			{
 				if(ops[opsi] == '-')  // only meaningful op is negative sign
 					retValue *= -1;
@@ -189,10 +193,10 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 				__COUTV__(StringMacros::vectorToString(numbers));
 				__COUTV__(StringMacros::vectorToString(ops));
 			}
-			//__COUTV__(opsi);
-			//__COUTV__(ops[opsi]);
-			//__COUTV__(tmpValue);
-			//__COUT__ << "Intermediate value = " << retValue << __E__;
+			// __COUTV__(opsi);
+			// __COUTV__(ops[opsi]);
+			// __COUTV__(tmpValue);
+			// __COUT__ << "Intermediate value = " << retValue << __E__;
 
 			switch(ops[opsi])
 			{

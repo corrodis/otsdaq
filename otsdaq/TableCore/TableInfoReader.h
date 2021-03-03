@@ -44,6 +44,10 @@ class TableInfoReader
 	XMLCh* columnDataTypeAttributeTag_;
 	XMLCh* columnDataChoicesAttributeTag_;
 	XMLCh* columnDefaultValueAttributeTag_;
+	XMLCh* columnMinValueAttributeTag_;
+	XMLCh* columnMaxValueAttributeTag_;
+
+	//adding two new tags for min and max
 
 	bool allowIllegalColumns_;
 

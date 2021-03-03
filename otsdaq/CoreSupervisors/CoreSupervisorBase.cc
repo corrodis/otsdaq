@@ -356,6 +356,12 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 	//if(detail.size())
 	//	__SUP_COUTV__(detail);
 
+	//if empty detail, give last command
+	if(!detail.size() && RunControlStateMachine::getLastCommand() != "")
+	{
+		detail = "Last Command: " + RunControlStateMachine::getLastCommand();	
+	}
+
 	return detail;
 }  // end getStatusProgressDetail()
 
@@ -390,7 +396,7 @@ xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap:
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
 	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply", retParameters);
-}
+} //end stateMachineErrorMessageRequest()
 
 //==============================================================================
 void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateInitial" << __E__; }

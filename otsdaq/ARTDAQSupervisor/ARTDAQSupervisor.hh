@@ -19,68 +19,77 @@
 
 namespace ots
 {
+// ARTDAQSupervisor
+//	This class provides the otsdaq Supervisor interface to a single artdaq Data Logger.
+class ARTDAQSupervisor : public CoreSupervisorBase
+{
+  public:
+	XDAQ_INSTANTIATOR();
 
-	// ARTDAQSupervisor
-	//	This class provides the otsdaq Supervisor interface to a single artdaq Data Logger.
-	class ARTDAQSupervisor : public CoreSupervisorBase
+	struct DAQInterfaceProcessInfo
 	{
-	public:
-		XDAQ_INSTANTIATOR();
-
-		struct DAQInterfaceProcessInfo {
-			std::string label;
-			std::string host;
-			int port;
-			int subsystem;
-			int rank;
-			std::string state;
-		};
-
-		ARTDAQSupervisor(xdaq::ApplicationStub* s);
-		virtual ~ARTDAQSupervisor(void);
-
-
-
-		void 			init(void);
-		void 			destroy(void);
-
-		virtual void 	transitionConfiguring(toolbox::Event::Reference event) override;
-		virtual void 	transitionHalting(toolbox::Event::Reference event) override;
-		virtual void 	transitionInitializing(toolbox::Event::Reference event) override;
-		virtual void 	transitionPausing(toolbox::Event::Reference event) override;
-		virtual void 	transitionResuming(toolbox::Event::Reference event) override;
-		virtual void 	transitionStarting(toolbox::Event::Reference event) override;
-		virtual void 	transitionStopping(toolbox::Event::Reference event) override;
-		virtual void 	enteringError(toolbox::Event::Reference event) override;
-
-		std::list<std::pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>> makeCommandersFromProcessInfo();
-
-		static std::list<std::string> tokenize_(std::string const& input);
-	private:
-		void 			configuringThread(void);
-
-		PyObject* daqinterface_ptr_;
-		std::recursive_mutex  			daqinterface_mutex_;
-		int       						partition_;
-		std::string 					daqinterface_state_;
-		std::unique_ptr<std::thread> 	runner_thread_;
-		std::atomic<bool> 				runner_running_;
-
-
-		std::mutex        				thread_mutex_;
-		ProgressBar        				thread_progress_bar_;
-		std::string						thread_error_message_;
-		int								last_thread_progress_read_;
-		time_t							last_thread_progress_update_;
-
-
-		void 			getDAQState_(void);
-		std::string 	getProcessInfo_(void);
-		std::list<DAQInterfaceProcessInfo> getAndParseProcessInfo_(void);
-		void 			daqinterfaceRunner_(void);
-		void 			stop_runner_(void);
-		void 			start_runner_(void);
+		std::string label;
+		std::string host;
+		int         port;
+		int         subsystem;
+		int         rank;
+		std::string state;
 	};
+
+	ARTDAQSupervisor(xdaq::ApplicationStub* s);
+	virtual ~ARTDAQSupervisor(void);
+
+	void init(void);
+	void destroy(void);
+
+	virtual void        transitionConfiguring(toolbox::Event::Reference event) override;
+	virtual void        transitionHalting(toolbox::Event::Reference event) override;
+	virtual void        transitionInitializing(toolbox::Event::Reference event) override;
+	virtual void        transitionPausing(toolbox::Event::Reference event) override;
+	virtual void        transitionResuming(toolbox::Event::Reference event) override;
+	virtual void        transitionStarting(toolbox::Event::Reference event) override;
+	virtual void        transitionStopping(toolbox::Event::Reference event) override;
+	virtual void        enteringError(toolbox::Event::Reference event) override;
+	virtual std::string getStatusProgressDetail(void) override
+	{
+		std::lock_guard<std::mutex> lk(thread_mutex_);
+		return thread_progress_message_;
+	}
+
+	std::list<std::pair<DAQInterfaceProcessInfo, std::unique_ptr<artdaq::CommanderInterface>>> makeCommandersFromProcessInfo();
+
+	static std::list<std::string> tokenize_(std::string const& input);
+
+  private:
+	void configuringThread(void);
+	void startingThread(void);
+
+	PyObject*                    daqinterface_ptr_;
+	std::recursive_mutex         daqinterface_mutex_;
+	int                          partition_;
+	std::string                  daqinterface_state_;
+	std::unique_ptr<std::thread> runner_thread_;
+	std::atomic<bool>            runner_running_;
+
+	std::mutex  thread_mutex_;
+	ProgressBar thread_progress_bar_;
+	std::string thread_progress_message_;
+	std::string thread_error_message_;
+	int         last_thread_progress_read_;
+	time_t      last_thread_progress_update_;
+
+	void                               getDAQState_(void);
+	std::string                        getProcessInfo_(void);
+	std::list<DAQInterfaceProcessInfo> getAndParseProcessInfo_(void);
+	void                               daqinterfaceRunner_(void);
+	void                               stop_runner_(void);
+	void                               start_runner_(void);
+	void                               set_thread_message_(std::string msg)
+	{
+		std::lock_guard<std::mutex> lk(thread_mutex_);
+		thread_progress_message_ = msg;
+	}
+};
 
 }  // namespace ots
 

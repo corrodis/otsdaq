@@ -54,10 +54,11 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		std::string label;
 		std::string hostname;
 		int         subsystem;
+		int port;
 		bool		status;
 
-		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff)
-		: label(l), hostname(h), subsystem(s), status(onOff) {}
+		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff, int p = -1)
+		: label(l), hostname(h), subsystem(s), port(p), status(onOff) {}
 	};
 
 	struct SubsystemInfo
@@ -95,6 +96,10 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	                   						                			 bool               includeAtTableParameters    = false);
 	static std::string 						insertModuleType			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree moduleTypeNode);
 	static void        						insertMetricsBlock			(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree daqNode);
+	static void                             insertArtProcessBlock(std::ostream& out, std::string& tabStr, std::string& commentStr, ConfigurationTree art,
+																		 ConfigurationTree subsystemLink = ConfigurationTree(),
+	            							                      		 size_t                   routingTimeoutMs     = DEFAULT_ROUTING_TIMEOUT_MS,
+	            							                      		 size_t                   routingRetryCount    = DEFAULT_ROUTING_RETRY_COUNT );
 
 	static void 							outputBoardReaderFHICL		(const ConfigurationTree& boardReaderNode,
 	            							                      		 size_t                   maxFragmentSizeBytes = DEFAULT_MAX_FRAGMENT_SIZE,
@@ -110,6 +115,8 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	static void 							outputRoutingMasterFHICL	(const ConfigurationTree& routingMasterNode,
 	            							                        	 size_t                   routingTimeoutMs  = DEFAULT_ROUTING_TIMEOUT_MS,
 	            							                        	 size_t                   routingRetryCount = DEFAULT_ROUTING_RETRY_COUNT);
+
+	static void                              outputOnlineMonitorFHICL ( const ConfigurationTree& onlineMonitorNode);
 
 	static const ARTDAQInfo& 				extractARTDAQInfo			(ConfigurationTree artdaqSupervisorNode,
 			 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 bool			   getStatusFalseNodes  = false,

@@ -19,7 +19,10 @@ class TableViewColumnInfo
 	                    const std::string& dataType,
 	                    const std::string* defaultValue,
 	                    const std::string& dataChoicesCSV,
+						const std::string* minValue,
+						const std::string* maxValue,
 	                    std::string*       capturedExceptionString);
+
 	TableViewColumnInfo(const TableViewColumnInfo& c);             // copy constructor because of bitmap pointer
 	TableViewColumnInfo& operator=(const TableViewColumnInfo& c);  // assignment operator because of bitmap pointer
 
@@ -30,7 +33,11 @@ class TableViewColumnInfo
 	const std::string&              getStorageName(void) const;
 	const std::string&              getDataType(void) const;
 	const std::string&              getDefaultValue(void) const;
+	const std::string&              getMinValue(void) const;
+	const std::string&              getMaxValue(void) const;
 	static const std::string&       getDefaultDefaultValue(const std::string& type, const std::string& dataType);
+	static const std::string&       getMinDefaultValue(const std::string& dataType);
+	static const std::string&       getMaxDefaultValue(const std::string& dataType);
 	const std::vector<std::string>& getDataChoices(void) const;
 
 	struct BitMapInfo  // uses dataChoices CSV fields if type is TYPE_BITMAP_DATA
@@ -78,6 +85,8 @@ class TableViewColumnInfo
 	static const std::string DATATYPE_COMMENT_DEFAULT;
 	static const std::string DATATYPE_BOOL_DEFAULT;
 	static const std::string DATATYPE_NUMBER_DEFAULT;
+	static const std::string DATATYPE_NUMBER_MIN_DEFAULT;
+	static const std::string DATATYPE_NUMBER_MAX_DEFAULT;
 	static const std::string DATATYPE_TIME_DEFAULT;
 	static const std::string DATATYPE_LINK_DEFAULT;
 
@@ -96,7 +105,9 @@ class TableViewColumnInfo
 	const std::string              dataType_;
 	const std::string              defaultValue_;
 	const std::vector<std::string> dataChoices_;
-	BitMapInfo*              		bitMapInfoP_;
+	const std::string              minValueGeneral_;
+	const std::string              maxValueGeneral_;
+	BitMapInfo*              	   bitMapInfoP_;
 }; //end TableViewColumnInfo class
 // clang-format on
 }  // namespace ots

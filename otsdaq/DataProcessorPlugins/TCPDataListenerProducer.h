@@ -3,7 +3,7 @@
 
 #include "otsdaq/Configurable/Configurable.h"
 #include "otsdaq/DataManager/DataProducer.h"
-#include "otsdaq/NetworkUtilities/TCPSubscribeClient.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
+#include "otsdaq/NetworkUtilities/TCPListenServer.h"  // Make sure this is always first because <sys/types.h> (defined in Socket.h) must be first
 
 #include <string>
 
@@ -11,7 +11,7 @@ namespace ots
 {
 class ConfigurationTree;
 
-class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPSubscribeClient
+class TCPDataListenerProducer : public DataProducer, public Configurable, public TCPListenServer
 {
   public:
 	TCPDataListenerProducer(std::string              supervisorApplicationUID,
@@ -34,9 +34,8 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 
-	std::string    ipAddress_;
-	unsigned short port_;
 	std::string    dataType_;
+	unsigned    port_;
 
 	// bool getNextFragment(void);
 };

@@ -11,7 +11,7 @@
 				<COLUMN Type="ChildLinkUID-physics" 	 Name="physicsLinkUID" 	 StorageName="PHYSICS_LINK_UID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-source" 	 Name="sourceLink" 	 StorageName="SOURCE_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQSourceTable"/>
 				<COLUMN Type="ChildLinkUID-source" 	 Name="sourceLinkUID" 	 StorageName="SOURCE_LINK_UID" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="ProcessName" 	 StorageName="PROCESS_NAME" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="UniqueData" 	 Name="ProcessName" 	 StorageName="PROCESS_NAME" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-addOnParameters parameters" 	 Name="AddOnParametersLink" 	 StorageName="ADD_ON_PARAMETERS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
 				<COLUMN Type="ChildLinkGroupID-addOnParameters parameters" 	 Name="AddOnParametersLinkGroupID" 	 StorageName="ADD_ON_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>

@@ -1,11 +1,8 @@
 console : { 
- 	type : cout 
- 	threshold : "DEBUG"
- 	format:
- 	{
-		timestamp: none
-		noLineBreaks: true
-	}
+ 	type : 					cout 
+ 	threshold : 			DEBUG
+	filename_delimit: 		"/src"
+	format_string: 			"|%L:%N:%f [%u]\t%m"
 }
 
 #file: {

@@ -42,27 +42,27 @@ class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 		addStateTransition(from, to, input, transitionName, obj, func);
 	}
 
-	toolbox::fsm::State 	getProvenanceState			(void);
-	toolbox::fsm::State 	getTransitionFinalState		(const std::string& transition);
+	toolbox::fsm::State 			getProvenanceState			(void);
+	toolbox::fsm::State 			getTransitionFinalState		(const std::string& transition);
 
-	std::string        		getProvenanceStateName		(void);
-	std::string        		getCurrentStateName			(void);
-	time_t             		getTimeInState				(void);
-	std::string        		getCurrentTransitionName	(const std::string& transition = "");
-	std::string        		getTransitionName			(const toolbox::fsm::State from, const std::string& transition);
-	std::string        		getTransitionParameter		(const toolbox::fsm::State from, const std::string& transition);
-	std::string        		getTransitionFinalStateName	(const std::string& transition);
-	const std::string& 		getErrorMessage				(void) const;
-	const std::string& 		getStateMachineName			(void) const { return stateMachineName_; }
-	void               		setStateMachineName			(const std::string& name) { stateMachineName_ = name; }
+	std::string        				getProvenanceStateName		(void);
+	std::string        				getCurrentStateName			(void);
+	time_t             				getTimeInState				(void);
+	std::string        				getCurrentTransitionName	(const std::string& transition = "");
+	std::string        				getTransitionName			(const toolbox::fsm::State from, const std::string& transition);
+	std::string        				getTransitionParameter		(const toolbox::fsm::State from, const std::string& transition);
+	std::string        				getTransitionFinalStateName	(const std::string& transition);
+	const std::string& 				getErrorMessage				(void) const;
+	const std::string& 				getStateMachineName			(void) const { return stateMachineName_; }
+	void               				setStateMachineName			(const std::string& name) { stateMachineName_ = name; }
 
-	const xoap::MessageReference& getCurrentMessage(void);
+	const xoap::MessageReference& 	getCurrentMessage			(void) { return theMessage_; }
 
-	bool execTransition(const std::string& transition);
-	bool execTransition(const std::string& transition, const xoap::MessageReference& message);
-	bool isInTransition(void);
-	void setInitialState(toolbox::fsm::State state);
-	void setErrorMessage(const std::string& errMessage, bool append = true);
+	bool 							execTransition				(const std::string& transition);
+	bool 							execTransition				(const std::string& transition, const xoap::MessageReference& message);
+	bool 							isInTransition				(void);
+	void 							setInitialState				(toolbox::fsm::State state);
+	void 							setErrorMessage				(const std::string& errMessage, bool append = true);
 
   protected:
 	time_t stateEntranceTime_;

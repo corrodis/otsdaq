@@ -1,3 +1,6 @@
+
+
+#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
 #include "artdaq/DAQdata/Globals.hh"
 #define TRACE_NAME "UDPReceiver"
 

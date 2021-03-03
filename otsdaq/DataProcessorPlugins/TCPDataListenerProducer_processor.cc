@@ -24,13 +24,12 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
           supervisorApplicationUID, bufferUID, processorUID, theXDAQContextConfigTree.getNode(configurationPath).getNode("BufferSize").getValue<unsigned int>())
     //, DataProducer (supervisorApplicationUID, bufferUID, processorUID, 100)
     , Configurable(theXDAQContextConfigTree, configurationPath)
-    , TCPSubscribeClient(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>(),
-                         theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
+    , TCPListenServer(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>(),
+                      theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerMaxClients").getValue<unsigned>())
     , dataP_(nullptr)
     , headerP_(nullptr)
-    , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
-    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
+    , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 {
 }
 
@@ -40,8 +39,7 @@ TCPDataListenerProducer::~TCPDataListenerProducer(void) {}
 //==============================================================================
 void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect(30,1000);
-	TCPSubscribeClient::setReceiveTimeout(1, 0);
+	startAccept();
 	DataProducer::startProcessingData(runNumber);
 }
 
@@ -49,7 +47,6 @@ void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 void TCPDataListenerProducer::stopProcessingData(void)
 {
 	DataProducer::stopProcessingData();
-	TCPSubscribeClient::disconnect();
 }
 
 //==============================================================================
@@ -70,7 +67,7 @@ void TCPDataListenerProducer::slowWrite(void)
 
 	try
 	{
-		data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		data_ = TCPListenServer::receive<std::string>();  // Throws an exception if it fails
 		if(data_.size() == 0)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1000));
@@ -83,7 +80,6 @@ void TCPDataListenerProducer::slowWrite(void)
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		return;
 	}
-	header_["IPAddress"] = ipAddress_;
 	header_["Port"]      = std::to_string(port_);
 
 	while(DataProducer::write(data_, header_) < 0)
@@ -112,9 +108,9 @@ void TCPDataListenerProducer::fastWrite(void)
 	try
 	{
 		if(dataType_ == "Packet")
-			*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
+			*dataP_ = TCPListenServer::receivePacket();  // Throws an exception if it fails
 		else//"Raw" || DEFAULT
-			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+			*dataP_ = TCPListenServer::receive<std::string>();  // Throws an exception if it fails
 
 		if(dataP_->size() == 0)//When it goes in timeout
 			return;
@@ -125,7 +121,6 @@ void TCPDataListenerProducer::fastWrite(void)
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return;
 	}
-	(*headerP_)["IPAddress"] = ipAddress_;
 	(*headerP_)["Port"]      = std::to_string(port_);
 
 	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();

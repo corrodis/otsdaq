@@ -28,6 +28,7 @@ TableView::TableView(const std::string& tableName)
 	, colStatus_(INVALID)
 	, colPriority_(INVALID)
 	, fillWithLooseColumnMatching_(false)
+	, getSourceRawData_(false)
 	, sourceColumnMismatchCount_(0)
 	, sourceColumnMissingCount_(0)
 {
@@ -617,6 +618,53 @@ void TableView::init(void)
 
 				// check for link mate (i.e. every child link needs link ID)
 				getChildLink(col, tmpIsGroup, tmpLinkPair);
+			}
+		 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
+			if(columnsInfo_[col].isNumberDataType())
+			{
+				std::string minimumValueString = columnsInfo_[col].getMinValue();
+				std::string maximumValueString = columnsInfo_[col].getMaxValue();
+				double       minimumValue, maximumValue, valueFromTable;
+				bool        minExists = false, maxExists = false;
+				//__COUT__ << "values output1 " << minimumValueString << " another output1 " << maximumValueString << __E__;
+
+				if(!minimumValueString.empty())
+				{
+					std::string envData = StringMacros::convertEnvironmentVariables(minimumValueString);
+					minExists           = StringMacros::getNumber(envData, minimumValue);
+				}
+
+				if(!maximumValueString.empty())
+				{
+					std::string envData1 = StringMacros::convertEnvironmentVariables(maximumValueString);
+					maxExists            = StringMacros::getNumber(envData1, maximumValue);
+				}
+
+				//__COUT__ << "values output" << minimumValue << " another output " << maximumValue << __E__;
+
+				if(minExists && maxExists && minimumValue > maximumValue)
+				{
+					__SS__ << "Minimum value is greater than maximum, check table editor to change this" << __E__;
+					__SS_THROW__;
+				}
+
+				if(minExists || maxExists)
+					for(unsigned int row = 0; row < getNumberOfRows(); ++row)
+					{
+						getValue(valueFromTable, row, col);
+						if(minExists && valueFromTable < minimumValue)
+						{
+							__SS__ << "This value is out of the established limits: " <<
+								valueFromTable << " is lower than specified minimum " << minimumValue << __E__;
+							__SS_THROW__;
+						}
+						if(maxExists && valueFromTable > maximumValue)
+						{
+							__SS__ << "This value is out of the established limits: " <<
+								valueFromTable << " is greater than specified maximum " << maximumValue << __E__;
+							__SS_THROW__;
+						}
+					}
 			}
 		}
 
@@ -1817,6 +1865,9 @@ void TableView::setLastAccessTime(time_t t) { lastAccessTime_ = t; }
 void TableView::setLooseColumnMatching(bool setValue) { fillWithLooseColumnMatching_ = setValue; }
 
 //==============================================================================
+void TableView::doGetSourceRawData(bool setValue) { getSourceRawData_ = setValue; }
+
+//==============================================================================
 void TableView::reset(void)
 {
 	version_ = -1;
@@ -2023,7 +2074,14 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
-	bool dbg = tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
+	bool dbg = false; //tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
+	bool rawData = getSourceRawData_;
+	if(getSourceRawData_) 
+	{ 	//only get source raw data once, then revert member variable
+		__COUTV__(getSourceRawData_);
+		getSourceRawData_ = false;
+		sourceRawData_ = ""; //clear for this fill
+	}
 
 	std::map<std::string /*key*/, unsigned int /*entries/rows*/> keyEntryCountMap;
 	std::vector<std::string>                                     keys;
@@ -2350,6 +2408,7 @@ int TableView::fillFromJSON(const std::string& json)
 				__COUTV__(fillWithLooseColumnMatching_);
 			}
 
+
 			// extract only what we care about
 			// for TableView only care about matching depth 1
 
@@ -2360,7 +2419,27 @@ int TableView::fillFromJSON(const std::string& json)
 				if ((currDepth == 1 && keys[k] == currKey) || (currDepth > 1 && keys[k] == jsonPath[1]))
 					matchedKey = k;
 
-			if (matchedKey != (unsigned int)-1)
+			if(rawData)
+			{
+				//raw data handling fills raw data string with row/col values
+				
+				if(currDepth == 1)
+				{
+					if(matchedKey == CV_JSON_FILL_COMMENT)
+						setComment(currVal);
+					else if(matchedKey == CV_JSON_FILL_AUTHOR)
+						setAuthor(currVal);
+					else if(matchedKey == CV_JSON_FILL_CREATION_TIME)
+						setCreationTime(strtol(currVal.c_str(), 0, 10));
+				}
+				else if(currDepth == 2)
+				{
+					//encode URI component so commas are surviving delimiter
+					sourceRawData_ += StringMacros::encodeURIComponent(currKey) + "," + StringMacros::encodeURIComponent(currVal) + ",";
+					sourceColumnNames_.emplace(currKey);
+				}
+			}
+			else if (matchedKey != (unsigned int)-1)
 			{
 				// std::cout << "New Data for:: key[" << matchedKey << "]-" <<
 				//		keys[matchedKey] << "\n";
@@ -2567,47 +2646,10 @@ int TableView::fillFromJSON(const std::string& json)
 
 	if (!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
-		const std::set<std::string> srcColNames = getSourceColumnNames();
-		__SS__ << "Can not ignore errors because not every column was found in the "
-			"source data!"
-			<< ". Please see the details below:\n\n"
-			<< "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
-			<< getNumberOfColumns() << ". This resulted in a count of " << getSourceColumnMismatch() << " source column mismatches, and a count of "
-			<< getSourceColumnMissing() << " table entries missing in " << getNumberOfRows() << " row(s) of data." << __E__;
-
-		ss << "\n\nSource column names in ALPHABETICAL order were as follows:\n";
-		char        index = 'a';
-		std::string preIndexStr = "";
-		for (auto& srcColName : srcColNames)
-		{
-			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
-			if (index == 'z')  // wrap-around
-			{
-				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
-				index = 'a';
-			}
-			else
-				++index;
-		}
-		ss << __E__;
-
-		std::set<std::string> destColNames = getColumnStorageNames();
-		ss << "\n\nCurrent table column names in ALPHABETICAL order are as follows:\n";
-		index = 'a';
-		preIndexStr = "";
-		for (auto& destColName : destColNames)
-		{
-			ss << "\n\t" << preIndexStr << index << ". " << destColName;
-			if (index == 'z')  // wrap-around
-			{
-				preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
-				index = 'a';
-			}
-			else
-				++index;
-		}
-		ss << __E__;
-		ss << StringMacros::stackTrace();
+		__SS__ << "Can not ignore errors because not every column was found in the source data!"
+			<< ". Please see the details below:\n\n" << 
+			getMismatchColumnInfo() <<
+			StringMacros::stackTrace();
 		__SS_ONLY_THROW__;
 	}
 
@@ -2615,6 +2657,63 @@ int TableView::fillFromJSON(const std::string& json)
 
 	return 0;  // success
 }  // end fillFromJSON()
+
+//==============================================================================
+std::string TableView::getMismatchColumnInfo(void) const
+{
+	const std::set<std::string>& 	srcColNames  = getSourceColumnNames();
+	std::set<std::string> 			destColNames = getColumnStorageNames();
+
+	__SS__ << "The source column size was found to be " << srcColNames.size()
+		<< ", and the current number of columns for this table is "
+		<< getNumberOfColumns() << ". This resulted in a count of "
+		<< getSourceColumnMismatch()
+		<< " source column mismatches, and a count of "
+		<< getSourceColumnMissing() << " table entries missing in "
+		<< getNumberOfRows() << " row(s) of data." << __E__;
+	
+
+	ss << "\n\n" << srcColNames.size() << " Source column names in ALPHABETICAL order were as follows:\n";
+	char        index = 'a';
+	std::string preIndexStr = "";
+	for (auto& srcColName : srcColNames)
+	{
+		if(destColNames.find(srcColName) == destColNames.end())
+			ss << "\n\t*** " << preIndexStr << index << ". " << srcColName << " ***";
+		else
+			ss << "\n\t" << preIndexStr << index << ". " << srcColName;
+
+		if (index == 'z')  // wrap-around
+		{
+			preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+			index = 'a';
+		}
+		else
+			++index;
+	}
+	ss << __E__;
+
+	ss << "\n\n" << destColNames.size() << " Current table column names in ALPHABETICAL order are as follows:\n";
+	index = 'a';
+	preIndexStr = "";
+	for (auto& destColName : destColNames)
+	{
+		if(srcColNames.find(destColName) == srcColNames.end())
+			ss << "\n\t*** " << preIndexStr << index << ". " << destColName << " ***";
+		else
+			ss << "\n\t" << preIndexStr << index << ". " << destColName;
+
+		if (index == 'z')  // wrap-around
+		{
+			preIndexStr += 'a';  // keep adding index 'digits' for wrap-around
+			index = 'a';
+		}
+		else
+			++index;
+	}
+	ss << __E__;
+	return ss.str();
+} //end getMismatchColumnInfo()
 
 //==============================================================================
 bool TableView::isURIEncodedCommentTheSame(const std::string& comment) const
@@ -2845,6 +2944,8 @@ bool TableView::setURIEncodedValue(const std::string& value, const unsigned int&
 		//			__SS_THROW__;
 		//		}
 		theDataView_[r][c] = valueStr;
+
+		// is it here that a new exception should be added to enforce min and max, given that they only appear with number type?
 	}
 	else if (columnsInfo_[c].getDataType() == TableViewColumnInfo::DATATYPE_TIME)
 	{
