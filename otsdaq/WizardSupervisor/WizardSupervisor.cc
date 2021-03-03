@@ -14,7 +14,6 @@
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 
-#include <bits/stdc++.h>
 #include <dirent.h>    //for DIR
 #include <sys/stat.h>  // mkdir
 #include <boost/filesystem.hpp>
@@ -24,7 +23,7 @@
 #include <iostream>
 #include <string>
 #include <thread>  // std::this_thread::sleep_for
-namespace filesystem = std::filesystem;
+namespace filesystem = boost::filesystem;
 using namespace ots;
 
 // clang-format off
