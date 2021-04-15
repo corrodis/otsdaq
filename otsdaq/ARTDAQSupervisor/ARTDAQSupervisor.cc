@@ -604,9 +604,23 @@ try
 
 	if(res2 == NULL)
 	{
+		PyObject* pName = PyString_FromString("do_recover");
+		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+
 		PyErr_Print();
-		__GEN_SS__ << "Error calling boot transition" << __E__;
-		__GEN_SS_THROW__;
+
+		thread_progress_bar_.step();
+		set_thread_message_("Calling do_boot (retry)");
+		__GEN_COUT__ << "Calling do_boot again" << __E__;
+		__GEN_COUT__ << "Status before boot: " << daqinterface_state_ << __E__;
+		PyObject* res3 = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName2, pStateArgs1, NULL);
+
+		if(res3 == NULL)
+		{
+			PyErr_Print();
+			__GEN_SS__ << "Error calling boot transition (2nd try)" << __E__;
+			__GEN_SS_THROW__;
+		}
 	}
 
 	getDAQState_();
