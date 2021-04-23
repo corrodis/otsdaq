@@ -5,8 +5,9 @@
 				<COLUMN Type="UID" 	 Name="SupervisorUID" 	 StorageName="SUPERVISOR_UID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-FE" 	 Name="LinkToFEInterfaceTable" 	 StorageName="LINK_TO_FE_INTERFACE_TABLE" 		DataType="STRING" 		DataChoices="arbitraryBool=0,FEInterfaceTable"/>
 				<COLUMN Type="ChildLinkGroupID-FE" 	 Name="LinkToFEInterfaceGroupID" 	 StorageName="LINK_TO_FE_INTERFACE_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="YesNo" 	 Name="EnableSlowControlsMetricManager" 	 StorageName="ENABLE_SLOW_CONTROLS_METRIC_MANAGER" 		DataType="STRING" 		DataChoices=""/>
-				<COLUMN Type="Data" 	 Name="SlowControlsMetricManagerChannelNamePreamble" 	 StorageName="SLOW_CONTROLS_METRIC_MANAGER_CHANNEL_NAME_PREAMBLE" 		DataType="STRING" 		DataChoices=""/>
+        <COLUMN Type="Data" 	 Name="SlowControlsMetricManagerChannelNamePreamble" 	 StorageName="SLOW_CONTROLS_METRIC_MANAGER_CHANNEL_NAME_PREAMBLE" 		DataType="STRING" 		DataChoices=""/>
+        <COLUMN Type="ChildLink-metrics" 	 Name="daqMetricsLink" 	 StorageName="DAQ_METRICS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricTable"/>
+        <COLUMN Type="ChildLinkGroupID-metrics" 	 Name="daqMetricsLinkGroupID" 	 StorageName="DAQ_METRICS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>

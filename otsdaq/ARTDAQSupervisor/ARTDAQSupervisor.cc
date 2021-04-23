@@ -604,10 +604,17 @@ try
 
 	if(res2 == NULL)
 	{
+		PyErr_Print();
+		__GEN_COUT__ << "Error on first boost attempt, recovering and retrying" << __E__;
+
 		PyObject* pName = PyString_FromString("do_recover");
 		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
 
-		PyErr_Print();
+		if (res == NULL) {
+			PyErr_Print();
+			__GEN_SS__ << "Error calling recover transition!!!!" << __E__;
+			__GEN_SS_THROW__;
+		}
 
 		thread_progress_bar_.step();
 		set_thread_message_("Calling do_boot (retry)");
