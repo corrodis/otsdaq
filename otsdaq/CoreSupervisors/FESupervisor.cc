@@ -879,13 +879,12 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 	// get pset from Board Reader metric manager table
 	try
 	{
-		// FIXME -- this should be enabled and named by configuration!
-
 		__COUTV__(CorePropertySupervisorBase::getSupervisorConfigurationPath());
 
 		ConfigurationTree feSupervisorNode = CorePropertySupervisorBase::getSupervisorTableNode();
 
 		std::string metric_string = "";
+		bool metricStringSetup = true;
 		try
 		{
 			std::ostringstream oss;
@@ -896,6 +895,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 		}
 		catch(...)
 		{
+			metricStringSetup = false;
+			metric_string = "";
 		}  // ignore error
 
 		if(!metricMan)
@@ -905,13 +906,23 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 		}
 		std::string metricNamePreamble = feSupervisorNode.getNode("/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
 		__COUTV__(metricNamePreamble);
+		if(metricNamePreamble == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			metricNamePreamble = "";
 
 		//std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
 		fhicl::ParameterSet metric_pset;
 		fhicl::make_ParameterSet(metric_string, metric_pset);
 
-		metricMan->initialize(metric_pset.get<fhicl::ParameterSet>("metrics"), metricNamePreamble);
-
+		__COUTV__(metricNamePreamble);
+		try
+		{
+			metricMan->initialize(metric_pset.get<fhicl::ParameterSet>("metrics"), metricNamePreamble);
+		}
+		catch(...)
+		{
+			if(metricStringSetup) throw;
+			else __SUP_COUT__ << "Ignore metric manager initialize error because metric string is not setup." << __E__;
+		}
 		__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan << ") initialized = " << metricMan->Initialized() << __E__;
 	}
 	catch(const std::runtime_error& e)
