@@ -58,15 +58,15 @@ bool TCPPacket::decode(std::string& message)
 	// for (auto l = 0; l < 4; l++)
 	//  std::cout << std::hex << (unsigned int)fBuffer[l] << std::dec << "-";
 	// std::cout << std::endl;
-	std::cout << __PRETTY_FUNCTION__
-	          //<< std::hex
-	          << "Buffer length: "
-	          << fBuffer.length()
-	          //              << ", htonl length: " << length
-	          << ", ntohl length: "
-	          << length
-	          //<< std::dec
-	          << std::endl;
+	// std::cout << __PRETTY_FUNCTION__
+	//           //<< std::hex
+	//           << "Buffer length: "
+	//           << fBuffer.length()
+	//           //              << ", htonl length: " << length
+	//           << ", ntohl length: "
+	//           << length
+	//           //<< std::dec
+	//           << std::endl;
 	if(fBuffer.length() == length)
 	{
 		message = fBuffer.substr(headerLength);
