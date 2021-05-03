@@ -193,8 +193,8 @@ int BufferImplementation<D, H>::setWrittenSubBuffer(void)  // Must be used in co
                                                            // nextWritePointer buffer
 {
 	writePointer_ = nextWritePointer();  // Already protected in nextWritePointer with %numSubBuffers_
-	if(writePointer_ % 1000 == 0)
-		dumpStatus();
+//	if(writePointer_ % 1000 == 0)
+//		dumpStatus();
 	//__GEN_COUTV__(writePointer_);
 	setWritten(writePointer_);
 	return writePointer_;

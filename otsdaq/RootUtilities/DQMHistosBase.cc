@@ -1,10 +1,11 @@
 #include "otsdaq/RootUtilities/DQMHistosBase.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/RootUtilities/VisualDataManager.h"
 
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TObject.h>
-#include <TStyle.h>
+#include <TStyle.h> 
 
 #include <iostream>
 
@@ -21,7 +22,8 @@ void DQMHistosBase::openFile(std::string fileName)
 {
 	closeFile();
 	myDirectory_ = nullptr;
-	theFile_     = TFile::Open(fileName.c_str(), "RECREATE");
+//	theFile_     = TFile::Open(fileName.c_str(), "RECREATE");
+	theFile_     = theDataManager_->openFile(fileName);
 	theFile_->cd();
 }
 
@@ -38,7 +40,8 @@ void DQMHistosBase::closeFile(void)
 {
 	if(theFile_ != nullptr)
 	{
-		theFile_->Close();
+		if(theFile_->IsOpen())
+			theFile_->Close();
 		theFile_ = nullptr;
 	}
 }
