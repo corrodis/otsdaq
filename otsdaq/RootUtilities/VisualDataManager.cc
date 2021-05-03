@@ -3,6 +3,8 @@
 #include "otsdaq/DataManager/DQMHistosConsumerBase.h"
 #include "otsdaq/DataManager/DataManager.h"
 #include "otsdaq/DataManager/DataProcessor.h"
+#include "otsdaq/Macros/CoutMacros.h"
+
 
 #include <cassert>
 #include <chrono>  // std::chrono::seconds
@@ -12,6 +14,9 @@
 #include <TFile.h>
 
 using namespace ots;
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ "VisualDataManager"
+#define mfSubject_ (std::string("VisualDataManager"))
 
 //==============================================================================
 VisualDataManager::VisualDataManager(const ConfigurationTree& theXDAQContextConfigTree,
@@ -170,6 +175,13 @@ TFile* VisualDataManager::openFile(std::string fileName)
 	if(tmpFile == fileMap_.end() || !tmpFile->second->IsOpen())
 		fileMap_[fileName] = TFile::Open(fileName.c_str(), "RECREATE");
 
+	if(fileMap_[fileName] == nullptr || !fileMap_[fileName]->IsOpen())
+	{
+		__GEN_SS__ << "Can't open file: " << fileName
+		           << ". It is likely that the directory where the file should be stored does not exist or cannot be written." << __E__;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
+		__GEN_SS_THROW__;
+	}
 	return fileMap_[fileName];
 }
 

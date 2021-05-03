@@ -4,12 +4,15 @@
 
 #include <TDirectory.h>
 #include <TFile.h>
-#include <TObject.h>
-#include <TStyle.h> 
+#include <TStyle.h>
 
 #include <iostream>
 
 using namespace ots;
+
+#undef __MF_SUBJECT__
+#define __MF_SUBJECT__ "DQMHistos"
+#define mfSubject_ (std::string("DQMHistos"))
 
 //==============================================================================
 DQMHistosBase::DQMHistosBase(void) : theFile_(nullptr), myDirectory_(nullptr) { gStyle->SetPalette(1); }
@@ -18,19 +21,28 @@ DQMHistosBase::DQMHistosBase(void) : theFile_(nullptr), myDirectory_(nullptr) { 
 DQMHistosBase::~DQMHistosBase(void) { closeFile(); }
 
 //==============================================================================
+bool DQMHistosBase::isFileOpen(void)
+{
+	if(theFile_ == nullptr || !theFile_->IsOpen())
+		return false;
+	return true;
+}
+
+//==============================================================================
 void DQMHistosBase::openFile(std::string fileName)
 {
 	closeFile();
 	myDirectory_ = nullptr;
-//	theFile_     = TFile::Open(fileName.c_str(), "RECREATE");
 	theFile_     = theDataManager_->openFile(fileName);
+	
 	theFile_->cd();
+	myDirectory_ = theFile_;
+	
 }
 
 //==============================================================================
 void DQMHistosBase::save(void)
 {
-	std::cout << __COUT_HDR_FL__ << __PRETTY_FUNCTION__ << "Saving file!" << std::endl;
 	if(theFile_ != nullptr)
 		theFile_->Write();
 }

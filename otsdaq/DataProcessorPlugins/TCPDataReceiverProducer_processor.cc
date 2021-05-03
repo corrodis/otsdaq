@@ -70,7 +70,10 @@ void TCPDataReceiverProducer::slowWrite(void)
 
 	try
 	{
-		data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
+		if(dataType_ == "Packet")
+			data_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
+		else//"Raw" || DEFAULT
+			data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 		if(data_.size() == 0)
 		{
 			std::this_thread::sleep_for(std::chrono::microseconds(1000));

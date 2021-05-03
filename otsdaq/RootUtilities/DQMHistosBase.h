@@ -27,6 +27,7 @@ class DQMHistosBase
 	TFile*   getFile(void) { return theFile_; }
 
   protected:
+	bool         isFileOpen(void);
 	virtual void save(void);
 	virtual void openFile(std::string fileName);
 	virtual void closeFile(void);
