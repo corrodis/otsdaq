@@ -1,3 +1,4 @@
+
 cet_make(LIBRARY_NAME ConfigurationInterface
 		 LIBRARIES
 		 PluginMakers
@@ -8,13 +9,13 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 
 		 ${FHICLCPP}
          ${CETLIB}
-         artdaq-database_ConfigurationDB
-         artdaq-database_DataFormats_Json
-         artdaq-database_SharedCommon
-         artdaq-database_Overlay
-         artdaq-database_JsonDocument
-         artdaq-database_BasicTypes
-         artdaq-database_StorageProviders_FileSystemDB
+         artdaq_database::artdaq-database_ConfigurationDB
+         artdaq_database::artdaq-database_DataFormats_Json
+         artdaq_database::artdaq-database_SharedCommon
+         artdaq_database::artdaq-database_Overlay
+         artdaq_database::artdaq-database_JsonDocument
+         artdaq_database::artdaq-database_BasicTypes
+         artdaq_database::artdaq-database_StorageProviders_FileSystemDB
 		 ${Boost_SYSTEM_LIBRARY}		 		 
 )
 

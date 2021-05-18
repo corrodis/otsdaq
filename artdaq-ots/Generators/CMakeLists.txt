@@ -2,8 +2,8 @@ simple_plugin(UDPReceiver "generator"
   artdaq-ots_Overlays
   artdaq_Generators
   artdaq_DAQdata
-  artdaq-core_Utilities
-  artdaq-core_Data
+  artdaq_core::artdaq-core_Utilities
+  artdaq_core::artdaq-core_Data
   canvas
   pthread
   ${FHICLCPP}

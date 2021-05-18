@@ -8,7 +8,7 @@ cet_make_exec(InterfacePluginTestMain
         FECore
         ${CETLIB}
         ${Boost_FILESYSTEM_LIBRARY}
-	artdaq-core_Core
+	artdaq_core::artdaq-core_Core
 		#DAQHardware
 		#FEInterfaces
 		#TableCore

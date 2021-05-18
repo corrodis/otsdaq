@@ -21,7 +21,7 @@ cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 ${Boost_FILESYSTEM_LIBRARY}
 		 /usr/lib64/libpython2.7.so.1.0
 		 artdaq_Application
-		 artdaq-core_Utilities
+		 artdaq_core::artdaq-core_Utilities
 		 artdaq_DAQdata
 		 artdaq_BuildInfo
 		 artdaq_ExternalComms

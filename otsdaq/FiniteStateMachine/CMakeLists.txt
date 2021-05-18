@@ -3,7 +3,7 @@ cet_make(LIBRARY_NAME FiniteStateMachine
 		${XDAQ_BASIC_LIB_LIST}
 		SOAPUtilities
 		ProgressBar
-		artdaq-core_Utilities
+		artdaq_core::artdaq-core_Utilities
 		Macros
                 )
 

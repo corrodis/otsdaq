@@ -22,7 +22,7 @@ cet_make(LIBRARY_NAME CoreSupervisors
          XmlUtilities
          CgiDataUtilities         
          ${XDAQ_BASIC_LIB_LIST}
-
+         $ENV{XDAQ_LIB}/libconfig.so
 		 
 		 otsdaq_TablePlugins_XDAQContextTable_table
 		 otsdaq_TablePlugins_DesktopIconTable_table

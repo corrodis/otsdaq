@@ -17,7 +17,7 @@ cet_make(LIBRARY_NAME FECore
          artdaq_Application
          artdaq_BuildInfo
          artdaq_DAQdata
-         artdaq-utilities_Plugins
+         artdaq_utilities::artdaq-utilities_Plugins
 		 ${ART_PERSISTENCY_PROVENANCE}
 		 ${Boost_SYSTEM_LIBRARY}
 		 ${ART_UTILITIES}

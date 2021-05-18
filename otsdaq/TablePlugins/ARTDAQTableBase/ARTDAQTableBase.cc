@@ -5,7 +5,7 @@
 #include <fhiclcpp/ParameterSet.h>
 #include <fhiclcpp/detail/print_mode.h>
 #include <fhiclcpp/intermediate_table.h>
-#include <fhiclcpp/make_ParameterSet.h>
+#include "artdaq-utilities/Plugins/MakeParameterSet.hh"
 #include <fhiclcpp/parse.h>
 
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
@@ -165,11 +165,15 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 	{
 		TLOG(TLVL_INFO) << "parsing document:" << inFile;
 		fhicl::intermediate_table tbl;
+		#if ART_HEX_VERSION >= 0x30900
+		tbl = fhicl::parse_document(inFile, policy);
+		pset = fhicl::ParameterSet::make(tbl);
+		#else
 		fhicl::parse_document(inFile, policy, tbl);
+		fhicl::make_ParameterSet(tbl, pset);
+		#endif
 		TLOG(TLVL_TRACE) << "document:" << inFile << " parsed";
 
-		fhicl::ParameterSet pset;
-		fhicl::make_ParameterSet(tbl, pset);
 		TLOG(TLVL_TRACE) << "got pset from table:";
 
 		std::ofstream ofs{outFile};
