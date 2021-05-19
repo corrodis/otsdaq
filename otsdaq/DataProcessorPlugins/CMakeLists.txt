@@ -1,5 +1,3 @@
-include_directories(${MPI_INCLUDE_PATH})
-include_directories(${CMAKE_BINARY_DIR}/artdaq)
 
 #get_cmake_property(_variableNames VARIABLES)
 #foreach(_variableName ${_variableNames})

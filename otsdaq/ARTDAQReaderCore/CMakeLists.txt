@@ -1,5 +1,3 @@
-include_directories(${MPI_INCLUDE_PATH})
-include_directories(${CMAKE_BINARY_DIR}/artdaq)
 
 cet_make(LIBRARY_NAME ARTDAQReaderCore
 		LIBRARIES
