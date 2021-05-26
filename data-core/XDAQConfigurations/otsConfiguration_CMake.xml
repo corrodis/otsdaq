@@ -14,6 +14,7 @@ are loaded prior instantiation of plugins -->
 
  <xp:Module>${XDAQ_ROOT}/lib/libb2innub.so</xp:Module>
  <xp:Module>${XDAQ_ROOT}/lib/libexecutive.so</xp:Module>
+ <xp:Module>${XDAQ_ROOT}/lib/libi2outils.so</xp:Module>
  <xp:Module>${XDAQ_ROOT}/lib/libb2inutils.so</xp:Module>
 
  <xp:Application class="pt::http::PeerTransportHTTP" id="1"  network="local">
