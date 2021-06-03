@@ -26,8 +26,6 @@ struct GroupInfo
 	TableGroupKey getLatestKey() { if(keys_.size()) return *(keys_.rbegin()); else return TableGroupKey(); }
 };
 
-#define Q(X) #X
-#define QUOTE(X) Q(X)
 #define __GETCFG_RW__(X) getConfigurationRW<X>(QUOTE(X))
 
 //==============================================================================
