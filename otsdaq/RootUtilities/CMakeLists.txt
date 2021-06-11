@@ -1,10 +1,10 @@
 cet_make(LIBRARY_NAME RootUtilities
 	      LIBRARIES
 	      ${ROOT_BASIC_LIB_LIST}
-	     #zzzzzzzDataDecoders
 	      NetworkUtilities
 	      TableCore
-	      ConfigurationInterface	      
+	      ConfigurationInterface
+          DataManager	      
           #otsdaq_TablePlugins_DataBufferConfiguration_table
           #otsdaq_TablePlugins_UDPDataStreamerConsumerConfiguration_table
           #otsdaq_TablePlugins_UDPDataListenerProducerConfiguration_table

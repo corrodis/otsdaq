@@ -9,6 +9,7 @@ include_directories(${CMAKE_BINARY_DIR}/artdaq)
 cet_make(LIBRARY_NAME CoreSupervisors
 		 LIBRARIES
 		 ARTDAQDataManager
+         ARTDAQTableBase
 		 DataManager
 		 FECore
          WorkLoopManager

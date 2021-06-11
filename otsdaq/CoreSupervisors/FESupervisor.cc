@@ -1,6 +1,7 @@
 #include "otsdaq/CoreSupervisors/FESupervisor.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/FECore/FEVInterfacesManager.h"
+#include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 
 #include "artdaq/DAQdata/Globals.hh"  // instantiates artdaq::Globals::metricMan_
 
@@ -132,7 +133,8 @@ FESupervisor::~FESupervisor(void)
 }  // end destructor
 
 //==============================================================================
-xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageReference message) try
+xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageReference message)
+try
 {
 	__SUP_COUT__ << "FE Request received: " << SOAPUtilities::translate(message) << __E__;
 
@@ -859,61 +861,69 @@ FEVInterfacesManager* FESupervisor::extractFEInterfacesManager()
 void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 {
 	__SUP_COUT__ << "transitionConfiguring" << __E__;
-	
-	{ //do like start of CoreSupervisorBase::transitionConfiguring
+
+	{  // do like start of CoreSupervisorBase::transitionConfiguring
 		// activate the configuration tree (the first iteration)
 		if(RunControlStateMachine::getIterationIndex() == 0 && RunControlStateMachine::getSubIterationIndex() == 0)
 		{
 			std::pair<std::string /*group name*/, TableGroupKey> theGroup(
-					SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupName"),
-					TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupKey")));
-			
+			    SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupName"),
+			    TableGroupKey(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getParameters().getValue("ConfigurationTableGroupKey")));
+
 			__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << __E__;
-			
+
 			theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
 		}
-	} //end start like CoreSupervisorBase::transitionConfiguring
-	
+	}  // end start like CoreSupervisorBase::transitionConfiguring
+
 	// get pset from Board Reader metric manager table
 	try
 	{
-		// FIXME -- this should be enabled and named by configuration!
-		
 		__COUTV__(CorePropertySupervisorBase::getSupervisorConfigurationPath());
-		
+
 		ConfigurationTree feSupervisorNode = CorePropertySupervisorBase::getSupervisorTableNode();
-		
-		bool enableMetricManager = false;
+
+		std::string metric_string = "";
+		bool metricStringSetup = true;
 		try
 		{
-			enableMetricManager = feSupervisorNode.getNode(
-				"/EnableSlowControlsMetricManager").getValue<bool>();
+			std::ostringstream oss;
+			std::string        tabString      = "";
+			std::string        commentsString = "";
+			ARTDAQTableBase::insertMetricsBlock(oss, tabString, commentsString, feSupervisorNode);
+			metric_string = oss.str();
 		}
-		catch(...) {		}//ignore error
-		
-		
-		if(enableMetricManager)
+		catch(...)
 		{
-			if(!metricMan) 
-			{
-				__SUP_COUT__ << "Metric manager is not instantiated! Attempting to fix." << __E__;
-				metricMan = std::make_unique<artdaq::MetricManager>();
-			}
-			std::string			metricNamePreamble = feSupervisorNode.getNode(
-							"/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
-			__COUTV__(metricNamePreamble);
-			
-			std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
-			fhicl::ParameterSet metric_pset;
-			fhicl::make_ParameterSet(metric_string, metric_pset);
+			metricStringSetup = false;
+			metric_string = "";
+		}  // ignore error
 
-			metricMan->initialize(metric_pset,metricNamePreamble);
-			
-			__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan <<
-				") initialized = " << metricMan->Initialized() << __E__;
+		if(!metricMan)
+		{
+			__SUP_COUT__ << "Metric manager is not instantiated! Attempting to fix." << __E__;
+			metricMan = std::make_unique<artdaq::MetricManager>();
 		}
-		else
-			__SUP_COUT__ << "Metric Manager disabled." << __E__;
+		std::string metricNamePreamble = feSupervisorNode.getNode("/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
+		__COUTV__(metricNamePreamble);
+		if(metricNamePreamble == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			metricNamePreamble = "";
+
+		//std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
+		fhicl::ParameterSet metric_pset;
+		fhicl::make_ParameterSet(metric_string, metric_pset);
+
+		__COUTV__(metricNamePreamble);
+		try
+		{
+			metricMan->initialize(metric_pset.get<fhicl::ParameterSet>("metrics"), metricNamePreamble);
+		}
+		catch(...)
+		{
+			if(metricStringSetup) throw;
+			else __SUP_COUT__ << "Ignore metric manager initialize error because metric string is not setup." << __E__;
+		}
+		__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan << ") initialized = " << metricMan->Initialized() << __E__;
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -923,11 +933,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 
 		//__SS_THROW_ONLY__;
 		theStateMachine_.setErrorMessage(ss.str());
-		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
-		                                         ss.str() /* message*/,
-		                                         "FESupervisor::transitionConfiguring" /*module*/,
-		                                         __LINE__ /*line*/,
-		                                         __FUNCTION__ /*function*/
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/, ss.str() /* message*/, "FESupervisor::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
 		);
 	}
 	catch(...)
@@ -938,11 +945,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 
 		//__SS_THROW_ONLY__;
 		theStateMachine_.setErrorMessage(ss.str());
-		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
-		                                         ss.str() /* message*/,
-		                                         "FESupervisor::transitionConfiguring" /*module*/,
-		                                         __LINE__ /*line*/,
-		                                         __FUNCTION__ /*function*/
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/, ss.str() /* message*/, "FESupervisor::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
 		);
 	}
 
@@ -955,12 +959,12 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionHalting" << __E__;
-	
+
 	try
 	{
-		
-		if(metricMan && metricMan->Initialized()) {
-			metricMan->shutdown();  //will set initilized_ to false with mutex, which should prevent races
+		if(metricMan && metricMan->Initialized())
+		{
+			metricMan->shutdown();  // will set initilized_ to false with mutex, which should prevent races
 			metricMan.reset(nullptr);
 		}
 		else
@@ -974,14 +978,11 @@ void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 
 		//__SS_THROW_ONLY__;
 		theStateMachine_.setErrorMessage(ss.str());
-		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
-		                                         ss.str() /* message*/,
-		                                         "FESupervisor::transitionHalting" /*module*/,
-		                                         __LINE__ /*line*/,
-		                                         __FUNCTION__ /*function*/
+		throw toolbox::fsm::exception::Exception(
+		    "Transition Error" /*name*/, ss.str() /* message*/, "FESupervisor::transitionHalting" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
 		);
 	}
-	
+
 	CoreSupervisorBase::transitionHalting(event);
 	__SUP_COUT__ << "transitionHalting done." << __E__;
 }  // end transitionHalting()

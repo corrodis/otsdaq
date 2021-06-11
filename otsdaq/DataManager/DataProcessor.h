@@ -19,6 +19,7 @@ class DataProcessor
 	virtual void registerToBuffer(void) = 0;
 	// virtual void unregisterFromBuffer(void) = 0;
 
+	virtual void configure(void) = 0;
 	virtual void startProcessingData(std::string runNumber) = 0;
 	virtual void stopProcessingData(void)                   = 0;
 	virtual void pauseProcessingData(void) { stopProcessingData(); }

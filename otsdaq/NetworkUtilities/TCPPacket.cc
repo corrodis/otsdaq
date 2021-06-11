@@ -58,15 +58,15 @@ bool TCPPacket::decode(std::string& message)
 	// for (auto l = 0; l < 4; l++)
 	//  std::cout << std::hex << (unsigned int)fBuffer[l] << std::dec << "-";
 	// std::cout << std::endl;
-	std::cout << __PRETTY_FUNCTION__
-	          //<< std::hex
-	          << "Buffer length: "
-	          << fBuffer.length()
-	          //              << ", htonl length: " << length
-	          << ", ntohl length: "
-	          << length
-	          //<< std::dec
-	          << std::endl;
+	// std::cout << __PRETTY_FUNCTION__
+	//           //<< std::hex
+	//           << "Buffer length: "
+	//           << fBuffer.length()
+	//           //              << ", htonl length: " << length
+	//           << ", ntohl length: "
+	//           << length
+	//           //<< std::dec
+	//           << std::endl;
 	if(fBuffer.length() == length)
 	{
 		message = fBuffer.substr(headerLength);
@@ -76,16 +76,16 @@ bool TCPPacket::decode(std::string& message)
 	else if(fBuffer.length() > length)
 	{
 		message = fBuffer.substr(headerLength, length - headerLength);
-		std::cout << __PRETTY_FUNCTION__ << "Erasing: " << length
-		          << " characters!"
-		          //<< " Msg:-" << message << "-"
-		          << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << "Erasing: " << length
+		//           << " characters!"
+		//           //<< " Msg:-" << message << "-"
+		//           << std::endl;
 		fBuffer.erase(0, length);
 		return true;
 	}
 	else
 	{
-		std::cout << __PRETTY_FUNCTION__ << "Can't decode an incomplete message! Length is only: " << fBuffer.length() << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << "Can't decode an incomplete message! Length is only: " << fBuffer.length() << std::endl;
 		return false;
 	}
 }

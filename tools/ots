@@ -12,6 +12,7 @@ source "${SCRIPT_DIR}"/common.sh ots
 # TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
+	
 	# trace helper functions
 	source "${TRACE_BIN}"/trace_functions.sh
 	
@@ -27,6 +28,11 @@ function setupTrace()
 	#tinfo #show trace info
 	export TRACE_FILE=/tmp/trace_buffer_${USER}
 }
+
+
+if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
+	rm /tmp/trace_buffer_${USER}
+fi
 
 setupTrace
 
