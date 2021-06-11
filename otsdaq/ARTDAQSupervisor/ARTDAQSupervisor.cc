@@ -155,6 +155,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	o << "fake_messagefacility: " << std::boolalpha << getSupervisorProperty("fake_messagefacility", false) << std::endl;
 	o << "advanced_memory_usage: " << std::boolalpha << getSupervisorProperty("advanced_memory_usage", false) << std::endl;
 	o << "disable_private_network_bookkeeping: " << std::boolalpha << getSupervisorProperty("disable_private_network_bookkeeping", false) << std::endl;
+	o << "allowed_processors: " << getSupervisorProperty("allowed_processors", "") << std::endl; // Note this sets a taskset for ALL processes, on all nodes (ex. "1,2,5-7")
 
 	o.close();
 
@@ -419,9 +420,9 @@ try
 	    theSupervisorNode,
 	    false /*getStatusFalseNodes*/,
 	    true /*doWriteFHiCL*/,
-	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("max_fragment_size_bytes", ARTDAQTableBase::DEFAULT_MAX_FRAGMENT_SIZE),
-	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_timeout_ms", ARTDAQTableBase::DEFAULT_ROUTING_TIMEOUT_MS),
-	    CorePropertySupervisorBase::getSupervisorProperty<size_t>("routing_retry_count", ARTDAQTableBase::DEFAULT_ROUTING_RETRY_COUNT),
+	    getSupervisorProperty("max_fragment_size_bytes", 8888),
+	    getSupervisorProperty("routing_timeout_ms", 1999),
+	    getSupervisorProperty("routing_retry_count", 12),
 	    &thread_progress_bar_);
 
 	// Check lists
@@ -573,13 +574,15 @@ try
 	{
 		PyObject* readerName = PyString_FromString(reader.label.c_str());
 
-		PyObject* readerData      = PyList_New(3);
+		PyObject* readerData      = PyList_New(4);
 		PyObject* readerHost      = PyString_FromString(reader.hostname.c_str());
 		PyObject* readerPort      = PyString_FromString("-1");
 		PyObject* readerSubsystem = PyString_FromString(std::to_string(reader.subsystem).c_str());
+		PyObject* readerAllowedProcessors = PyString_FromString("0-99"); // Readers should always be allowed to run on core 0 for PCI access
 		PyList_SetItem(readerData, 0, readerHost);
 		PyList_SetItem(readerData, 1, readerPort);
 		PyList_SetItem(readerData, 2, readerSubsystem);
+		PyList_SetItem(readerData, 3, readerAllowedProcessors);
 		PyDict_SetItem(readerDict, readerName, readerData);
 	}
 	PyObject* res1 = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName1, readerDict, NULL);
