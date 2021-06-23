@@ -14,7 +14,6 @@ defaultqual    e20:s108
 incdir      product_dir include
 libdir      fq_dir      lib
 bindir      fq_dir      bin
-fcldir      -
 
 #
 product             version     optional

@@ -54,7 +54,6 @@ find_ups_product( artdaq_core v3_06_00 )
 find_ups_product( artdaq_utilities v1_00_00 )
 find_ups_product( art v1_06_00 )
 find_ups_product( canvas v1_00_00 )
-find_ups_product( fhiclcpp v2_16_00 )
 find_ups_product( messagefacility v1_10_00 )
 find_ups_product( cetlib v1_03_00 )
 find_ups_product( artdaq_database v1_03_07 )
@@ -94,6 +93,16 @@ list(GET MESSAGEFACILITY_VERSION_LIST 0 MESSAGEFACILITY_MAJOR_VERSION)
 list(GET MESSAGEFACILITY_VERSION_LIST 1 MESSAGEFACILITY_MINOR_VERSION)
 list(GET MESSAGEFACILITY_VERSION_LIST 2 MESSAGEFACILITY_PATCH_VERSION)
 
+# as of fhiclcpp v4_15_00 (s108), ParameterSet::make is the preferred way to make a ParameterSet
+check_ups_version(fhiclcpp $ENV{FHICLCPP_VERSION} v4_15_00 PRODUCT_MATCHES_VAR PSET_MAKE)
+check_ups_version(artdaq_database $ENV{ARTDAQ_DATABASE_VERSION} v1_05_03 PRODUCT_MATCHES_VAR PSET_MAKE2)
+if(PSET_MAKE)
+  add_definitions(-DSIMPLER_PSET_MAKE)
+endif()
+if(PSET_MAKE2)
+  add_definitions(-DSIMPLER_PSET_MAKE)
+endif()
+
 message("-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION}")
 add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION})
 
@@ -108,6 +117,7 @@ add_definitions(-DOTSDAQ_PATCH_VERSION=${OTSDAQ_PATCH_VERSION})
 
 # macros for art_dictionary and simple_plugin
 
+include(CetMake)
 include(ArtMake)
 include(BuildPlugins)
 include(CetTest)
