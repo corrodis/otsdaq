@@ -11,7 +11,7 @@ cet_make(LIBRARY_NAME FECore
          NetworkUtilities
          PluginMakers
          DataManager
-		 ${CETLIB}
+		 cetlib
          artdaq_Application
          artdaq_BuildInfo
          artdaq_DAQdata
@@ -19,8 +19,8 @@ cet_make(LIBRARY_NAME FECore
 		 ${ART_PERSISTENCY_PROVENANCE}
 		 ${Boost_SYSTEM_LIBRARY}
 		 ${ART_UTILITIES}
-		 ${CETLIB}
-		 ${FHICLCPP}
+		 cetlib
+		 fhiclcpp
 	#	 MessageFacility
 		 ${MF_UTILITIES}
          ${ROOT_CORE}

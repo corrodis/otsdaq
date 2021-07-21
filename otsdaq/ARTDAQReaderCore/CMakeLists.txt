@@ -8,9 +8,7 @@ cet_make(LIBRARY_NAME ARTDAQReaderCore
         canvas
 		${Boost_SYSTEM_LIBRARY}
 		${Boost_THREAD_LIBRARY}
-		${FHICLCPP}
-		${MF_UTILITIES}
-		
+		fhiclcpp		
 		Configurable
 		
         )

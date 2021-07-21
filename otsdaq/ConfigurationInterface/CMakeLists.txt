@@ -4,7 +4,7 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 TableCore
 		 PluginMakers
 		 ProgressBar
-		cetlib_except::cetlib_except
+		cetlib_except
 		artdaq_database::artdaq-database_ConfigurationDB
 )
 

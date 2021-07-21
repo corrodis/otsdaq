@@ -8,9 +8,9 @@ include_directories("/usr/include/python2.7/")
 cet_make(LIBRARY_NAME ARTDAQSupervisor
 		 LIBRARIES
 		 
-		 ${FHICLCPP}
-		 ${CETLIB}
-		 ${CETLIB_EXCEPT}
+		 fhiclcpp
+		 cetlib
+		 cetlib_except
 		 #${XDAQ_BASIC_LIB_LIST}
   		 ${ROOT_CORE}
 		 canvas

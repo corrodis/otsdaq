@@ -1,7 +1,7 @@
 #cet_make(LIBRARY_NAME TablePlugins
 #		 LIBRARIES
 #		 TableCore
-#         ${CETLIB}
+#         cetlib
 #)
 
 add_subdirectory(ARTDAQTableBase)
@@ -36,32 +36,32 @@ simple_plugin(ARTDAQRoutingMasterTable "table"
 simple_plugin(FESlowControlsTable "table"
   TableCore 
   ConfigurationInterface
-  ${CETLIB}
+  cetlib
   )
   
 simple_plugin(XDAQContextTable "table"
   TableCore  
   ConfigurationInterface
-  ${CETLIB}
+  cetlib
   )
   
 simple_plugin(DesktopIconTable "table"
   TableCore
   ConfigurationInterface
   WebUsersUtilities
-  ${CETLIB}
+  cetlib
   )
   
 simple_plugin(MessageFacilityTable "table"
   TableCore
   ConfigurationInterface
-  ${CETLIB}
+  cetlib
   )
     
 simple_plugin(IterateTable "table"
   TableCore
   ConfigurationInterface
-  ${CETLIB}
+  cetlib
   )
 
 

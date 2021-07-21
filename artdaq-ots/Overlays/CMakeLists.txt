@@ -3,8 +3,8 @@ EXCLUDE OTS_fragmentNameHelper.cc
     LIB_LIBRARIES
     artdaq_core::artdaq-core_Utilities
     artdaq_DAQdata
-    ${CETLIB}
-    ${CETLIB_EXCEPT}
+    cetlib
+    cetlib_except
   )
 
   basic_plugin(OTS "fragmentNameHelper"

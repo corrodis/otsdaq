@@ -95,11 +95,7 @@ list(GET MESSAGEFACILITY_VERSION_LIST 2 MESSAGEFACILITY_PATCH_VERSION)
 
 # as of fhiclcpp v4_15_00 (s108), ParameterSet::make is the preferred way to make a ParameterSet
 check_ups_version(fhiclcpp $ENV{FHICLCPP_VERSION} v4_15_00 PRODUCT_MATCHES_VAR PSET_MAKE)
-check_ups_version(artdaq_database $ENV{ARTDAQ_DATABASE_VERSION} v1_05_03 PRODUCT_MATCHES_VAR PSET_MAKE2)
 if(PSET_MAKE)
-  add_definitions(-DSIMPLER_PSET_MAKE)
-endif()
-if(PSET_MAKE2)
   add_definitions(-DSIMPLER_PSET_MAKE)
 endif()
 

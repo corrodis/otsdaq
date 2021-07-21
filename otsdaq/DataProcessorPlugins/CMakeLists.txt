@@ -6,13 +6,13 @@
 
 
 simple_plugin(ARTDAQConsumer "processor"
-  		${CETLIB}
+  		cetlib
   		DataManager
   		ARTDAQReaderCore
   )
 
 simple_plugin(ARTDAQProducer "processor"
-  		${CETLIB}
+  		cetlib
   		DataManager
  		ARTDAQReaderCore
   )
@@ -20,36 +20,36 @@ simple_plugin(ARTDAQProducer "processor"
 simple_plugin(UDPDataListenerProducer "processor"
 	DataManager
 	NetworkUtilities
-	${CETLIB}
+	cetlib
   )
 
 simple_plugin(UDPDataStreamerConsumer "processor"
 	DataManager
 	NetworkUtilities
-	${CETLIB}
+	cetlib
   )
   
 simple_plugin(TCPDataReceiverProducer "processor"
 	DataManager
 	NetworkUtilities
-	${CETLIB}
+	cetlib
   )
 
 simple_plugin(TCPDataListenerProducer "processor"
 	DataManager
 	NetworkUtilities
-	${CETLIB}
+	cetlib
   )
 
 #simple_plugin(TCPDataStreamerConsumer "processor"
 #	DataManager
 #	NetworkUtilities
-#	${CETLIB}
+#	cetlib
 #  )
 
 simple_plugin(RawDataSaverConsumer "processor"
 	DataManager
-	${CETLIB}
+	cetlib
   )
 
 simple_plugin(RawDataVisualizerConsumer "processor"
@@ -58,19 +58,19 @@ simple_plugin(RawDataVisualizerConsumer "processor"
 	#MessageFacility
     ConfigurationInterface
     TableCore
-	${MF_MESSAGELOGGER}
+	MF_MessageLogger
   )
 
 
 simple_plugin(OtsDataSaverConsumer "processor"
 	DataManager
-	${CETLIB}
+	cetlib
   )
 
 #simple_plugin(DataDecoderConsumer "processor"
 #	DataManager
 #	DataDecoders
-#	${CETLIB}
+#	cetlib
 #  )
 
 

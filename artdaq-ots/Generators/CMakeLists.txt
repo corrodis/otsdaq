@@ -6,10 +6,10 @@ simple_plugin(UDPReceiver "generator"
   artdaq_core::artdaq-core_Data
   canvas
   pthread
-  ${FHICLCPP}
-  ${CETLIB}
-  ${CETLIB_EXCEPT}
-  ${MF_MESSAGELOGGER}
+  fhiclcpp
+  cetlib
+  cetlib_except
+  MF_MessageLogger
   ${Boost_SYSTEM_LIBRARY}
   )
 
