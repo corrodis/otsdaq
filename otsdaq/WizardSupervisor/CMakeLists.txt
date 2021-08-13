@@ -13,5 +13,3 @@ cet_make(LIBRARY_NAME WizardSupervisor
 )
 install_headers()
 install_source()
-
-
