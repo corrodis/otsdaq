@@ -16,9 +16,9 @@ cet_make(LIBRARY_NAME FECore
          artdaq_BuildInfo
          artdaq_DAQdata
          artdaq_utilities::artdaq-utilities_Plugins
-		 ${ART_PERSISTENCY_PROVENANCE}
+		 art_Persistency_Provenance
 		 ${Boost_SYSTEM_LIBRARY}
-		 ${ART_UTILITIES}
+		 art_Utilities
 		 cetlib
 		 fhiclcpp
 	#	 MessageFacility
