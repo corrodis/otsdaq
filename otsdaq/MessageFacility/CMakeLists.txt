@@ -1,13 +1,11 @@
 cet_make(LIBRARY_NAME MessageFacility
   LIBRARIES
-  ${ART_UTILITIES}
-  ${MF_MESSAGELOGGER}
-  ${MF_UTILITIES}
-  ${CETLIB}
+  art_Utilities
+  MF_MessageLogger
+  cetlib
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
-  ${FHICLCPP}
-  ${TRACE}
+  fhiclcpp
   )
 
 install_headers()

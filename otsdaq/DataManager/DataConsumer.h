@@ -26,6 +26,7 @@ class DataConsumer : public DataProcessor, public virtual WorkLoop
 	virtual void registerToBuffer(void);
 	// virtual void         unregisterFromBuffer  	(void);
 
+	virtual void configure(void){;}
 	virtual void startProcessingData(std::string runNumber);
 	virtual void stopProcessingData(void);
 

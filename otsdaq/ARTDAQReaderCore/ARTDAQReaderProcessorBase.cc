@@ -1,6 +1,6 @@
 #include "otsdaq/ARTDAQReaderCore/ARTDAQReaderProcessorBase.h"
 #include "artdaq/Application/Commandable.hh"
-#include "fhiclcpp/make_ParameterSet.h"
+#include "artdaq-utilities/Plugins/MakeParameterSet.hh"
 #include "otsdaq/DataManager/DataManager.h"
 #include "otsdaq/DataManager/DataManagerSingleton.h"
 #include "otsdaq/Macros/CoutMacros.h"
@@ -111,7 +111,7 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              /*
 
 	try
 	{
-		fhicl::make_ParameterSet(fileFclString, fhiclConfiguration_);
+		fhiclConfiguration_ = artdaq::make_pset(fileFclString );
 	}
 	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
 	{

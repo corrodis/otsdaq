@@ -10,8 +10,8 @@
 # use cmake 3.17 or later
 cmake_minimum_required (VERSION 3.17)
 
-
-project(otsdaq)
+find_package(cetbuildtools)
+project(otsdaq VERSION 2.06.02)
 # cetbuildtools contains our cmake modules
 SET ( CETBUILDTOOLS_VERSION $ENV{CETBUILDTOOLS_VERSION} )
 IF (NOT CETBUILDTOOLS_VERSION)
@@ -28,7 +28,7 @@ message(STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
 
 include(CetCMakeEnv)
 cet_cmake_env()
-include(FindUpsXdaq)
+include(CetFindPkgConfigPackage)
 
 cet_set_compiler_flags(
  DIAGS 
@@ -54,21 +54,30 @@ find_ups_product( artdaq_core v3_06_00 )
 find_ups_product( artdaq_utilities v1_00_00 )
 find_ups_product( art v1_06_00 )
 find_ups_product( canvas v1_00_00 )
-find_ups_product( fhiclcpp v2_16_00 )
 find_ups_product( messagefacility v1_10_00 )
 find_ups_product( cetlib v1_03_00 )
 find_ups_product( artdaq_database v1_03_07 )
 find_ups_product( TRACE v3_03_00 )
-find_ups_xdaq( v11_2_7 )
+find_ups_product( xdaq v16_7_0_1)
 find_ups_root( v5_34_00 )
 find_ups_boost( v1_50_0 filesystem
                         program_options
                         unit_test_framework
  )
 
-# Include at the top level to make sure include directory is visible
-# everywhere.
-include(ProcessSmc)
+ # XDAQ Extra setup
+ include_directories($ENV{XDAQ_INC}/linux)
+link_directories($ENV{XDAQ_LIB})
+link_directories($ENV{ARTDAQ_DATABASE_LIB})
+ set(XDAQ_BASIC_LIB_LIST 
+   xcept
+   xoap
+   xdaq
+   toolbox
+   xerces-c
+   cgicc
+ )
+ set(XDAQ_XERCES-C xerces-c)
 
 string(REGEX MATCHALL "[0-9][0-9]?[0-9]?" ART_VERSION_LIST "$ENV{ART_VERSION}")
 list(GET ART_VERSION_LIST 0 ART_MAJOR_VERSION)
@@ -84,6 +93,12 @@ list(GET MESSAGEFACILITY_VERSION_LIST 0 MESSAGEFACILITY_MAJOR_VERSION)
 list(GET MESSAGEFACILITY_VERSION_LIST 1 MESSAGEFACILITY_MINOR_VERSION)
 list(GET MESSAGEFACILITY_VERSION_LIST 2 MESSAGEFACILITY_PATCH_VERSION)
 
+# as of fhiclcpp v4_15_00 (s108), ParameterSet::make is the preferred way to make a ParameterSet
+check_ups_version(fhiclcpp $ENV{FHICLCPP_VERSION} v4_15_00 PRODUCT_MATCHES_VAR PSET_MAKE)
+if(PSET_MAKE)
+  add_definitions(-DSIMPLER_PSET_MAKE)
+endif()
+
 message("-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION}")
 add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION})
 
@@ -96,10 +111,9 @@ add_definitions(-DOTSDAQ_MAJOR_VERSION=${OTSDAQ_MAJOR_VERSION})
 add_definitions(-DOTSDAQ_MINOR_VERSION=${OTSDAQ_MINOR_VERSION})
 add_definitions(-DOTSDAQ_PATCH_VERSION=${OTSDAQ_PATCH_VERSION})
 
-##find_package(MPI QUIET)
-
 # macros for art_dictionary and simple_plugin
 
+include(CetMake)
 include(ArtMake)
 include(BuildPlugins)
 include(CetTest)

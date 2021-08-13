@@ -64,11 +64,13 @@ class DataManager : public Configurable, public VStateMachine
 	// void destroyBuffer     		(const std::string& bufferUID);//!!!!!Delete all the
 	// pointers of the producers and consumers
 
+	void configureAllBuffers(void);
 	void startAllBuffers(const std::string& runNumber);
 	void stopAllBuffers(void);
 	void resumeAllBuffers(void);
 	void pauseAllBuffers(void);
 
+	void configureBuffer(const std::string& bufferUID);
 	void startBuffer(const std::string& bufferUID, std::string runNumber);
 	void stopBuffer(const std::string& bufferUID);
 	void resumeBuffer(const std::string& bufferUID);

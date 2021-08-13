@@ -31,8 +31,8 @@
 #define __MF_SUBJECT__ __FILENAME__  // default subject.. others can #undef and re-#define
 // Note: to turn off MF everywhere, just replace with std::cout here at __MF_TYPE__(X)!
 
-#define Q(X) #X
-#define QUOTE(X) Q(X)
+#define QQQQ(X) #X
+#define QUOTE(X) QQQQ(X)
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(__ENV__("OTSDAQ_USING_MF")=="1"?
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 

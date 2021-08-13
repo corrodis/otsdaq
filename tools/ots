@@ -12,6 +12,7 @@ source "${SCRIPT_DIR}"/common.sh ots
 # TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
+	
 	# trace helper functions
 	source "${TRACE_BIN}"/trace_functions.sh
 	
@@ -27,6 +28,11 @@ function setupTrace()
 	#tinfo #show trace info
 	export TRACE_FILE=/tmp/trace_buffer_${USER}
 }
+
+
+if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
+	rm /tmp/trace_buffer_${USER}
+fi
 
 setupTrace
 
@@ -452,21 +458,21 @@ export CONFIGURATION_TYPE=File
 # TODO (Iris): Fix old syntax comparisions
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
     export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
-    export OTSDAQ_DEMO_LIB=${MRB_BUILDDIR}/otsdaq_demo/lib
+    export OTSDAQ_DEMO_LIB=`echo ${MRB_BUILDDIR}/otsdaq_demo/slf7*/lib`
     export OTSDAQDEMO_REPO=$OTSDAQ_DEMO_DIR
     unset  OTSDAQ_DEMO_DIR
 fi
 
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DIR/CMakeLists.txt ]; then
     export OTSDAQ_BUILD=${MRB_BUILDDIR}/otsdaq
-    export OTSDAQ_LIB=${MRB_BUILDDIR}/otsdaq/lib
+    export OTSDAQ_LIB=`echo ${MRB_BUILDDIR}/otsdaq/slf7*/lib`
     export OTSDAQ_REPO=$OTSDAQ_DIR
     export FHICL_FILE_PATH=.:$OTSDAQ_REPO/tools/fcl:$FHICL_FILE_PATH
 fi
   
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_UTILITIES_DIR/CMakeLists.txt ]; then
     export OTSDAQUTILITIES_BUILD=${MRB_BUILDDIR}/otsdaq_utilities
-    export OTSDAQ_UTILITIES_LIB=${MRB_BUILDDIR}/otsdaq_utilities/lib
+    export OTSDAQ_UTILITIES_LIB=`echo ${MRB_BUILDDIR}/otsdaq_utilities/slf7*/lib`
     export OTSDAQUTILITIES_REPO=$OTSDAQ_UTILITIES_DIR
 fi
 

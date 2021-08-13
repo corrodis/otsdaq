@@ -293,6 +293,7 @@ void DataManager::configure(void)
 			}  // end consumer creation loop
 		}
 	}
+	DataManager::configureAllBuffers();
 }  // end configure()
 
 //==============================================================================
@@ -651,6 +652,13 @@ void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* c
 }
 
 //==============================================================================
+void DataManager::configureAllBuffers(void)
+{
+	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
+		configureBuffer(it->first);
+}
+
+//==============================================================================
 void DataManager::startAllBuffers(const std::string& runNumber)
 {
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
@@ -677,6 +685,43 @@ void DataManager::pauseAllBuffers(void)
 	for(auto it = buffers_.begin(); it != buffers_.end(); it++)
 		pauseBuffer(it->first);
 }
+
+//==============================================================================
+void DataManager::configureBuffer(const std::string& bufferUID)
+{
+	__CFG_COUT__ << "Configuring... " << bufferUID << __E__;
+
+	for(auto& it : buffers_[bufferUID].consumers_)
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->configure();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while configuring consumer '" << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
+
+	for(auto& it : buffers_[bufferUID].producers_)
+	{
+		// use try..catch to make sure there is some identifying trail for errors
+		try
+		{
+			it->configure();
+		}
+		catch(...)
+		{
+			__CFG_COUT_WARN__ << "An error occurred while starting producer '" << it->getProcessorID() << "'..." << __E__;
+			throw;
+		}
+	}
+
+	buffers_[bufferUID].status_ = Initialized;
+
+}  // end startBuffer()
 
 //==============================================================================
 void DataManager::startBuffer(const std::string& bufferUID, std::string runNumber)

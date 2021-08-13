@@ -7,25 +7,25 @@ art_make(NO_PLUGINS # WAnt different link lists for modues
 simple_plugin(ArtdaqOtsBuildInfo "module"
   artdaq_DAQdata
   artdaq_BuildInfo
-  artdaq-core_BuildInfo
+  artdaq_core::artdaq-core_BuildInfo
   artdaq-ots_BuildInfo
-  ${FHICLCPP}
-  ${CETLIB}
-  ${CETLIB_EXCEPT}
+  fhiclcpp
+  cetlib
+  cetlib_except
 )
 
 simple_plugin(UDPDump "module"
-  artdaq-core_Utilities
-  ${FHICLCPP}
-  ${CETLIB}
-  ${CETLIB_EXCEPT}
+  artdaq_core::artdaq-core_Utilities
+  fhiclcpp
+  cetlib
+  cetlib_except
   MF_MessageLogger
 )
 
 simple_plugin(JSONDispatcher "module"
-  artdaq-core_Utilities
+  artdaq_core::artdaq-core_Utilities
   ${Boost_SYSTEM_LIBRARY}
-  ${CETLIB_EXCEPT}
+  cetlib_except
   pthread
   MF_MessageLogger
 )

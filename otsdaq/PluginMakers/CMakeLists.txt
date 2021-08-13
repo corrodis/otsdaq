@@ -2,8 +2,8 @@ cet_make(LIBRARY_NAME PluginMakers
 		 LIBRARIES
          artdaq_DAQdata
         ${XDAQ_XERCES-C} 
-	${CETLIB}
-         ${CETLIB_EXCEPT}
+	cetlib
+         cetlib_except
          ${Boost_SYSTEM_LIBRARY}
 	 MF_MessageLogger
          pthread 

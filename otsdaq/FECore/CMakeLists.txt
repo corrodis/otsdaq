@@ -1,5 +1,3 @@
-include_directories(${MPI_INCLUDE_PATH})
-include_directories(${CMAKE_BINARY_DIR}/artdaq)
 
 cet_make(LIBRARY_NAME FECore
 		 LIBRARIES
@@ -13,16 +11,16 @@ cet_make(LIBRARY_NAME FECore
          NetworkUtilities
          PluginMakers
          DataManager
-		 ${CETLIB}
+		 cetlib
          artdaq_Application
          artdaq_BuildInfo
          artdaq_DAQdata
-         artdaq-utilities_Plugins
-		 ${ART_PERSISTENCY_PROVENANCE}
+         artdaq_utilities::artdaq-utilities_Plugins
+		 art_Persistency_Provenance
 		 ${Boost_SYSTEM_LIBRARY}
-		 ${ART_UTILITIES}
-		 ${CETLIB}
-		 ${FHICLCPP}
+		 art_Utilities
+		 cetlib
+		 fhiclcpp
 	#	 MessageFacility
 		 ${MF_UTILITIES}
          ${ROOT_CORE}

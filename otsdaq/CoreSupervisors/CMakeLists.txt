@@ -1,5 +1,3 @@
-include_directories(${MPI_INCLUDE_PATH})
-include_directories(${CMAKE_BINARY_DIR}/artdaq)
 
 #get_cmake_property(_variableNames VARIABLES)
 #foreach(_variableName ${_variableNames})
@@ -9,6 +7,7 @@ include_directories(${CMAKE_BINARY_DIR}/artdaq)
 cet_make(LIBRARY_NAME CoreSupervisors
 		 LIBRARIES
 		 ARTDAQDataManager
+         ARTDAQTableBase
 		 DataManager
 		 FECore
          WorkLoopManager
@@ -21,8 +20,7 @@ cet_make(LIBRARY_NAME CoreSupervisors
          XmlUtilities
          CgiDataUtilities         
          ${XDAQ_BASIC_LIB_LIST}
-
-		 
+         config # From XDAQ
 		 otsdaq_TablePlugins_XDAQContextTable_table
 		 otsdaq_TablePlugins_DesktopIconTable_table
         )

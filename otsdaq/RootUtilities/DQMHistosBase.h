@@ -10,6 +10,7 @@ class TObject;
 
 namespace ots
 {
+class VisualDataManager;
 class DQMHistosBase
 {
   public:
@@ -20,16 +21,22 @@ class DQMHistosBase
 	virtual void fill(std::string& /*buffer*/, std::map<std::string, std::string> /*header*/) { ; }
 	virtual void load(std::string /*fileName*/) { ; }
 
+	void     setDataManager(VisualDataManager* dataManager){theDataManager_ = dataManager;}
+	
 	TObject* get(std::string name);
 	TFile*   getFile(void) { return theFile_; }
 
   protected:
+	bool         isFileOpen(void);
 	virtual void save(void);
 	virtual void openFile(std::string fileName);
 	virtual void closeFile(void);
 
 	TFile*      theFile_;
 	TDirectory* myDirectory_;
+
+  private:
+	VisualDataManager* theDataManager_;
 };
 }  // namespace ots
 
