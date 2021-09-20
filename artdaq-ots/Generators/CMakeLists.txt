@@ -1,4 +1,4 @@
-simple_plugin(UDPReceiver "generator"
+basic_plugin(UDPReceiver "generator"
   artdaq-ots_Overlays
   artdaq_Generators
   artdaq_DAQdata

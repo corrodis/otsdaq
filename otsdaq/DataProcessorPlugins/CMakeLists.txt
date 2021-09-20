@@ -5,54 +5,54 @@
 #endforeach()
 
 
-simple_plugin(ARTDAQConsumer "processor"
+basic_plugin(ARTDAQConsumer "processor"
   		cetlib
   		DataManager
   		ARTDAQReaderCore
   )
 
-simple_plugin(ARTDAQProducer "processor"
+basic_plugin(ARTDAQProducer "processor"
   		cetlib
   		DataManager
  		ARTDAQReaderCore
   )
 
-simple_plugin(UDPDataListenerProducer "processor"
+basic_plugin(UDPDataListenerProducer "processor"
 	DataManager
 	NetworkUtilities
 	cetlib
   )
 
-simple_plugin(UDPDataStreamerConsumer "processor"
+basic_plugin(UDPDataStreamerConsumer "processor"
 	DataManager
 	NetworkUtilities
 	cetlib
   )
   
-simple_plugin(TCPDataReceiverProducer "processor"
+basic_plugin(TCPDataReceiverProducer "processor"
 	DataManager
 	NetworkUtilities
 	cetlib
   )
 
-simple_plugin(TCPDataListenerProducer "processor"
+basic_plugin(TCPDataListenerProducer "processor"
 	DataManager
 	NetworkUtilities
 	cetlib
   )
 
-#simple_plugin(TCPDataStreamerConsumer "processor"
+#basic_plugin(TCPDataStreamerConsumer "processor"
 #	DataManager
 #	NetworkUtilities
 #	cetlib
 #  )
 
-simple_plugin(RawDataSaverConsumer "processor"
+basic_plugin(RawDataSaverConsumer "processor"
 	DataManager
 	cetlib
   )
 
-simple_plugin(RawDataVisualizerConsumer "processor"
+basic_plugin(RawDataVisualizerConsumer "processor"
     DataManager
     WorkLoopManager
 	#MessageFacility
@@ -62,12 +62,12 @@ simple_plugin(RawDataVisualizerConsumer "processor"
   )
 
 
-simple_plugin(OtsDataSaverConsumer "processor"
+basic_plugin(OtsDataSaverConsumer "processor"
 	DataManager
 	cetlib
   )
 
-#simple_plugin(DataDecoderConsumer "processor"
+#basic_plugin(DataDecoderConsumer "processor"
 #	DataManager
 #	DataDecoders
 #	cetlib
