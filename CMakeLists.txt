@@ -10,17 +10,14 @@
 # use cmake 3.17 or later
 cmake_minimum_required (VERSION 3.17)
 
-find_package(cetbuildtools)
-project(otsdaq VERSION 2.06.02)
-# cetbuildtools contains our cmake modules
-SET ( CETBUILDTOOLS_VERSION $ENV{CETBUILDTOOLS_VERSION} )
-IF (NOT CETBUILDTOOLS_VERSION)
-    MESSAGE (FATAL_ERROR "ERROR: setup cetbuildtools to get the cmake modules")
-ENDIF()
+find_package(cetmodules)
+set(CET_CETBUILDTOOLS_COMPAT TRUE)
+include(Compatibility)
+set(CET_WARN_DEPRECATED)
+
+project(otsdaq VERSION 2.06.03)
 
 set(CMAKE_MODULE_PATH
-        $ENV{ART_DIR}/Modules
-        $ENV{CETBUILDTOOLS_DIR}/Modules
         $ENV{XDAQ_DIR}/Modules
         $ENV{ARTDAQ_UTILITIES_DIR}/Modules
         ${CMAKE_MODULE_PATH})
@@ -145,8 +142,4 @@ INSTALL(DIRECTORY test DESTINATION ${product}/${version})
 FILE(COPY data-core DESTINATION .)
 INSTALL(DIRECTORY data-core DESTINATION ${product}/${version})
 
-# ups - table and config files
-add_subdirectory(ups)
-
-# packaging utility
-include(UseCPack)
+cet_cmake_config()
