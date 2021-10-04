@@ -7,7 +7,6 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 		 PluginMakers
 		 ProgressBar
 		cetlib_except
-		artdaq_database::artdaq-database_ConfigurationDB
 )
 
 basic_plugin(Database "configInterface"
