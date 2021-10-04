@@ -1,4 +1,4 @@
-#include "otsdaq/ConfigurationInterface/FileConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/File_configInterface.h"
 #include <dirent.h>
 #include <errno.h>
 #include <iostream>

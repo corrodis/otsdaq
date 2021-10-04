@@ -1,4 +1,4 @@
-#include "otsdaq/ConfigurationInterface/DatabaseConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/Database_configInterface.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 
