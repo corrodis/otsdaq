@@ -1,7 +1,7 @@
 
 cet_make(LIBRARY_NAME ConfigurationInterface
 		NO_PLUGINS
-		EXCLUDE FileConfigurationInterface.cc DatabaseConfigurationInterface.cc
+		EXCLUDE File_configInterface.cc Database_configInterface.cc Database_configInterface_Impl.cc
 		 LIBRARIES
 		 TableCore
 		 PluginMakers
@@ -11,6 +11,8 @@ cet_make(LIBRARY_NAME ConfigurationInterface
 )
 
 basic_plugin(Database "configInterface"
+IMPL_SOURCE Database_configInterface_Impl.cc
+LIBRARIES
 ConfigurationInterface
 artdaq_database::artdaq-database_ConfigurationDB
 )
