@@ -65,7 +65,6 @@ find_ups_boost( v1_50_0 filesystem
  # XDAQ Extra setup
  include_directories($ENV{XDAQ_INC}/linux)
 link_directories($ENV{XDAQ_LIB})
-link_directories($ENV{ARTDAQ_DATABASE_LIB})
  set(XDAQ_BASIC_LIB_LIST 
    xcept
    xoap

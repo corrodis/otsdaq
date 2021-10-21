@@ -15,6 +15,7 @@ LIBRARIES
 ConfigurationInterface
 artdaq_database::artdaq-database_ConfigurationDB
 )
+target_link_directories(otsdaq_ConfigurationInterface_Database_configInterface PUBLIC $ENV{ARTDAQ_DATABASE_LIB})
 
 basic_plugin(File "configInterface"
 ConfigurationInterface)
