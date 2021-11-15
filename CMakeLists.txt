@@ -42,7 +42,7 @@ cet_remove_compiler_flags(-std=c++98)
 #  cet_add_compiler_flags(-fsanitize=address)
 #endif()
 
-cet_report_compiler_flags()
+#cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
 find_ups_product( cetbuildtools v3_03_00 )
