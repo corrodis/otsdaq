@@ -284,7 +284,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 		for(auto& TRACEApp: allTraceControllerSupervisorInfo_)
 		{			
 			__COUT__ << "The TRACE-controller for hostname = " << TRACEApp.first <<
-					"/" << TRACEApp.second.getId() " is ..." 
+					"/" << TRACEApp.second.getId() << " is ..." 
 					<< " name = " << TRACEApp.second.getName()
 					<< " class = " << TRACEApp.second.getClass()
 					<< " hostname = " << TRACEApp.second.getHostname() <<
