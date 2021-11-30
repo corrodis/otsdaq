@@ -153,24 +153,7 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 			}
 
 			theARTDAQSupervisorInfo_ = &(emplacePair.first->second);
-
-			//since ARTDAQ Supervisor handles TRACE for all children processes, make sure it represents its hostname
-			//NOTE: do not do emplace, because it will fail on collisions!
-//			allTraceControllerSupervisorInfo_[theARTDAQSupervisorInfo_->getHostname()] =
-//					allSupervisorInfo_.at(theARTDAQSupervisorInfo_->getId());
-//					std::make_pair(
-//							theARTDAQSupervisorInfo_->getId(),
-//							*theARTDAQSupervisorInfo_);
 		}
-//		else //all non-ARTDAQ Supervisor are interchangeable TRACE Controllers for a host
-//			allTraceControllerSupervisorInfo_.emplace(std::make_pair(
-//					emplacePair.first->second.getHostname(),
-//					emplacePair.first->second));
-//			TRACEAppMap.emplace(std::make_pair(
-//					emplacePair.first->second.getHostname(),
-//					std::pair<unsigned int, const SupervisorInfo&>(
-//							emplacePair.first->second.getId(),
-//							emplacePair.first->second)));
 
 		/////////////////////////////////////////////
 		// now organize new descriptor by class...
@@ -271,7 +254,8 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 					theARTDAQSupervisorInfo_->getClass() << ":" <<
 					theARTDAQSupervisorInfo_->getId() << __E__;
 
-			allTraceControllerSupervisorInfo_.emplace(std::make_pair(
+			//DO NOT USE make_pair here.. it somehow infers types that break the map
+			allTraceControllerSupervisorInfo_.emplace(std::pair<std::string, const SupervisorInfo&>(
 					theARTDAQSupervisorInfo_->getHostname(),
 					*theARTDAQSupervisorInfo_));
 		}
@@ -296,6 +280,16 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 //							allSupervisorInfo_.at(TRACEApp.second.second.getId())));
 		}
 		__COUT__ << "TRACE-controller app count = " << allTraceControllerSupervisorInfo_.size() << __E__;
+
+		for(auto& TRACEApp: allTraceControllerSupervisorInfo_)
+		{			
+			__COUT__ << "The TRACE-controller for hostname = " << TRACEApp.first <<
+					"/" << TRACEApp.second.getId() " is ..." 
+					<< " name = " << TRACEApp.second.getName()
+					<< " class = " << TRACEApp.second.getClass()
+					<< " hostname = " << TRACEApp.second.getHostname() <<
+					__E__;
+		}
 	}
 
 
