@@ -1605,7 +1605,8 @@ unsigned int TableView::findRow(unsigned int col, const std::string& value, unsi
 		return TableView::INVALID;
 
 	__SS__ << "\tIn view: " << tableName_ << ", Can't find value=" << value << " in column named " << columnsInfo_[col].getName()
-		<< " with type=" << columnsInfo_[col].getType() << __E__;
+		<< " with type=" << columnsInfo_[col].getType() << __E__ << __E__ << StringMacros::stackTrace() << __E__;
+	
 	// Note: findRow gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
 	//__COUT__ << "\n" << ss.str();
@@ -3030,99 +3031,23 @@ unsigned int TableView::addRow(const std::string& author,
 	// column
 	for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
 	{
-		//		__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
-		//				TableViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
+		// if(incrementUniqueData)
+		// 	__COUT__ << col << " " << columnsInfo_[col].getType() << " basename= " <<
+		// 		baseNameAutoUID << __E__;
 
 		// baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if (incrementUniqueData &&
-			(col == getColUID() || (getNumberOfRows() > 1 && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			(col == getColUID() || 
+				columnsInfo_[col].isChildLinkGroupID() ||
+				(getNumberOfRows() > 1 && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
 				columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
-			if (col == getColUID())
+			if (col == getColUID() || 
+				columnsInfo_[col].isChildLinkGroupID())
 				setUniqueColumnValue(rowToAdd, col, baseNameAutoUID /*baseValueAsString*/);
 			else
-				setUniqueColumnValue(rowToAdd, col);
-			//
-			//			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
-			//			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
-			//			//<<
-			//			//"'"
-			//			//			         << __E__;
-			//
-			//			maxUniqueData = 0;
-			//			tmpString     = "";
-			//			baseString    = "";
-			//
-			//			// find max in rows
-			//
-			//			// this->print();
-			//
-			//			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
-			//			{
-			//				if(r == rowToAdd)
-			//					continue;  // skip row to add
-			//
-			//				// find last non numeric character
-			//
-			//				foundAny  = false;
-			//				tmpString = theDataView_[r][col];
-			//
-			//				//__COUT__ << "tmpString " << tmpString << __E__;
-			//
-			//				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
-			//				{
-			//					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
-			//					//__E__;
-			//					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
-			//						break;  // if not numeric, break
-			//					foundAny = true;
-			//				}
-			//
-			//				//__COUT__ << "index " << index << __E__;
-			//
-			//				if(tmpString.length() && foundAny)  // then found a numeric substring
-			//				{
-			//					// create numeric substring
-			//					numString = tmpString.substr(index + 1);
-			//					tmpString = tmpString.substr(0, index + 1);
-			//
-			//					//__COUT__ << "Found unique data base string '" <<
-			//					//		tmpString << "' and number string '" << numString <<
-			//					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
-			//
-			//					// extract number
-			//					sscanf(numString.c_str(), "%u", &index);
-			//
-			//					if(index > maxUniqueData)
-			//					{
-			//						maxUniqueData = index;
-			//						baseString    = tmpString;
-			//					}
-			//				}
-			//			}
-			//
-			//			++maxUniqueData;  // increment
-			//
-			//			sprintf(indexString, "%u", maxUniqueData);
-			//			//__COUT__ << "indexString " << indexString << __E__;
-			//
-			//			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
-			//			if(col == getColUID())
-			//			{
-			//				// handle UID case
-			//				if(baseNameAutoUID != "")
-			//					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
-			//				else
-			//					theDataView_[rowToAdd][col] = baseString + indexString;
-			//			}
-			//			else
-			//				theDataView_[rowToAdd][col] = baseString + indexString;
-			//
-			//			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
-			//			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
-			//
-			//			// this->print();
+				setUniqueColumnValue(rowToAdd, col);		
 		}
 		else
 			theDataView_[rowToAdd][col] = defaultRowValues[col];

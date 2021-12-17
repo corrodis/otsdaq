@@ -21,7 +21,8 @@ class XDAQContextTable : public TableBase
 
 	struct XDAQApplication
 	{
-		static const uint8_t DEFAULT_PRIORITY;
+		static const uint8_t 		DEFAULT_PRIORITY;
+		static const unsigned int 	GATEWAY_APP_ID;
 
 		std::string  applicationGroupID_;
 		std::string  applicationUID_;

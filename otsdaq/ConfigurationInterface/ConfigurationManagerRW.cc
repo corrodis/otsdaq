@@ -140,6 +140,8 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username)
 			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "w");
 			if(fp)
 			{
+				fprintf(fp,"ARTDAQ/*");
+				fprintf(fp,"ConfigCore/*");
 				for(const auto& name : contextMemberNames)
 					fprintf(fp, "\nContextGroup/%s", name.c_str());
 				for(const auto& name : backboneMemberNames)

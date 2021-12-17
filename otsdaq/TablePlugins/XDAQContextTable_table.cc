@@ -27,7 +27,8 @@ const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ 	=
 const std::set<std::string> XDAQContextTable::CodeEditorTypeClassNames_ 		= { "ots::CodeEditorSupervisor"};
 
 
-const uint8_t XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY 				= 100;
+const uint8_t		 	XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY 	= 100;
+const unsigned int 		XDAQContextTable::XDAQApplication::GATEWAY_APP_ID 		= 200;
 
 XDAQContextTable::ColContext 				XDAQContextTable::colContext_ 		= XDAQContextTable::ColContext();  // initialize static member
 XDAQContextTable::ColApplication 			XDAQContextTable::colApplication_ 	= XDAQContextTable::ColApplication();  // initialize static member
@@ -199,18 +200,34 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			appChild.second.getNode(colApplication_.colClass_).getValue(contexts_.back().applications_.back().class_);
 			appChild.second.getNode(colApplication_.colId_).getValue(contexts_.back().applications_.back().id_);
 
-			// assert Gateway is 200
-			if((contexts_.back().applications_.back().id_ == 200 &&
+			// infer Gateway is XDAQContextTable::XDAQApplication::GATEWAY_APP_ID from default
+			if(appChild.second.getNode(colApplication_.colId_).isDefaultValue() &&
+			    (contexts_.back().applications_.back().class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS ||
+			     contexts_.back().applications_.back().class_ == XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS))
+			{
+				contexts_.back().applications_.back().id_ = XDAQContextTable::XDAQApplication::GATEWAY_APP_ID;
+			}
+			
+
+			// assert Gateway is XDAQContextTable::XDAQApplication::GATEWAY_APP_ID
+			if((contexts_.back().applications_.back().id_ == XDAQContextTable::XDAQApplication::GATEWAY_APP_ID &&
 			    contexts_.back().applications_.back().class_ != XDAQContextTable::GATEWAY_SUPERVISOR_CLASS &&
 			    contexts_.back().applications_.back().class_ != XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS) ||
-			   (contexts_.back().applications_.back().id_ != 200 &&
+			   (contexts_.back().applications_.back().id_ != XDAQContextTable::XDAQApplication::GATEWAY_APP_ID &&
 			    (contexts_.back().applications_.back().class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS ||
 			     contexts_.back().applications_.back().class_ == XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS)))
 			{
-				__SS__ << "XDAQ Application ID of 200 is reserved for the Gateway "
-				          "Supervisor "
-				       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << ". Conflict specifically at id=" << contexts_.back().applications_.back().id_
-				       << " appName=" << contexts_.back().applications_.back().applicationUID_ << __E__;
+				__SS__ << "XDAQ Application ID of " << XDAQContextTable::XDAQApplication::GATEWAY_APP_ID << 
+						" is reserved for the Gateway Supervisor's class '"
+				       << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << 
+					   ".' There must be one and only one XDAQ supervisor application specified with ID '" <<
+					   XDAQContextTable::XDAQApplication::GATEWAY_APP_ID <<
+					   "' and class '" <<
+					   XDAQContextTable::GATEWAY_SUPERVISOR_CLASS <<					   
+					   ".' A conflict was found specifically at appName=" << 
+					   contexts_.back().applications_.back().applicationUID_ << 
+					   " with id=" << contexts_.back().applications_.back().id_ <<
+					   " and class=" << contexts_.back().applications_.back().class_ << __E__;
 				__SS_THROW__;
 			}
 
@@ -220,7 +237,7 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				// assert NO app id repeats
 				if(appIdSet.find(contexts_.back().applications_.back().id_) != appIdSet.end())
 				{
-					__SS__ << "XDAQ Application IDs are not unique. Specifically at id=" << contexts_.back().applications_.back().id_
+					__SS__ << "XDAQ Application IDs are not unique; this could be due to multiple instances of the same XDAQ application linked to from two seperate XDAQ Contexts (check all enabled XDAQ Contexts for replicated application IDs). Specifically, there is a duplicate at id=" << contexts_.back().applications_.back().id_
 					       << " appName=" << contexts_.back().applications_.back().applicationUID_ << __E__;
 					__COUT_ERR__ << "\n" << ss.str();
 					__SS_THROW__;
@@ -244,8 +261,6 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 			else
 				appChild.second.getNode(colApplication_.colGroup_).getValue(contexts_.back().applications_.back().group_);
 
-			//keep module env variable!! so do getValueAsString()
-			contexts_.back().applications_.back().module_ = appChild.second.getNode(colApplication_.colModule_).getValueAsString();
 
 			// force deprecated Supervisor to GatewaySupervisor class
 			if(contexts_.back().applications_.back().class_ == XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS)
@@ -254,7 +269,9 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				__COUT__ << "Fixing deprecated Supervisor class from " << XDAQContextTable::DEPRECATED_SUPERVISOR_CLASS << " to "
 				         << (contexts_.back().applications_.back().class_);
 			}
-			if(contexts_.back().applications_.back().module_.find("libSupervisor.so") != std::string::npos)
+
+			if(contexts_.back().applications_.back().class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS && 
+				contexts_.back().applications_.back().module_.find("libSupervisor.so") != std::string::npos)
 			{
 				__COUT__ << "Fixing deprecated Supervisor class from " << contexts_.back().applications_.back().module_ << " to ";
 				contexts_.back().applications_.back().module_ =
@@ -263,6 +280,20 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				    "GatewaySupervisor.so";
 				std::cout << contexts_.back().applications_.back().module_ << __E__;
 			}
+
+			//if module is default, attempt to resolve from class
+			if(contexts_.back().applications_.back().id_ != XDAQContextTable::XDAQApplication::GATEWAY_APP_ID &&
+				appChild.second.getNode(colApplication_.colModule_).isDefaultValue())
+			{
+				contexts_.back().applications_.back().module_ = "${OTSDAQ_LIB}/lib" + contexts_.back().applications_.back().class_.substr(
+					std::string("ots::").size()) + ".so";
+				__COUT__ << "Inferred module of '" << contexts_.back().applications_.back().applicationUID_ << "' as '" <<
+					contexts_.back().applications_.back().module_ << __E__;
+			}
+			else //keep module env variable!! so do getValueAsString()
+				contexts_.back().applications_.back().module_ = appChild.second.getNode(colApplication_.colModule_).getValueAsString();
+
+
 
 			try
 			{
