@@ -112,9 +112,16 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				            "table."
 				         << std::endl;
 
-				child.second.getNode(COL_WEB_PORT0).getValue(fwdPort);
-				child.second.getNode(COL_WEB_IP).getValue(fwdIP);
+				if(child.second.getNode(COL_WEB_PORT0).isDefaultValue())
+					fwdPort = atoi(__ENV__("OTS_MAIN_PORT")) + 30000;
+				else
+					child.second.getNode(COL_WEB_PORT0).getValue(fwdPort);
 
+				if(child.second.getNode(COL_WEB_IP).isDefaultValue())
+					fwdIP = __ENV__("HOSTNAME");
+				else
+					child.second.getNode(COL_WEB_IP).getValue(fwdIP);
+				
 				fclSs << "otsConsole: {\n";
 				fclSs << "\t"
 				      << "type: UDP\n";
@@ -151,7 +158,12 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 					__SS_THROW__;
 				}
 				qtfs << "RECEIVE_PORT \t " << fwdPort << "\n";
-				child.second.getNode(COL_WEB_PORT1).getValue(fwdPort);
+
+				if(child.second.getNode(COL_WEB_PORT1).isDefaultValue())
+					fwdPort = atoi(__ENV__("OTS_MAIN_PORT")) + 30001;
+				else
+					child.second.getNode(COL_WEB_PORT1).getValue(fwdPort);
+
 				qtfs << "DESTINATION_PORT \t " << fwdPort << "\n";
 				qtfs << "DESTINATION_IP \t " << fwdIP << "\n";
 				qtfs.close();
