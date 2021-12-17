@@ -91,6 +91,10 @@ sed -i s/configuration/table/g *ableInfo.x*
 sed -i s/TheSupervisor/GatewaySupervisor/g *ableInfo.x*
 sed -i s/OtsConfigurationWizard/WizardSupervisor/g *ableInfo.x*
 
+#revert things that have gone too far!
+sed -i s/TableGUI/ConfigurationGUI/g *ableInfo.x* #*/ end C++ comment coloring
+sed -i s/TableSubset/ConfigurationSubset/g *ableInfo.x* #*/ end C++ comment coloring
+
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Active Groups file..."
 mv $USER_DATA/ServiceData/ActiveConfigurationGroups.cfg $USER_DATA/ServiceData/ActiveTableGroups.cfg
 
