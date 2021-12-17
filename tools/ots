@@ -576,8 +576,7 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    mv ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}.bak.$$		
 	    mv ${ARTDAQ_DATABASE_FILESYSTEM_PATH}_new ${ARTDAQ_DATABASE_FILESYSTEM_PATH}
 	    echo "rebuilt" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild
-	    #else
-	    #	out "${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild file exists, so not rebuilding indices."
+	   	out "Database indices rebuilt. Marked complete at ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromIndexRebuild"
 	fi
 
 	if [ ! -e ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd ]; then	
@@ -596,7 +595,7 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 	    
 	    otsdaq_convert_config_to_table	
 	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
-	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
+	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes. Marked complete at ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2"
 	    
 	    if [ $ISCONFIG == 0 ]; then		
 			exit
@@ -784,27 +783,8 @@ launchOTSMacromaker() {
 	export MACROMAKER_SUPERVISOR_ID=290
 	MAIN_PORT=2015
 
-    # TODO: Handle ports in one place, with special handling for Wiz mode if needed
 	if [ "x$OTS_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_MAIN_PORT}
-	elif [ $USER == rrivera ]; then
-	  MAIN_PORT=1983
-	elif [ $USER == lukhanin ]; then
-	  MAIN_PORT=2060
-	elif [ $USER == uplegger ]; then
-	  MAIN_PORT=1974
-	elif [ $USER == parilla ]; then
-	   MAIN_PORT=9000
-	elif [ $USER == eflumerf ]; then
-	   MAIN_PORT=1987
-	elif [ $USER == swu ]; then
-	   MAIN_PORT=1994
-	elif [ $USER == rrivera ]; then
-	   MAIN_PORT=1776
-	elif [ $USER == naodell ]; then
-	   MAIN_PORT=2030
-	elif [ $USER == bschneid ]; then
-	   MAIN_PORT=2050
 	fi
 	export PORT=${MAIN_PORT}	
 	
@@ -944,26 +924,8 @@ launchOTSWiz() {
 	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
 	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_MAIN_PORT}
-	elif [ $USER == rrivera ]; then
-	  MAIN_PORT=1983
-	elif [ $USER == lukhanin ]; then
-	  MAIN_PORT=2060
-	elif [ $USER == uplegger ]; then
-	  MAIN_PORT=1974
-	elif [ $USER == parilla ]; then
-	   MAIN_PORT=9000
-	elif [ $USER == eflumerf ]; then
-	   MAIN_PORT=1987
-	elif [ $USER == swu ]; then
-	   MAIN_PORT=1994
-	elif [ $USER == rrivera ]; then
-	   MAIN_PORT=1776
-	elif [ $USER == naodell ]; then
-	   MAIN_PORT=2030
-	elif [ $USER == bschneid ]; then
-	   MAIN_PORT=2050
 	fi
-	export PORT=${MAIN_PORT}	
+	export PORT=${MAIN_PORT}
 	
 	
 	
@@ -986,8 +948,14 @@ launchOTSWiz() {
 	#out "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
 	
-	USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
-	USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
+	if [ -f ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool ]; then
+		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
+	else #defeault to web viewer
+		USE_WEB_VIEWER=1
+	fi
+	if [ -f ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool ]; then
+		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
+	fi
 			
 	
 	#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
