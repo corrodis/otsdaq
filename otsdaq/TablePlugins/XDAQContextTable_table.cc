@@ -25,6 +25,64 @@ const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ 				= { "ots::
 const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ 			= { "ots::ConsoleSupervisor"};
 const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ 	= { "ots::TableGUISupervisor"};
 const std::set<std::string> XDAQContextTable::CodeEditorTypeClassNames_ 		= { "ots::CodeEditorSupervisor"};
+const std::set<std::string> XDAQContextTable::VisualizerTypeClassNames_ 		= { "ots::VisualSupervisor"};
+const std::set<std::string> XDAQContextTable::SlowControlsTypeClassNames_ 		= { "ots::SlowControlsDashboardSupervisor"};
+
+const std::map<std::string /*class*/, std::string /*module*/> XDAQContextTable::AppClassModuleLookup_ = {
+	std::make_pair(XDAQContextTable::GATEWAY_SUPERVISOR_CLASS,					"${OTSDAQ_LIB}/libGatewaySupervisor.so"),
+	std::make_pair(XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS,					"${OTSDAQ_LIB}/libARTDAQSupervisor.so"),
+	std::make_pair(*(XDAQContextTable::FETypeClassNames_.begin()),				"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::FETypeClassNames_.begin(),1)),	"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::FETypeClassNames_.begin(),2)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(XDAQContextTable::DMTypeClassNames_.begin()),				"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),1)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),2)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(XDAQContextTable::LogbookTypeClassNames_.begin()),			"${OTSDAQ_UTILITIES_LIB}/libLogbook.so"),
+	std::make_pair(*(XDAQContextTable::MacroMakerTypeClassNames_.begin()),		"${OTSDAQ_UTILITIES_LIB}/libMacroMaker.so"),
+	std::make_pair(*(XDAQContextTable::ChatTypeClassNames_.begin()),			"${OTSDAQ_UTILITIES_LIB}/libChat.so"),
+	std::make_pair(*(XDAQContextTable::ConsoleTypeClassNames_.begin()),			"${OTSDAQ_UTILITIES_LIB}/libConsole.so"),
+	std::make_pair(*(XDAQContextTable::ConfigurationGUITypeClassNames_.begin()),"${OTSDAQ_UTILITIES_LIB}/libConfigurationGUI.so"),
+	std::make_pair(*(XDAQContextTable::CodeEditorTypeClassNames_.begin()),		"${OTSDAQ_LIB}/libCodeEditor.so"),
+	std::make_pair(*(XDAQContextTable::VisualizerTypeClassNames_.begin()),		"${OTSDAQ_UTILITIES_LIB}/libVisualization.so"),
+	std::make_pair(*(XDAQContextTable::SlowControlsTypeClassNames_.begin()),	"${OTSDAQ_UTILITIES_LIB}/libSlowControlsDashboard.so")
+};
+// Module Choices from fixed choice XDAQApp table:
+//		${OTSDAQ_LIB}/libGatewaySupervisor.so
+//		${OTSDAQ_LIB}/libCoreSupervisors.so
+//		${OTSDAQ_LIB}/libEventBuilderApp.so
+//		${OTSDAQ_UTILITIES_LIB}/libChat.so
+//		${OTSDAQ_UTILITIES_LIB}/libConsole.so
+//		${OTSDAQ_UTILITIES_LIB}/libLogbook.so
+//		${OTSDAQ_UTILITIES_LIB}/libVisualization.so
+//		${OTSDAQ_UTILITIES_LIB}/libConfigurationGUI.so
+//		${OTSDAQ_UTILITIES_LIB}/libSlowControlsDashboard.so
+//		${OTSDAQ_UTILITIES_LIB}/libMacroMaker.so
+//		${OTSDAQ_LIB}/libARTDAQSupervisor.so
+//		${OTSDAQ_LIB}/libARTDAQOnlineMonitor.so
+//		${OTSDAQ_LIB}/libDispatcherApp.so
+//		${OTSDAQ_LIB}/libDataLoggerApp.so
+//		${OTSDAQ_LIB}/libCodeEditor.so
+
+// Class Choices from fixed choice XDAQApp table:
+//		ots::GatewaySupervisor
+//		ots::FESupervisor
+//		ots::DataManagerSupervisor
+//		ots::FEDataManagerSupervisor
+//		ots::ARTDAQDataManagerSupervisor
+//		ots::ARTDAQFEDataManagerSupervisor
+//		ots::ARTDAQSupervisor
+//		ots::ARTDAQOnlineMonitorSupervisor
+//		ots::EventBuilderApp
+//		ots::DispatcherApp
+//		ots::DataLoggerApp
+//		ots::ConfigurationGUISupervisor
+//		ots::MacroMakerSupervisor
+//		ots::VisualSupervisor
+//		ots::ChatSupervisor
+//		ots::ConsoleSupervisor
+//		ots::LogbookSupervisor
+//		ots::SlowControlsDashboardSupervisor
+//		ots::CodeEditorSupervisor
 
 
 const uint8_t		 	XDAQContextTable::XDAQApplication::DEFAULT_PRIORITY 	= 100;
@@ -281,14 +339,19 @@ void XDAQContextTable::extractContexts(ConfigurationManager* configManager)
 				std::cout << contexts_.back().applications_.back().module_ << __E__;
 			}
 
+				__COUT__ << "CHECK Inferred module of '" << contexts_.back().applications_.back().applicationUID_ << "' as '" <<
+					contexts_.back().applications_.back().module_ << " " << (appChild.second.getNode(colApplication_.colModule_).isDefaultValue()?"YES":"NO") << __E__;
+
 			//if module is default, attempt to resolve from class
-			if(contexts_.back().applications_.back().id_ != XDAQContextTable::XDAQApplication::GATEWAY_APP_ID &&
-				appChild.second.getNode(colApplication_.colModule_).isDefaultValue())
+			if(contexts_.back().applications_.back().id_ == XDAQContextTable::XDAQApplication::GATEWAY_APP_ID) //force correct Gateway Supervisor module
+				contexts_.back().applications_.back().module_ = XDAQContextTable::AppClassModuleLookup_.at(XDAQContextTable::GATEWAY_SUPERVISOR_CLASS);
+			else if(appChild.second.getNode(colApplication_.colModule_).isDefaultValue() && XDAQContextTable::AppClassModuleLookup_.find(contexts_.back().applications_.back().class_) != 
+					XDAQContextTable::AppClassModuleLookup_.end())
 			{
-				contexts_.back().applications_.back().module_ = "${OTSDAQ_LIB}/lib" + contexts_.back().applications_.back().class_.substr(
-					std::string("ots::").size()) + ".so";
+				contexts_.back().applications_.back().module_ = XDAQContextTable::AppClassModuleLookup_.at(contexts_.back().applications_.back().class_);
 				__COUT__ << "Inferred module of '" << contexts_.back().applications_.back().applicationUID_ << "' as '" <<
-					contexts_.back().applications_.back().module_ << __E__;
+					contexts_.back().applications_.back().module_ << "' based on class '" << 
+					contexts_.back().applications_.back().class_ << "'" << __E__;
 			}
 			else //keep module env variable!! so do getValueAsString()
 				contexts_.back().applications_.back().module_ = appChild.second.getNode(colApplication_.colModule_).getValueAsString();

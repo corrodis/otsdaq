@@ -839,14 +839,14 @@ launchOTSMacromaker() {
 		#test for relaunch
 		# 4 times quietly, then get louder
 		
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
 		# Loop 4 times waiting for it to come up
 		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 1
-				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 			else
 				break
 			fi
@@ -942,25 +942,13 @@ launchOTSWiz() {
 	PORTMFOFF=$((30000 + $PORT))
 	sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
 	
-	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
-
 	#this fcl tells the MF library used by ots source how to behave
+	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
 	#out "OTSDAQ_LOG_FHICL=" ${OTSDAQ_LOG_FHICL}
 	
-	
-	if [ -f ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool ]; then
-		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
-	else #defeault to web viewer
-		USE_WEB_VIEWER=1
-	fi
-	if [ -f ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool ]; then
-		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
-	fi
-			
-	
-	#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
-	#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
-	
+	#defeault to web viewer
+	USE_WEB_VIEWER=1
+	USE_QT_VIEWER=0
 	
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
 		#out "CONSOLE: Using web console viewer"
@@ -1047,12 +1035,12 @@ launchOTSWiz() {
 		
 		#test for relaunch
 		# 4 times quietly, then get louder
-		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 		
 		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 1
-				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)"  #hide error output
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 			else
 				break
 			fi
@@ -1191,14 +1179,11 @@ launchOTS() {
 	
 	
 	if [[ $ISGATEWAYLAUNCH == 1 ]]; then
-		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool)"
-		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool)"
 
-			
-		
-		#out "USE_WEB_VIEWER" ${USE_WEB_VIEWER}
-		#out "USE_QT_VIEWER" ${USE_QT_VIEWER}
-		
+		USE_WEB_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseWebConsole.bool 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+		USE_QT_VIEWER="$(cat ${USER_DATA}/MessageFacilityConfigurations/UseQTViewer.bool 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+		# out "USE_WEB_VIEWER =" ${USE_WEB_VIEWER}
+		# out "USE_QT_VIEWER =" ${USE_QT_VIEWER}		
 		
 		if [[ $USE_WEB_VIEWER == "1" ]]; then
 
@@ -1426,14 +1411,14 @@ launchOTS() {
 								#test for relaunch
 								# 4 times quietly, then get louder
 								
-								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
+								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 								#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 	
 								# Test for start 4 times with short sleep
 								for t in {1..4}; do
 									if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 										sleep 1
-										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
+										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 									else
 										break
 									fi
@@ -1584,13 +1569,13 @@ launchOTS() {
 			#test for relaunch
 			# 4 times quietly, then get louder		
 			
-			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			
 			for t in {1..4}; do
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 					sleep 1
-					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"  #hide error output
+					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 				else
 					break
 				fi

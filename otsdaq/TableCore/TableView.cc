@@ -619,28 +619,38 @@ void TableView::init(void)
 				// check for link mate (i.e. every child link needs link ID)
 				getChildLink(col, tmpIsGroup, tmpLinkPair);
 			}
-		 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
+		
+			 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
 			if(columnsInfo_[col].isNumberDataType())
 			{
 				std::string minimumValueString = columnsInfo_[col].getMinValue();
 				std::string maximumValueString = columnsInfo_[col].getMaxValue();
-				double       minimumValue, maximumValue, valueFromTable;
-				bool        minExists = false, maxExists = false;
-				//__COUT__ << "values output1 " << minimumValueString << " another output1 " << maximumValueString << __E__;
+				double    	minimumValue, maximumValue, valueFromTable;
+				bool       	minExists = false, maxExists = false;
 
 				if(!minimumValueString.empty())
 				{
-					std::string envData = StringMacros::convertEnvironmentVariables(minimumValueString);
-					minExists           = StringMacros::getNumber(envData, minimumValue);
+					minExists 			= StringMacros::getNumber(
+							StringMacros::convertEnvironmentVariables(minimumValueString), minimumValue);
+					if(!minExists)
+					{
+						__SS__ <<  "Inavlid user spec'd min value '" << minimumValueString << 
+							"' which is not a valid number. The minimum value must be a number (environment variables and math operations are allowed)." << __E__;
+						__SS_THROW__;
+					}
 				}
 
 				if(!maximumValueString.empty())
 				{
-					std::string envData1 = StringMacros::convertEnvironmentVariables(maximumValueString);
-					maxExists            = StringMacros::getNumber(envData1, maximumValue);
+					maxExists            = StringMacros::getNumber(
+						StringMacros::convertEnvironmentVariables(maximumValueString), maximumValue);
+					if(!maxExists)
+					{
+						__SS__ <<  "Inavlid user spec'd max value '" << maximumValueString << 
+							"' which is not a valid number. The maximum value must be a number (environment variables and math operations are allowed)." << __E__;
+						__SS_THROW__;
+					}
 				}
-
-				//__COUT__ << "values output" << minimumValue << " another output " << maximumValue << __E__;
 
 				if(minExists && maxExists && minimumValue > maximumValue)
 				{
@@ -654,19 +664,21 @@ void TableView::init(void)
 						getValue(valueFromTable, row, col);
 						if(minExists && valueFromTable < minimumValue)
 						{
-							__SS__ << "This value is out of the established limits: " <<
-								valueFromTable << " is lower than specified minimum " << minimumValue << __E__;
+							__SS__ << "The value '" << valueFromTable << "' at [row,col]=[" <<
+								row << "," << col << "] is outside the established limits: " <<
+								valueFromTable << " is lower than the specified minimum " << minimumValue << "." << __E__;
 							__SS_THROW__;
 						}
 						if(maxExists && valueFromTable > maximumValue)
 						{
-							__SS__ << "This value is out of the established limits: " <<
-								valueFromTable << " is greater than specified maximum " << maximumValue << __E__;
+							__SS__ << "This value '" << valueFromTable << "' at [row,col]=[" <<
+								row << "," << col << "] is outside the established limits: " <<
+								valueFromTable << " is greater than the specified maximum " << maximumValue << "." << __E__;
 							__SS_THROW__;
 						}
 					}
-			}
-		}
+			} //end handling NUMBER data types
+		} //end column loop
 
 		// verify child link index uniqueness
 		if (groupIdIndexes.size() != groupIdIndexesCount)

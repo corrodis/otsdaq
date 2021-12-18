@@ -128,11 +128,14 @@ class XDAQContextTable : public TableBase
 
 
   public:
-	static const std::set<std::string> FETypeClassNames_, DMTypeClassNames_,
-	    LogbookTypeClassNames_, MacroMakerTypeClassNames_, ChatTypeClassNames_,
-	    ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_, CodeEditorTypeClassNames_;
-	static const std::string GATEWAY_SUPERVISOR_CLASS, WIZARD_SUPERVISOR_CLASS,
-	    DEPRECATED_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_CLASS;
+	static const std::set<std::string> 					FETypeClassNames_, DMTypeClassNames_,
+	    												LogbookTypeClassNames_, MacroMakerTypeClassNames_, ChatTypeClassNames_,
+	    												ConsoleTypeClassNames_, ConfigurationGUITypeClassNames_, CodeEditorTypeClassNames_,
+														VisualizerTypeClassNames_, SlowControlsTypeClassNames_;
+	static const std::string 							GATEWAY_SUPERVISOR_CLASS, WIZARD_SUPERVISOR_CLASS,
+	    												DEPRECATED_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_CLASS;
+	static const std::map<std::string /*class*/, 
+		std::string /*module*/> 						AppClassModuleLookup_;
 }; //end XDAQContextTable class
 }  // namespace ots
 // clang-format on

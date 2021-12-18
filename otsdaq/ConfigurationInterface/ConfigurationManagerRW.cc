@@ -1235,7 +1235,7 @@ GroupEditStruct::GroupEditStruct(const ConfigurationManager::GroupType& groupTyp
 	if(originalGroupName_ == "" || originalGroupKey_.isInvalid())
 	{
 		__SS__ << "Error! No active group found for type '" << ConfigurationManager::convertGroupTypeToName(groupType)
-		       << ".' There must be an active group to edit the group." << __E__;
+		       << ".' There must be an active group to edit the group." << __E__ << __E__ << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 
