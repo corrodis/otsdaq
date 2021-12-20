@@ -23,7 +23,7 @@ const std::set<std::string> XDAQContextTable::LogbookTypeClassNames_ 			= { "ots
 const std::set<std::string> XDAQContextTable::MacroMakerTypeClassNames_ 		= { "ots::MacroMakerSupervisor"};
 const std::set<std::string> XDAQContextTable::ChatTypeClassNames_ 				= { "ots::ChatSupervisor"};
 const std::set<std::string> XDAQContextTable::ConsoleTypeClassNames_ 			= { "ots::ConsoleSupervisor"};
-const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ 	= { "ots::TableGUISupervisor"};
+const std::set<std::string> XDAQContextTable::ConfigurationGUITypeClassNames_ 	= { "ots::ConfigurationGUISupervisor"};
 const std::set<std::string> XDAQContextTable::CodeEditorTypeClassNames_ 		= { "ots::CodeEditorSupervisor"};
 const std::set<std::string> XDAQContextTable::VisualizerTypeClassNames_ 		= { "ots::VisualSupervisor"};
 const std::set<std::string> XDAQContextTable::SlowControlsTypeClassNames_ 		= { "ots::SlowControlsDashboardSupervisor"};
@@ -33,10 +33,10 @@ const std::map<std::string /*class*/, std::string /*module*/> XDAQContextTable::
 	std::make_pair(XDAQContextTable::ARTDAQ_SUPERVISOR_CLASS,					"${OTSDAQ_LIB}/libARTDAQSupervisor.so"),
 	std::make_pair(*(XDAQContextTable::FETypeClassNames_.begin()),				"${OTSDAQ_LIB}/libCoreSupervisors.so"),
 	std::make_pair(*(std::next(XDAQContextTable::FETypeClassNames_.begin(),1)),	"${OTSDAQ_LIB}/libCoreSupervisors.so"),
-	std::make_pair(*(std::next(XDAQContextTable::FETypeClassNames_.begin(),2)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::FETypeClassNames_.begin(),2)),	"${OTSDAQ_LIB}/libCoreSupervisors.so"),
 	std::make_pair(*(XDAQContextTable::DMTypeClassNames_.begin()),				"${OTSDAQ_LIB}/libCoreSupervisors.so"),
-	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),1)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
-	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),2)),			"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),1)),	"${OTSDAQ_LIB}/libCoreSupervisors.so"),
+	std::make_pair(*(std::next(XDAQContextTable::DMTypeClassNames_.begin(),2)),	"${OTSDAQ_LIB}/libCoreSupervisors.so"),
 	std::make_pair(*(XDAQContextTable::LogbookTypeClassNames_.begin()),			"${OTSDAQ_UTILITIES_LIB}/libLogbook.so"),
 	std::make_pair(*(XDAQContextTable::MacroMakerTypeClassNames_.begin()),		"${OTSDAQ_UTILITIES_LIB}/libMacroMaker.so"),
 	std::make_pair(*(XDAQContextTable::ChatTypeClassNames_.begin()),			"${OTSDAQ_UTILITIES_LIB}/libChat.so"),

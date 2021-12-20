@@ -1430,6 +1430,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 	parameters.addParameter("ConfigurationTableGroupKey", theConfigurationTableGroup_.second.toString());
 
 	// update Macro Maker front end list
+	if(CorePropertySupervisorBase::allSupervisorInfo_.getAllMacroMakerTypeSupervisorInfo().size())
 	{
 		__COUT__ << "Initializing Macro Maker." << __E__;
 		xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference("FECommunication");
@@ -1455,7 +1456,7 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 			return;
 		}
-	}
+	} //end update Macro Maker front end list
 
 	// xoap::MessageReference message =
 	// SOAPUtilities::makeSOAPMessageReference(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand(),

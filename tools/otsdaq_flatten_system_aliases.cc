@@ -1,10 +1,13 @@
+#define __COUT_TO_STD__		1
 
+#include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include <dirent.h>
 #include <cassert>
 #include <iostream>
 #include <memory>
 #include <string>
+
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
@@ -21,6 +24,10 @@ using namespace ots;
 
 void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 {
+	// The configuration uses __ENV__("SERVICE_DATA_PATH") in init() so define it if it is not defined
+	if(getenv("SERVICE_DATA_PATH") == NULL)
+		setenv("SERVICE_DATA_PATH", (std::string(__ENV__("USER_DATA")) + "/ServiceData").c_str(), 1);
+
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
 	std::cout << "=================================================\n";
@@ -83,8 +90,7 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	setenv("TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
 
-	// Some configuration plug-ins use __ENV__("SERVICE_DATA_PATH") in init() so define it
-	setenv("SERVICE_DATA_PATH", (std::string(getenv("USER_DATA")) + "/ServiceData").c_str(), 1);
+
 
 	// Some configuration plug-ins use __ENV__("OTSDAQ_LIB") and
 	// __ENV__("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok
@@ -841,6 +847,7 @@ CLEAN_UP:
 
 int main(int argc, char* argv[])
 {
+	INIT_MF("FlattenSystemAliases");
 	FlattenActiveSystemAliasTableGroups(argc, argv);
 	return 0;
 }

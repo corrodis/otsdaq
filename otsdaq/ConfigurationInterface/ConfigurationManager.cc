@@ -14,7 +14,7 @@ using namespace ots;
 #define __MF_SUBJECT__ "ConfigurationManager"
 
 
-const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			= std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/";
+const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			=  ((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + "/RunControlData/";
 const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE 	= "CFGLastActivatedConfigGroup.hist";
 const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE 	= "CFGLastActivatedContextGroup.hist";
 const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE 	= "CFGLastActivatedBackboneGroup.hist";

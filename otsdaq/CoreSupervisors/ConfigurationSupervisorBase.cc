@@ -989,10 +989,17 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	try
 	{
 		unsigned int row;
-		std::string  iconUID;
+		std::string  iconUID = "";
+		std::string  decodedCaption = StringMacros::decodeURIComponent(iconCaption);
+
+		for(unsigned int i=0;i<decodedCaption.size();++i)
+			if((decodedCaption[i] >='a' && decodedCaption[i] <= 'z') ||
+				(decodedCaption[i] >='A' && decodedCaption[i] <= 'Z') ||
+				(decodedCaption[i] >='0' && decodedCaption[i] <= '9') )
+			iconUID += decodedCaption[i];
 
 		// create icon record
-		row     = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon");
+		row     = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon" + iconUID);
 		iconUID = iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
 
 		__COUTV__(row);
