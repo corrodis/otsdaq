@@ -1,3 +1,8 @@
+#include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
+
+#include <fstream>   // for std::ofstream
+#include <iostream>  // std::cout
+#include <typeinfo>
 
 #include "otsdaq/Macros/CoutMacros.h"
 #define TRACE_NAME "ARTDAQTableBase"
@@ -8,13 +13,7 @@
 #include "artdaq-utilities/Plugins/MakeParameterSet.hh"
 #include <fhiclcpp/parse.h>
 
-#include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 #include "otsdaq/TablePlugins/XDAQContextTable.h"
-
-#include <fstream>   // for std::ofstream
-#include <iostream>  // std::cout
-#include <typeinfo>
-
 #include "otsdaq/ProgressBar/ProgressBar.h"
 
 using namespace ots;
@@ -69,10 +68,26 @@ ARTDAQTableBase::ProcessTypes 			ARTDAQTableBase::processTypes_;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) : TableBase(tableName, accumulatedExceptions)
+ARTDAQTableBase::ARTDAQTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) 
+	: TableBase(tableName, accumulatedExceptions)
 {
 	// make directory just in case
 	mkdir((ARTDAQ_FCL_PATH).c_str(), 0755);
+
+	//December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	//	This check and re-initialization seems to cover up the issue for now.
+	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
+	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
+	if(traceTID == 0)
+	{
+		std::cout << "ARTDAQTableBase Before traceTID=" << traceTID << __E__;
+		char buf[40];
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		std::cout << "ARTDAQTableBase After traceTID=" << traceTID << __E__;
+		__COUT__ << "ARTDAQTableBase TRACE reinit and Constructed." << __E__;
+	}
+
 }  // end constuctor()
 
 //==============================================================================
@@ -503,6 +518,18 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	}
 
 	//--------------------------------------
+	// handle preamble parameters
+	//_COUT__ << "Inserting preamble parameters..." << __E__;
+	insertParameters(out,
+		tabStr,
+		commentStr,
+		boardReaderNode.getNode("preambleParametersLink"),
+		"daqParameter" /*parameterType*/,
+		false /*onlyInsertAtTableParameters*/,
+		true /*includeAtTableParameters*/);
+
+
+	//--------------------------------------
 	// handle daq
 	OUT << "daq: {\n";
 
@@ -586,6 +613,17 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 
 	POPTAB;
 	OUT << "}\n\n";  // end daq
+
+	//--------------------------------------
+	// handle ALL add-on parameters
+	//__COUT__ << "Inserting add-on parameters" << __E__;
+	insertParameters(out,
+		tabStr,
+		commentStr,
+		boardReaderNode.getNode("addOnParametersLink"),
+		"daqParameter" /*parameterType*/,
+		false /*onlyInsertAtTableParameters*/,
+		true /*includeAtTableParameters*/);
 
 	out.close();
 }  // end outputReaderFHICL()
