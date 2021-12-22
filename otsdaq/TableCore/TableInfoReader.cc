@@ -366,7 +366,7 @@ std::string TableInfoReader::read(TableBase& table)
 					minValue =
 							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMinValueAttributeTag_)));
 
-					__COUT__ << "FOUND min value! " << minValue << __E__;
+					// __COUT__ << "FOUND min value! " << minValue << __E__;
 				}
 				std::string maxValue;
 				bool isMaxValue = columnElement->getAttributeNode(columnMaxValueAttributeTag_)?true:false;
@@ -375,7 +375,7 @@ std::string TableInfoReader::read(TableBase& table)
 					maxValue =
 							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMaxValueAttributeTag_)));
 
-					__COUT__ << "FOUND max value! " << maxValue << __E__;
+					// __COUT__ << "FOUND max value! " << maxValue << __E__;
 				}
 				// TODO read min/max, almost done??
 				else

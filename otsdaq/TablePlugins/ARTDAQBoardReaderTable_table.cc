@@ -20,10 +20,24 @@ ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
 	, ARTDAQTableBase("ARTDAQBoardReaderTable")
 	, SlowControlsTableBase("ARTDAQBoardReaderTable")
 {
+
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  		//
 	//////////////////////////////////////////////////////////////////////
-	__COUT__ << "ARTDAQBoardReaderTable Constructed." << __E__;
+    //December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	//	This check and re-initialization seems to cover up the issue for now.
+	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
+	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
+	if(traceTID == 0)
+	{
+		std::cout << "ARTDAQBoardReaderTable Before traceTID=" << traceTID << __E__;
+		char buf[40];
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		std::cout << "ARTDAQBoardReaderTable After traceTID=" << traceTID << __E__;
+		__COUT__ << "ARTDAQBoardReaderTable TRACE reinit and Constructed." << __E__;
+	}
+	else __COUT__ << "ARTDAQBoardReaderTable Constructed." << __E__;
 }  // end constructor()
 
 //==============================================================================
@@ -45,8 +59,8 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 
-	//	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
-	//	__COUT__ << configManager->__SELF_NODE__ << __E__;
+	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << __E__;
+	__COUT__ << configManager->__SELF_NODE__ << __E__;
 
 	// handle fcl file generation, wherever the level of this table
 

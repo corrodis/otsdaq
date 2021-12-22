@@ -143,6 +143,161 @@ std::string StringMacros::encodeURIComponent(const std::string& sourceStr)
 }  // end encodeURIComponent()
 
 //==============================================================================
+// StringMacros::escapeString
+//	convert quotes to html quote characters &apos; = ' and &quot; = "
+//	remove new line characters
+//	and (if !allowWhiteSpace) remove white space (so that read from file white space
+// artifact removed)
+//
+//	convert &amp; = &
+//	if(allowWhiteSpace) convert \t to 8 &#160; spaces and \n to <br>
+std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpace /* = false */)
+{
+	bool doit = false;
+
+	unsigned int ws = -1;
+	char         htmlTmp[6];
+
+	for (unsigned int i = 0; i < inString.length(); i++)
+		if (inString[i] != ' ')
+		{
+			if (doit)
+				__COUT__ << inString[i] << ":" << (int)inString[i] << ":" << inString << std::endl;
+
+			// remove new lines and unprintable characters
+			if (inString[i] == '\r' || inString[i] == '\n' ||          // remove new line chars
+				inString[i] == '\t' ||                                 // remove tabs
+				inString[i] < 32 ||                                    // remove un-printable characters (they mess up xml
+																	   // interpretation)
+				(inString[i] > char(126) && inString[i] < char(161)))  // this is aggravated by the bug in
+																	   // MFextensions (though Eric says he fixed on
+																	   // 8/24/2016)  Note: greater than 255 should be
+																	   // impossible if by byte (but there are html
+																	   // chracters in 300s and 8000s)
+			{
+				if (  // maintain new lines and tabs
+					inString[i] == '\n')
+				{
+					if (allowWhiteSpace)
+					{
+						sprintf(htmlTmp, "&#%3.3d", inString[i]);
+						inString.insert(i, htmlTmp);         // insert html str sequence
+						inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
+						i += 6;                              // skip to next char to check
+						--i;
+					}
+					else  // translate to ' '
+						inString[i] = ' ';
+				}
+				else if (  // maintain new lines and tabs
+					inString[i] == '\t')
+				{
+					if (allowWhiteSpace)
+					{
+						if (0)
+						{
+							// tab = 8 spaces
+							sprintf(htmlTmp, "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
+							inString.insert(i, htmlTmp);          // insert html str sequence
+							inString.replace(i + 47, 1, 1, ';');  // replace special character with ;
+							i += 48;                              // skip to next char to check
+							--i;
+						}
+						else  // tab =  0x09
+						{
+							sprintf(htmlTmp, "&#009");
+							inString.insert(i, htmlTmp);         // insert html str sequence
+							inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
+							i += 6;                              // skip to next char to check
+							--i;
+						}
+					}
+					else  // translate to ' '
+						inString[i] = ' ';
+				}
+				else
+				{
+					inString.erase(i, 1);  // erase character
+					--i;                   // step back so next char to check is correct
+				}
+				if (doit)
+					__COUT__ << inString << std::endl;
+				continue;
+			}
+
+			if (doit)
+				__COUT__ << inString << std::endl;
+
+			// replace special characters
+			if (inString[i] == '\"' || inString[i] == '\'')
+			{
+				inString.insert(i,
+					(inString[i] == '\'') ? "&apos" : "&quot");  // insert HTML name before quotes
+				inString.replace(i + 5, 1, 1, ';');                          // replace special character with ;
+				i += 5;                                                      // skip to next char to check
+																			 //__COUT__ <<  inString << std::endl;
+			}
+			else if (inString[i] == '&')
+			{
+				inString.insert(i, "&amp");          // insert HTML name before special character
+				inString.replace(i + 4, 1, 1, ';');  // replace special character with ;
+				i += 4;                              // skip to next char to check
+			}
+			else if (inString[i] == '<' || inString[i] == '>')
+			{
+				inString.insert(i,
+					(inString[i] == '<') ? "&lt" : "&gt");  // insert HTML name before special character
+				inString.replace(i + 3, 1, 1, ';');                     // replace special character with ;
+				i += 3;                                                 // skip to next char to check
+			}
+			else if (inString[i] >= char(161) && inString[i] <= char(255))  // printable special characters
+			{
+				sprintf(htmlTmp, "&#%3.3d", inString[i]);
+				inString.insert(i, htmlTmp);         // insert html number sequence
+				inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
+				i += 5;                              // skip to next char to check
+			}
+
+			if (doit)
+				__COUT__ << inString << std::endl;
+
+			ws = i;  // last non white space char
+		}
+		else if (allowWhiteSpace)  // keep white space if allowed
+		{
+			if (i - 1 == ws)
+				continue;  // dont do anything for first white space
+
+			// for second white space add 2, and 1 from then
+			if (0 && i - 2 == ws)
+			{
+				inString.insert(i, "&#160;");  // insert html space
+				i += 6;                        // skip to point at space again
+			}
+			inString.insert(i, "&#160");         // insert html space
+			inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
+			i += 5;                              // skip to next char to check
+												 // ws = i;
+		}
+
+	if (doit)
+		__COUT__ << inString.size() << " " << ws << std::endl;
+
+	// inString.substr(0,ws+1);
+
+	if (doit)
+		__COUT__ << inString.size() << " " << inString << std::endl;
+
+	if (allowWhiteSpace)  // keep all white space
+		return inString;
+	// else trim trailing white space
+
+	if (ws == (unsigned int)-1)
+		return "";                      // empty std::string since all white space
+	return inString.substr(0, ws + 1);  // trim right white space
+} //end escapeString()
+
+//==============================================================================
 // convertEnvironmentVariables ~
 //	static recursive function
 //

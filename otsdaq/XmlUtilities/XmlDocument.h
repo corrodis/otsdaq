@@ -27,6 +27,7 @@
 #include <iostream.h>
 #endif
 
+// clang-format off
 //===============================================================================================================
 namespace ots
 {
@@ -34,37 +35,36 @@ class XmlDocument
 {
 	//---------------------------------------------------------------------------------------------------------------
   public:
-	XmlDocument(std::string rootName = "ROOT");
-	XmlDocument(const XmlDocument& doc);
-	XmlDocument& operator=(const XmlDocument& doc);
-	~XmlDocument(void);
+										XmlDocument(std::string rootName = "ROOT");
+										XmlDocument(const XmlDocument& doc);
+										XmlDocument& operator=(const XmlDocument& doc);
+										~XmlDocument(void);
 
-	xercesc::DOMElement* addTextElementToParent(std::string childName, std::string childText, xercesc::DOMElement* parent);
-	xercesc::DOMElement* addTextElementToParent(std::string childName, std::string childText, std::string parentName, unsigned int parentIndex = 0);
-	void                 saveXmlDocument(std::string filePath);
-	void                 recursiveRemoveChild(xercesc::DOMElement* childEl, xercesc::DOMElement* parentEl);
-	bool                 loadXmlDocument(std::string filePath);
-	void                 outputXmlDocument(std::ostringstream* out, bool dispStdOut = false);
-	void                 makeDirectoryBinaryTree(std::string name, std::string rootPath, int indent, xercesc::DOMElement* anchorNode);
-	xercesc::DOMElement* populateBinaryTreeNode(xercesc::DOMElement* anchorNode, std::string name, int indent, bool isLeaf);
-	void                 setAnchors(std::string fSystemPath, std::string fRootPath);
-	void                 setDocument(xercesc::DOMDocument* doc);
-	void                 setDarioStyle(bool darioStyle);
-	void                 setRootPath(std::string rootPath) { fRootPath_ = rootPath; }
+	xercesc::DOMElement* 				addTextElementToParent(std::string childName, std::string childText, xercesc::DOMElement* parent);
+	xercesc::DOMElement* 				addTextElementToParent(std::string childName, std::string childText, std::string parentName, unsigned int parentIndex = 0);
+	void                 				saveXmlDocument(std::string filePath);
+	void                 				recursiveRemoveChild(xercesc::DOMElement* childEl, xercesc::DOMElement* parentEl);
+	bool                 				loadXmlDocument(std::string filePath);
+	void                 				outputXmlDocument(std::ostringstream* out, bool dispStdOut = false);
+	void                 				makeDirectoryBinaryTree(std::string name, std::string rootPath, int indent, xercesc::DOMElement* anchorNode);
+	xercesc::DOMElement* 				populateBinaryTreeNode(xercesc::DOMElement* anchorNode, std::string name, int indent, bool isLeaf);
+	void                 				setAnchors(std::string fSystemPath, std::string fRootPath);
+	void                 				setDocument(xercesc::DOMDocument* doc);
+	void                 				setDarioStyle(bool darioStyle);
+	void                 				setRootPath(std::string rootPath) { fRootPath_ = rootPath; }
 	//---------------------------------------------------------------------------------------------------------------
   protected:
-	void        copyDocument(const xercesc::DOMDocument* toCopy, xercesc::DOMDocument* copy);
-	void        recursiveElementCopy(const xercesc::DOMElement* toCopy, xercesc::DOMElement* copy);
-	void        initDocument(void);
-	void        initPlatform(void);
-	void        terminatePlatform(void);
-	void        recursiveOutputXmlDocument(xercesc::DOMElement* currEl, std::ostringstream* out, bool dispStdOut = false, std::string tabStr = "");
-	std::string escapeString(std::string inString, bool allowWhiteSpace = false);
-
-	xercesc::DOMImplementation* theImplementation_;
-	xercesc::DOMDocument*       theDocument_;
-	xercesc::DOMElement*        rootElement_;
-	const std::string           rootTagName_;
+	void        						copyDocument(const xercesc::DOMDocument* toCopy, xercesc::DOMDocument* copy);
+	void        						recursiveElementCopy(const xercesc::DOMElement* toCopy, xercesc::DOMElement* copy);
+	void        						initDocument(void);
+	void        						initPlatform(void);
+	void        						terminatePlatform(void);
+	void        						recursiveOutputXmlDocument(xercesc::DOMElement* currEl, std::ostringstream* out, bool dispStdOut = false, std::string tabStr = "");
+	
+	xercesc::DOMImplementation* 		theImplementation_;
+	xercesc::DOMDocument*       		theDocument_;
+	xercesc::DOMElement*        		rootElement_;
+	const std::string           		rootTagName_;
 
 	xercesc::DOMDocument*               doc;
 	xercesc::DOMElement*                rootElem;
@@ -84,14 +84,15 @@ class XmlDocument
 	xercesc::DOMConfiguration*          pDomConfiguration;
 	bool                                darioXMLStyle_;
 
-	std::string                 fSystemPath_;
-	std::string                 fRootPath_;
-	std::string                 fFoldersPath_;
-	std::string                 fFileName_;
-	std::string                 fThisFolderPath_;
-	int                         indent_;
-	std::map<bool, std::string> isALeaf_;
+	std::string                 		fSystemPath_;
+	std::string                 		fRootPath_;
+	std::string                 		fFoldersPath_;
+	std::string                 		fFileName_;
+	std::string                 		fThisFolderPath_;
+	int                         		indent_;
+	std::map<bool, std::string> 		isALeaf_;
 };
 }  // namespace ots
 
+// clang-format on
 #endif  // ots_XmlDocument_h

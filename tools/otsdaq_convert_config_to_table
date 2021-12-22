@@ -95,6 +95,7 @@ sed -i s/OtsConfigurationWizard/WizardSupervisor/g *ableInfo.x*
 sed -i s/TableGUI/ConfigurationGUI/g *ableInfo.x* #*/ end C++ comment coloring
 sed -i s/TableSubset/ConfigurationSubset/g *ableInfo.x* #*/ end C++ comment coloring
 sed -i s/TableSupervisor/ConfigurationSupervisor/g *ableInfo.x* #*/ end C++ comment coloring
+sed -i s/TableDump/ConfigurationDump/g *ableInfo.x* #*/ end C++ comment coloring
 
 echo -e `date +"%h%y %T"` "convert_config_to_table.sh [${LINENO}]  \t Renaming Active Groups file..."
 mv $USER_DATA/ServiceData/ActiveConfigurationGroups.cfg $USER_DATA/ServiceData/ActiveTableGroups.cfg
@@ -135,6 +136,7 @@ sed -i s/OtsConfigurationWizard/WizardSupervisor/g *Table/*.json #*/ end C++ com
 sed -i s/TableGUI/ConfigurationGUI/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/TableSubset/ConfigurationSubset/g *Table/*.json #*/ end C++ comment coloring
 sed -i s/TableSupervisor/ConfigurationSupervisor/g *Table/*.json #*/ end C++ comment coloring
+sed -i s/TableDump/ConfigurationDump/g *Table/*.json #*/ end C++ comment coloring
 
 
 #return index after transformation
@@ -164,6 +166,7 @@ sed -i s/configuration/table/g TableGroupMetadata/*.json #*/ end C++ comment col
 sed -i s/TableGUI/ConfigurationGUI/g TableGroupMetadata/*.json #*/ end C++ comment coloring
 sed -i s/TableSubset/ConfigurationSubset/g TableGroupMetadata/*.json #*/ end C++ comment coloring
 sed -i s/TableSupervisor/ConfigurationSupervisor/g TableGroupMetadata/*.json #*/ end C++ comment coloring
+sed -i s/TableDump/ConfigurationDump/g TableGroupMetadata/*.json #*/ end C++ comment coloring
 
 
 #return index after transformation

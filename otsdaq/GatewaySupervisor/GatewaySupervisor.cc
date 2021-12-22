@@ -128,7 +128,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 GatewaySupervisor::~GatewaySupervisor(void)
 {
 	delete CorePropertySupervisorBase::theConfigurationManager_;
-	makeSystemLogbookEntry("ots shutdown.");
+	makeSystemLogEntry("ots shutdown.");
 }  // end destructor
 
 //==============================================================================
@@ -449,12 +449,12 @@ void GatewaySupervisor::StateChangerWorkLoop(GatewaySupervisor* theSupervisor)
 }  // end StateChangerWorkLoop()
 
 //==============================================================================
-// makeSystemLogbookEntry
+// makeSystemLogEntry
 //	makes a logbook entry into all Logbook supervisors
 //		and specifically the current active experiments within the logbook
 //	escape entryText to make it html/xml safe!!
 ////      reserved: ", ', &, <, >, \n, double-space
-void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
+void GatewaySupervisor::makeSystemLogEntry(std::string entryText)
 {
 	__COUT__ << "Making System Logbook Entry: " << entryText << __E__;
 
@@ -470,26 +470,8 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 		__COUT__ << "Making logbook entry: " << entryText << __E__;
 	}
 
-	//__COUT__ << "before: " << entryText << __E__;
-	{  // input entryText
-		std::string replace[] = {"\"", "'", "&", "<", ">", "\n", "  "};
-		std::string with[]    = {"%22", "%27", "%26", "%3C", "%3E", "%0A%0D", "%20%20"};
 
-		int numOfKeys = 7;
-
-		size_t f;
-		for(int i = 0; i < numOfKeys; ++i)
-		{
-			while((f = entryText.find(replace[i])) != std::string::npos)
-			{
-				entryText = entryText.substr(0, f) + with[i] + entryText.substr(f + replace[i].length());
-				//__COUT__ << "found " << " " << entryText << __E__;
-			}
-		}
-	}
-	//__COUT__ << "after: " << entryText << __E__;
-
-	SOAPParameters parameters("EntryText", entryText);
+	SOAPParameters parameters("EntryText", StringMacros::encodeURIComponent(entryText));
 
 	// SOAPParametersV parameters(1);
 	// parameters[0].setName("EntryText"); parameters[0].setValue(entryText);
@@ -498,29 +480,45 @@ void GatewaySupervisor::makeSystemLogbookEntry(std::string entryText)
 	{
 		try
 		{
-			xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogbookEntry", parameters);
+			xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(logbookInfo.second.getDescriptor(), "MakeSystemLogEntry", parameters);
 
 			SOAPParameters retParameters("Status");
 			// SOAPParametersV retParameters(1);
 			// retParameters[0].setName("Status");
 			SOAPUtilities::receive(retMsg, retParameters);
 
-			__COUT__ << "Returned Status: " << retParameters.getValue("Status") << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+			std::string status = retParameters.getValue("Status");
+			__COUT__ << "Returned Status: " << status << __E__;  // retParameters[0].getValue() << __E__ << __E__;
+			if(status != "Success")
+			{
+				__SS__ << "Invalid return status on MakeSystemLogEntry: " << status << __E__;
+				__SS_THROW__;
+			}
+			
 		}
-		catch(...)
+		catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 		{
-			__COUT_ERR__ << "Failed to send logbook SOAP entry to " <<
-					logbookInfo.first << ":" << logbookInfo.second.getContextName() <<
-					":" << logbookInfo.second.getName() << __E__;
+			__SS__ << "Failed to send system log SOAP entry to " <<
+					logbookInfo.second.getContextName() <<
+					"/" << logbookInfo.second.getName() << " w/app ID=" << logbookInfo.first << __E__ << e.what();
+					
+			__SS_THROW__;
+		}
+		catch(std::runtime_error& e)
+		{
+			__SS__ << "Error during handling of system log SOAP entry at " <<
+					logbookInfo.second.getContextName() <<
+					"/" << logbookInfo.second.getName() << " w/app ID=" << logbookInfo.first << __E__ << e.what();
+			__SS_THROW__;
 		}
 	}
-}  // end makeSystemLogbookEntry()
+}  // end makeSystemLogEntry()
 
 //==============================================================================
 void GatewaySupervisor::Default(xgi::Input* /*in*/, xgi::Output* out)
 {
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
-		makeSystemLogbookEntry("ots started.");
+		makeSystemLogEntry("ots started.");
 
 	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" << GatewaySupervisor::getIconHeaderString() <<
 	    // end show ots icon
@@ -740,7 +738,9 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	if(command == "Configure")
 		parameters.push_back(CgiDataUtilities::postData(cgiIn, "ConfigurationAlias"));
 
-	attemptStateMachineTransition(&xmlOut, out, command, fsmName, fsmWindowName, userInfo.username_, parameters);
+	std::string logEntry = CgiDataUtilities::postData(cgiIn, "logEntry");
+	
+	attemptStateMachineTransition(&xmlOut, out, command, fsmName, fsmWindowName, userInfo.username_, parameters, logEntry);
 
 }  // end stateMachineXgiHandler()
 
@@ -751,7 +751,8 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
                                                              const std::string&              fsmName,
                                                              const std::string&              fsmWindowName,
                                                              const std::string&              username,
-                                                             const std::vector<std::string>& commandParameters)
+                                                             const std::vector<std::string>& commandParameters,
+                                                             const std::string&              logEntry)
 {
 	std::string errorStr = "";
 
@@ -760,8 +761,11 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 	__COUT__ << "fsmName = " << fsmName << __E__;
 	__COUT__ << "fsmWindowName = " << fsmWindowName << __E__;
 	__COUT__ << "activeStateMachineName_ = " << activeStateMachineName_ << __E__;
+	__COUTV__(logEntry);
 	__COUT__ << "command = " << command << __E__;
 	__COUT__ << "commandParameters.size = " << commandParameters.size() << __E__;
+
+	activeStateMachineLogEntry_ = ""; //clear
 
 	SOAPParameters parameters;
 	if(command == "Configure")
@@ -806,6 +810,43 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 
 			return errorStr;
 		}
+
+		//test Require user log info
+		try
+		{			
+			ConfigurationTree configLinkNode =
+				CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(fsmName);
+				bool requireUserLogInput  = fsmLinkNode.getNode("RequireUserLogInputOnConfigureTransition").getValue<bool>();
+				__COUTV__(requireUserLogInput);
+				if(requireUserLogInput && logEntry.size() < 3)
+				{
+					__SS__ << "Error - the state machine property 'RequireUserLogInputOnConfigureTransition' has been enabled which requires the user to enter at least 3 characters of log info to proceed with the Configure transition."
+						<< __E__;
+					__COUT_ERR__ << "\n" << ss.str();
+					errorStr = ss.str();
+
+					if(xmldoc)
+						xmldoc->addTextElementToData("state_tranisition_attempted",
+													"0");  // indicate to GUI transition NOT attempted
+					if(xmldoc)
+						xmldoc->addTextElementToData("state_tranisition_attempted_err",
+													ss.str());  // indicate to GUI transition NOT attempted
+					if(out)
+						xmldoc->outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
+
+					return errorStr;
+				}
+				else if(requireUserLogInput)
+					activeStateMachineLogEntry_ = logEntry;
+			}
+		}
+		catch(...)
+		{ /* ignore exceptions during test Require user log info*/}
+
+
 
 		parameters.addParameter("ConfigurationAlias", commandParameters[0]);
 
@@ -864,6 +905,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 				if(!configLinkNode.isDisconnected())
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+					
 					std::string runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
 					__COUTV__(runInfoPluginType);
 					if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT  && 
@@ -890,8 +932,38 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 						}
 
 						runNumber = runInfoInterface->claimNextRunNumber();
+					} //end Run Info Plugin handling
+		
+					//test Require user log info
+					try
+					{
+						bool requireUserLogInput  = fsmLinkNode.getNode("RequireUserLogInputOnRunTransition").getValue<bool>();
+						__COUTV__(requireUserLogInput);
+						if(requireUserLogInput && logEntry.size() < 3)
+						{
+							__SS__ << "Error - the state machine property 'RequireUserLogInputOnRunTransition' has been enabled which requires the user to enter at least 3 characters of log info to proceed with the Start transition."
+								<< __E__;
+							__COUT_ERR__ << "\n" << ss.str();
+							errorStr = ss.str();
+
+							if(xmldoc)
+								xmldoc->addTextElementToData("state_tranisition_attempted",
+															"0");  // indicate to GUI transition NOT attempted
+							if(xmldoc)
+								xmldoc->addTextElementToData("state_tranisition_attempted_err",
+															ss.str());  // indicate to GUI transition NOT attempted
+							if(out)
+								xmldoc->outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
+
+							return errorStr;
+						}
+						else if(requireUserLogInput)
+							activeStateMachineLogEntry_ = logEntry;
 					}
-				}
+					catch(...)
+					{ /* ignore exceptions during test Require user log info*/}
+
+				} //end handle state machine config link
 			}
 			catch(const std::runtime_error& e)
 			{
@@ -1260,6 +1332,7 @@ void GatewaySupervisor::checkForAsyncError()
 
 //==============================================================================
 void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
+try
 {
 	checkForAsyncError();
 
@@ -1319,8 +1392,12 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 		std::stringstream ss;
 		ss << "Configuring '" << systemAlias << "' which translates to " << theConfigurationTableGroup_.first << " (" << theConfigurationTableGroup_.second
 		   << ").";
-		makeSystemLogbookEntry(ss.str());
-	}
+
+		if(activeStateMachineLogEntry_ != "")
+			ss << " User log entry:\n " << StringMacros::decodeURIComponent(activeStateMachineLogEntry_);
+			
+		makeSystemLogEntry(ss.str());
+	} //end make logbook entry
 
 	RunControlStateMachine::theProgressBar_.step();
 
@@ -1379,29 +1456,50 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 			try  // errors in dump are not tolerated
 			{
 				bool        dumpConfiguration = true;
+				bool		requireUserLogInput = false;
 				std::string dumpFilePath, dumpFileRadix, dumpFormat;
+					
+				bool doThrow = false;			
 				try  // for backwards compatibility
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
 					dumpConfiguration             = fsmLinkNode.getNode("EnableConfigurationDumpOnConfigureTransition").getValue<bool>();
-					dumpFilePath                  = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFilePath").getValue<std::string>();
-					dumpFileRadix                 = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFileRadix").getValue<std::string>();
+					doThrow = true; //at this point throw the exception!
+					dumpFilePath                  = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFilePath").getValueWithDefault<std::string>(
+														__ENV__("OTSDAQ_LOG_DIR"));
+					dumpFileRadix                 = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFileRadix").getValueWithDefault<std::string>(
+														"ConfigTransitionConfigurationDump");
 					dumpFormat                    = fsmLinkNode.getNode("ConfigurationDumpOnConfigureFormat").getValue<std::string>();
+					requireUserLogInput  		  = fsmLinkNode.getNode("RequireUserLogInputOnConfigureTransition").getValue<bool>();
 				}
-				catch(std::runtime_error& e)
+				catch(std::runtime_error& e)  //throw exception on missing fields if dumpConfiguration set
 				{
-					__COUT_INFO__ << "FSM configuration dump Link disconnected." << __E__;
+					__COUT_INFO__ << "FSM configuration dump Link disconnected at '" << 
+							ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME << "/" << 
+							supervisorContextUID_ << "/" <<  supervisorApplicationUID_ << "/" <<
+							"LinkToStateMachineTable/" << activeStateMachineName_ << "/" << "EnableConfigurationDumpOnConfigureTransition" <<
+							__E__;
+					if(doThrow) 
+					{
+						__SS__ << "Configuration Dump on Configure transition was enabled, but there are missing fields! " << e.what() << __E__;
+						__SS_THROW__;
+					}
 					dumpConfiguration = false;
 				}
 
 				if(dumpConfiguration)
 				{
+					__COUT_INFO__ << "Dumping the Configuration on the Configuration transition..." << __E__;
 					// dump configuration
 					CorePropertySupervisorBase::theConfigurationManager_->dumpActiveConfiguration(
-					    dumpFilePath + "/" + dumpFileRadix + "_" + std::to_string(time(0)) + ".dump", dumpFormat);
+					    dumpFilePath + "/" + dumpFileRadix + "_" + std::to_string(time(0)) + ".dump", 
+						dumpFormat, requireUserLogInput?activeStateMachineLogEntry_:"",
+						theWebUsers_.getActiveUsersString());
 
 					CorePropertySupervisorBase::theConfigurationManager_->dumpMacroMakerModeFhicl();
 				}
+				else
+					__COUT_INFO__ << "Not dumping the Configuration on the Configuration transition." << __E__;
 			}
 			catch(std::runtime_error& e)
 			{
@@ -1422,7 +1520,12 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 				return;
 			}
 		}
+		else
+			__COUT_INFO__ << "No Gateway Supervisor configuration record found at '" <<
+				ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME << "/" << 
+				supervisorContextUID_ << "/" <<  supervisorApplicationUID_ << "' - consider adding one to control configuration dumps and state machine properties." << __E__;
 	}
+	
 
 	RunControlStateMachine::theProgressBar_.step();
 	SOAPParameters parameters;
@@ -1474,26 +1577,70 @@ void GatewaySupervisor::transitionConfiguring(toolbox::Event::Reference/* e*/)
 	__COUT__ << "Done configuring." << __E__;
 	RunControlStateMachine::theProgressBar_.complete();
 }  // end transitionConfiguring()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Configuring interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Configuring interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Configuring interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionConfiguring() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionHalting(toolbox::Event::Reference /*e*/)
+try
 {
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
-	makeSystemLogbookEntry("Run halting.");
+	makeSystemLogEntry("System halting.");
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionHalting()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Halting interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Halting interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Halting interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionHalting() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
+try
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	RunControlStateMachine::theProgressBar_.step();
-	makeSystemLogbookEntry("System shutting down.");
+	makeSystemLogEntry("System shutting down.");
 	RunControlStateMachine::theProgressBar_.step();
 
 	// kill all non-gateway contexts
@@ -1508,14 +1655,36 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
 		RunControlStateMachine::theProgressBar_.step();
 	}
 }  // end transitionShuttingDown()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Shutting Down interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Shutting Down interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Shutting Down interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionShuttingDown() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference /*e*/)
+try
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	RunControlStateMachine::theProgressBar_.step();
-	makeSystemLogbookEntry("System starting up.");
+	makeSystemLogEntry("System starting up.");
 	RunControlStateMachine::theProgressBar_.step();
 
 	// start all non-gateway contexts
@@ -1531,28 +1700,93 @@ void GatewaySupervisor::transitionStartingUp(toolbox::Event::Reference /*e*/)
 	}
 
 }  // end transitionStartingUp()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Starting Up interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Starting Up interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Starting Up interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionStartingUp() catch
 
 //==============================================================================
-void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference e)
-
+void GatewaySupervisor::transitionInitializing(toolbox::Event::Reference event)
+try
 {
 	__COUT__ << theStateMachine_.getCurrentStateName() << __E__;
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
-	__COUT__ << "Fsm current transition: " << theStateMachine_.getCurrentTransitionName(e->type()) << __E__;
-	__COUT__ << "Fsm final state: " << theStateMachine_.getTransitionFinalStateName(e->type()) << __E__;
+	__COUT__ << "Fsm current transition: " << theStateMachine_.getCurrentTransitionName(event->type()) << __E__;
+	__COUT__ << "Fsm final state: " << theStateMachine_.getTransitionFinalStateName(event->type()) << __E__;
 }  // end transitionInitializing()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Initializing interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Initializing interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Initializing interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionInitializing() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionPausing(toolbox::Event::Reference /*e*/)
+try
 {
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
-	makeSystemLogbookEntry("Run pausing.");
+	//calculate run duration and post system log entry
+	{
+		int dur = std::chrono::duration_cast<std::chrono::milliseconds>(
+						std::chrono::steady_clock::now() - activeStateMachineRunStartTime)
+						.count() +
+					activeStateMachineRunDuration_ms;
+		int dur_s = dur / 1000;
+		dur       = dur % 1000;
+		int dur_m = dur_s / 60;
+		dur_s     = dur_s % 60;
+		int dur_h = dur_m / 60;
+		dur_m     = dur_m % 60;
+		std::ostringstream dur_ss;
+		dur_ss << "Run pausing. Duration so far of " << std::setw(2) << std::setfill('0') << dur_h << ":" << std::setw(2)
+				<< std::setfill('0') << dur_m << ":" << std::setw(2) << std::setfill('0')
+				<< dur_s << "." << dur << " seconds.";
+	
+		makeSystemLogEntry(dur_ss.str());
+	}
+
+	activeStateMachineRunDuration_ms += std::chrono::duration_cast<std::chrono::milliseconds>(
+					std::chrono::steady_clock::now() - activeStateMachineRunStartTime)
+					.count();
 
 	// the current message is not for Pause if its due to async exception, so rename
 	if(RunControlStateMachine::asyncPauseExceptionReceived_)
@@ -1563,9 +1797,31 @@ void GatewaySupervisor::transitionPausing(toolbox::Event::Reference /*e*/)
 	else
 		broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionPausing()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Pausing interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Pausing interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Pausing interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionPausing() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionResuming(toolbox::Event::Reference /*e*/)
+try
 {
 	if(RunControlStateMachine::asyncPauseExceptionReceived_)
 	{
@@ -1584,13 +1840,37 @@ void GatewaySupervisor::transitionResuming(toolbox::Event::Reference /*e*/)
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
-	makeSystemLogbookEntry("Run resuming.");
+	makeSystemLogEntry("Run resuming.");
+
+	activeStateMachineRunStartTime = std::chrono::steady_clock::now();
 
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionResuming()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Resuming interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Resuming interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Resuming interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionResuming() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
+try
 {
 	if(RunControlStateMachine::asyncPauseExceptionReceived_)
 	{
@@ -1612,8 +1892,8 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 	SOAPParameters parameters("RunNumber");
 	SOAPUtilities::receive(theStateMachine_.getCurrentMessage(), parameters);
 
-	std::string runNumber = parameters.getValue("RunNumber");
-	__COUTV__(runNumber);
+	activeStateMachineRunNumber_ = parameters.getValue("RunNumber");
+	__COUTV__(activeStateMachineRunNumber_);
 
 	// check if configuration dump is enabled on configure transition
 	{
@@ -1624,27 +1904,48 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 			try  // errors in dump are not tolerated
 			{
 				bool        dumpConfiguration = true;
+				bool		requireUserLogInput = false;
 				std::string dumpFilePath, dumpFileRadix, dumpFormat;
+
+				bool doThrow = false;
 				try  // for backwards compatibility
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
 					dumpConfiguration             = fsmLinkNode.getNode("EnableConfigurationDumpOnRunTransition").getValue<bool>();
-					dumpFilePath                  = fsmLinkNode.getNode("ConfigurationDumpOnRunFilePath").getValue<std::string>();
-					dumpFileRadix                 = fsmLinkNode.getNode("ConfigurationDumpOnRunFileRadix").getValue<std::string>();
+					doThrow = true; //at this point throw the exception!
+					dumpFilePath                  = fsmLinkNode.getNode("ConfigurationDumpOnRunFilePath").getValueWithDefault<std::string>(
+														__ENV__("OTSDAQ_LOG_DIR"));
+					dumpFileRadix                 = fsmLinkNode.getNode("ConfigurationDumpOnRunFileRadix").getValueWithDefault<std::string>(
+														"RunTransitionConfigurationDump");
 					dumpFormat                    = fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>();
+					requireUserLogInput  		  = fsmLinkNode.getNode("RequireUserLogInputOnRunTransition").getValue<bool>();
 				}
-				catch(std::runtime_error& e)
+				catch(std::runtime_error& e)  //throw exception on missing fields if dumpConfiguration set
 				{
-					__COUT_INFO__ << "FSM configuration dump Link disconnected." << __E__;
+					__COUT_INFO__ << "FSM configuration dump Link disconnected at '" << 
+							ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME << "/" << 
+							supervisorContextUID_ << "/" <<  supervisorApplicationUID_ << "/" <<
+							"LinkToStateMachineTable/" << activeStateMachineName_ << "/" << "EnableConfigurationDumpOnRunTransition" <<
+							__E__;
+					if(doThrow) 
+					{
+						__SS__ << "Configuration Dump on the Run Start transition was enabled, but there are missing fields! " << e.what() << __E__;
+						__SS_THROW__;
+					}
 					dumpConfiguration = false;
 				}
 
 				if(dumpConfiguration)
 				{
+					__COUT_INFO__ << "Dumping the Configuration on the Run Start transition..." << __E__;
 					// dump configuration
 					CorePropertySupervisorBase::theConfigurationManager_->dumpActiveConfiguration(
-					    dumpFilePath + "/" + dumpFileRadix + "_Run" + runNumber + "_" + std::to_string(time(0)) + ".dump", dumpFormat);
+					    dumpFilePath + "/" + dumpFileRadix + "_Run" + activeStateMachineRunNumber_ + "_" + std::to_string(time(0)) + ".dump",
+						dumpFormat, requireUserLogInput?activeStateMachineLogEntry_:"",
+						theWebUsers_.getActiveUsersString());
 				}
+				else
+					__COUT_INFO__ << "Not dumping the Configuration on the Run Start transition." << __E__;
 			}
 			catch(std::runtime_error& e)
 			{
@@ -1665,25 +1966,80 @@ void GatewaySupervisor::transitionStarting(toolbox::Event::Reference /*e*/)
 				return;
 			}
 		}
+		else
+			__COUT_INFO__ << "No Gateway Supervisor configuration record found at '" <<
+				ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME << "/" << 
+				supervisorContextUID_ << "/" <<  supervisorApplicationUID_ << "' - consider adding one to control configuration dumps and state machine properties." << __E__;
 	}
 
-	makeSystemLogbookEntry("Run " + runNumber + " starting.");
+	// make logbook entry
+	{
+		std::stringstream ss;
+		ss << "Run '" << activeStateMachineRunNumber_ << "' starting.";
 
+		if(activeStateMachineLogEntry_ != "")
+			ss << " User log entry:\n " << StringMacros::decodeURIComponent(activeStateMachineLogEntry_);
+			
+		makeSystemLogEntry(ss.str());
+	} //end make logbook entry
+
+	activeStateMachineRunStartTime = std::chrono::steady_clock::now();
+    activeStateMachineRunDuration_ms = 0;
 	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 	// save last started group name/key
 	ConfigurationManager::saveGroupNameAndKey(theConfigurationTableGroup_, FSM_LAST_STARTED_GROUP_ALIAS_FILE);
 }  // end transitionStarting()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Starting Run interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Starting Run interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Starting Run interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionStarting() catch
 
 //==============================================================================
 void GatewaySupervisor::transitionStopping(toolbox::Event::Reference /*e*/)
+try
 {
 	checkForAsyncError();
 
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
-	makeSystemLogbookEntry("Run stopping.");
+	activeStateMachineRunDuration_ms += std::chrono::duration_cast<std::chrono::milliseconds>(
+                              std::chrono::steady_clock::now() - activeStateMachineRunStartTime)
+                              .count();
 
+	//calculate run duration and make system log entry
+	{
+		int dur = activeStateMachineRunDuration_ms;
+		int dur_s = dur / 1000;
+		dur       = dur % 1000;
+		int dur_m = dur_s / 60;
+		dur_s     = dur_s % 60;
+		int dur_h = dur_m / 60;
+		dur_m     = dur_m % 60;
+		std::ostringstream dur_ss;
+		dur_ss << "Run stopping. Duration of " << std::setw(2) << std::setfill('0') << dur_h << ":" << std::setw(2)
+				<< std::setfill('0') << dur_m << ":" << std::setw(2) << std::setfill('0')
+				<< dur_s << "." << dur << " seconds.";
+	
+		makeSystemLogEntry(dur_ss.str());
+	}
 
 	// the current message is not for Stop if its due to async exception, so rename
 	if(RunControlStateMachine::asyncStopExceptionReceived_)
@@ -1694,6 +2050,27 @@ void GatewaySupervisor::transitionStopping(toolbox::Event::Reference /*e*/)
 	else
 		broadcastMessage(theStateMachine_.getCurrentMessage());
 }  // end transitionStopping()
+catch(const xdaq::exception::Exception& e)  // due to xoap send failure
+{
+	__SS__ << "\nTransition to Stopping Run interrupted! There was a system communication error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(std::runtime_error& e)
+{
+	__SS__ << "\nTransition to Stopping Run interrupted! There was an error "
+				"identified. " << __E__ << e.what(); 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(...)
+{
+	__SS__ << "\nTransition to Stopping Run interrupted! There was an unknown error "
+				"identified. " << __E__; 
+	__COUT_ERR__ << "\n" << ss.str();
+	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+} // end transitionStopping() catch
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //////////////      MESSAGES ///////////////////////////////////////////////
@@ -2297,7 +2674,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 	std::vector<std::string> loggedOutUsernames;
 	theWebUsers_.cleanupExpiredEntries(&loggedOutUsernames);
 	for(unsigned int i = 0; i < loggedOutUsernames.size(); ++i)  // Log logout for logged out users
-		makeSystemLogbookEntry(loggedOutUsernames[i] + " login timed out.");
+		makeSystemLogEntry(loggedOutUsernames[i] + " login timed out.");
 
 	if(Command == "sessionId")
 	{
@@ -2398,7 +2775,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 				newAccountCode = "0";  // clear cookie code if failure
 		}
 		else  // Log login in logbook for active experiment
-			makeSystemLogbookEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
+			makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
 
 		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
 
@@ -2458,7 +2835,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 				cookieCode = "0";  // clear cookie code if failure
 		}
 		else  // Log login in logbook for active experiment
-			makeSystemLogbookEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
+			makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
 
 		//__COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << __E__;
 
@@ -2495,7 +2872,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 			// if did some logging out, check if completely logged out
 			// if so, system logbook message should be made.
 			if(!theWebUsers_.isUserIdActive(uid))
-				makeSystemLogbookEntry(theWebUsers_.getUsersUsername(uid) + " logged out.");
+				makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged out.");
 		}
 	}
 	else
@@ -2745,7 +3122,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 				try  // for backwards compatibility
 				{
 					ConfigurationTree fsmLinkNode = configLinkNode.getNode("LinkToStateMachineTable");
-					if(!fsmLinkNode.isDisconnected())
+					if(!fsmLinkNode.isDisconnected() && !fsmLinkNode.getNode(fsmName + "/SystemAliasFilter").isDefaultValue())
 						stateMachineAliasFilter = fsmLinkNode.getNode(fsmName + "/SystemAliasFilter").getValue<std::string>();
 					else
 						__COUT_INFO__ << "FSM Link disconnected." << __E__;
@@ -3152,7 +3529,8 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 						if(!fsmLinkNode.isDisconnected())
 						{
-							stateMachineRunAlias = fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
+							if(!fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").isDefaultValue())
+								stateMachineRunAlias = fsmLinkNode.getNode(fsmName + "/RunDisplayAlias").getValue<std::string>();
 							std::string runInfoPluginType = fsmLinkNode.getNode(fsmName + "/RunInfoPluginType").getValue<std::string>();
 							if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && 
 								runInfoPluginType != "No Run Info Plugin")
@@ -3550,7 +3928,7 @@ xoap::MessageReference GatewaySupervisor::supervisorSystemLogbookEntry(xoap::Mes
 
 	__COUT__ << "EntryText: " << parameters.getValue("EntryText").substr(0, 10) << __E__;
 
-	makeSystemLogbookEntry(parameters.getValue("EntryText"));
+	makeSystemLogEntry(parameters.getValue("EntryText"));
 
 	return SOAPUtilities::makeSOAPMessageReference("SystemLogbookResponse");
 }

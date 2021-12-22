@@ -80,7 +80,14 @@ export MACROMAKER_MODE #this environment variable is used by source code
 # Output startup banner
 
 if [ "$1" != "-x" ]; then
-	out "${Green}=========================== ots ============================="
+
+	if [ "x$OTS_OWNER" == "x" ]; then
+		echo "Consider setting the OTS_ONWER enviroment variable to your project name..."
+		out "${Green}=========================== ots ============================="
+	else
+		out "${Green}=========================== ${OTS_OWNER} ots ============================="
+	fi
+	
 fi
 
 # Check for options
@@ -805,7 +812,7 @@ launchOTSMacromaker() {
 	#substitute environment variables into template wiz-mode xdaq config xml
 	envsubst <${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml > ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml
 	
-	#use safe Message Facility fcl in config mode
+	#use safe Message Facility fcl in wiz mode
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl
 	
 

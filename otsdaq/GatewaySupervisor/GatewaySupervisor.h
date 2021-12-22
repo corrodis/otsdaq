@@ -112,7 +112,7 @@ namespace ots
 		void 						transitionStartingUp(toolbox::Event::Reference e) override;
 		void 						enteringError(toolbox::Event::Reference e) override;
 
-		void 						makeSystemLogbookEntry(std::string entryText);
+		void 						makeSystemLogEntry(std::string entryText);
 
 		void 						checkForAsyncError(void);
 
@@ -138,7 +138,8 @@ namespace ots
 																						const std::string& fsmName,
 																						const std::string& fsmWindowName,
 																						const std::string& username,
-																						const std::vector<std::string>& parameters);
+																						const std::vector<std::string>& parameters,
+																						const std::string& logEntry = "");
 		void        					broadcastMessage								(xoap::MessageReference msg);
 
 		struct BroadcastMessageIterationsDoneStruct
@@ -265,6 +266,13 @@ namespace ots
 
 		std::string 		activeStateMachineName_;  // when multiple state machines, this is the name of the state machine which executed theconfigure transition
 		std::string 		activeStateMachineWindowName_;
+		std::string			activeStateMachineLogEntry_;
+		std::string 		activeStateMachineRunNumber_;
+		std::chrono::steady_clock::time_point 
+							activeStateMachineRunStartTime;
+		int					activeStateMachineRunDuration_ms; // For paused runs, don't count time spent in pause state
+
+
 		std::pair<std::string /*group name*/, TableGroupKey>
 							theConfigurationTableGroup_;  // used to track the active configuration group atstates after the configure state
 

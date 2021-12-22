@@ -61,8 +61,9 @@ struct StringMacros
 
 	static std::string 			decodeURIComponent			(const std::string& data);
 	static std::string        	encodeURIComponent			(const std::string& data);
+	static std::string			escapeString				(std::string inString, bool allowWhiteSpace = false);
 	static std::string 			convertEnvironmentVariables	(const std::string& data);
-
+	
 	static bool        			isNumber					(const std::string& stringToCheck); // Note: before call consider use of stringToCheck = StringMacros::convertEnvironmentVariables(stringToCheck)
 	static std::string  		getNumberType				(const std::string& stringToCheck); // Note: before call consider use of stringToCheck = StringMacros::convertEnvironmentVariables(stringToCheck)
 	template<class T>

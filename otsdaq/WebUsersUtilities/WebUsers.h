@@ -24,6 +24,8 @@
 #define USERS_PREFERENCES_PATH USERS_DB_PATH + "UserPreferencesData/"
 #define TOOLTIP_DB_PATH USERS_DB_PATH + "/TooltipData/"
 
+// clang-format off
+
 namespace ots
 {
 class HttpXmlDocument;
@@ -33,7 +35,6 @@ class HttpXmlDocument;
 //	and permissions.
 class WebUsers
 {
-	// clang-format off
   public:
 	WebUsers();
 
@@ -467,7 +468,7 @@ class WebUsers
 	bool        isUsernameActive(const std::string& username) const;
 	bool        isUserIdActive(uint64_t uid) const;
 	uint64_t    getAdminUserID(void);
-	std::string getSecurity(void);
+	const std::string& getSecurity(void);
 
 	static void deleteUserData(void);
 
@@ -647,7 +648,8 @@ class WebUsers
 
 	std::mutex				webUserMutex_;
 };
-// clang-format on
 }  // namespace ots
+
+// clang-format on
 
 #endif

@@ -1,5 +1,3 @@
-#define __COUT_TO_STD__		1
-
 #include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include <dirent.h>
@@ -847,6 +845,12 @@ CLEAN_UP:
 
 int main(int argc, char* argv[])
 {
+	if(getenv("OTSDAQ_LOG_FHICL") == NULL)
+		setenv("OTSDAQ_LOG_FHICL", (std::string(__ENV__("USER_DATA")) + "/MessageFacilityConfigurations/MessageFacilityWithCout.fcl").c_str(), 1);
+
+	if(getenv("OTSDAQ_LOG_ROOT") == NULL)
+		setenv("OTSDAQ_LOG_ROOT", (std::string(__ENV__("USER_DATA")) + "/Logs").c_str(), 1);
+
 	INIT_MF("FlattenSystemAliases");
 	FlattenActiveSystemAliasTableGroups(argc, argv);
 	return 0;

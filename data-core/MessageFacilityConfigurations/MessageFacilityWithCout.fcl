@@ -1,5 +1,5 @@
 console : { 
- 	type : 					cout 
+ 	type : 					OTS 
  	threshold : 			DEBUG
 	filename_delimit: 		"/src"
 	format_string: 			"|%L:%N:%f [%u]\t%m"
