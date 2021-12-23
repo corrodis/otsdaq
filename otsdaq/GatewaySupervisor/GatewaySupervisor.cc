@@ -1591,6 +1591,10 @@ catch(std::runtime_error& e)
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
+}
 catch(...)
 {
 	__SS__ << "\nTransition to Configuring interrupted! There was an unknown error "
@@ -1624,6 +1628,10 @@ catch(std::runtime_error& e)
 				"identified. " << __E__ << e.what(); 
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
 }
 catch(...)
 {
@@ -1668,6 +1676,10 @@ catch(std::runtime_error& e)
 				"identified. " << __E__ << e.what(); 
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
 }
 catch(...)
 {
@@ -1714,6 +1726,10 @@ catch(std::runtime_error& e)
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
+}
 catch(...)
 {
 	__SS__ << "\nTransition to Starting Up interrupted! There was an unknown error "
@@ -1747,6 +1763,10 @@ catch(std::runtime_error& e)
 				"identified. " << __E__ << e.what(); 
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
 }
 catch(...)
 {
@@ -1811,6 +1831,10 @@ catch(std::runtime_error& e)
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
+}
 catch(...)
 {
 	__SS__ << "\nTransition to Pausing interrupted! There was an unknown error "
@@ -1859,6 +1883,10 @@ catch(std::runtime_error& e)
 				"identified. " << __E__ << e.what(); 
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
 }
 catch(...)
 {
@@ -2004,6 +2032,10 @@ catch(std::runtime_error& e)
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
+}
 catch(...)
 {
 	__SS__ << "\nTransition to Starting Run interrupted! There was an unknown error "
@@ -2063,6 +2095,10 @@ catch(std::runtime_error& e)
 				"identified. " << __E__ << e.what(); 
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+}
+catch(toolbox::fsm::exception::Exception& e)
+{
+	throw; //just rethrow exceptions of already the correct type
 }
 catch(...)
 {
