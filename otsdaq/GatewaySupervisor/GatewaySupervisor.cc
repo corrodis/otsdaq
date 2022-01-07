@@ -2706,215 +2706,235 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 	// checkCookie
 	// logout
 
-	// always cleanup expired entries and get a vector std::string of logged out users
-	std::vector<std::string> loggedOutUsernames;
-	theWebUsers_.cleanupExpiredEntries(&loggedOutUsernames);
-	for(unsigned int i = 0; i < loggedOutUsernames.size(); ++i)  // Log logout for logged out users
-		makeSystemLogEntry(loggedOutUsernames[i] + " login timed out.");
-
-	if(Command == "sessionId")
+	try
 	{
-		//	When client loads page, client submits unique user id and receives random
-		// sessionId from server 	Whenever client submits user name and password it is
-		// jumbled by sessionId when sent to server and sent along with UUID. Server uses
-		// sessionId to unjumble.
-		//
-		//	Server maintains list of active sessionId by UUID
-		//	sessionId expires after set time if no login attempt (e.g. 5 minutes)
-		std::string uuid = CgiDataUtilities::postData(cgi, "uuid");
+		// always cleanup expired entries and get a vector std::string of logged out users
+		std::vector<std::string> loggedOutUsernames;
+		theWebUsers_.cleanupExpiredEntries(&loggedOutUsernames);
+		for(unsigned int i = 0; i < loggedOutUsernames.size(); ++i)  // Log logout for logged out users
+			makeSystemLogEntry(loggedOutUsernames[i] + " login timed out.");
 
-		std::string sid = theWebUsers_.createNewLoginSession(uuid, cgi.getEnvironment().getRemoteAddr() /* ip */);
-
-		//		__COUT__ << "uuid = " << uuid << __E__;
-		//		__COUT__ << "SessionId = " << sid.substr(0, 10) << __E__;
-		*out << sid;
-	}
-	else if(Command == "checkCookie")
-	{
-		uint64_t    uid;
-		std::string uuid;
-		std::string jumbledUser;
-		std::string cookieCode;
-
-		//	If client has a cookie, client submits cookie and username, jumbled, to see if
-		// cookie and user are still active 	if active, valid cookie code is returned
-		// and  name to display, in XML
-		// 	if not, return 0
-		// 	params:
-		//		uuid 			- unique user id, to look up sessionId
-		//		ju 				- jumbled user name
-		//		CookieCode 		- cookie code to check
-
-		uuid        = CgiDataUtilities::postData(cgi, "uuid");
-		jumbledUser = CgiDataUtilities::postData(cgi, "ju");
-		cookieCode  = CgiDataUtilities::postData(cgi, "cc");
-
-		//		__COUT__ << "uuid = " << uuid << __E__;
-		//		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << __E__;
-		//		__COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << __E__;
-
-		// If cookie code is good, then refresh and return with display name, else return
-		// 0 as CookieCode value
-		uid = theWebUsers_.isCookieCodeActiveForLogin(uuid, cookieCode,
-		                                              jumbledUser);  // after call jumbledUser holds displayName on success
-
-		if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+		if(Command == "sessionId")
 		{
-			__COUT__ << "cookieCode invalid" << __E__;
-			jumbledUser = "";   // clear display name if failure
-			cookieCode  = "0";  // clear cookie code if failure
+			//	When client loads page, client submits unique user id and receives random
+			// sessionId from server 	Whenever client submits user name and password it is
+			// jumbled by sessionId when sent to server and sent along with UUID. Server uses
+			// sessionId to unjumble.
+			//
+			//	Server maintains list of active sessionId by UUID
+			//	sessionId expires after set time if no login attempt (e.g. 5 minutes)
+			std::string uuid = CgiDataUtilities::postData(cgi, "uuid");
+
+			std::string sid = theWebUsers_.createNewLoginSession(uuid, cgi.getEnvironment().getRemoteAddr() /* ip */);
+
+			//		__COUT__ << "uuid = " << uuid << __E__;
+			//		__COUT__ << "SessionId = " << sid.substr(0, 10) << __E__;
+			*out << sid;
+		}
+		else if(Command == "checkCookie")
+		{
+			uint64_t    uid;
+			std::string uuid;
+			std::string jumbledUser;
+			std::string cookieCode;
+
+			//	If client has a cookie, client submits cookie and username, jumbled, to see if
+			// cookie and user are still active 	if active, valid cookie code is returned
+			// and  name to display, in XML
+			// 	if not, return 0
+			// 	params:
+			//		uuid 			- unique user id, to look up sessionId
+			//		ju 				- jumbled user name
+			//		CookieCode 		- cookie code to check
+
+			uuid        = CgiDataUtilities::postData(cgi, "uuid");
+			jumbledUser = CgiDataUtilities::postData(cgi, "ju");
+			cookieCode  = CgiDataUtilities::postData(cgi, "cc");
+
+			//		__COUT__ << "uuid = " << uuid << __E__;
+			//		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << __E__;
+			//		__COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << __E__;
+
+			// If cookie code is good, then refresh and return with display name, else return
+			// 0 as CookieCode value
+			uid = theWebUsers_.isCookieCodeActiveForLogin(uuid, cookieCode,
+														jumbledUser);  // after call jumbledUser holds displayName on success
+
+			if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+			{
+				__COUT__ << "cookieCode invalid" << __E__;
+				jumbledUser = "";   // clear display name if failure
+				cookieCode  = "0";  // clear cookie code if failure
+			}
+			else
+				__COUT__ << "cookieCode is good." << __E__;
+
+			// return xml holding cookie code and display name
+			HttpXmlDocument xmldoc(cookieCode, jumbledUser);
+
+			theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
+
+			xmldoc.outputXmlDocument((std::ostringstream*)out);
+		}
+		else if(Command == "login")
+		{
+			//	If login attempt or create account, jumbled user and pw are submitted
+			//	if successful, valid cookie code and display name returned.
+			// 	if not, return 0
+			// 	params:
+			//		uuid 			- unique user id, to look up sessionId
+			//		nac				- new account code for first time logins
+			//		ju 				- jumbled user name
+			//		jp		 		- jumbled password
+
+			std::string uuid           = CgiDataUtilities::postData(cgi, "uuid");
+			std::string newAccountCode = CgiDataUtilities::postData(cgi, "nac");
+			std::string jumbledUser    = CgiDataUtilities::postData(cgi, "ju");
+			std::string jumbledPw      = CgiDataUtilities::postData(cgi, "jp");
+
+			//		__COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << __E__;
+			//		__COUT__ << "jumbledPw = " << jumbledPw.substr(0, 10) << __E__;
+			//		__COUT__ << "uuid = " << uuid << __E__;
+			//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
+
+
+			uint64_t uid = theWebUsers_.attemptActiveSession(uuid,
+															jumbledUser,
+															jumbledPw,
+															newAccountCode,
+															cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
+
+
+			if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
+			{
+				__COUT__ << "Login invalid." << __E__;
+				jumbledUser = "";          // clear display name if failure
+				if(newAccountCode != "1")  // indicates uuid not found
+					newAccountCode = "0";  // clear cookie code if failure
+			}
+			else  // Log login in logbook for active experiment
+				makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
+
+			//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
+
+			HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
+
+			// include extra error detail
+			if(uid == theWebUsers_.ACCOUNT_INACTIVE)
+				xmldoc.addTextElementToData("Error", "Account is inactive. Notify admins.");
+			else if(uid == theWebUsers_.ACCOUNT_BLACKLISTED)
+				xmldoc.addTextElementToData("Error", "Account is blacklisted. Notify admins.");
+
+			theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
+
+			// insert active session count for user
+
+			if(uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
+			{
+				uint64_t asCnt = theWebUsers_.getActiveSessionCountForUser(uid) - 1;  // subtract 1 to remove just started session from count
+				char     asStr[20];
+				sprintf(asStr, "%lu", asCnt);
+				xmldoc.addTextElementToData("user_active_session_count", asStr);
+			}
+
+			xmldoc.outputXmlDocument((std::ostringstream*)out);
+		}
+		else if(Command == "cert")
+		{
+			//	If login attempt or create account, jumbled user and pw are submitted
+			//	if successful, valid cookie code and display name returned.
+			// 	if not, return 0
+			// 	params:
+			//		uuid 			- unique user id, to look up sessionId
+			//		nac				- new account code for first time logins
+			//		ju 				- jumbled user name
+			//		jp		 		- jumbled password
+
+			std::string uuid         = CgiDataUtilities::postData(cgi, "uuid");
+			std::string jumbledEmail = cgicc::form_urldecode(CgiDataUtilities::getData(cgi, "httpsUser"));
+			std::string username     = "";
+			std::string cookieCode   = "";
+
+			//		__COUT__ << "CERTIFICATE LOGIN REUEST RECEVIED!!!" << __E__;
+			//		__COUT__ << "jumbledEmail = " << jumbledEmail << __E__;
+			//		__COUT__ << "uuid = " << uuid << __E__;
+
+			uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid,
+																	jumbledEmail,
+																	cookieCode,
+																	username,
+																	cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
+
+			if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
+			{
+				__COUT__ << "cookieCode invalid" << __E__;
+				jumbledEmail = "";     // clear display name if failure
+				if(cookieCode != "1")  // indicates uuid not found
+					cookieCode = "0";  // clear cookie code if failure
+			}
+			else  // Log login in logbook for active experiment
+				makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
+
+			//__COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << __E__;
+
+			HttpXmlDocument xmldoc(cookieCode, jumbledEmail);
+
+			theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
+
+			// insert active session count for user
+
+			if(uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
+			{
+				uint64_t asCnt = theWebUsers_.getActiveSessionCountForUser(uid) - 1;  // subtract 1 to remove just started session from count
+				char     asStr[20];
+				sprintf(asStr, "%lu", asCnt);
+				xmldoc.addTextElementToData("user_active_session_count", asStr);
+			}
+
+			xmldoc.outputXmlDocument((std::ostringstream*)out);
+		}
+		else if(Command == "logout")
+		{
+			std::string cookieCode   = CgiDataUtilities::postData(cgi, "CookieCode");
+			std::string logoutOthers = CgiDataUtilities::postData(cgi, "LogoutOthers");
+
+			//		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << __E__;
+			//		__COUT__ << "logoutOthers = " << logoutOthers << __E__;
+
+			uint64_t uid;  // get uid for possible system logbook message
+			if(theWebUsers_.cookieCodeLogout(cookieCode,
+											logoutOthers == "1",
+											&uid,
+											cgi.getEnvironment().getRemoteAddr()) != theWebUsers_.NOT_FOUND_IN_DATABASE)  // user logout
+			{
+				// if did some logging out, check if completely logged out
+				// if so, system logbook message should be made.
+				if(!theWebUsers_.isUserIdActive(uid))
+					makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged out.");
+			}
 		}
 		else
-			__COUT__ << "cookieCode is good." << __E__;
-
-		// return xml holding cookie code and display name
-		HttpXmlDocument xmldoc(cookieCode, jumbledUser);
-
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
-
-		xmldoc.outputXmlDocument((std::ostringstream*)out);
-	}
-	else if(Command == "login")
-	{
-		//	If login attempt or create account, jumbled user and pw are submitted
-		//	if successful, valid cookie code and display name returned.
-		// 	if not, return 0
-		// 	params:
-		//		uuid 			- unique user id, to look up sessionId
-		//		nac				- new account code for first time logins
-		//		ju 				- jumbled user name
-		//		jp		 		- jumbled password
-
-		std::string uuid           = CgiDataUtilities::postData(cgi, "uuid");
-		std::string newAccountCode = CgiDataUtilities::postData(cgi, "nac");
-		std::string jumbledUser    = CgiDataUtilities::postData(cgi, "ju");
-		std::string jumbledPw      = CgiDataUtilities::postData(cgi, "jp");
-
-		//		__COUT__ << "jumbledUser = " << jumbledUser.substr(0, 10) << __E__;
-		//		__COUT__ << "jumbledPw = " << jumbledPw.substr(0, 10) << __E__;
-		//		__COUT__ << "uuid = " << uuid << __E__;
-		//		__COUT__ << "nac =-" << newAccountCode << "-" << __E__;
-
-
-		uint64_t uid = theWebUsers_.attemptActiveSession(uuid,
-		                                                 jumbledUser,
-		                                                 jumbledPw,
-		                                                 newAccountCode,
-		                                                 cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
-
-
-		if(uid >= theWebUsers_.ACCOUNT_ERROR_THRESHOLD)
 		{
-			__COUT__ << "Login invalid." << __E__;
-			jumbledUser = "";          // clear display name if failure
-			if(newAccountCode != "1")  // indicates uuid not found
-				newAccountCode = "0";  // clear cookie code if failure
-		}
-		else  // Log login in logbook for active experiment
-			makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
-
-		//__COUT__ << "new cookieCode = " << newAccountCode.substr(0, 10) << __E__;
-
-		HttpXmlDocument xmldoc(newAccountCode, jumbledUser);
-
-		// include extra error detail
-		if(uid == theWebUsers_.ACCOUNT_INACTIVE)
-			xmldoc.addTextElementToData("Error", "Account is inactive. Notify admins.");
-		else if(uid == theWebUsers_.ACCOUNT_BLACKLISTED)
-			xmldoc.addTextElementToData("Error", "Account is blacklisted. Notify admins.");
-
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
-
-		// insert active session count for user
-
-		if(uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
-		{
-			uint64_t asCnt = theWebUsers_.getActiveSessionCountForUser(uid) - 1;  // subtract 1 to remove just started session from count
-			char     asStr[20];
-			sprintf(asStr, "%lu", asCnt);
-			xmldoc.addTextElementToData("user_active_session_count", asStr);
-		}
-
-		xmldoc.outputXmlDocument((std::ostringstream*)out);
-	}
-	else if(Command == "cert")
-	{
-		//	If login attempt or create account, jumbled user and pw are submitted
-		//	if successful, valid cookie code and display name returned.
-		// 	if not, return 0
-		// 	params:
-		//		uuid 			- unique user id, to look up sessionId
-		//		nac				- new account code for first time logins
-		//		ju 				- jumbled user name
-		//		jp		 		- jumbled password
-
-		std::string uuid         = CgiDataUtilities::postData(cgi, "uuid");
-		std::string jumbledEmail = cgicc::form_urldecode(CgiDataUtilities::getData(cgi, "httpsUser"));
-		std::string username     = "";
-		std::string cookieCode   = "";
-
-		//		__COUT__ << "CERTIFICATE LOGIN REUEST RECEVIED!!!" << __E__;
-		//		__COUT__ << "jumbledEmail = " << jumbledEmail << __E__;
-		//		__COUT__ << "uuid = " << uuid << __E__;
-
-		uint64_t uid = theWebUsers_.attemptActiveSessionWithCert(uuid,
-		                                                         jumbledEmail,
-		                                                         cookieCode,
-		                                                         username,
-		                                                         cgi.getEnvironment().getRemoteAddr());  // after call jumbledUser holds displayName on success
-
-		if(uid == theWebUsers_.NOT_FOUND_IN_DATABASE)
-		{
-			__COUT__ << "cookieCode invalid" << __E__;
-			jumbledEmail = "";     // clear display name if failure
-			if(cookieCode != "1")  // indicates uuid not found
-				cookieCode = "0";  // clear cookie code if failure
-		}
-		else  // Log login in logbook for active experiment
-			makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged in.");
-
-		//__COUT__ << "new cookieCode = " << cookieCode.substr(0, 10) << __E__;
-
-		HttpXmlDocument xmldoc(cookieCode, jumbledEmail);
-
-		theWebUsers_.insertSettingsForUser(uid, &xmldoc);  // insert settings
-
-		// insert active session count for user
-
-		if(uid != theWebUsers_.NOT_FOUND_IN_DATABASE)
-		{
-			uint64_t asCnt = theWebUsers_.getActiveSessionCountForUser(uid) - 1;  // subtract 1 to remove just started session from count
-			char     asStr[20];
-			sprintf(asStr, "%lu", asCnt);
-			xmldoc.addTextElementToData("user_active_session_count", asStr);
-		}
-
-		xmldoc.outputXmlDocument((std::ostringstream*)out);
-	}
-	else if(Command == "logout")
-	{
-		std::string cookieCode   = CgiDataUtilities::postData(cgi, "CookieCode");
-		std::string logoutOthers = CgiDataUtilities::postData(cgi, "LogoutOthers");
-
-		//		__COUT__ << "Cookie Code = " << cookieCode.substr(0, 10) << __E__;
-		//		__COUT__ << "logoutOthers = " << logoutOthers << __E__;
-
-		uint64_t uid;  // get uid for possible system logbook message
-		if(theWebUsers_.cookieCodeLogout(cookieCode,
-		                                 logoutOthers == "1",
-		                                 &uid,
-		                                 cgi.getEnvironment().getRemoteAddr()) != theWebUsers_.NOT_FOUND_IN_DATABASE)  // user logout
-		{
-			// if did some logging out, check if completely logged out
-			// if so, system logbook message should be made.
-			if(!theWebUsers_.isUserIdActive(uid))
-				makeSystemLogEntry(theWebUsers_.getUsersUsername(uid) + " logged out.");
+			__COUT__ << "Invalid Command" << __E__;
+			*out << "0";
 		}
 	}
-	else
+	catch(const std::runtime_error& e)
 	{
-		__COUT__ << "Invalid Command" << __E__;
-		*out << "0";
+		__SS__ << "An error was encountered handling Command '" << Command << "':" << e.what() << __E__;
+		__COUT__ << "\n" << ss.str();
+		HttpXmlDocument           xmldoc;
+		xmldoc.addTextElementToData("Error", ss.str());
+		xmldoc.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown error was encountered handling Command '" << Command << ".' "
+		       << "Please check the printouts to debug." << __E__;
+		__COUT__ << "\n" << ss.str();
+		HttpXmlDocument           xmldoc;
+		xmldoc.addTextElementToData("Error", ss.str());
+		xmldoc.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 	}
 
 	__COUT__ << "Done clock=" << clock() << __E__;
