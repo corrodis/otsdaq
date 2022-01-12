@@ -141,7 +141,7 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username)
 			if(fp)
 			{
 				fprintf(fp,"ARTDAQ/*");
-				fprintf(fp,"ConfigCore/*");
+				fprintf(fp,"\nConfigCore/*");
 				for(const auto& name : contextMemberNames)
 					fprintf(fp, "\nContextGroup/%s", name.c_str());
 				for(const auto& name : backboneMemberNames)
