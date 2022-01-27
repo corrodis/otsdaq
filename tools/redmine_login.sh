@@ -16,7 +16,7 @@ if [ "x$SKIP_REDMINE_LOGIN" != "x1" ]; then
 	export REDMINE_LOGIN_LISTF=/tmp/redmine_list_p$$
 	export REDMINE_LOGIN_COOKIEF=/tmp/redmine_cookies_p$$
 	export REDMINE_LOGIN_RLVERBOSEF=${REDMINE_LOGIN_RLVERBOSEF:=false}
-	trap 'rm -f /tmp/postdata$$ /tmp/at_p$$ $REDMINE_LOGIN_COOKIEF $REDMINE_LOGIN_LISTF*; unset SKIP_REDMINE_LOGIN' EXIT
+	trap 'echo -e "redmine_login.sh [${LINENO}]  \t Exit detected. Cleaning up..."; rm -f /tmp/postdata$$ /tmp/at_p$$ $REDMINE_LOGIN_COOKIEF $REDMINE_LOGIN_LISTF*; unset SKIP_REDMINE_LOGIN' EXIT
 fi
 
 #
