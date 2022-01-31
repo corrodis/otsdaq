@@ -82,7 +82,7 @@ export MACROMAKER_MODE #this environment variable is used by source code
 if [ "$1" != "-x" ]; then
 
 	if [ "x$OTS_OWNER" == "x" ]; then
-		echo "Consider setting the OTS_ONWER enviroment variable to your project name..."
+		out "Consider setting the OTS_ONWER enviroment variable to your project name..."
 		out "${Green}=========================== ots ============================="
 	else
 		out "${Green}=========================== ${OTS_OWNER} ots ============================="

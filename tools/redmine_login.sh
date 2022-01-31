@@ -16,7 +16,7 @@ if [ "x$SKIP_REDMINE_LOGIN" != "x1" ]; then
 	export REDMINE_LOGIN_LISTF=/tmp/redmine_list_p$$
 	export REDMINE_LOGIN_COOKIEF=/tmp/redmine_cookies_p$$
 	export REDMINE_LOGIN_RLVERBOSEF=${REDMINE_LOGIN_RLVERBOSEF:=false}
-	trap 'echo -e "redmine_login.sh [${LINENO}]  \t Exit detected. Cleaning up..."; rm -f /tmp/postdata$$ /tmp/at_p$$ $REDMINE_LOGIN_COOKIEF $REDMINE_LOGIN_LISTF*; unset SKIP_REDMINE_LOGIN' EXIT
+	trap 'echo -e "redmine_login.sh [${LINENO}]  \t Exit detected. Cleaning up..."; rm -f /tmp/postdata_p$$ /tmp/at_p$$ $REDMINE_LOGIN_COOKIEF $REDMINE_LOGIN_LISTF*; unset SKIP_REDMINE_LOGIN' EXIT
 fi
 
 #
@@ -33,6 +33,7 @@ do_login() {
        "password=`echo $pass | urlencode`" \
        "login=Login ?" 
 	if grep '>Sign in' $REDMINE_LOGIN_LISTF > /dev/null;then
+
 		echo
         echo -e "redmine_login.sh [${LINENO}]  \t Login failed."
 		unset user #force new login attempt
@@ -102,7 +103,7 @@ post_url() {
      shift
      the_data=""
      sep=""
-     df=/tmp/postdata$$
+     df=/tmp/postdata_p$$
      :>$df
      for d in "$@";do
         printf "%s" "$sep$d" >> $df
@@ -145,14 +146,18 @@ if [ "x$SKIP_REDMINE_LOGIN" != "x1" ]; then
 	export SKIP_REDMINE_LOGIN=1 
 fi 
 
-echo "REDMINE_LOGIN_COOKIEF=${REDMINE_LOGIN_COOKIEF}"
-
 if [ $REDMINE_LOGIN_WORKED == 0 ]; then
+	echo
+	echo -e "redmine_login.sh [${LINENO}]  \t !!!!!!!!!!"
 	echo -e "redmine_login.sh [${LINENO}]  \t Check your Fermilab Services name and password!"
+	echo -e "redmine_login.sh [${LINENO}]  \t !!!!!!!!!!"
+	echo
 	exit 1 
 fi
 
+echo
 echo -e "redmine_login.sh [${LINENO}]  \t Login successful."
+echo
 
 		
 ####################################### end redmine login code
