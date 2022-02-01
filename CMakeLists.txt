@@ -134,7 +134,7 @@ endif()
 # test programs
 add_subdirectory(test)
 
-# tools
+# test
 FILE(COPY test DESTINATION .)
 INSTALL(DIRECTORY test DESTINATION ${product}/${version})
 
