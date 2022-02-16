@@ -1,4 +1,4 @@
-#include "otsdaq/ConfigurationInterface/DatabaseConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/Database_configInterface.h"
 
 #include <algorithm>
 #include <iterator>

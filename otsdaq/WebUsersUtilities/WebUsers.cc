@@ -2876,6 +2876,9 @@ std::string WebUsers::getActiveUsersString()
 
 		ret += Users_[i].displayName_;
 	}
+	if(activeUserIndices.size() == 0 && WebUsers::getSecurity() == WebUsers::SECURITY_TYPE_NONE) //assume only admin is active
+		ret += WebUsers::DEFAULT_ADMIN_DISPLAY_NAME;
+
 	__COUTV__(ret);
 	return ret;
 }  // end getActiveUsersString()
@@ -3229,7 +3232,7 @@ void WebUsers::systemMessageCleanup()
 
 //==============================================================================
 // WebUsers::getSecurity
-std::string WebUsers::getSecurity() { return securityType_; }
+const std::string& WebUsers::getSecurity() { return securityType_; }
 //==============================================================================
 // WebUsers::loadSecuritySelection
 void WebUsers::loadSecuritySelection()

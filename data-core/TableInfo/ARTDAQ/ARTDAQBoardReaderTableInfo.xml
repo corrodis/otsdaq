@@ -14,6 +14,10 @@
 				<COLUMN Type="ChildLinkGroupID-daqParameters" 	 Name="daqParametersLinkGroupID" 	 StorageName="DAQ_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-metrics" 	 Name="daqMetricsLink" 	 StorageName="DAQ_METRICS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricTable"/>
 				<COLUMN Type="ChildLinkGroupID-metrics" 	 Name="daqMetricsLinkGroupID" 	 StorageName="DAQ_METRICS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-preambleParameters daqParameters" 	 Name="preambleParametersLink" 	 StorageName="PREAMBLE_PARAMETERS_LINK" 		DataType="STRING" 		DefaultValue="DEFAULT" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-preambleParameters daqParameters" 	 Name="preambleParametersLinkGroupID" 	 StorageName="PREAMBLE_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="ChildLink-addOnParameters daqParameters" 	 Name="addOnParametersLink" 	 StorageName="ADD_ON_PARAMETERS_LINK" 		DataType="STRING" 		DefaultValue="DEFAULT" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDaqParameterTable"/>
+				<COLUMN Type="ChildLinkGroupID-addOnParameters daqParameters" 	 Name="addOnParametersLinkGroupID" 	 StorageName="ADD_ON_PARAMETERS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-MetricAlarmThresholds" 	 Name="MetricAlarmThresholdsLink" 	 StorageName="METRIC_ALARM_THRESHOLDS_LINK" 		DataType="STRING" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQMetricAlarmThresholdsTable"/>
 				<COLUMN Type="ChildLinkGroupID-MetricAlarmThresholds" 	 Name="MetricAlarmThresholdsLinkGroupID" 	 StorageName="METRIC_ALARM_THRESHOLDS_LINK_GROUP_ID" 		DataType="STRING" 		DataChoices=""/>
 				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DataChoices=""/>

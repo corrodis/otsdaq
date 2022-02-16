@@ -334,9 +334,9 @@ void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::str
 } //end sendSystemMessage)
 
 //==============================================================================
-// makeSystemLogbookEntry
+// makeSystemLogEntry
 //	make system logbook through Supervisor
-void RemoteWebUsers::makeSystemLogbookEntry(const std::string& entryText)
+void RemoteWebUsers::makeSystemLogEntry(const std::string& entryText)
 {
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);
@@ -345,4 +345,4 @@ void RemoteWebUsers::makeSystemLogbookEntry(const std::string& entryText)
 			gatewaySupervisorDescriptor_, "SupervisorSystemLogbookEntry", parameters);
 
 	//__COUT__ << SOAPUtilities::translate(retMsg) << __E__;
-} //end makeSystemLogbookEntry()
+} //end makeSystemLogEntry()

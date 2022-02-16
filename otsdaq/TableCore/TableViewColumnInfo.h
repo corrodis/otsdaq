@@ -105,8 +105,8 @@ class TableViewColumnInfo
 	const std::string              dataType_;
 	const std::string              defaultValue_;
 	const std::vector<std::string> dataChoices_;
-	const std::string              minValueGeneral_;
-	const std::string              maxValueGeneral_;
+	const std::string              minValue_;
+	const std::string              maxValue_;
 	BitMapInfo*              	   bitMapInfoP_;
 }; //end TableViewColumnInfo class
 // clang-format on

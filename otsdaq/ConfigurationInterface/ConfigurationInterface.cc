@@ -1,6 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq/ConfigurationInterface/DatabaseConfigurationInterface.h"
-#include "otsdaq/ConfigurationInterface/FileConfigurationInterface.h"
+#include "otsdaq/PluginMakers/MakeConfigurationInterface.h"
 
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
@@ -15,7 +14,7 @@ using namespace ots;
 #define DEBUG_CONFIGURATION true
 
 //==============================================================================
-ConfigurationInterface* ConfigurationInterface::theInstance_               = 0;
+ConfigurationInterface* ConfigurationInterface::theInstance_               = nullptr;
 bool                    ConfigurationInterface::theMode_                   = true;
 bool                    ConfigurationInterface::theVersionTrackingEnabled_ = true;
 
@@ -27,30 +26,15 @@ ConfigurationInterface::ConfigurationInterface() {}
 //==============================================================================
 ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 {
-	if(mode == true)
-	{
-		if(theInstance_ != 0 && dynamic_cast<FileConfigurationInterface*>(theInstance_) == 0)
-		{
-			delete theInstance_;
-			theInstance_ = 0;
-		}
-		if(theInstance_ == 0)  // && typeid(theInstance_) !=
-		                       // static_cast<DatabaseConfigurationInterface*> )
-			theInstance_ = new FileConfigurationInterface();
+	auto instanceType = mode ? "File" : "Database";
+	if (theMode_ != mode) {
+		delete theInstance_;
+		theInstance_ = nullptr;
 	}
-	else
-	{
-		if(theInstance_ != 0 && dynamic_cast<DatabaseConfigurationInterface*>(theInstance_) == 0)
-		{
-			delete theInstance_;
-			theInstance_ = 0;
-		}
-		if(theInstance_ == 0)  // && typeid(theInstance_) !=
-		                       // static_cast<DatabaseConfigurationInterface*> )
-		{
-			theInstance_ = new DatabaseConfigurationInterface();
-		}
+	if (theInstance_ == nullptr) {
+		theInstance_ = makeConfigurationInterface(instanceType);
 	}
+
 	theMode_ = mode;
 	return theInstance_;
 }

@@ -577,26 +577,10 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 			if(cfgViewPtr->getDataColumnSize() != cfgViewPtr->getNumberOfColumns() ||
 			   cfgViewPtr->getSourceColumnMismatch() != 0)  // check for column size mismatch
 			{
-				const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
+				// const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				__SS__ << "\n\nThere were errors found in loading a member table " << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
 				       << ". Please see the details below:\n\n"
-				       << "The source column size was found to be " << srcColNames.size() << ", and the current number of columns for this table is "
-				       << cfgViewPtr->getNumberOfColumns() << ". This resulted in a count of " << cfgViewPtr->getSourceColumnMismatch()
-				       << " source column mismatches, and a count of " << cfgViewPtr->getSourceColumnMissing() << " table entries missing in "
-				       << cfgViewPtr->getNumberOfRows() << " row(s) of data." << __E__;
-
-				ss << "\n\nSource column names were as follows:\n";
-				char index = 'a';
-				for(auto& srcColName : srcColNames)
-					ss << "\n\t" << index++ << ". " << srcColName;
-				ss << __E__;
-
-				std::set<std::string> destColNames = cfgViewPtr->getColumnStorageNames();
-				ss << "\n\nCurrent table column names are as follows:\n";
-				index = 'a';
-				for(auto& destColName : destColNames)
-					ss << "\n\t" << index++ << ". " << destColName;
-				ss << __E__;
+					   << cfgViewPtr->getMismatchColumnInfo();
 
 				__COUT_ERR__ << "\n" << ss.str();
 				xmlOut.addTextElementToData("Error", ss.str());
@@ -989,10 +973,17 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	try
 	{
 		unsigned int row;
-		std::string  iconUID;
+		std::string  iconUID = "";
+		std::string  decodedCaption = StringMacros::decodeURIComponent(iconCaption);
+
+		for(unsigned int i=0;i<decodedCaption.size();++i)
+			if((decodedCaption[i] >='a' && decodedCaption[i] <= 'z') ||
+				(decodedCaption[i] >='A' && decodedCaption[i] <= 'Z') ||
+				(decodedCaption[i] >='0' && decodedCaption[i] <= '9') )
+			iconUID += decodedCaption[i];
 
 		// create icon record
-		row     = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon");
+		row     = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon" + iconUID);
 		iconUID = iconTable.tableView_->getDataView()[row][iconTable.tableView_->getColUID()];
 
 		__COUTV__(row);

@@ -619,28 +619,38 @@ void TableView::init(void)
 				// check for link mate (i.e. every child link needs link ID)
 				getChildLink(col, tmpIsGroup, tmpLinkPair);
 			}
-		 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
+		
+			 // check if number exist and then if it is limited by min and max, use functions in here to get values different than stof
 			if(columnsInfo_[col].isNumberDataType())
 			{
 				std::string minimumValueString = columnsInfo_[col].getMinValue();
 				std::string maximumValueString = columnsInfo_[col].getMaxValue();
-				double       minimumValue, maximumValue, valueFromTable;
-				bool        minExists = false, maxExists = false;
-				//__COUT__ << "values output1 " << minimumValueString << " another output1 " << maximumValueString << __E__;
+				double    	minimumValue, maximumValue, valueFromTable;
+				bool       	minExists = false, maxExists = false;
 
 				if(!minimumValueString.empty())
 				{
-					std::string envData = StringMacros::convertEnvironmentVariables(minimumValueString);
-					minExists           = StringMacros::getNumber(envData, minimumValue);
+					minExists 			= StringMacros::getNumber(
+							StringMacros::convertEnvironmentVariables(minimumValueString), minimumValue);
+					if(!minExists)
+					{
+						__SS__ <<  "Inavlid user spec'd min value '" << minimumValueString << 
+							"' which is not a valid number. The minimum value must be a number (environment variables and math operations are allowed)." << __E__;
+						__SS_THROW__;
+					}
 				}
 
 				if(!maximumValueString.empty())
 				{
-					std::string envData1 = StringMacros::convertEnvironmentVariables(maximumValueString);
-					maxExists            = StringMacros::getNumber(envData1, maximumValue);
+					maxExists            = StringMacros::getNumber(
+						StringMacros::convertEnvironmentVariables(maximumValueString), maximumValue);
+					if(!maxExists)
+					{
+						__SS__ <<  "Inavlid user spec'd max value '" << maximumValueString << 
+							"' which is not a valid number. The maximum value must be a number (environment variables and math operations are allowed)." << __E__;
+						__SS_THROW__;
+					}
 				}
-
-				//__COUT__ << "values output" << minimumValue << " another output " << maximumValue << __E__;
 
 				if(minExists && maxExists && minimumValue > maximumValue)
 				{
@@ -654,19 +664,21 @@ void TableView::init(void)
 						getValue(valueFromTable, row, col);
 						if(minExists && valueFromTable < minimumValue)
 						{
-							__SS__ << "This value is out of the established limits: " <<
-								valueFromTable << " is lower than specified minimum " << minimumValue << __E__;
+							__SS__ << "The value '" << valueFromTable << "' at [row,col]=[" <<
+								row << "," << col << "] is outside the established limits: " <<
+								valueFromTable << " is lower than the specified minimum " << minimumValue << "." << __E__;
 							__SS_THROW__;
 						}
 						if(maxExists && valueFromTable > maximumValue)
 						{
-							__SS__ << "This value is out of the established limits: " <<
-								valueFromTable << " is greater than specified maximum " << maximumValue << __E__;
+							__SS__ << "This value '" << valueFromTable << "' at [row,col]=[" <<
+								row << "," << col << "] is outside the established limits: " <<
+								valueFromTable << " is greater than the specified maximum " << maximumValue << "." << __E__;
 							__SS_THROW__;
 						}
 					}
-			}
-		}
+			} //end handling NUMBER data types
+		} //end column loop
 
 		// verify child link index uniqueness
 		if (groupIdIndexes.size() != groupIdIndexesCount)
@@ -1605,7 +1617,8 @@ unsigned int TableView::findRow(unsigned int col, const std::string& value, unsi
 		return TableView::INVALID;
 
 	__SS__ << "\tIn view: " << tableName_ << ", Can't find value=" << value << " in column named " << columnsInfo_[col].getName()
-		<< " with type=" << columnsInfo_[col].getType() << __E__;
+		<< " with type=" << columnsInfo_[col].getType() << __E__ << __E__ << StringMacros::stackTrace() << __E__;
+	
 	// Note: findRow gets purposely called by configuration GUI a lot looking for
 	// exceptions 	so may not want to print out
 	//__COUT__ << "\n" << ss.str();
@@ -3030,99 +3043,23 @@ unsigned int TableView::addRow(const std::string& author,
 	// column
 	for (unsigned int col = 0; col < getNumberOfColumns(); ++col)
 	{
-		//		__COUT__ << col << " " << columnsInfo_[col].getType() << " == " <<
-		//				TableViewColumnInfo::TYPE_UNIQUE_DATA << __E__;
+		// if(incrementUniqueData)
+		// 	__COUT__ << col << " " << columnsInfo_[col].getType() << " basename= " <<
+		// 		baseNameAutoUID << __E__;
 
 		// baseNameAutoUID indicates to attempt to make row unique
 		//	add index to max number
 		if (incrementUniqueData &&
-			(col == getColUID() || (getNumberOfRows() > 1 && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
+			(col == getColUID() || 
+				columnsInfo_[col].isChildLinkGroupID() ||
+				(getNumberOfRows() > 1 && (columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_DATA ||
 				columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_UNIQUE_GROUP_DATA))))
 		{
-			if (col == getColUID())
+			if (col == getColUID() || 
+				columnsInfo_[col].isChildLinkGroupID())
 				setUniqueColumnValue(rowToAdd, col, baseNameAutoUID /*baseValueAsString*/);
 			else
-				setUniqueColumnValue(rowToAdd, col);
-			//
-			//			//			__COUT__ << "Current unique data entry is data[" << rowToAdd
-			//			//					<< "][" << col << "] = '" << theDataView_[rowToAdd][col]
-			//			//<<
-			//			//"'"
-			//			//			         << __E__;
-			//
-			//			maxUniqueData = 0;
-			//			tmpString     = "";
-			//			baseString    = "";
-			//
-			//			// find max in rows
-			//
-			//			// this->print();
-			//
-			//			for(unsigned int r = 0; r < getNumberOfRows(); ++r)
-			//			{
-			//				if(r == rowToAdd)
-			//					continue;  // skip row to add
-			//
-			//				// find last non numeric character
-			//
-			//				foundAny  = false;
-			//				tmpString = theDataView_[r][col];
-			//
-			//				//__COUT__ << "tmpString " << tmpString << __E__;
-			//
-			//				for(index = tmpString.length() - 1; index < tmpString.length(); --index)
-			//				{
-			//					//__COUT__ << index << " tmpString[index] " << tmpString[index] <<
-			//					//__E__;
-			//					if(!(tmpString[index] >= '0' && tmpString[index] <= '9'))
-			//						break;  // if not numeric, break
-			//					foundAny = true;
-			//				}
-			//
-			//				//__COUT__ << "index " << index << __E__;
-			//
-			//				if(tmpString.length() && foundAny)  // then found a numeric substring
-			//				{
-			//					// create numeric substring
-			//					numString = tmpString.substr(index + 1);
-			//					tmpString = tmpString.substr(0, index + 1);
-			//
-			//					//__COUT__ << "Found unique data base string '" <<
-			//					//		tmpString << "' and number string '" << numString <<
-			//					//		"' in last record '" << theDataView_[r][col] << "'" << __E__;
-			//
-			//					// extract number
-			//					sscanf(numString.c_str(), "%u", &index);
-			//
-			//					if(index > maxUniqueData)
-			//					{
-			//						maxUniqueData = index;
-			//						baseString    = tmpString;
-			//					}
-			//				}
-			//			}
-			//
-			//			++maxUniqueData;  // increment
-			//
-			//			sprintf(indexString, "%u", maxUniqueData);
-			//			//__COUT__ << "indexString " << indexString << __E__;
-			//
-			//			//__COUT__ << "baseNameAutoUID " << baseNameAutoUID << __E__;
-			//			if(col == getColUID())
-			//			{
-			//				// handle UID case
-			//				if(baseNameAutoUID != "")
-			//					theDataView_[rowToAdd][col] = baseNameAutoUID + indexString;
-			//				else
-			//					theDataView_[rowToAdd][col] = baseString + indexString;
-			//			}
-			//			else
-			//				theDataView_[rowToAdd][col] = baseString + indexString;
-			//
-			//			__COUT__ << "New unique data entry is data[" << rowToAdd << "][" << col
-			//			         << "] = '" << theDataView_[rowToAdd][col] << "'" << __E__;
-			//
-			//			// this->print();
+				setUniqueColumnValue(rowToAdd, col);		
 		}
 		else
 			theDataView_[rowToAdd][col] = defaultRowValues[col];

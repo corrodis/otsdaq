@@ -14,6 +14,7 @@ cet_script(ALWAYS_COPY otsdaq_convert_config_to_table )
 cet_script(ALWAYS_COPY otsdaq_convert_artdaq_daq_tables) 
 cet_script(ALWAYS_COPY otsdaq_beautify_artdaq_tables )
 cet_script(ALWAYS_COPY otsdaq_add_artdaq_tables)
+cet_script(ALWAYS_COPY redmine_login.sh )
 
 install_headers()
 install_source()

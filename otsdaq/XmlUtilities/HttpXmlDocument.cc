@@ -1,5 +1,6 @@
 #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/Macros/StringMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
@@ -241,9 +242,9 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 	                                                                                                              // attribute
 	{
 		if(dispStdOut)
-			std::cout << " value='" << escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace) << "'";
+			std::cout << " value='" << StringMacros::escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace) << "'";
 		if(out)
-			*out << " value='" << escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace) << "'";
+			*out << " value='" << StringMacros::escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace) << "'";
 	}
 
 	xercesc::DOMNodeList* nodeList = currEl->getChildNodes();  // get all children
@@ -266,7 +267,7 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 		// Dario-style...
 		std::string outText = "";
 		if(currEl->getFirstChild() != NULL && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)
-			outText = escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace);
+			outText = StringMacros::escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()), allowWhiteSpace);
 		{
 			if(darioXMLStyle_ && !(std::string(XML_TO_CHAR(currEl->getNodeName())) == "ROOT" || std::string(XML_TO_CHAR(currEl->getNodeName())) == "HEADER" ||
 			                       std::string(XML_TO_CHAR(currEl->getNodeName())) == "DATA" || std::string(XML_TO_CHAR(currEl->getNodeName())) == "node" ||
@@ -320,7 +321,7 @@ std::string HttpXmlDocument::recursiveFindElementValue(xercesc::DOMElement* curr
 		if(currEl->getFirstChild() != NULL &&
 		   currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, return as value
 		                                                                           // attribute
-			return escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()));
+			return StringMacros::escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()));
 		else
 			return "";  // empty value attribute
 	}
@@ -432,7 +433,7 @@ void HttpXmlDocument::recursiveAddElementToParent(xercesc::DOMElement* child, xe
 	{
 		childText = XML_TO_CHAR(child->getFirstChild()->getNodeValue());
 		if(html)
-			childText = escapeString(childText);
+			childText = StringMacros::escapeString(childText);
 	}
 	// __COUT__<< "childName " << childName <<  " childText " <<
 	// childText << std::endl;
@@ -477,12 +478,12 @@ void HttpXmlDocument::recursiveFindAllElements(xercesc::DOMElement* currEl, cons
 			recursiveFindAllElements((xercesc::DOMElement*)(nodeList->item(i)), field, retVec);
 }
 //==============================================================================
-// HttpXmlDocument::escapeString
+// HttpXmlDocument::StringMacros::escapeString
 //	convert quotes to html quote characters &apos = ' and &quot = "
 //	remove new line characters
 //	and remove white space (so that read from file white space artifact removed)
 /*
-std::string	HttpXmlDocument::escapeString(string inString)
+std::string	HttpXmlDocument::StringMacros::escapeString(string inString)
 {
     unsigned int ws = -1;
     for(unsigned int i=0;i<inString.length();++i)
@@ -588,7 +589,7 @@ void HttpXmlDocument::recursiveFixTextFields(xercesc::DOMElement* currEl)
 		if(nodeList->item(i)->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // fix text nodes
 			((xercesc::DOMElement*)(nodeList->item(i)))
 			    ->setTextContent(CONVERT_TO_XML(  // change text value to escaped version
-			        escapeString(XML_TO_CHAR(((xercesc::DOMElement*)(nodeList->item(i)))->getNodeValue()))));
+			        StringMacros::escapeString(XML_TO_CHAR(((xercesc::DOMElement*)(nodeList->item(i)))->getNodeValue()))));
 		else
 			recursiveFixTextFields((xercesc::DOMElement*)(nodeList->item(i)));
 }

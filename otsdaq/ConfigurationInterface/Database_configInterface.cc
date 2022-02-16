@@ -1,5 +1,6 @@
-#include "otsdaq/ConfigurationInterface/DatabaseConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/Database_configInterface.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/Macros/ConfigurationInterfacePluginMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include <algorithm>
@@ -325,3 +326,5 @@ catch(...)
 	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
+
+DEFINE_OTS_CONFIGURATION_INTERFACE(DatabaseConfigurationInterface)

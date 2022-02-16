@@ -1,4 +1,4 @@
-#include "otsdaq/ConfigurationInterface/FileConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/File_configInterface.h"
 #include <dirent.h>
 #include <errno.h>
 #include <iostream>
@@ -6,6 +6,7 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationHandler.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/Macros/ConfigurationInterfacePluginMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/TableCore/TableBase.h"
 
@@ -79,3 +80,5 @@ std::set<TableVersion> FileConfigurationInterface::getVersions(const TableBase* 
 	closedir(dp);
 	return dirNumbers;
 }
+
+DEFINE_OTS_CONFIGURATION_INTERFACE(FileConfigurationInterface)

@@ -15,7 +15,7 @@ set(CET_CETBUILDTOOLS_COMPAT TRUE)
 include(Compatibility)
 set(CET_WARN_DEPRECATED)
 
-project(otsdaq VERSION 2.06.03)
+project(otsdaq VERSION 2.06.04)
 
 set(CMAKE_MODULE_PATH
         $ENV{XDAQ_DIR}/Modules
@@ -42,7 +42,7 @@ cet_remove_compiler_flags(-std=c++98)
 #  cet_add_compiler_flags(-fsanitize=address)
 #endif()
 
-cet_report_compiler_flags()
+#cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
 find_ups_product( cetbuildtools v3_03_00 )
@@ -65,7 +65,6 @@ find_ups_boost( v1_50_0 filesystem
  # XDAQ Extra setup
  include_directories($ENV{XDAQ_INC}/linux)
 link_directories($ENV{XDAQ_LIB})
-link_directories($ENV{ARTDAQ_DATABASE_LIB})
  set(XDAQ_BASIC_LIB_LIST 
    xcept
    xoap
@@ -100,7 +99,8 @@ message("-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSA
 add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION})
 
 # For version.h
-string(REGEX MATCHALL "[0-9][0-9]?" OTSDAQ_VERSION_LIST "${version}")
+message("PROJECT_VERSION ${PROJECT_VERSION}")
+string(REGEX MATCHALL "[0-9][0-9]?" OTSDAQ_VERSION_LIST "${PROJECT_VERSION}")
 list(GET OTSDAQ_VERSION_LIST 0 OTSDAQ_MAJOR_VERSION)
 list(GET OTSDAQ_VERSION_LIST 1 OTSDAQ_MINOR_VERSION)
 list(GET OTSDAQ_VERSION_LIST 2 OTSDAQ_PATCH_VERSION)
@@ -134,7 +134,7 @@ endif()
 # test programs
 add_subdirectory(test)
 
-# tools
+# test
 FILE(COPY test DESTINATION .)
 INSTALL(DIRECTORY test DESTINATION ${product}/${version})
 

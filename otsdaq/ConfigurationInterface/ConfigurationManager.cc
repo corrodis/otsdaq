@@ -14,7 +14,7 @@ using namespace ots;
 #define __MF_SUBJECT__ "ConfigurationManager"
 
 
-const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			= std::string(__ENV__("SERVICE_DATA_PATH")) + "/RunControlData/";
+const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			=  ((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + "/RunControlData/";
 const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE 	= "CFGLastActivatedConfigGroup.hist";
 const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE 	= "CFGLastActivatedContextGroup.hist";
 const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE 	= "CFGLastActivatedBackboneGroup.hist";
@@ -848,7 +848,9 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 //==============================================================================
 // dumpActiveConfiguration
 //	if filePath == "", then output to cout
-void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath, const std::string& dumpType)
+void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath, 
+	const std::string& dumpType, const std::string& logEntry,
+	const std::string& activeUsers)
 {
 	time_t rawtime = time(0);
 	__GEN_COUT__ << "filePath = " << filePath << __E__;
@@ -874,18 +876,22 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath, 
 	}
 
 	(*out) << "#################################" << __E__;
-	(*out) << "This is an ots configuration dump.\n\n" << __E__;
-	(*out) << "Source database is $ARTDAQ_DATABASE_URI = \t" << __ENV__("ARTDAQ_DATABASE_URI") << __E__;
-	(*out) << "\nOriginal location of dump: \t" << filePath << __E__;
-	(*out) << "Type of dump: \t" << dumpType << __E__;
-	(*out) << "Linux time for dump: \t" << rawtime << __E__;
+	(*out) << "This is an ots configuration dump.\n" << __E__;
+	(*out) << "Source database is $ARTDAQ_DATABASE_URI: " << __ENV__("ARTDAQ_DATABASE_URI") << __E__;
+	(*out) << "Original location of dump:               " << filePath << __E__;	
+	(*out) << "\nActive ots users: \t" << (activeUsers.size()?activeUsers:"no active users") << __E__;	
+	(*out) << "Type of dump: \t\t" << dumpType << __E__;
+	(*out) << "Time of dump: \t\t" << rawtime;
 
 	{
 		struct tm* timeinfo = localtime(&rawtime);
 		char       buffer[100];
 		strftime(buffer, 100, "%c %Z", timeinfo);
-		(*out) << "Display time for dump: \t" << buffer << __E__;
+		(*out) << " \t" << buffer << __E__;
 	}
+
+	if(logEntry.size())
+		(*out) << "User Log Entry (" << logEntry.size() << " chars):\n" << logEntry << __E__;
 
 	// define local "lambda" functions
 	//	active groups

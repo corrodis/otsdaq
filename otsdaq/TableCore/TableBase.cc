@@ -32,8 +32,22 @@ TableBase::TableBase(const std::string&  tableName,
 		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
+	
+	//December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	//	This check and re-initialization seems to cover up the issue for now.
+	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
+	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
+	if(traceTID == 0)
+	{
+		std::cout << "TableBase Before traceTID=" << traceTID << __E__;
+		char buf[40];
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		std::cout << "TableBase After traceTID=" << traceTID << __E__;
+		__COUT__ << "TableBase TRACE reinit and Constructed." << __E__;
+	}
 
-	bool dbg = tableName == "ARTDAQEventBuilderTable";	
+	bool dbg = false; //tableName == "ARTDAQEventBuilderTable";	
 	if(dbg) __COUTV__(tableName);
 	// info reader fills up the mockup view
 	TableInfoReader tableInfoReader(accumulatedExceptions);
@@ -72,7 +86,7 @@ TableBase::TableBase(const std::string&  tableName,
 			*accumulatedExceptions += std::string("\n") + e.what();
 		else
 			throw;
-	}
+	}	
 }  // end constructor()
 
 //==============================================================================
