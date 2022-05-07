@@ -23,50 +23,6 @@
 
 using namespace ots;
 
-
-int makeSocket(const char* ip, int port, struct addrinfo*& p)
-{
-	int                     sockfd;
-	struct addrinfo         hints, *servinfo;
-	int                     rv;
-	//char                    s[INET6_ADDRSTRLEN];
-
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family   = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
-	char portStr[10];
-	sprintf(portStr, "%d", port);
-	if((rv = getaddrinfo(ip, portStr, &hints, &servinfo)) != 0)
-	{
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		return 1;
-	}
-
-	// loop through all the results and make a socket
-	for(p = servinfo; p != NULL; p = p->ai_next)
-	{
-		if((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
-		{
-			perror("sw: socket");
-			continue;
-		}
-
-		break;
-	}
-
-	if(p == NULL)
-	{
-		fprintf(stderr, "sw: failed to create socket\n");
-		return 2;
-	}
-
-	freeaddrinfo(servinfo);
-
-	
-
-	return sockfd;
-}
-
 //==============================================================================
 Socket::Socket(const std::string& IPAddress, unsigned int port) : socketNumber_(-1), IPAddress_(IPAddress), requestedPort_(port)
 //    maxSocketSize_(maxSocketSize)
@@ -86,6 +42,14 @@ Socket::Socket(const std::string& IPAddress, unsigned int port) : socketNumber_(
 	socketAddress_.sin_port   = htons(port);  // short, network byte order
 
 	__COUT__ << "IPAddress: " << IPAddress << " port: " << port << " htons: " << socketAddress_.sin_port << std::endl;
+
+	if(inet_aton(IPAddress.c_str(), &socketAddress_.sin_addr) == 0)
+	{
+		__SS__ << "FATAL: Invalid IP:Port combination. Please verify... " << IPAddress << ":" << port << std::endl;
+		// assert(0); //RAR changed to exception on 8/17/2016
+		__COUT_ERR__ << "\n" << ss.str();
+		__SS_THROW__;
+	}
 
 	memset(&(socketAddress_.sin_zero), '\0', 8);  // zero the rest of the struct
 
@@ -117,7 +81,6 @@ Socket::~Socket(void)
 void Socket::initialize(unsigned int socketReceiveBufferSize)
 {
 	__COUT__ << "Initializing port " << ntohs(socketAddress_.sin_port) << " htons: " << socketAddress_.sin_port << std::endl;
-	
 	struct addrinfo  hints;
 	struct addrinfo* res;
 	int              status = 0;
@@ -144,7 +107,7 @@ void Socket::initialize(unsigned int socketReceiveBufferSize)
 		__COUT__ << "]\tBinding port: " << port.str() << std::endl;
 		socketAddress_.sin_port = htons(p);  // short, network byte order
 
-		if((status = getaddrinfo(IPAddress_.c_str(), port.str().c_str(), &hints, &res)) != 0)
+		if((status = getaddrinfo(NULL, port.str().c_str(), &hints, &res)) != 0)
 		{
 			__COUT__ << "]\tGetaddrinfo error status: " << status << std::endl;
 			continue;

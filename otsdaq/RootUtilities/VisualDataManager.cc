@@ -24,7 +24,7 @@ VisualDataManager::VisualDataManager(const ConfigurationTree& theXDAQContextConf
     : DataManager(theXDAQContextConfigTree, supervisorConfigurationPath)
 	, doNotStop_(false)
 	, ready_(false)
-    , theLiveDQMHistos_(nullptr)
+    , theLiveDQMHistos_(false)
 //, theFileDQMHistos_ (supervisorType, supervisorInstance, "VisualBuffer",
 //"FileDQMHistos") , theFileDQMHistos_ (supervisorType, supervisorInstance,
 //"VisualBuffer", "FileDQMHistos",0) , theFileDQMHistos_ ()
@@ -87,21 +87,21 @@ void VisualDataManager::configure(void)
 							{
 								__CFG_COUT__ << "Trying for DQMHistosConsumerBase."
 								             << __E__;
-								theLiveDQMHistos_ =
-								    dynamic_cast<DQMHistosConsumerBase*>(consumer);
+								// theLiveDQMHistos_ =
+								//     dynamic_cast<DQMHistosConsumerBase*>(consumer);
 								theLiveDQMs_.emplace_back(dynamic_cast<DQMHistosBase*>(consumer));
 								dynamic_cast<DQMHistosBase*>(consumer)->setDataManager(this);
 
-								__CFG_COUT__ << "Did we succeed? " << theLiveDQMHistos_
-								             << __E__;
+								// __CFG_COUT__ << "Did we succeed? " << theLiveDQMHistos_
+								//              << __E__;
 							}
 							catch(...)
 							{
 							}  // ignore failures
 
-							if(!theLiveDQMHistos_)
+							if(theLiveDQMs_.size() == 0)
 							{
-								__CFG_SS__ << "No valid visualizer consumer!" << __E__;
+								__CFG_SS__ << "There are no configured visualizer consumer! There must be at least one consumer if you want to use the visualizer." << __E__;
 								__CFG_SS_THROW__;
 							}
 						}
@@ -115,7 +115,9 @@ void VisualDataManager::configure(void)
 //==============================================================================
 void VisualDataManager::halt(void)
 {
-	theLiveDQMHistos_ = nullptr;
+	ready_ = false;
+	theLiveDQMHistos_ = false;
+	while(doNotStop_){};
 	DataManager::halt();
 }
 
@@ -135,9 +137,9 @@ void VisualDataManager::start(std::string runNumber)
 	__CFG_COUT__ << "Start!" << __E__;
 
 	ready_ = false;
-	//theLiveDQMHistos_   = nullptr;
 
 	DataManager::start(runNumber);
+	theLiveDQMHistos_   = true;
 
 	ready_ = true;
 }
@@ -146,7 +148,7 @@ void VisualDataManager::start(std::string runNumber)
 void VisualDataManager::stop(void)
 {
 	ready_ = false;
-	theLiveDQMHistos_ = nullptr;
+	theLiveDQMHistos_ = false;
 	while(doNotStop_){};
 	DataManager::stop();
 }
@@ -163,7 +165,7 @@ void VisualDataManager::load(std::string fileName, std::string type)
 }
 
 //==============================================================================
-DQMHistosBase* VisualDataManager::getLiveDQMHistos(void) { return theLiveDQMHistos_; }
+bool VisualDataManager::getLiveDQMHistos(void) { return theLiveDQMHistos_; }
 
 //==============================================================================
 DQMHistosBase& VisualDataManager::getFileDQMHistos(void) { return theFileDQMHistos_; }

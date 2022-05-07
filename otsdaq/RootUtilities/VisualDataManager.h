@@ -38,7 +38,7 @@ class VisualDataManager : public DataManager
 	bool  isReady(void){return ready_;}
 	TFile* openFile(std::string fileName);
 
-	DQMHistosBase* getLiveDQMHistos(void);//TO BE DELETED
+	bool           getLiveDQMHistos(void);
 	DQMHistosBase& getFileDQMHistos(void);//TO BE DELETED
 	const std::string& getRawData(void);//TO BE DELETED
 	// const Visual3DEvents&   getVisual3DEvents   (void);
@@ -55,7 +55,7 @@ class VisualDataManager : public DataManager
 	// Visual3DData           the3DData_;
 
 
-	DQMHistosBase* theLiveDQMHistos_;//TO BE DELETED
+	bool theLiveDQMHistos_;//TO BE DELETED
 	DQMHistosBase  theFileDQMHistos_;//TO BE DELETED
 
 };
