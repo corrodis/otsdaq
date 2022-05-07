@@ -425,9 +425,9 @@ if [[ $KILLALL != 0 ]]; then
     out "Done with ots kill-all." 
 	
 	#kills self too:
-	killall -9 ots &>/dev/null 2>&1 #hide output
 	killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
 	killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
+	killall -9 ots &>/dev/null 2>&1 #hide output
 	
 	exit
 fi
@@ -1144,6 +1144,11 @@ launchOTS() {
 
 	fi
 
+	#clear files initially
+	echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE
+	echo "0" > $OTSDAQ_STARTOTS_QUIT_FILE
+	echo "0" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+
 
 	##############################################################################
 	XDAQ_OTS_XML="ots" 	#used for normal mode launch as copy location for stable script launching
@@ -1453,6 +1458,24 @@ launchOTS() {
 									#verify relaunch
 									sleep 8 #give time before relaunch test
 									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat)"
+									
+									#check if exit requested to avoid endless looping (e.g. on remote hosts)
+									OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
+									OTSDAQ_STARTOTS_QUIT="$(cat ${OTSDAQ_STARTOTS_QUIT_FILE})"
+									OTSDAQ_STARTOTS_LOCAL_QUIT="$(cat ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE})"
+							
+									if [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
+
+										out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
+													
+										killprocs	
+
+										if [ $ISREMOTE == 1 ]; then
+											out "Done killing (stale) processes"
+										fi
+										
+										exit
+									fi
 									
 								done
 								
