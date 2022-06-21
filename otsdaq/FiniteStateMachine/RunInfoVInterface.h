@@ -16,7 +16,8 @@ class RunInfoVInterface// : public Configurable
 	enum class RunStopType {
 		HALT,
 		STOP,
-		ERROR
+		ERROR,
+		PAUSE
 	};
 
 

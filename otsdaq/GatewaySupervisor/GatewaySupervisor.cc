@@ -1060,8 +1060,60 @@ void GatewaySupervisor::stateInitial(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	auto pause = std::chrono::system_clock::now();
+	std::time_t pause_time = std::chrono::system_clock::to_time_t(pause);
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << " at " << std::ctime(&pause_time) << __E__;
 
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME)
+	{
+
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::PAUSE);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO PAUSE TIME UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO PAUSE TIME UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End update pause time into run info db
+	} //end update Run Info handling
 }  // end statePaused()
 
 //==============================================================================
@@ -1123,14 +1175,14 @@ void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		catch(const std::runtime_error& e)
 		{
 			//ERROR
-			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+			__SS__ << "RUN INFO UPDATE INTO DATABASE FAILED!!! "
 				<< e.what() << __E__;
 			__SS_THROW__;
 		}
 		catch(...)
 		{
 			//ERROR
-			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! "
+			__SS__ << "RUN INFO UPDATE INTO DATABASE FAILED!!! "
 				<< __E__;
 			__SS_THROW__;
 		}  // End write run info into db			
