@@ -25,40 +25,34 @@ std::string TCPReceiverSocket::receivePacket(std::chrono::milliseconds timeout)
 	uint32_t message_size;
 	while(received_bytes < 4 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start) < timeout) {
 	  int this_received_bytes = receive(reinterpret_cast<char*>(&message_size) + received_bytes, 4 - received_bytes);
-	  if(this_received_bytes < 0){
-	    if(errno == EAGAIN) continue; 
-	    return retVal;
-	  }
+	  if(this_received_bytes < 0){  continue;  }
 	  received_bytes += this_received_bytes;
 	}
 
-	
-	if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start) >= timeout) {
+	if(received_bytes == 0 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start) >= timeout) {
 	  // std::cout << __PRETTY_FUNCTION__ << " timeout while receiving message size, returning null (received " << static_cast<int>(received_bytes) << " bytes)" << std::endl;
 	  return retVal;
+	} else { 
+	  while(received_bytes < 4) {
+	    int this_received_bytes = receive(reinterpret_cast<char*>(&message_size) + received_bytes, 4 - received_bytes);
+	    if(this_received_bytes < 0){ continue;}
+	    received_bytes += this_received_bytes;
+	  }
 	}
 	
-
 	message_size = ntohl(message_size);
 	// std::cout << "Received message size in header: " << message_size << std::endl;
 	message_size -= 4; // Message size in header is inclusive, remove header size
 	std::vector<char> buffer(message_size);
 	received_bytes = 0;
-	while(received_bytes < message_size && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start) < timeout) {
+	while(received_bytes < message_size) {
 	  int this_received_bytes = receive(&buffer[received_bytes], message_size - received_bytes);
 	  // std::cout << "Message receive returned " << this_received_bytes << std::endl;
-	  if(this_received_bytes < 0){
-	    if(errno == EAGAIN) continue; 
-	    return retVal;
-	  }
+	  if(this_received_bytes < 0){ continue; }
 	  received_bytes += this_received_bytes;
 	}
 	
 	retVal = std::string(buffer.begin(), buffer.end());
-
-	if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start) >= timeout) {
-	  std::cout << __PRETTY_FUNCTION__ << " timeout while receiving message of size " << message_size << ", returning " << retVal << std::endl;
-	}
 
 	return retVal;
 }
