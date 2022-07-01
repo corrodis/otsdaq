@@ -342,7 +342,7 @@ void ARTDAQTableBase::insertMetricsBlock(std::ostream& out, std::string& tabStr,
 
 //==============================================================================
 void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReaderNode,
-	size_t                   maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE */,
+	size_t                   /*maxFragmentSizeBytes *//* = DEFAULT_MAX_FRAGMENT_SIZE */,
 	size_t                   routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
 	size_t                   routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */)
 {
@@ -538,7 +538,6 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	OUT << "fragment_receiver: {\n";
 
 	PUSHTAB;
-	OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
 	{
 		// plugin type and fragment data-type
 		OUT << "generator"
@@ -633,7 +632,7 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 //	Note: currently selfRank and selfPort are unused by artdaq fcl
 void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverNode,
 	ARTDAQAppType            appType,
-	size_t                   maxFragmentSizeBytes /* = DEFAULT_MAX_FRAGMENT_SIZE */,
+	size_t                   /*maxFragmentSizeBytes *//* = DEFAULT_MAX_FRAGMENT_SIZE */,
 	size_t                   routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
 	size_t                   routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */)
 {
@@ -717,7 +716,6 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 
 		PUSHTAB;
 
-		OUT << "max_fragment_size_bytes: " << maxFragmentSizeBytes << "\n";
 
 		if (appType == ARTDAQAppType::DataLogger)
 		{

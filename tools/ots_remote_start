@@ -11,11 +11,14 @@ source ${SCRIPT_DIR}/common.sh ots_remote_start
 STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another (TODO (Iris): Use something like PID since hostname is printed too
 out "${Green}=========================== ots REMOTE ============================="
 info "ots script path = ${SCRIPT_DIR}/ots_remote_start"
-info "Expected setup path     = ${SCRIPT_DIR}/../../../setup_ots.sh"
+info "Expected setup path     = ${SCRIPT_DIR}/../../../../setup_ots.sh"
 
 
 # Have to CD because setup_ots.sh isn't safe to run in other directories than the ots root, die if it didn't work
-cd ${SCRIPT_DIR}/../../../ || die "Couldn't chdir to ots root directory on ${HOSTNAME}"
+cd ${SCRIPT_DIR}/../../../ || die "Couldn't chdir to ots setup directory on ${HOSTNAME}"
+if ! [ -e setup_ots.sh ]; then # try going one directory up (for mrb reverse compatibility)
+  cd ../ || die "Couldn't chdir to ots setup directory on ${HOSTNAME}"
+fi
 
 # We don't care about the non-error output of this script because it gets shown on the remote's launching terminal
 userinput="$(cat .ots_setup_type.txt)";

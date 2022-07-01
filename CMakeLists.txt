@@ -15,7 +15,7 @@ set(CET_CETBUILDTOOLS_COMPAT TRUE)
 include(Compatibility)
 set(CET_WARN_DEPRECATED)
 
-project(otsdaq VERSION 2.06.03)
+project(otsdaq VERSION 2.06.05)
 
 set(CMAKE_MODULE_PATH
         $ENV{XDAQ_DIR}/Modules
@@ -134,7 +134,7 @@ endif()
 # test programs
 add_subdirectory(test)
 
-# tools
+# test
 FILE(COPY test DESTINATION .)
 INSTALL(DIRECTORY test DESTINATION ${product}/${version})
 
