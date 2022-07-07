@@ -2,6 +2,7 @@
 #define _TCPReceiverSocket_h_
 
 #include <string>
+#include <chrono>
 #include "otsdaq/NetworkUtilities/TCPPacket.h"
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
@@ -28,13 +29,12 @@ class TCPReceiverSocket : public virtual TCPSocket
 		// std::endl;
 		return buffer;  // c++11 doesn't make a copy anymore when returned
 	}
-	std::string receivePacket();
+	std::string receivePacket(std::chrono::milliseconds timeout = std::chrono::milliseconds(5));
 	void        setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds);
 
   private:
-	std::size_t                   receive(char* buffer, std::size_t bufferSize = maxSocketSize, int timeoutMicroSeconds = -1);
+	int                   receive(char* buffer, std::size_t bufferSize = maxSocketSize, int timeoutMicroSeconds = -1);
 	static constexpr unsigned int maxSocketSize = 65536;
-	TCPPacket                     fPacket;
 };
 }
 #endif
