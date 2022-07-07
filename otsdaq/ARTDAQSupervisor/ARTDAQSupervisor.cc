@@ -486,6 +486,9 @@ try
 		{
 			o << "EventBuilder subsystem: " << builder.subsystem << std::endl;
 		}
+		if (builder.allowed_processors != "") {
+			o << "EventBuilder allowed_processors" << builder.allowed_processors << std::endl;
+		}
 		o << std::endl;
 	}
 	for (auto& logger : info.processes[ARTDAQTableBase::ARTDAQAppType::DataLogger])
@@ -495,6 +498,10 @@ try
 		if (logger.subsystem != 1)
 		{
 			o << "DataLogger subsystem: " << logger.subsystem << std::endl;
+		}
+		if(logger.allowed_processors != "")
+		{
+			o << "DataLogger allowed_processors" << builder.allowed_processors << std::endl;
 		}
 		o << std::endl;
 	}
@@ -507,6 +514,10 @@ try
 		{
 			o << "Dispatcher subsystem: " << dispatcher.subsystem << std::endl;
 		}
+		if(dispatcher.allowed_processors != "")
+		{
+			o << "Dispatcher allowed_processors" << builder.allowed_processors << std::endl;
+		}
 		o << std::endl;
 	}
 	for (auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
@@ -516,6 +527,10 @@ try
 		if (rmaster.subsystem != 1)
 		{
 			o << "RoutingMaster subsystem: " << rmaster.subsystem << std::endl;
+		}
+		if(rmaster.allowed_processors != "")
+		{
+			o << "RoutingMaster allowed_processors" << builder.allowed_processors << std::endl;
 		}
 		o << std::endl;
 	}
@@ -581,7 +596,7 @@ try
 		PyObject* readerHost = PyString_FromString(reader.hostname.c_str());
 		PyObject* readerPort = PyString_FromString("-1");
 		PyObject* readerSubsystem = PyString_FromString(std::to_string(reader.subsystem).c_str());
-		PyObject* readerAllowedProcessors = PyString_FromString("0-99"); // Readers should always be allowed to run on core 0 for PCI access
+		PyObject* readerAllowedProcessors = PyString_FromString(reader.allowed_processors.c_str());
 		PyList_SetItem(readerData, 0, readerHost);
 		PyList_SetItem(readerData, 1, readerPort);
 		PyList_SetItem(readerData, 2, readerSubsystem);

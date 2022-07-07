@@ -27,7 +27,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	static const std::string ARTDAQ_SUPERVISOR_CLASS, ARTDAQ_SUPERVISOR_TABLE;
 	static const std::string ARTDAQ_READER_TABLE, ARTDAQ_BUILDER_TABLE, ARTDAQ_LOGGER_TABLE, ARTDAQ_DISPATCHER_TABLE, ARTDAQ_MONITOR_TABLE, ARTDAQ_ROUTER_TABLE;
 	static const std::string ARTDAQ_SUBSYSTEM_TABLE, ARTDAQ_DAQ_TABLE, ARTDAQ_DAQ_PARAMETER_TABLE;
-	static const std::string ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID;
+	static const std::string ARTDAQ_TYPE_TABLE_HOSTNAME, ARTDAQ_TYPE_TABLE_ALLOWED_PROCESSORS, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK, ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK_UID;
 
 	enum class ARTDAQAppType
 	{
@@ -56,9 +56,10 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		int         subsystem;
 		int port;
 		bool		status;
+		std::string allowed_processors;
 
-		ProcessInfo(std::string l, std::string h, int s, ARTDAQAppType /*t*/, bool onOff, int p = -1)
-		: label(l), hostname(h), subsystem(s), port(p), status(onOff) {}
+		ProcessInfo(std::string l, std::string h, std::string procs, int s, ARTDAQAppType /*t*/, bool onOff, int p = -1)
+		: label(l), hostname(h), subsystem(s), port(p), status(onOff), allowed_processors(procs) {}
 	};
 
 	struct SubsystemInfo
