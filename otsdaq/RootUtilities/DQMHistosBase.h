@@ -21,8 +21,8 @@ class DQMHistosBase
 	virtual void fill(std::string& /*buffer*/, std::map<std::string, std::string> /*header*/) { ; }
 	virtual void load(std::string /*fileName*/) { ; }
 
-	void     setDataManager(VisualDataManager* dataManager){theDataManager_ = dataManager;}
-	
+	void setDataManager(VisualDataManager* dataManager) { theDataManager_ = dataManager; }
+
 	TObject* get(std::string name);
 	TFile*   getFile(void) { return theFile_; }
 

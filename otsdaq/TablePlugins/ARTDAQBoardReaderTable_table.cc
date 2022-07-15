@@ -15,17 +15,14 @@ using namespace ots;
 // clang-format on
 
 //==============================================================================
-ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void) 
-	: TableBase("ARTDAQBoardReaderTable")
-	, ARTDAQTableBase("ARTDAQBoardReaderTable")
-	, SlowControlsTableBase("ARTDAQBoardReaderTable")
+ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
+    : TableBase("ARTDAQBoardReaderTable"), ARTDAQTableBase("ARTDAQBoardReaderTable"), SlowControlsTableBase("ARTDAQBoardReaderTable")
 {
-
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  		//
 	//////////////////////////////////////////////////////////////////////
-    //December 2021 started seeing an issue where traceTID is found to be cleared to 0
-	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	// December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor
 	//	This check and re-initialization seems to cover up the issue for now.
 	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
 	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
@@ -33,11 +30,12 @@ ARTDAQBoardReaderTable::ARTDAQBoardReaderTable(void)
 	{
 		std::cout << "ARTDAQBoardReaderTable Before traceTID=" << traceTID << __E__;
 		char buf[40];
-		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)), 0);
 		std::cout << "ARTDAQBoardReaderTable After traceTID=" << traceTID << __E__;
 		__COUT__ << "ARTDAQBoardReaderTable TRACE reinit and Constructed." << __E__;
 	}
-	else __COUT__ << "ARTDAQBoardReaderTable Constructed." << __E__;
+	else
+		__COUT__ << "ARTDAQBoardReaderTable Constructed." << __E__;
 }  // end constructor()
 
 //==============================================================================
@@ -64,7 +62,7 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 
 	// handle fcl file generation, wherever the level of this table
 
-	//auto readers = lastConfigManager_->getNode(ARTDAQTableBase::getTableName()).getChildren(
+	// auto readers = lastConfigManager_->getNode(ARTDAQTableBase::getTableName()).getChildren(
 	auto readers = lastConfigManager_->__SELF_NODE__.getChildren(
 	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
 	    /*default byPriority*/ false,
@@ -144,8 +142,8 @@ unsigned int ARTDAQBoardReaderTable::slowControlsHandlerConfig(
 						numberOfBoardReaderMetricParameters =
 						    slowControlsHandler(out, tabStr, commentStr, subsystem, boardReaderPair.first, slowControlsLink, channelList);
 
-						__COUT__ << "BoardReader '" << boardReaderPair.first
-						         << "' number of metrics for slow controls: " << numberOfBoardReaderMetricParameters << __E__;
+						__COUT__ << "BoardReader '" << boardReaderPair.first << "' number of metrics for slow controls: " << numberOfBoardReaderMetricParameters
+						         << __E__;
 					}
 				}
 			}

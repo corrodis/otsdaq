@@ -11,7 +11,7 @@ TCPPublishServer::TCPPublishServer(unsigned int serverPort, unsigned int maxNumb
 //==============================================================================
 TCPPublishServer::~TCPPublishServer(void)
 {
-//	std::cout << __PRETTY_FUNCTION__ << "Done" << std::endl;
+	//	std::cout << __PRETTY_FUNCTION__ << "Done" << std::endl;
 }
 
 //==============================================================================
@@ -34,5 +34,5 @@ void TCPPublishServer::acceptConnections()
 				break;
 		}
 	}
-	//fAcceptPromise.set_value(true);
+	// fAcceptPromise.set_value(true);
 }

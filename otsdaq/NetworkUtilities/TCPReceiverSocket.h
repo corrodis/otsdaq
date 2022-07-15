@@ -1,8 +1,8 @@
 #ifndef _TCPReceiverSocket_h_
 #define _TCPReceiverSocket_h_
 
-#include <string>
 #include <chrono>
+#include <string>
 #include "otsdaq/NetworkUtilities/TCPPacket.h"
 #include "otsdaq/NetworkUtilities/TCPSocket.h"
 
@@ -33,8 +33,8 @@ class TCPReceiverSocket : public virtual TCPSocket
 	void        setReceiveTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds);
 
   private:
-	int                   receive(char* buffer, std::size_t bufferSize = maxSocketSize, int timeoutMicroSeconds = -1);
+	int                           receive(char* buffer, std::size_t bufferSize = maxSocketSize, int timeoutMicroSeconds = -1);
 	static constexpr unsigned int maxSocketSize = 65536;
 };
-}
+}  // namespace ots
 #endif

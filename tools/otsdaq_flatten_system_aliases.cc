@@ -6,7 +6,6 @@
 #include <memory>
 #include <string>
 
-
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 //#include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
@@ -87,8 +86,6 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	setenv("CONFIGURATION_DATA_PATH", (std::string(getenv("USER_DATA")) + "/ConfigurationDataExamples").c_str(), 1);
 	setenv("TABLE_INFO_PATH", (std::string(getenv("USER_DATA")) + "/TableInfo").c_str(), 1);
 	////////////////////////////////////////////////////
-
-
 
 	// Some configuration plug-ins use __ENV__("OTSDAQ_LIB") and
 	// __ENV__("OTSDAQ_UTILITIES_LIB") in init() so define it 	to a non-sense place is ok

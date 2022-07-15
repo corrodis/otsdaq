@@ -14,5 +14,5 @@ class TCPSendClient : public TCPTransmitterSocket, public TCPClientBase
 	TCPSendClient(const std::string& serverIP, int serverPort);
 	virtual ~TCPSendClient(void);
 };
-}
+}  // namespace ots
 #endif

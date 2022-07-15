@@ -2,33 +2,30 @@
 //#include "otsdaq_cmsburninbox/BeagleBone/BeagleBoneUtils/TCPServerBase.h"
 //#else
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
-#include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
 
 //#endif
 
 #include <arpa/inet.h>
 #include <errno.h>   // errno
 #include <string.h>  // errno
-#include <iostream>
 #include <sys/socket.h>
+#include <iostream>
 
 // #include <sys/socket.h>
 // #include <netinet/in.h>
 // #include <netdb.h>
 
-
 using namespace ots;
 
 //==============================================================================
 TCPServerBase::TCPServerBase(unsigned int serverPort, unsigned int maxNumberOfClients)
-    : fMaxNumberOfClients(maxNumberOfClients)
-	, fServerPort(serverPort)
-	, fAccept(true)
+    : fMaxNumberOfClients(maxNumberOfClients), fServerPort(serverPort), fAccept(true)
 {
-	//CANNOT GO IN THE CONSTRUCTOR OR IT MIGHT START BEFORE THE CHILD CLASS CONSTRUCTOR IS FULLY CONSTRUCTED 
-	//THIS MIGHT RESULT IN THE CALL OF THE VIRTUAL TCPServerBase::acceptConnections
-	//startAccept();
+	// CANNOT GO IN THE CONSTRUCTOR OR IT MIGHT START BEFORE THE CHILD CLASS CONSTRUCTOR IS FULLY CONSTRUCTED
+	// THIS MIGHT RESULT IN THE CALL OF THE VIRTUAL TCPServerBase::acceptConnections
+	// startAccept();
 }
 
 //==============================================================================
@@ -38,7 +35,7 @@ TCPServerBase::~TCPServerBase(void)
 	shutdownAccept();
 	while(fAcceptFuture.valid() && fAcceptFuture.wait_for(std::chrono::milliseconds(100)) != std::future_status::ready)
 	{
-	 	__COUT__ << "Server accept still running" << std::endl;
+		__COUT__ << "Server accept still running" << std::endl;
 		shutdownAccept();
 	}
 	//__COUT__ << "Closing connected client sockets for socket: " << getSocketId() << std::endl;
@@ -49,7 +46,7 @@ TCPServerBase::~TCPServerBase(void)
 //==============================================================================
 void TCPServerBase::startAccept(void)
 {
-//	__COUT__ << "Begin startAccept" << std::endl;
+	//	__COUT__ << "Begin startAccept" << std::endl;
 	int opt = 1;  // SO_REUSEADDR - man socket(7)
 	if(::setsockopt(getSocketId(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) == -1)
 	{
@@ -68,7 +65,7 @@ void TCPServerBase::startAccept(void)
 		close();
 		throw std::runtime_error(std::string("Bind: ") + strerror(errno));
 	}
-    //freeaddrinfo(serverAddr); // all done with this structure
+	// freeaddrinfo(serverAddr); // all done with this structure
 
 	if(::listen(getSocketId(), fMaxConnectionBacklog) != 0)
 	{
@@ -76,9 +73,9 @@ void TCPServerBase::startAccept(void)
 		throw std::runtime_error(std::string("Listen: ") + strerror(errno));
 	}
 
-	fAccept = true;
+	fAccept       = true;
 	fAcceptFuture = std::async(std::launch::async, &TCPServerBase::acceptConnections, this);
-//	__COUT__ << "Done startAccept" << std::endl;
+	//	__COUT__ << "Done startAccept" << std::endl;
 }
 
 // An accepts waits for a connection and returns the opened socket number
@@ -86,24 +83,24 @@ void TCPServerBase::startAccept(void)
 int TCPServerBase::accept(bool blocking)
 {
 	__COUT__ << "Now server accept connections on socket: " << getSocketId() << std::endl;
-	if (getSocketId() == invalidSocketId)
+	if(getSocketId() == invalidSocketId)
 	{
 		throw std::logic_error("Accept called on a bad socket object (this object was moved)");
 	}
 
-    struct sockaddr_storage clientAddress; // connector's address information
-    socklen_t clientAddressSize = sizeof(clientAddress);
-	int clientSocket = invalidSocketId;
-	if (blocking)
+	struct sockaddr_storage clientAddress;  // connector's address information
+	socklen_t               clientAddressSize = sizeof(clientAddress);
+	int                     clientSocket      = invalidSocketId;
+	if(blocking)
 	{
 		//__COUT__ << "Number of connected clients: " << fConnectedClients.size() << std::endl;
-		//clientSocket = ::accept4(getSocketId(),(struct sockaddr *)&clientAddress,  &clientAddressSize, 0);
-		//unsigned counter = 0;
+		// clientSocket = ::accept4(getSocketId(),(struct sockaddr *)&clientAddress,  &clientAddressSize, 0);
+		// unsigned counter = 0;
 		while(true)
 		{
-			clientSocket = ::accept(getSocketId(), (struct sockaddr *)&clientAddress, &clientAddressSize);
-			pingActiveClients();//This message is to check if there are clients that disconnected and, if so, they are removed from the client list 
-			if(fAccept && fMaxNumberOfClients> 0 && fConnectedClients.size() >= fMaxNumberOfClients)
+			clientSocket = ::accept(getSocketId(), (struct sockaddr*)&clientAddress, &clientAddressSize);
+			pingActiveClients();  // This message is to check if there are clients that disconnected and, if so, they are removed from the client list
+			if(fAccept && fMaxNumberOfClients > 0 && fConnectedClients.size() >= fMaxNumberOfClients)
 			{
 				send(clientSocket, "Too many clients connected!", 27, 0);
 				::shutdown(clientSocket, SHUT_WR);
@@ -111,12 +108,12 @@ int TCPServerBase::accept(bool blocking)
 			}
 			break;
 		}
-		std::cout << __LINE__<< "] " << __PRETTY_FUNCTION__ << "fAccept? " << fAccept << std::endl;
-		if (!fAccept)
+		std::cout << __LINE__ << "] " << __PRETTY_FUNCTION__ << "fAccept? " << fAccept << std::endl;
+		if(!fAccept)
 		{
 			throw E_SHUTDOWN;
 		}
-		else if (clientSocket == invalidSocketId)
+		else if(clientSocket == invalidSocketId)
 		{
 			__COUT__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
 			throw std::runtime_error(std::string("Accept: ") + strerror(errno));
@@ -127,28 +124,29 @@ int TCPServerBase::accept(bool blocking)
 	}
 	else
 	{
-		constexpr int sleepMSeconds = 5;
-		constexpr int timeoutSeconds = 0;
-		constexpr int timeoutUSeconds = 1000;
+		constexpr int  sleepMSeconds   = 5;
+		constexpr int  timeoutSeconds  = 0;
+		constexpr int  timeoutUSeconds = 1000;
 		struct timeval timeout;
-		timeout.tv_sec = timeoutSeconds;
+		timeout.tv_sec  = timeoutSeconds;
 		timeout.tv_usec = timeoutUSeconds;
 
 		fd_set fdSet;
 
-		while (fAccept)
+		while(fAccept)
 		{
 			FD_ZERO(&fdSet);
 			FD_SET(getSocketId(), &fdSet);
 			select(getSocketId() + 1, &fdSet, 0, 0, &timeout);
 
-			if (FD_ISSET(getSocketId(), &fdSet))
+			if(FD_ISSET(getSocketId(), &fdSet))
 			{
 				struct sockaddr_in clientAddress;
-				socklen_t socketSize = sizeof(clientAddress);
-				//int newSocketFD = ::accept4(fdServerSocket_,(struct sockaddr*)&clientAddress,&socketSize, (pushOnly_ ? SOCK_NONBLOCK : 0));
-				clientSocket = ::accept(getSocketId(), (struct sockaddr *)&clientAddress, &socketSize); //Blocking since select goes in timeout if there is nothing
-				if (clientSocket == invalidSocketId)
+				socklen_t          socketSize = sizeof(clientAddress);
+				// int newSocketFD = ::accept4(fdServerSocket_,(struct sockaddr*)&clientAddress,&socketSize, (pushOnly_ ? SOCK_NONBLOCK : 0));
+				clientSocket =
+				    ::accept(getSocketId(), (struct sockaddr*)&clientAddress, &socketSize);  // Blocking since select goes in timeout if there is nothing
+				if(clientSocket == invalidSocketId)
 				{
 					__COUT__ << "New socket invalid?: " << clientSocket << " errno: " << errno << std::endl;
 					throw std::runtime_error(std::string("Accept: ") + strerror(errno));
@@ -162,7 +160,7 @@ int TCPServerBase::accept(bool blocking)
 }
 
 //==============================================================================
-//This method is called in the distructor so I need to wait for the threads to be done!
+// This method is called in the distructor so I need to wait for the threads to be done!
 void TCPServerBase::closeClientSockets(void)
 {
 	for(auto& socket : fConnectedClients)
@@ -173,14 +171,14 @@ void TCPServerBase::closeClientSockets(void)
 		}
 		catch(const std::exception& e)
 		{
-			//I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
-			//Just do nothing!
+			// I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
+			// Just do nothing!
 			__COUT__ << e.what() << '\n';
 		}
-		
+
 		auto clientThread = fConnectedClientsFuture.find(socket.first);
 		if(clientThread != fConnectedClientsFuture.end())
-			clientThread->second.wait();//Waiting for client thread
+			clientThread->second.wait();  // Waiting for client thread
 		delete socket.second;
 	}
 	fConnectedClients.clear();
@@ -190,7 +188,7 @@ void TCPServerBase::closeClientSockets(void)
 //==============================================================================
 void TCPServerBase::closeClientSocket(int socket)
 {
-	//This method is called inside the thread itself so it cannot call the removeClientSocketFuture!!!
+	// This method is called inside the thread itself so it cannot call the removeClientSocketFuture!!!
 	auto it = fConnectedClients.find(socket);
 	if(it != fConnectedClients.end())
 	{
@@ -202,8 +200,8 @@ void TCPServerBase::closeClientSocket(int socket)
 			}
 			catch(const std::exception& e)
 			{
-				//I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
-				//Just do nothing!
+				// I can get here with the TCPPubishServer because it doesn't keep track of the clients that might have already disconnected
+				// Just do nothing!
 				__COUT__ << e.what() << '\n';
 			}
 			delete it->second;
@@ -217,10 +215,7 @@ void TCPServerBase::closeClientSocket(int socket)
 }
 
 //==============================================================================
-void TCPServerBase::broadcastPacket(const char* message, std::size_t length)
-{
-	broadcastPacket(std::string(message,length));
-}
+void TCPServerBase::broadcastPacket(const char* message, std::size_t length) { broadcastPacket(std::string(message, length)); }
 
 //==============================================================================
 void TCPServerBase::broadcastPacket(const std::string& message)
@@ -233,11 +228,12 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 		}
 		catch(const std::exception& e)
 		{
-			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should
+			// contact Lorenzo Uplegger" << std::endl;
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -248,19 +244,20 @@ void TCPServerBase::broadcastPacket(const std::string& message)
 void TCPServerBase::broadcast(const char* message, std::size_t length)
 {
 	//	std::lock_guard<std::mutex> lock(clientsMutex_);
-	for (auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
+	for(auto it = fConnectedClients.begin(); it != fConnectedClients.end(); it++)
 	{
 		try
 		{
-			dynamic_cast<TCPTransmitterSocket *>(it->second)->send(message, length);
+			dynamic_cast<TCPTransmitterSocket*>(it->second)->send(message, length);
 		}
-		catch (const std::exception &e)
+		catch(const std::exception& e)
 		{
-			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should
+			// contact Lorenzo Uplegger" << std::endl;
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -278,11 +275,12 @@ void TCPServerBase::broadcast(const std::string& message)
 		}
 		catch(const std::exception& e)
 		{
-			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should
+			// contact Lorenzo Uplegger" << std::endl;
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -300,11 +298,12 @@ void TCPServerBase::broadcast(const std::vector<char>& message)
 		}
 		catch(const std::exception& e)
 		{
-			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should
+			// contact Lorenzo Uplegger" << std::endl;
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -324,8 +323,8 @@ void TCPServerBase::broadcast(const std::vector<uint16_t>& message)
 		{
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}
@@ -343,11 +342,12 @@ void TCPServerBase::pingActiveClients()
 		}
 		catch(const std::exception& e)
 		{
-			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should contact Lorenzo Uplegger" << std::endl;
+			// __COUT__ << "I don't think that this error is possible because I close the socket when I get disconnected...if you see this then you should
+			// contact Lorenzo Uplegger" << std::endl;
 			// __COUT__ << "This should only happen with the TCPSubscribeServer because it doesn't keep track of the connected clients..." << std::endl;
 			// __COUT__ << "Error: " << e.what() << std::endl;
-            if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
-                fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
+			if(fConnectedClientsFuture.find(it->first) != fConnectedClientsFuture.end())
+				fConnectedClientsFuture.erase(fConnectedClientsFuture.find(it->first));
 			delete it->second;
 			fConnectedClients.erase(it--);
 		}

@@ -5,7 +5,7 @@
 
 namespace ots
 {
-	ConfigurationInterface* makeConfigurationInterface(std::string const& interfacePluginName)
+ConfigurationInterface* makeConfigurationInterface(std::string const& interfacePluginName)
 {
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("configInterface", "make");
 

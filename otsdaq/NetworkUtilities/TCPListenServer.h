@@ -1,8 +1,8 @@
 #ifndef _TCPListenServer_h_
 #define _TCPListenServer_h_
 
-#include "otsdaq/NetworkUtilities/TCPServerBase.h"
 #include "otsdaq/NetworkUtilities/TCPReceiverSocket.h"
+#include "otsdaq/NetworkUtilities/TCPServerBase.h"
 
 #include "TRACE/trace.h"
 

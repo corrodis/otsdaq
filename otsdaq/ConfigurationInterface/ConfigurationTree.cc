@@ -749,7 +749,7 @@ bool ConfigurationTree::isDefaultValue(void) const
 //==============================================================================
 // getDefaultValue
 //	returns default value if is value node
-// TODO: should a function to get if it is min and max value be included here?? 
+// TODO: should a function to get if it is min and max value be included here??
 const std::string& ConfigurationTree::getDefaultValue(void) const
 {
 	if(!isValueNode())
@@ -1563,18 +1563,14 @@ std::vector<ConfigurationTree::RecordField> ConfigurationTree::getCommonFields(c
 
 	}  // end record loop
 
-	__COUT__ << "======================= check for count = " <<
-		(int)recordList.size() << __E__;
+	__COUT__ << "======================= check for count = " << (int)recordList.size() << __E__;
 
 	// loop through all field candidates
 	//	remove those with <field count> != num of records
 	for(unsigned int i = 0; i < fieldCandidateList.size(); ++i)
 	{
-		__COUT__ << "Checking " << fieldCandidateList[i].relativePath_ <<
-				fieldCandidateList[i].columnName_ << " = " <<
-				fieldCount[i] << __E__;
-		if(recordList.size() != 0 && fieldCount[i] != -1 &&
-				fieldCount[i] != (int)recordList.size())
+		__COUT__ << "Checking " << fieldCandidateList[i].relativePath_ << fieldCandidateList[i].columnName_ << " = " << fieldCount[i] << __E__;
+		if(recordList.size() != 0 && fieldCount[i] != -1 && fieldCount[i] != (int)recordList.size())
 		{
 			//__COUT__ << "Erasing " << fieldCandidateList[i].relativePath_ <<
 			//		fieldCandidateList[i].columnName_ << __E__;
@@ -1912,15 +1908,14 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 				//	else ignore
 				for(j = 0; j < fieldCandidateList.size(); ++j)
 				{
-					if((relativePathBase + fieldNode.first) ==
-							(fieldCandidateList[j].relativePath_ + fieldCandidateList[j].columnName_))
+					if((relativePathBase + fieldNode.first) == (fieldCandidateList[j].relativePath_ + fieldCandidateList[j].columnName_))
 					{
 						//__COUT__ << "incrementing " << j <<
 						//		" " << fieldCandidateList[j].relativePath_ << __E__;
 						// found, so increment <field count>
 						++fieldCount[j];
-						if(fieldNode.second.isGroupLinkNode() && j+1 < fieldCandidateList.size())
-							++fieldCount[j+1]; //increment associated link index too!
+						if(fieldNode.second.isGroupLinkNode() && j + 1 < fieldCandidateList.size())
+							++fieldCount[j + 1];  // increment associated link index too!
 						break;
 					}
 				}
@@ -2005,22 +2000,21 @@ void ConfigurationTree::recursiveGetCommonFields(std::vector<ConfigurationTree::
 			{
 				// if link fields (MUST BE 2) is in <field candidates list>, increment <field count>
 				//	else ignore
-				for(j = 0; j < fieldCandidateList.size()-1; ++j)
+				for(j = 0; j < fieldCandidateList.size() - 1; ++j)
 				{
-					if((relativePathBase + fieldNode.first) ==
-							(fieldCandidateList[j].relativePath_ + fieldCandidateList[j].columnName_))
+					if((relativePathBase + fieldNode.first) == (fieldCandidateList[j].relativePath_ + fieldCandidateList[j].columnName_))
 					{
 						//__COUT__ << "incrementing " << j <<
 						//		" " << fieldCandidateList[j].relativePath_ << __E__;
 						// found, so increment <field count>
 						++fieldCount[j];
-						++fieldCount[j+1]; //increment associated link index too!
+						++fieldCount[j + 1];  // increment associated link index too!
 						break;
 					}
 				}
 			}
 
-			//if depth remaining, then follow link, recursively!
+			// if depth remaining, then follow link, recursively!
 			if(depth > 0 && !fieldNode.second.isDisconnected())
 				fieldNode.second.recursiveGetCommonFields(fieldCandidateList,
 				                                          fieldCount,
@@ -2297,8 +2291,7 @@ bool ConfigurationTree::isEnabled(void) const
 {
 	if(!isUIDNode())
 	{
-		 __SS__ << "Can not get status of '" << getValueAsString() << 
-		 	".' Can only check the status of a UID/Record node!" << __E__;
+		__SS__ << "Can not get status of '" << getValueAsString() << ".' Can only check the status of a UID/Record node!" << __E__;
 		__SS_THROW__;
 	}
 
@@ -2353,7 +2346,6 @@ std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPrior
 			for(const auto& priorityChildRow : priorityChildRowVector)
 				retVector[retVector.size() - 1].push_back(tableView_->getDataView()[priorityChildRow][tableView_->getColUID()]);
 		}
-
 	}
 	else if(row_ == TableView::INVALID)
 	{

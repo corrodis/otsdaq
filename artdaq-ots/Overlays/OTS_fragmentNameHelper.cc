@@ -1,5 +1,5 @@
-#include "artdaq-ots/Overlays/FragmentType.hh"
 #include "artdaq-core/Data/FragmentNameHelper.hh"
+#include "artdaq-ots/Overlays/FragmentType.hh"
 
 #include "otsdaq/Macros/CoutMacros.h"
 #define TRACE_NAME "OtsFragmentNameHelper"
@@ -24,20 +24,19 @@ class OtsFragmentNameHelper : public artdaq::ArtdaqFragmentNameHelper
 	OtsFragmentNameHelper(std::string unidentified_instance_name, std::vector<std::pair<artdaq::Fragment::type_t, std::string>> extraTypes);
 
   private:
-	OtsFragmentNameHelper(OtsFragmentNameHelper const&) = delete;
-	OtsFragmentNameHelper(OtsFragmentNameHelper&&)      = delete;
+	OtsFragmentNameHelper(OtsFragmentNameHelper const&)            = delete;
+	OtsFragmentNameHelper(OtsFragmentNameHelper&&)                 = delete;
 	OtsFragmentNameHelper& operator=(OtsFragmentNameHelper const&) = delete;
-	OtsFragmentNameHelper& operator=(OtsFragmentNameHelper&&) = delete;
+	OtsFragmentNameHelper& operator=(OtsFragmentNameHelper&&)      = delete;
 };
 
-OtsFragmentNameHelper::OtsFragmentNameHelper(std::string                                                   unidentified_instance_name,
-                                                           std::vector<std::pair<artdaq::Fragment::type_t, std::string>> extraTypes)
+OtsFragmentNameHelper::OtsFragmentNameHelper(std::string unidentified_instance_name, std::vector<std::pair<artdaq::Fragment::type_t, std::string>> extraTypes)
     : ArtdaqFragmentNameHelper(unidentified_instance_name, extraTypes)
 {
 	TLOG(TLVL_DEBUG) << "OtsFragmentNameHelper CONSTRUCTOR START";
 	SetBasicTypes(ots::makeFragmentTypeMap());
 	TLOG(TLVL_DEBUG) << "OtsFragmentNameHelper CONSTRUCTOR END";
 }
-}  // namespace artdaq
+}  // namespace ots
 
 DEFINE_ARTDAQ_FRAGMENT_NAME_HELPER(ots::OtsFragmentNameHelper)

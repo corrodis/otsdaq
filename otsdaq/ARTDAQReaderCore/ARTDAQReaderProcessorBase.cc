@@ -1,6 +1,6 @@
 #include "otsdaq/ARTDAQReaderCore/ARTDAQReaderProcessorBase.h"
-#include "artdaq/Application/Commandable.hh"
 #include "artdaq-utilities/Plugins/MakeParameterSet.hh"
+#include "artdaq/Application/Commandable.hh"
 #include "otsdaq/DataManager/DataManager.h"
 #include "otsdaq/DataManager/DataManagerSingleton.h"
 #include "otsdaq/Macros/CoutMacros.h"
@@ -18,8 +18,8 @@ using namespace ots;
 #define ARTDAQ_FILE_PREAMBLE "boardReader"
 
 //==============================================================================
-ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              /*supervisorApplicationUID*/,
-                                                     std::string              /*bufferUID*/,
+ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string /*supervisorApplicationUID*/,
+                                                     std::string /*bufferUID*/,
                                                      std::string              processorUID,
                                                      const ConfigurationTree& theXDAQContextConfigTree,
                                                      const std::string&       configurationPath)
@@ -111,7 +111,7 @@ ARTDAQReaderProcessorBase::ARTDAQReaderProcessorBase(std::string              /*
 
 	try
 	{
-		fhiclConfiguration_ = artdaq::make_pset(fileFclString );
+		fhiclConfiguration_ = artdaq::make_pset(fileFclString);
 	}
 	catch(const cet::coded_exception<fhicl::error, &fhicl::detail::translate>& e)
 	{

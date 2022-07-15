@@ -14,5 +14,5 @@ class TCPPublishServer : public TCPServerBase
   protected:
 	void acceptConnections() override;
 };
-}
+}  // namespace ots
 #endif

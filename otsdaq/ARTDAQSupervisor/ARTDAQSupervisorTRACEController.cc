@@ -1,12 +1,11 @@
 #include "otsdaq/ARTDAQSupervisor/ARTDAQSupervisorTRACEController.h"
 #include <string>
 
-ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController()
-{}
+ots::ARTDAQSupervisorTRACEController::ARTDAQSupervisorTRACEController() {}
 
 const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEController::getTraceLevels()
 {
-	traceLevelsMap_.clear(); //reset
+	traceLevelsMap_.clear();  // reset
 
 	ots::ITRACEController::addTraceLevelsForThisHost();
 	if(theSupervisor_)
@@ -28,7 +27,8 @@ const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEContro
 
 					iss >> name >> lvlM >> lvlS >> lvlT;
 
-					//PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled by ARTDAQ supervisor.
+					// PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled
+					// by ARTDAQ supervisor.
 					traceLevelsMap_["artdaq.." + comm.first.host][name].M = lvlM;
 					traceLevelsMap_["artdaq.." + comm.first.host][name].S = lvlS;
 					traceLevelsMap_["artdaq.." + comm.first.host][name].T = lvlT;
@@ -38,10 +38,12 @@ const ots::ITRACEController::HostTraceLevelMap& ots::ARTDAQSupervisorTRACEContro
 	}
 
 	return traceLevelsMap_;
-} //end getTraceLevels()
+}  // end getTraceLevels()
 
-void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& label, TraceMasks const& lvl,
-		const std::string& host /*=localhost*/, std::string const& mode /*= "ALL"*/)
+void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& label,
+                                                             TraceMasks const&  lvl,
+                                                             const std::string& host /*=localhost*/,
+                                                             std::string const& mode /*= "ALL"*/)
 {
 	if(theSupervisor_)
 	{
@@ -51,7 +53,8 @@ void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& 
 
 		for(auto& comm : commanders)
 		{
-			//PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled by ARTDAQ supervisor.
+			// PREPEND special artdaq signature, so that normal TRACE on those hosts can be modified independently of artdaq processes that are handled by
+			// ARTDAQ supervisor.
 			if("artdaq.." + comm.first.host == host)
 			{
 				if(allMode || mode == "FAST")
@@ -66,4 +69,4 @@ void ots::ARTDAQSupervisorTRACEController::setTraceLevelMask(const std::string& 
 	}
 
 	ots::ITRACEController::setTraceLevelsForThisHost(label, lvl, mode);
-} //end setTraceLevelMask()
+}  // end setTraceLevelMask()

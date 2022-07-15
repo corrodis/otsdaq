@@ -55,7 +55,7 @@ inline void INIT_MF(const char* name)
 
 	__COUT__ << "Configuring message facility with " << logFhiclCode << __E__;
 	{
-		FILE* fp = fopen(logFhiclCode, "r");
+		FILE*        fp        = fopen(logFhiclCode, "r");
 		unsigned int charCount = 0;
 		while(fp)
 		{

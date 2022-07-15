@@ -15,16 +15,14 @@ using namespace ots;
 // clang-format on
 
 //==============================================================================
-ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void) 
-	: TableBase("ARTDAQDataLoggerTable")
-	, ARTDAQTableBase("ARTDAQDataLoggerTable")
-	, SlowControlsTableBase("ARTDAQDataLoggerTable")
+ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void)
+    : TableBase("ARTDAQDataLoggerTable"), ARTDAQTableBase("ARTDAQDataLoggerTable"), SlowControlsTableBase("ARTDAQDataLoggerTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  		//
 	//////////////////////////////////////////////////////////////////////
-	//December 2021 started seeing an issue where traceTID is found to be cleared to 0
-	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	// December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor
 	//	This check and re-initialization seems to cover up the issue for now.
 	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
 	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
@@ -32,11 +30,12 @@ ARTDAQDataLoggerTable::ARTDAQDataLoggerTable(void)
 	{
 		std::cout << "ARTDAQBoardReaderTable Before traceTID=" << traceTID << __E__;
 		char buf[40];
-		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)), 0);
 		std::cout << "ARTDAQBoardReaderTable After traceTID=" << traceTID << __E__;
 		__COUT__ << "ARTDAQDataLoggerTable TRACE reinit and Constructed." << __E__;
 	}
-	else __COUT__ << "ARTDAQDataLoggerTable Constructed." << __E__;
+	else
+		__COUT__ << "ARTDAQDataLoggerTable Constructed." << __E__;
 }  // end constructor()
 
 //==============================================================================
@@ -77,10 +76,9 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 }
 
 //==============================================================================
-unsigned int ARTDAQDataLoggerTable::slowControlsHandlerConfig(
-    std::stringstream&                                                             out,
-    ConfigurationManager*                                                          configManager,
-    std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
+unsigned int ARTDAQDataLoggerTable::slowControlsHandlerConfig(std::stringstream&                                                             out,
+                                                              ConfigurationManager*                                                          configManager,
+                                                              std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
 ) const
 {
 	/////////////////////////
