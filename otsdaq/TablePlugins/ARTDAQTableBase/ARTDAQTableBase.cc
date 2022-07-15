@@ -34,7 +34,7 @@ const std::string 	ARTDAQTableBase::ARTDAQ_BUILDER_TABLE = "ARTDAQEventBuilderTa
 const std::string 	ARTDAQTableBase::ARTDAQ_LOGGER_TABLE = "ARTDAQDataLoggerTable";
 const std::string 	ARTDAQTableBase::ARTDAQ_DISPATCHER_TABLE = "ARTDAQDispatcherTable";
 const std::string 	ARTDAQTableBase::ARTDAQ_MONITOR_TABLE = "ARTDAQMonitorTable";
-const std::string 	ARTDAQTableBase::ARTDAQ_ROUTER_TABLE = "ARTDAQRoutingMasterTable";
+const std::string 	ARTDAQTableBase::ARTDAQ_ROUTER_TABLE = "ARTDAQRoutingManagerTable";
 
 const std::string 	ARTDAQTableBase::ARTDAQ_SUBSYSTEM_TABLE = "ARTDAQSubsystemTable";
 const std::string 	ARTDAQTableBase::ARTDAQ_DAQ_TABLE = "ARTDAQDaqTable";
@@ -118,7 +118,7 @@ const std::string& ARTDAQTableBase::getTypeString(ARTDAQAppType type)
 		return processTypes_.READER;
 	case ARTDAQAppType::Monitor:
 		return processTypes_.MONITOR;
-	case ARTDAQAppType::RoutingMaster:
+	case ARTDAQAppType::RoutingManager:
 		return processTypes_.ROUTER;
 	}
 	// return "UNKNOWN";
@@ -587,10 +587,10 @@ void ARTDAQTableBase::outputBoardReaderFHICL(const ConfigurationTree& boardReade
 	{
 		readerSubsystemID = getSubsytemId(readerSubsystemLink);
 	}
-	if (info_.subsystems[readerSubsystemID].hasRoutingMaster)
+	if (info_.subsystems[readerSubsystemID].hasRoutingManager)
 	{
 		OUT << "use_routing_manager: true\n";
-		OUT << "routing_manager_hostname: \"" << info_.subsystems[readerSubsystemID].routingMasterHost << "\"\n";
+		OUT << "routing_manager_hostname: \"" << info_.subsystems[readerSubsystemID].routingManagerHost << "\"\n";
 		OUT << "table_update_port: 0\n";
 		OUT << "table_update_address: \"0.0.0.0\"\n";
 		OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -750,10 +750,10 @@ void ARTDAQTableBase::outputDataReceiverFHICL(const ConfigurationTree& receiverN
 				builderSubsystemID = getSubsytemId(builderSubsystemLink);
 			}
 
-			if (info_.subsystems[builderSubsystemID].hasRoutingMaster)
+			if (info_.subsystems[builderSubsystemID].hasRoutingManager)
 			{
 				OUT << "use_routing_manager: true\n";
-				OUT << "routing_manager_hostname: \"" << info_.subsystems[builderSubsystemID].routingMasterHost << "\"\n";
+				OUT << "routing_manager_hostname: \"" << info_.subsystems[builderSubsystemID].routingManagerHost << "\"\n";
 				OUT << "routing_token_port: 0\n";
 			}
 			else
@@ -1078,10 +1078,10 @@ void ARTDAQTableBase::insertArtProcessBlock(std::ostream& out,
 					mySubsystemID = getSubsytemId(subsystemLink);
 				}
 				destinationSubsystemID = info_.subsystems[mySubsystemID].destination;
-				if (info_.subsystems[destinationSubsystemID].hasRoutingMaster)
+				if (info_.subsystems[destinationSubsystemID].hasRoutingManager)
 				{
 					OUT << "use_routing_manager: true\n";
-					OUT << "routing_manager_hostname: \"" << info_.subsystems[destinationSubsystemID].routingMasterHost << "\"\n";
+					OUT << "routing_manager_hostname: \"" << info_.subsystems[destinationSubsystemID].routingManagerHost << "\"\n";
 					OUT << "table_update_port: 0\n";
 					OUT << "table_update_address: \"0.0.0.0\"\n";
 					OUT << "table_update_multicast_interface: \"0.0.0.0\"\n";
@@ -1338,11 +1338,11 @@ void ARTDAQTableBase::insertArtProcessBlock(std::ostream& out,
 }  // end insertArtProcessBlock()
 
 //==============================================================================
-void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingMasterNode,
+void ARTDAQTableBase::outputRoutingManagerFHICL(const ConfigurationTree& routingManagerNode,
 	size_t                   routingTimeoutMs /* = DEFAULT_ROUTING_TIMEOUT_MS */,
 	size_t                   routingRetryCount /* = DEFAULT_ROUTING_RETRY_COUNT */)
 {
-	std::string filename = getFHICLFilename(ARTDAQAppType::RoutingMaster, routingMasterNode.getValue());
+	std::string filename = getFHICLFilename(ARTDAQAppType::RoutingManager, routingManagerNode.getValue());
 
 	/////////////////////////
 	// generate xdaq run parameter file
@@ -1354,7 +1354,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	out.open(filename, std::fstream::out | std::fstream::trunc);
 	if (out.fail())
 	{
-		__SS__ << "Failed to open ARTDAQ RoutingMaster fcl file: " << filename << __E__;
+		__SS__ << "Failed to open ARTDAQ RoutingManager fcl file: " << filename << __E__;
 		__SS_THROW__;
 	}
 
@@ -1362,10 +1362,10 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	// header
 	OUT << "###########################################################" << __E__;
 	OUT << "#" << __E__;
-	OUT << "# artdaq routingMaster fcl configuration file produced by otsdaq." << __E__;
+	OUT << "# artdaq routingManager fcl configuration file produced by otsdaq." << __E__;
 	OUT << "# 	Creation time:                  \t" << StringMacros::getTimestampString() << __E__;
 	OUT << "# 	Original filename:              \t" << filename << __E__;
-	OUT << "#	otsdaq-ARTDAQ RoutingMaster UID:\t" << routingMasterNode.getValue() << __E__;
+	OUT << "#	otsdaq-ARTDAQ RoutingManager UID:\t" << routingManagerNode.getValue() << __E__;
 	OUT << "#" << __E__;
 	OUT << "###########################################################" << __E__;
 	OUT << "\n\n";
@@ -1373,7 +1373,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	// no primary link to table tree for reader node!
 	try
 	{
-		if (routingMasterNode.isDisconnected())
+		if (routingManagerNode.isDisconnected())
 		{
 			// create empty fcl
 			OUT << "{}\n\n";
@@ -1395,14 +1395,14 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 
 	OUT << "policy: {\n";
 	PUSHTAB;
-	auto policyName = routingMasterNode.getNode("routingPolicyPluginType").getValue();
+	auto policyName = routingManagerNode.getNode("routingPolicyPluginType").getValue();
 	if (policyName == "DEFAULT")
 		policyName = "NoOp";
 	OUT << "policy: " << policyName << "\n";
 	OUT << "receiver_ranks: []\n";
 
 	// shared and unique parameters
-	auto parametersLink = routingMasterNode.getNode("routingPolicyParametersLink");
+	auto parametersLink = routingManagerNode.getNode("routingPolicyParametersLink");
 	if (!parametersLink.isDisconnected())
 	{
 		auto parameters = parametersLink.getChildren();
@@ -1432,13 +1432,13 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 
 	OUT << "use_routing_manager: true\n";
 
-	auto        routingMasterSubsystemID = 1;
-	auto        routingMasterSubsystemLink = routingMasterNode.getNode("SubsystemLink");
+	auto        routingManagerSubsystemID = 1;
+	auto        routingManagerSubsystemLink = routingManagerNode.getNode("SubsystemLink");
 	std::string rmHost = "localhost";
-	if (!routingMasterSubsystemLink.isDisconnected())
+	if (!routingManagerSubsystemLink.isDisconnected())
 	{
-		routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
-		rmHost = info_.subsystems[routingMasterSubsystemID].routingMasterHost;
+		routingManagerSubsystemID = getSubsytemId(routingManagerSubsystemLink);
+		rmHost = info_.subsystems[routingManagerSubsystemID].routingManagerHost;
 	}
 	if (rmHost == "localhost" || rmHost == "127.0.0.1")
 	{
@@ -1462,12 +1462,12 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	OUT << "}\n";
 
 	// Optional parameters
-	auto tableUpdateIntervalMs = routingMasterNode.getNode("tableUpdateIntervalMs").getValue();
+	auto tableUpdateIntervalMs = routingManagerNode.getNode("tableUpdateIntervalMs").getValue();
 	if (tableUpdateIntervalMs != "DEFAULT")
 	{
 		OUT << "table_update_interval_ms: " << tableUpdateIntervalMs << "\n";
 	}
-	auto tableAckRetryCount = routingMasterNode.getNode("tableAckRetryCount").getValue();
+	auto tableAckRetryCount = routingManagerNode.getNode("tableAckRetryCount").getValue();
 	if (tableAckRetryCount != "DEFAULT")
 	{
 		OUT << "table_ack_retry_count: " << tableAckRetryCount << "\n";
@@ -1476,7 +1476,7 @@ void ARTDAQTableBase::outputRoutingMasterFHICL(const ConfigurationTree& routingM
 	OUT << "routing_timeout_ms: " << routingTimeoutMs << "\n";
 	OUT << "routing_retry_count: " << routingRetryCount << "\n";
 
-	insertMetricsBlock(OUT, tabStr, commentStr, routingMasterNode);
+	insertMetricsBlock(OUT, tabStr, commentStr, routingManagerNode);
 
 	POPTAB;
 	OUT << "}\n\n";  // end daq
@@ -1510,8 +1510,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 	if (artdaqSupervisorNode.isDisconnected())
 		return info_;
 
-	// We do RoutingMasters first so we can properly fill in routing tables later
-	extractRoutingMastersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
+	// We do RoutingManagers first so we can properly fill in routing tables later
+	extractRoutingManagersInfo(artdaqSupervisorNode, getStatusFalseNodes, doWriteFHiCL, routingTimeoutMs, routingRetryCount);
 
 	if (progressBar)
 		progressBar->step();
@@ -1540,24 +1540,24 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::extractARTDAQInfo(Configurat
 }  // end extractARTDAQInfo()
 
 //==============================================================================
-void ARTDAQTableBase::extractRoutingMastersInfo(
+void ARTDAQTableBase::extractRoutingManagersInfo(
 	ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount)
 {
-	__COUT__ << "Checking for Routing Masters..." << __E__;
-	ConfigurationTree rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingMasters_);
+	__COUT__ << "Checking for Routing Managers..." << __E__;
+	ConfigurationTree rmsLink = artdaqSupervisorNode.getNode(colARTDAQSupervisor_.colLinkToRoutingManagers_);
 	if (!rmsLink.isDisconnected() && rmsLink.getChildren().size() > 0)
 	{
-		std::vector<std::pair<std::string, ConfigurationTree>> routingMasters = rmsLink.getChildren();
+		std::vector<std::pair<std::string, ConfigurationTree>> routingManagers = rmsLink.getChildren();
 
-		__COUT__ << "There are " << routingMasters.size() << " configured Routing Masters" << __E__;
+		__COUT__ << "There are " << routingManagers.size() << " configured Routing Managers" << __E__;
 
-		for (auto& routingMaster : routingMasters)
+		for (auto& routingManager : routingManagers)
 		{
-			const std::string& rmUID = routingMaster.first;
+			const std::string& rmUID = routingManager.first;
 
-			if (getStatusFalseNodes || routingMaster.second.status())
+			if (getStatusFalseNodes || routingManager.second.status())
 			{
-				std::string rmHost = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
+				std::string rmHost = routingManager.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_HOSTNAME).getValueWithDefault("localhost");
 				if (rmHost == "localhost" || rmHost == "127.0.0.1")
 				{
 					char hostbuf[HOST_NAME_MAX + 1];
@@ -1565,74 +1565,74 @@ void ARTDAQTableBase::extractRoutingMastersInfo(
 					rmHost = std::string(hostbuf);
 				}
 
-				std::string rmAP = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_ALLOWED_PROCESSORS).getValueWithDefault("");
+				std::string rmAP = routingManager.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_ALLOWED_PROCESSORS).getValueWithDefault("");
 
-				int               routingMasterSubsystemID = 1;
-				ConfigurationTree routingMasterSubsystemLink = routingMaster.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
-				if (!routingMasterSubsystemLink.isDisconnected())
+				int               routingManagerSubsystemID = 1;
+				ConfigurationTree routingManagerSubsystemLink = routingManager.second.getNode(ARTDAQTableBase::ARTDAQ_TYPE_TABLE_SUBSYSTEM_LINK);
+				if (!routingManagerSubsystemLink.isDisconnected())
 				{
-					routingMasterSubsystemID = getSubsytemId(routingMasterSubsystemLink);
+					routingManagerSubsystemID = getSubsytemId(routingManagerSubsystemLink);
 
-					//__COUTV__(routingMasterSubsystemID);
-					info_.subsystems[routingMasterSubsystemID].id = routingMasterSubsystemID;
+					//__COUTV__(routingManagerSubsystemID);
+					info_.subsystems[routingManagerSubsystemID].id = routingManagerSubsystemID;
 
-					const std::string& routingMasterSubsystemName = routingMasterSubsystemLink.getUIDAsString();
-					//__COUTV__(routingMasterSubsystemName);
+					const std::string& routingManagerSubsystemName = routingManagerSubsystemLink.getUIDAsString();
+					//__COUTV__(routingManagerSubsystemName);
 
-					info_.subsystems[routingMasterSubsystemID].label = routingMasterSubsystemName;
+					info_.subsystems[routingManagerSubsystemID].label = routingManagerSubsystemName;
 
-					if (info_.subsystems[routingMasterSubsystemID].hasRoutingMaster)
+					if (info_.subsystems[routingManagerSubsystemID].hasRoutingManager)
 					{
-						__SS__ << "Error: You cannot have multiple Routing Masters in a subsystem!";
+						__SS__ << "Error: You cannot have multiple Routing Managers in a subsystem!";
 						__SS_THROW__;
 						return;
 					}
 
-					auto routingMasterSubsystemDestinationLink = routingMasterSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
-					if (routingMasterSubsystemDestinationLink.isDisconnected())
+					auto routingManagerSubsystemDestinationLink = routingManagerSubsystemLink.getNode(colARTDAQSubsystem_.colLinkToDestination_);
+					if (routingManagerSubsystemDestinationLink.isDisconnected())
 					{
 						// default to no destination when no link
-						info_.subsystems[routingMasterSubsystemID].destination = 0;
+						info_.subsystems[routingManagerSubsystemID].destination = 0;
 					}
 					else
 					{
 						// get destination subsystem id
-						info_.subsystems[routingMasterSubsystemID].destination = getSubsytemId(routingMasterSubsystemDestinationLink);
+						info_.subsystems[routingManagerSubsystemID].destination = getSubsytemId(routingManagerSubsystemDestinationLink);
 					}
-					//__COUTV__(info_.subsystems[routingMasterSubsystemID].destination);
+					//__COUTV__(info_.subsystems[routingManagerSubsystemID].destination);
 
 					// add this subsystem to destination subsystem's sources, if not
 					// there
-					if (!info_.subsystems.count(info_.subsystems[routingMasterSubsystemID].destination) ||
-						!info_.subsystems[info_.subsystems[routingMasterSubsystemID].destination].sources.count(routingMasterSubsystemID))
+					if (!info_.subsystems.count(info_.subsystems[routingManagerSubsystemID].destination) ||
+						!info_.subsystems[info_.subsystems[routingManagerSubsystemID].destination].sources.count(routingManagerSubsystemID))
 					{
-						info_.subsystems[info_.subsystems[routingMasterSubsystemID].destination].sources.insert(routingMasterSubsystemID);
+						info_.subsystems[info_.subsystems[routingManagerSubsystemID].destination].sources.insert(routingManagerSubsystemID);
 					}
 
 				}  // end subsystem instantiation
 
-				__COUT__ << "Found Routing Master with UID " << rmUID << ", DAQInterface Hostname " << rmHost << ", and Subsystem " << routingMasterSubsystemID
+				__COUT__ << "Found Routing Manager with UID " << rmUID << ", DAQInterface Hostname " << rmHost << ", and Subsystem " << routingManagerSubsystemID
 					<< __E__;
-				info_.processes[ARTDAQAppType::RoutingMaster].emplace_back(
-				    rmUID, rmHost, rmAP, routingMasterSubsystemID, ARTDAQAppType::RoutingMaster, routingMaster.second.status());
+				info_.processes[ARTDAQAppType::RoutingManager].emplace_back(
+				    rmUID, rmHost, rmAP, routingManagerSubsystemID, ARTDAQAppType::RoutingManager, routingManager.second.status());
 
-				info_.subsystems[routingMasterSubsystemID].hasRoutingMaster = true;
-				info_.subsystems[routingMasterSubsystemID].routingMasterHost = rmHost;
+				info_.subsystems[routingManagerSubsystemID].hasRoutingManager = true;
+				info_.subsystems[routingManagerSubsystemID].routingManagerHost = rmHost;
 
 				if (doWriteFHiCL)
 				{
-					outputRoutingMasterFHICL(routingMaster.second, routingTimeoutMs, routingRetryCount);
+					outputRoutingManagerFHICL(routingManager.second, routingTimeoutMs, routingRetryCount);
 
-					flattenFHICL(ARTDAQAppType::RoutingMaster, routingMaster.second.getValue());
+					flattenFHICL(ARTDAQAppType::RoutingManager, routingManager.second.getValue());
 				}
 			}
 			else  // disabled
 			{
-				__COUT__ << "Routing Master " << rmUID << " is disabled." << __E__;
+				__COUT__ << "Routing Manager " << rmUID << " is disabled." << __E__;
 			}
 		}  // end routing manager loop
 	}
-}  // end extractRoutingMastersInfo()
+}  // end extractRoutingManagersInfo()
 
 //==============================================================================
 void ARTDAQTableBase::extractBoardReadersInfo(ConfigurationTree artdaqSupervisorNode,
@@ -2606,10 +2606,10 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 			// create group link to routing managers
 			artdaqSupervisorTable.tableView_->setValueAsString(
-				ARTDAQ_ROUTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
+				ARTDAQ_ROUTER_TABLE, row, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingManagers_));
 			artdaqSupervisorTable.tableView_->setUniqueColumnValue(
 				row,
-				artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+				artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingManagersGroupID_),
 				artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
 
 			{
@@ -2936,15 +2936,15 @@ void ARTDAQTableBase::setAndActivateARTDAQSystem(
 
 			// create group link to routing managers
 			if (artdaqSupervisorTable.tableView_
-				->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_)] ==
+				->getDataView()[artdaqSupervisorRow][artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingManagers_)] ==
 				TableViewColumnInfo::DATATYPE_LINK_DEFAULT)
 			{
 				__COUT__ << "Fixing missing link to Routers" << __E__;
 				artdaqSupervisorTable.tableView_->setValueAsString(
-					ARTDAQ_ROUTER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMasters_));
+					ARTDAQ_ROUTER_TABLE, artdaqSupervisorRow, artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingManagers_));
 				artdaqSupervisorTable.tableView_->setUniqueColumnValue(
 					artdaqSupervisorRow,
-					artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_),
+					artdaqSupervisorTable.tableView_->findCol(colARTDAQSupervisor_.colLinkToRoutingManagersGroupID_),
 					artdaqSupervisorUID + processTypes_.mapToGroupIDAppend_.at(processTypes_.ROUTER));
 			}
 

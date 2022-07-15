@@ -28,7 +28,7 @@ basic_plugin(ARTDAQEventBuilderTable "table"
   SlowControlsTableBase
   )
   
-basic_plugin(ARTDAQRoutingMasterTable "table"
+basic_plugin(ARTDAQRoutingManagerTable "table"
   ARTDAQTableBase
   SlowControlsTableBase
   )

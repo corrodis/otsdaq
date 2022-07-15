@@ -36,7 +36,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		DataLogger,
 		Dispatcher,
 		Monitor,
-		RoutingMaster
+		RoutingManager
 	};
 
 	enum
@@ -71,10 +71,10 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		int           destination;  // destination subsystem id, 0 := no destination
 
 		bool eventMode; // Whether art sends events or Fragments
-		bool hasRoutingMaster;
-		std::string routingMasterHost;
+		bool hasRoutingManager;
+		std::string routingManagerHost;
 
-		SubsystemInfo() : sources(), destination(0),eventMode(false), hasRoutingMaster(false), routingMasterHost("") {}
+		SubsystemInfo() : sources(), destination(0),eventMode(false), hasRoutingManager(false), routingManagerHost("") {}
 	};
 
 	struct ARTDAQInfo
@@ -113,7 +113,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	            							                       		 size_t                   routingTimeoutMs     = DEFAULT_ROUTING_TIMEOUT_MS,
 	            							                       		 size_t                   routingRetryCount    = DEFAULT_ROUTING_RETRY_COUNT);
 
-	static void 							outputRoutingMasterFHICL	(const ConfigurationTree& routingMasterNode,
+	static void 							outputRoutingManagerFHICL	(const ConfigurationTree& routingManagerNode,
 	            							                        	 size_t                   routingTimeoutMs  = DEFAULT_ROUTING_TIMEOUT_MS,
 	            							                        	 size_t                   routingRetryCount = DEFAULT_ROUTING_RETRY_COUNT);
 
@@ -144,7 +144,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 
   private:
 	static int  							getSubsytemId				(ConfigurationTree subsystemNode);
-	static void 							extractRoutingMastersInfo	(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount);
+	static void 							extractRoutingManagersInfo	(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t routingTimeoutMs, size_t routingRetryCount);
 	static void 							extractBoardReadersInfo		(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes, size_t routingTimeoutMs, size_t routingRetryCount);
 	static void       						extractEventBuildersInfo	(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
 	static void       						extractDataLoggersInfo		(ConfigurationTree artdaqSupervisorNode, bool getStatusFalseNodes, bool doWriteFHiCL, size_t maxFragmentSizeBytes);
@@ -169,7 +169,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 				std::make_pair(LOGGER, 		ARTDAQTableBase::ARTDAQAppType::DataLogger),
 				std::make_pair(DISPATCHER, 	ARTDAQTableBase::ARTDAQAppType::Dispatcher),
 				std::make_pair(MONITOR, 	ARTDAQTableBase::ARTDAQAppType::Monitor),
-				std::make_pair(ROUTER, 		ARTDAQTableBase::ARTDAQAppType::RoutingMaster)})
+				std::make_pair(ROUTER, 		ARTDAQTableBase::ARTDAQAppType::RoutingManager)})
 			, mapToTable_({
 				std::make_pair(READER, 		ARTDAQTableBase::ARTDAQ_READER_TABLE),
 				std::make_pair(BUILDER, 	ARTDAQTableBase::ARTDAQ_BUILDER_TABLE),
@@ -183,20 +183,20 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 				std::make_pair(LOGGER, 		"DataLoggers"),
 				std::make_pair(DISPATCHER, 	"Dispatchers"),
 				std::make_pair(MONITOR, 	"Monitors"),
-				std::make_pair(ROUTER, 		"RoutingMasters")})
+				std::make_pair(ROUTER, 		"RoutingManagers")})
 		    , mapToLinkGroupIDColumn_({		    	
 				std::make_pair(READER, 		ARTDAQTableBase::colARTDAQSupervisor_.colLinkToBoardReadersGroupID_),
 				std::make_pair(BUILDER, 	ARTDAQTableBase::colARTDAQSupervisor_.colLinkToEventBuildersGroupID_),
 				std::make_pair(LOGGER, 		ARTDAQTableBase::colARTDAQSupervisor_.colLinkToDataLoggersGroupID_),
 				std::make_pair(DISPATCHER, 	ARTDAQTableBase::colARTDAQSupervisor_.colLinkToDispatchersGroupID_),
-				std::make_pair(ROUTER, 		ARTDAQTableBase::colARTDAQSupervisor_.colLinkToRoutingMastersGroupID_)})
+				std::make_pair(ROUTER, 		ARTDAQTableBase::colARTDAQSupervisor_.colLinkToRoutingManagersGroupID_)})
 		    , mapToGroupIDColumn_({		    	
 				std::make_pair(READER, 		"BoardReaderGroupID"),
 				std::make_pair(BUILDER, 	"EventBuilderGroupID"),
 				std::make_pair(LOGGER, 		"DataLoggerGroupID"),
 				std::make_pair(DISPATCHER, 	"DispatcherGroupID"),
 				std::make_pair(MONITOR, 	"MonitorGroupID"),
-				std::make_pair(ROUTER, 		"RoutingMasterGroupID")})
+				std::make_pair(ROUTER, 		"RoutingManagerGroupID")})
 		{}
 
 		const std::map<std::string /*processType*/, ARTDAQTableBase::ARTDAQAppType> mapToType_;
@@ -217,8 +217,8 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 		std::string const colLinkToDataLoggersGroupID_    	= "DataLoggersLinkGroupID";
 		std::string const colLinkToDispatchers_           	= "DispatchersLink";
 		std::string const colLinkToDispatchersGroupID_    	= "DispatchersLinkGroupID";
-		std::string const colLinkToRoutingMasters_        	= "RoutingMastersLink";
-		std::string const colLinkToRoutingMastersGroupID_ 	= "RoutingMastersLinkGroupID";
+		std::string const colLinkToRoutingManagers_        	= "RoutingManagersLink";
+		std::string const colLinkToRoutingManagersGroupID_ 	= "RoutingManagersLinkGroupID";
 	} colARTDAQSupervisor_;
 
 	// ARTDAQ Subsystem Column names

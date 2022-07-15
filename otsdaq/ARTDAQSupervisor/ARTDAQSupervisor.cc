@@ -501,7 +501,7 @@ try
 		}
 		if(logger.allowed_processors != "")
 		{
-			o << "DataLogger allowed_processors" << builder.allowed_processors << std::endl;
+			o << "DataLogger allowed_processors" << logger.allowed_processors << std::endl;
 		}
 		o << std::endl;
 	}
@@ -516,21 +516,21 @@ try
 		}
 		if(dispatcher.allowed_processors != "")
 		{
-			o << "Dispatcher allowed_processors" << builder.allowed_processors << std::endl;
+			o << "Dispatcher allowed_processors" << dispatcher.allowed_processors << std::endl;
 		}
 		o << std::endl;
 	}
-	for (auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
+	for (auto& rmanager : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingManager])
 	{
-		o << "RoutingMaster host: " << rmaster.hostname << std::endl;
-		o << "RoutingMaster label: " << rmaster.label << std::endl;
-		if (rmaster.subsystem != 1)
+		o << "RoutingManager host: " << rmanager.hostname << std::endl;
+		o << "RoutingManager label: " << rmanager.label << std::endl;
+		if (rmanager.subsystem != 1)
 		{
-			o << "RoutingMaster subsystem: " << rmaster.subsystem << std::endl;
+			o << "RoutingManager subsystem: " << rmanager.subsystem << std::endl;
 		}
-		if(rmaster.allowed_processors != "")
+		if(rmanager.allowed_processors != "")
 		{
-			o << "RoutingMaster allowed_processors" << builder.allowed_processors << std::endl;
+			o << "RoutingManager allowed_processors" << rmanager.allowed_processors << std::endl;
 		}
 		o << std::endl;
 	}
@@ -565,10 +565,10 @@ try
 		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::Dispatcher, dispatcher.label).c_str(),
 			(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + dispatcher.label + ".fcl").c_str());
 	}
-	for (auto& rmaster : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingMaster])
+	for (auto& rmanager : info.processes[ARTDAQTableBase::ARTDAQAppType::RoutingManager])
 	{
-		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::RoutingMaster, rmaster.label).c_str(),
-			(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + rmaster.label + ".fcl").c_str());
+		symlink(ARTDAQTableBase::getFlatFHICLFilename(ARTDAQTableBase::ARTDAQAppType::RoutingManager, rmanager.label).c_str(),
+			(ARTDAQTableBase::ARTDAQ_FCL_PATH + FAKE_CONFIG_NAME + "/" + rmanager.label + ".fcl").c_str());
 	}
 
 	thread_progress_bar_.step();
