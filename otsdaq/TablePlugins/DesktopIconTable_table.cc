@@ -78,14 +78,11 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 
 	auto childrenMap = configManager->__SELF_NODE__.getChildren();
 
-	ConfigurationTree contextTableNode = configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
-	const XDAQContextTable* contextTable =
-			configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+	ConfigurationTree       contextTableNode = configManager->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
+	const XDAQContextTable* contextTable     = configManager->getTable<XDAQContextTable>(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME);
 
-	//find gateway host origin string, to avoid modifying icons with same host
+	// find gateway host origin string, to avoid modifying icons with same host
 	std::string gatewayContextUID = contextTable->getContextOfGateway(configManager);
-
-
 
 	activeDesktopIcons_.clear();
 
@@ -137,53 +134,42 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 		icon->folderPath_       = removeCommas(icon->folderPath_, false /*andHexReplace*/, true /*andHTMLReplace*/);
 
 		// add application origin and URN/LID to windowContentURL_, if link is given
-		addedAppId = false;
+		addedAppId                = false;
 		ConfigurationTree appLink = child.second.getNode(COL_APP_LINK);
 		if(!appLink.isDisconnected())
 		{
-
-			//first check app origin
+			// first check app origin
 			if(icon->windowContentURL_.size() && icon->windowContentURL_[0] == '/')
 			{
-				//if starting with opening slash, then assume app should come from
+				// if starting with opening slash, then assume app should come from
 				//	appLink context's origin (to avoid cross-origin issues communicating
 				//	with app/supervisor)
 
-				std::string contextUID = contextTable->getContextOfApplication(configManager,
-						appLink.getValueAsString());
+				std::string contextUID = contextTable->getContextOfApplication(configManager, appLink.getValueAsString());
 
-
-				//only prepend address if not same as gateway
+				// only prepend address if not same as gateway
 				if(contextUID != gatewayContextUID)
 				{
 					try
 					{
 						//__COUTV__(contextUID);
-						ConfigurationTree contextNode =
-								contextTableNode.getNode(contextUID);
+						ConfigurationTree contextNode = contextTableNode.getNode(contextUID);
 
-						std::string contextAddress =  contextNode.getNode(
-								XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
-						unsigned int contextPort =  contextNode.getNode(
-								XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+						std::string  contextAddress = contextNode.getNode(XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
+						unsigned int contextPort    = contextNode.getNode(XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
 
 						//__COUTV__(contextAddress);
-						icon->windowContentURL_ = contextAddress + ":" +
-								std::to_string(contextPort) +
-								icon->windowContentURL_;
+						icon->windowContentURL_ = contextAddress + ":" + std::to_string(contextPort) + icon->windowContentURL_;
 						//__COUTV__(icon->windowContentURL_);
 					}
 					catch(const std::runtime_error& e)
 					{
-						__SS__ << "Error finding App origin which was linked to Desktop Icon '" <<
-								child.first <<
-								"': " << e.what() << __E__;
+						__SS__ << "Error finding App origin which was linked to Desktop Icon '" << child.first << "': " << e.what() << __E__;
 						ss << "\n\nPlease fix by disabling the Icon, enabling the App or fixing the link in the Configurate Tree." << __E__;
 						__SS_THROW__;
 					}
 				}
-			} //end app origin check
-
+			}  // end app origin check
 
 			// if last character is not '='
 			//	then assume need to add "?urn="

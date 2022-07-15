@@ -33,12 +33,13 @@ std::string SupervisorInfo::extractHostname(const std::string& URL)
 	size_t i = URL.find("://");
 	if(i == std::string::npos)
 		i = 0;
-	else i += 3;
+	else
+		i += 3;
 	//__COUTV__(i);
-	size_t j = URL.find(":",i);
+	size_t j = URL.find(":", i);
 	if(j != std::string::npos)
 		j -= i;
 	//__COUTV__(j);
 	//__COUTV__(URL.substr(i,j));
-	return URL.substr(i,j);
-} //end extractHostname
+	return URL.substr(i, j);
+}  // end extractHostname

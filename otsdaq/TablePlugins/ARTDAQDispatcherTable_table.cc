@@ -15,10 +15,8 @@ using namespace ots;
 // clang-format on
 
 //==============================================================================
-ARTDAQDispatcherTable::ARTDAQDispatcherTable(void) 
-	: TableBase("ARTDAQDispatcherTable")
-	, ARTDAQTableBase("ARTDAQDispatcherTable")
-	, SlowControlsTableBase("ARTDAQDispatcherTable")
+ARTDAQDispatcherTable::ARTDAQDispatcherTable(void)
+    : TableBase("ARTDAQDispatcherTable"), ARTDAQTableBase("ARTDAQDispatcherTable"), SlowControlsTableBase("ARTDAQDispatcherTable")
 
 {
 	//////////////////////////////////////////////////////////////////////
@@ -135,8 +133,8 @@ unsigned int ARTDAQDispatcherTable::slowControlsHandlerConfig(std::stringstream&
 						numberOfDispatcherMetricParameters =
 						    slowControlsHandler(out, tabStr, commentStr, subsystem, dispatcherPair.first, slowControlsLink, channelList);
 
-						__COUT__ << "Dispatcher '" << dispatcherPair.first
-						         << "' number of metrics for slow controls: " << numberOfDispatcherMetricParameters << __E__;
+						__COUT__ << "Dispatcher '" << dispatcherPair.first << "' number of metrics for slow controls: " << numberOfDispatcherMetricParameters
+						         << __E__;
 					}
 				}
 			}

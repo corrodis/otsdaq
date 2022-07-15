@@ -18,5 +18,5 @@ class TCPTransceiverSocket : public TCPReceiverSocket, public TCPTransmitterSock
 	std::string sendAndReceivePacket(const std::string& sendBuffer);
 	std::string sendAndReceive(const std::string& sendBuffer);
 };
-}
+}  // namespace ots
 #endif

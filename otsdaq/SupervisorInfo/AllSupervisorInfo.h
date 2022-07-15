@@ -2,8 +2,8 @@
 #define _ots_AllSupervisorInfo_h
 
 #include <map>
-#include <vector>
 #include <mutex> /* for recursive_mutex */
+#include <vector>
 
 #include "otsdaq/SupervisorInfo/SupervisorDescriptorInfoBase.h"
 #include "otsdaq/SupervisorInfo/SupervisorInfo.h"

@@ -15,7 +15,8 @@ using namespace ots;
 //			- 3: next highest is partial LEADING-wildcard match
 //			- 4: lowest priority is partial full-wildcard match
 //		return priority found by reference
-bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack, unsigned int* priorityIndex) try
+bool StringMacros::wildCardMatch(const std::string& needle, const std::string& haystack, unsigned int* priorityIndex)
+try
 {
 	//	__COUT__ << "\t\t wildCardMatch: " << needle <<
 	//			" =in= " << haystack << " ??? " <<
@@ -158,27 +159,27 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 	unsigned int ws = -1;
 	char         htmlTmp[6];
 
-	for (unsigned int i = 0; i < inString.length(); i++)
-		if (inString[i] != ' ')
+	for(unsigned int i = 0; i < inString.length(); i++)
+		if(inString[i] != ' ')
 		{
-			if (doit)
+			if(doit)
 				__COUT__ << inString[i] << ":" << (int)inString[i] << ":" << inString << std::endl;
 
 			// remove new lines and unprintable characters
-			if (inString[i] == '\r' || inString[i] == '\n' ||          // remove new line chars
-				inString[i] == '\t' ||                                 // remove tabs
-				inString[i] < 32 ||                                    // remove un-printable characters (they mess up xml
-																	   // interpretation)
-				(inString[i] > char(126) && inString[i] < char(161)))  // this is aggravated by the bug in
-																	   // MFextensions (though Eric says he fixed on
-																	   // 8/24/2016)  Note: greater than 255 should be
-																	   // impossible if by byte (but there are html
-																	   // chracters in 300s and 8000s)
+			if(inString[i] == '\r' || inString[i] == '\n' ||          // remove new line chars
+			   inString[i] == '\t' ||                                 // remove tabs
+			   inString[i] < 32 ||                                    // remove un-printable characters (they mess up xml
+			                                                          // interpretation)
+			   (inString[i] > char(126) && inString[i] < char(161)))  // this is aggravated by the bug in
+			                                                          // MFextensions (though Eric says he fixed on
+			                                                          // 8/24/2016)  Note: greater than 255 should be
+			                                                          // impossible if by byte (but there are html
+			                                                          // chracters in 300s and 8000s)
 			{
-				if (  // maintain new lines and tabs
-					inString[i] == '\n')
+				if(  // maintain new lines and tabs
+				    inString[i] == '\n')
 				{
-					if (allowWhiteSpace)
+					if(allowWhiteSpace)
 					{
 						sprintf(htmlTmp, "&#%3.3d", inString[i]);
 						inString.insert(i, htmlTmp);         // insert html str sequence
@@ -189,12 +190,12 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 					else  // translate to ' '
 						inString[i] = ' ';
 				}
-				else if (  // maintain new lines and tabs
-					inString[i] == '\t')
+				else if(  // maintain new lines and tabs
+				    inString[i] == '\t')
 				{
-					if (allowWhiteSpace)
+					if(allowWhiteSpace)
 					{
-						if (0)
+						if(0)
 						{
 							// tab = 8 spaces
 							sprintf(htmlTmp, "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
@@ -220,37 +221,37 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 					inString.erase(i, 1);  // erase character
 					--i;                   // step back so next char to check is correct
 				}
-				if (doit)
+				if(doit)
 					__COUT__ << inString << std::endl;
 				continue;
 			}
 
-			if (doit)
+			if(doit)
 				__COUT__ << inString << std::endl;
 
 			// replace special characters
-			if (inString[i] == '\"' || inString[i] == '\'')
+			if(inString[i] == '\"' || inString[i] == '\'')
 			{
 				inString.insert(i,
-					(inString[i] == '\'') ? "&apos" : "&quot");  // insert HTML name before quotes
+				                (inString[i] == '\'') ? "&apos" : "&quot");  // insert HTML name before quotes
 				inString.replace(i + 5, 1, 1, ';');                          // replace special character with ;
 				i += 5;                                                      // skip to next char to check
-																			 //__COUT__ <<  inString << std::endl;
+				                                                             //__COUT__ <<  inString << std::endl;
 			}
-			else if (inString[i] == '&')
+			else if(inString[i] == '&')
 			{
 				inString.insert(i, "&amp");          // insert HTML name before special character
 				inString.replace(i + 4, 1, 1, ';');  // replace special character with ;
 				i += 4;                              // skip to next char to check
 			}
-			else if (inString[i] == '<' || inString[i] == '>')
+			else if(inString[i] == '<' || inString[i] == '>')
 			{
 				inString.insert(i,
-					(inString[i] == '<') ? "&lt" : "&gt");  // insert HTML name before special character
+				                (inString[i] == '<') ? "&lt" : "&gt");  // insert HTML name before special character
 				inString.replace(i + 3, 1, 1, ';');                     // replace special character with ;
 				i += 3;                                                 // skip to next char to check
 			}
-			else if (inString[i] >= char(161) && inString[i] <= char(255))  // printable special characters
+			else if(inString[i] >= char(161) && inString[i] <= char(255))  // printable special characters
 			{
 				sprintf(htmlTmp, "&#%3.3d", inString[i]);
 				inString.insert(i, htmlTmp);         // insert html number sequence
@@ -258,18 +259,18 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 				i += 5;                              // skip to next char to check
 			}
 
-			if (doit)
+			if(doit)
 				__COUT__ << inString << std::endl;
 
 			ws = i;  // last non white space char
 		}
-		else if (allowWhiteSpace)  // keep white space if allowed
+		else if(allowWhiteSpace)  // keep white space if allowed
 		{
-			if (i - 1 == ws)
+			if(i - 1 == ws)
 				continue;  // dont do anything for first white space
 
 			// for second white space add 2, and 1 from then
-			if (0 && i - 2 == ws)
+			if(0 && i - 2 == ws)
 			{
 				inString.insert(i, "&#160;");  // insert html space
 				i += 6;                        // skip to point at space again
@@ -277,25 +278,25 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 			inString.insert(i, "&#160");         // insert html space
 			inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
 			i += 5;                              // skip to next char to check
-												 // ws = i;
+			                                     // ws = i;
 		}
 
-	if (doit)
+	if(doit)
 		__COUT__ << inString.size() << " " << ws << std::endl;
 
 	// inString.substr(0,ws+1);
 
-	if (doit)
+	if(doit)
 		__COUT__ << inString.size() << " " << inString << std::endl;
 
-	if (allowWhiteSpace)  // keep all white space
+	if(allowWhiteSpace)  // keep all white space
 		return inString;
 	// else trim trailing white space
 
-	if (ws == (unsigned int)-1)
+	if(ws == (unsigned int)-1)
 		return "";                      // empty std::string since all white space
 	return inString.substr(0, ws + 1);  // trim right white space
-} //end escapeString()
+}  // end escapeString()
 
 //==============================================================================
 // convertEnvironmentVariables ~
@@ -553,7 +554,8 @@ std::string StringMacros::getTimestampString(const time_t& linuxTimeInSeconds)
 //==============================================================================
 // validateValueForDefaultStringDataType
 //
-std::string StringMacros::validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables) try
+std::string StringMacros::validateValueForDefaultStringDataType(const std::string& value, bool doConvertEnvironmentVariables)
+try
 {
 	return doConvertEnvironmentVariables ? StringMacros::convertEnvironmentVariables(value) : value;
 }
@@ -616,7 +618,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
                                        const std::set<char>&     delimiter,
                                        const std::set<char>&     whitespace,
                                        std::vector<char>*        listOfDelimiters,
-					   bool	decodeURIComponents)
+                                       bool                      decodeURIComponents)
 {
 	unsigned int             i = 0;
 	unsigned int             j = 0;
@@ -667,9 +669,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 				//__COUTV__(lastDelimiter);
 				listOfDelimiters->push_back(lastDelimiter);
 			}
-			listToReturn.push_back(decodeURIComponents?
-					StringMacros::decodeURIComponent(inputString.substr(i, j - i)):
-					inputString.substr(i, j - i));
+			listToReturn.push_back(decodeURIComponents ? StringMacros::decodeURIComponent(inputString.substr(i, j - i)) : inputString.substr(i, j - i));
 
 			// setup i and j for next find
 			i = c + 1;
@@ -696,9 +696,7 @@ void StringMacros::getVectorFromString(const std::string&        inputString,
 			//__COUTV__(lastDelimiter);
 			listOfDelimiters->push_back(lastDelimiter);
 		}
-		listToReturn.push_back(decodeURIComponents?
-				StringMacros::decodeURIComponent(inputString.substr(i, j - i)):
-				inputString.substr(i, j - i));
+		listToReturn.push_back(decodeURIComponents ? StringMacros::decodeURIComponent(inputString.substr(i, j - i)) : inputString.substr(i, j - i));
 	}
 
 	// assert that there is one less delimiter than values
@@ -729,7 +727,7 @@ std::vector<std::string> StringMacros::getVectorFromString(const std::string&   
                                                            const std::set<char>& delimiter,
                                                            const std::set<char>& whitespace,
                                                            std::vector<char>*    listOfDelimiters,
-															bool decodeURIComponents)
+                                                           bool                  decodeURIComponents)
 {
 	std::vector<std::string> listToReturn;
 
@@ -745,7 +743,8 @@ void StringMacros::getMapFromString(const std::string&                  inputStr
                                     std::map<std::string, std::string>& mapToReturn,
                                     const std::set<char>&               pairPairDelimiter,
                                     const std::set<char>&               nameValueDelimiter,
-                                    const std::set<char>&               whitespace) try
+                                    const std::set<char>&               whitespace)
+try
 {
 	unsigned int i = 0;
 	unsigned int j = 0;
@@ -1006,7 +1005,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 			else
 				break;
 
-		//bool allHave0 = true;
+		// bool allHave0 = true;
 		for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
 		{
 			unsigned int cnt = 0;
@@ -1188,7 +1187,7 @@ std::string StringMacros::stackTrace()
 	char** messages = backtrace_symbols(array, size);
 
 	// skip first stack frame (points here)
-	//char syscom[256];
+	// char syscom[256];
 	for(unsigned int i = 1; i < size && messages != NULL; ++i)
 	{
 		// mangled name needs to be converted to get nice name and line number

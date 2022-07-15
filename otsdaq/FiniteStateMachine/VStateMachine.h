@@ -77,24 +77,24 @@ class VStateMachine
 			progress += name_ + ":" + transitionName_;
 		// else Done
 
-		//if(progress.size())
+		// if(progress.size())
 		//	__COUTV__(progress);
 
 		return progress;
 	}  // end getStatusProgressDetail()
 
-	void         			setTransitionName			(const std::string& transitionName) { transitionName_ = transitionName; }
-	const std::string&      getTransitionName			(void) {return transitionName_;}
-	void         setIterationIndex			(unsigned int i) { iterationIndex_ = i; }
-	void         setSubIterationIndex		(unsigned int i) { subIterationIndex_ = i; }
-	unsigned int getIterationIndex			(void) { return iterationIndex_; }
-	unsigned int getSubIterationIndex(void) { return subIterationIndex_; }
-	void         indicateIterationWork(void) { iterationWorkFlag_ = true; }
-	void         clearIterationWork(void) { iterationWorkFlag_ = false; }
-	bool         getIterationWork(void) { return iterationWorkFlag_; }
-	void         indicateSubIterationWork(void) { subIterationWorkFlag_ = true; }
-	void         clearSubIterationWork(void) { subIterationWorkFlag_ = false; }
-	bool         getSubIterationWork(void) { return subIterationWorkFlag_; }
+	void               setTransitionName(const std::string& transitionName) { transitionName_ = transitionName; }
+	const std::string& getTransitionName(void) { return transitionName_; }
+	void               setIterationIndex(unsigned int i) { iterationIndex_ = i; }
+	void               setSubIterationIndex(unsigned int i) { subIterationIndex_ = i; }
+	unsigned int       getIterationIndex(void) { return iterationIndex_; }
+	unsigned int       getSubIterationIndex(void) { return subIterationIndex_; }
+	void               indicateIterationWork(void) { iterationWorkFlag_ = true; }
+	void               clearIterationWork(void) { iterationWorkFlag_ = false; }
+	bool               getIterationWork(void) { return iterationWorkFlag_; }
+	void               indicateSubIterationWork(void) { subIterationWorkFlag_ = true; }
+	void               clearSubIterationWork(void) { subIterationWorkFlag_ = false; }
+	bool               getSubIterationWork(void) { return subIterationWorkFlag_; }
 
 	CoreSupervisorBase* parentSupervisor_;  // e.g. to communicate error fault and start
 	                                        // transition to error for entire system

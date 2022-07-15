@@ -35,11 +35,11 @@
 
 namespace ots
 {
-	class ConfigurationManager;
-	class TableGroupKey;
-	class WorkLoopManager;
+class ConfigurationManager;
+class TableGroupKey;
+class WorkLoopManager;
 
-	// clang-format off
+// clang-format off
 
 	// GatewaySupervisor
 	//	This class is the gateway server for all otsdaq requests in "Normal Mode." It
@@ -300,7 +300,7 @@ namespace ots
 
 		std::string        	securityType_;
 	};
-	// clang-format on
+// clang-format on
 
 }  // namespace ots
 

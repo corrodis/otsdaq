@@ -5,8 +5,10 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(CodeEditorSupervisor)
 
 //==============================================================================
-CodeEditorSupervisor::CodeEditorSupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub) 
-{ __SUP_COUT__ << "Constructed." << __E__; }  // end constructor
+CodeEditorSupervisor::CodeEditorSupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stub)
+{
+	__SUP_COUT__ << "Constructed." << __E__;
+}  // end constructor
 
 //==============================================================================
 CodeEditorSupervisor::~CodeEditorSupervisor(void)

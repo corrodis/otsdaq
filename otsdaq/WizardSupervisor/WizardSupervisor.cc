@@ -820,7 +820,6 @@ void WizardSupervisor::UserSettings(xgi::Input* in, xgi::Output* out)
 						system(commandToDecompressUserData.c_str());
 						// std::string resultString = StringMacros::exec(commandToDecompressUserData.c_str());
 						// __COUTV__(resultString);
-						
 					}
 				}
 				else

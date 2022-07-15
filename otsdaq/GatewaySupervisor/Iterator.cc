@@ -34,7 +34,8 @@ Iterator::Iterator(GatewaySupervisor* supervisor)
 Iterator::~Iterator(void) {}
 
 //==============================================================================
-void Iterator::IteratorWorkLoop(Iterator* iterator) try
+void Iterator::IteratorWorkLoop(Iterator* iterator)
+try
 {
 	__MOUT__ << "Iterator work loop starting..." << __E__;
 	__COUT__ << "Iterator work loop starting..." << __E__;
@@ -419,7 +420,8 @@ catch(...)
 }  // end IteratorWorkLoop()
 
 //==============================================================================
-void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
+void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct)
+try
 {
 	{
 		int i = 0;
@@ -493,23 +495,23 @@ void Iterator::startCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	}
 	else if(type == IterateTable::COMMAND_START)
 	{
-		return startCommandFSMTransition(iteratorStruct,"Start");
+		return startCommandFSMTransition(iteratorStruct, "Start");
 	}
 	else if(type == IterateTable::COMMAND_STOP)
 	{
-		return startCommandFSMTransition(iteratorStruct,"Stop");
+		return startCommandFSMTransition(iteratorStruct, "Stop");
 	}
 	else if(type == IterateTable::COMMAND_PAUSE)
 	{
-		return startCommandFSMTransition(iteratorStruct,"Pause");
+		return startCommandFSMTransition(iteratorStruct, "Pause");
 	}
 	else if(type == IterateTable::COMMAND_RESUME)
 	{
-		return startCommandFSMTransition(iteratorStruct,"Resume");
+		return startCommandFSMTransition(iteratorStruct, "Resume");
 	}
 	else if(type == IterateTable::COMMAND_HALT)
 	{
-		return startCommandFSMTransition(iteratorStruct,"Halt");
+		return startCommandFSMTransition(iteratorStruct, "Halt");
 	}
 	else
 	{
@@ -539,7 +541,8 @@ catch(...)
 // checkCommand
 //	when busy for a while, start to sleep
 //		use sleep() or nanosleep()
-bool Iterator::checkCommand(IteratorWorkLoopStruct* iteratorStruct) try
+bool Iterator::checkCommand(IteratorWorkLoopStruct* iteratorStruct)
+try
 {
 	// for out of range, return done
 	if(iteratorStruct->commandIndex_ >= iteratorStruct->commands_.size())
@@ -588,23 +591,23 @@ bool Iterator::checkCommand(IteratorWorkLoopStruct* iteratorStruct) try
 	}
 	else if(type == IterateTable::COMMAND_START)
 	{
-		return checkCommandFSMTransition(iteratorStruct,"Running");
+		return checkCommandFSMTransition(iteratorStruct, "Running");
 	}
 	else if(type == IterateTable::COMMAND_STOP)
 	{
-		return checkCommandFSMTransition(iteratorStruct,"Configured");
+		return checkCommandFSMTransition(iteratorStruct, "Configured");
 	}
 	else if(type == IterateTable::COMMAND_PAUSE)
 	{
-		return checkCommandFSMTransition(iteratorStruct,"Paused");
+		return checkCommandFSMTransition(iteratorStruct, "Paused");
 	}
 	else if(type == IterateTable::COMMAND_RESUME)
 	{
-		return checkCommandFSMTransition(iteratorStruct,"Running");
+		return checkCommandFSMTransition(iteratorStruct, "Running");
 	}
 	else if(type == IterateTable::COMMAND_HALT)
 	{
-		return checkCommandFSMTransition(iteratorStruct,RunControlStateMachine::HALTED_STATE_NAME);
+		return checkCommandFSMTransition(iteratorStruct, RunControlStateMachine::HALTED_STATE_NAME);
 	}
 	else
 	{
@@ -981,13 +984,12 @@ void Iterator::startCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct,
 	__COUTV__(currentState);
 
 	errorStr = iteratorStruct->theIterator_->theSupervisor_->attemptStateMachineTransition(0,
-							0,
-							transitionCommand,
-							iteratorStruct->fsmName_,
-							WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
-							WebUsers::DEFAULT_ITERATOR_USERNAME,
-							iteratorStruct->fsmCommandParameters_);
-
+	                                                                                       0,
+	                                                                                       transitionCommand,
+	                                                                                       iteratorStruct->fsmName_,
+	                                                                                       WebUsers::DEFAULT_ITERATOR_USERNAME /*fsmWindowName*/,
+	                                                                                       WebUsers::DEFAULT_ITERATOR_USERNAME,
+	                                                                                       iteratorStruct->fsmCommandParameters_);
 
 	if(errorStr != "")
 	{
@@ -1575,7 +1577,7 @@ bool Iterator::checkCommandConfigure(IteratorWorkLoopStruct* iteratorStruct)
 		__SS_THROW__;
 	}
 	return false;
-} //end checkCommandConfigure()
+}  // end checkCommandConfigure()
 
 //==============================================================================
 // return true if done
@@ -1607,20 +1609,18 @@ bool Iterator::checkCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct,
 		           ". Last State Machine error message was as follows: " + iteratorStruct->theIterator_->theSupervisor_->theStateMachine_.getErrorMessage();
 	else  // else successfully done (in Configured state!)
 	{
-		__COUT__ << "checkCommandFSMTransition complete." << __E__;		
+		__COUT__ << "checkCommandFSMTransition complete." << __E__;
 
 		return true;
 	}
 
 	if(errorStr != "")
 	{
-		__SS__ << "Iterator failed to reach final state '"
-		       << finalState
-		       << "' because of the following error: " << errorStr;
+		__SS__ << "Iterator failed to reach final state '" << finalState << "' because of the following error: " << errorStr;
 		__SS_THROW__;
 	}
 	return false;
-} //end checkCommandConfigure()
+}  // end checkCommandConfigure()
 
 //==============================================================================
 bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& command, const std::string& parameter)

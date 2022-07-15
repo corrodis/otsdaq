@@ -15,10 +15,8 @@ using namespace ots;
 // clang-format on
 
 //==============================================================================
-ARTDAQRoutingManagerTable::ARTDAQRoutingManagerTable(void) 
-	: TableBase("ARTDAQRoutingManagerTable")
-	, ARTDAQTableBase("ARTDAQRoutingManagerTable")
-	, SlowControlsTableBase("ARTDAQRoutingManagerTable")
+ARTDAQRoutingManagerTable::ARTDAQRoutingManagerTable(void)
+    : TableBase("ARTDAQRoutingManagerTable"), ARTDAQTableBase("ARTDAQRoutingManagerTable"), SlowControlsTableBase("ARTDAQRoutingManagerTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO 		//
@@ -130,8 +128,8 @@ unsigned int ARTDAQRoutingManagerTable::slowControlsHandlerConfig(
 						numberOfRoutingManagerMetricParameters =
 						    slowControlsHandler(out, tabStr, commentStr, subsystem, routingManagerPair.first, slowControlsLink, channelList);
 
-						__COUT__ << "RoutingManager '" << routingManagerPair.first << "' number of metrics for slow controls: " << numberOfRoutingManagerMetricParameters
-						         << __E__;
+						__COUT__ << "RoutingManager '" << routingManagerPair.first
+						         << "' number of metrics for slow controls: " << numberOfRoutingManagerMetricParameters << __E__;
 					}
 				}
 			}

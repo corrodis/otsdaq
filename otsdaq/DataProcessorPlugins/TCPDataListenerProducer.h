@@ -34,7 +34,7 @@ class TCPDataListenerProducer : public DataProducer, public Configurable, public
 	std::string*                        dataP_;
 	std::map<std::string, std::string>* headerP_;
 
-	std::string    dataType_;
+	std::string dataType_;
 	unsigned    port_;
 
 	// bool getNextFragment(void);
