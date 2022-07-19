@@ -4,7 +4,7 @@
 #include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 #include <iostream>
 

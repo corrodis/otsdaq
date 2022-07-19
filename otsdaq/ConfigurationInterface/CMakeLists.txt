@@ -1,24 +1,50 @@
+cet_register_export_set(SET_NAME CIPluginTypes NAMESPACE otsdaq_plugin_types)
+cet_register_export_set(SET_NAME CIPluginSupport NAMESPACE otsdaq_plugin_support)
 
-cet_make(LIBRARY_NAME ConfigurationInterface
-		NO_PLUGINS
-		EXCLUDE File_configInterface.cc Database_configInterface.cc Database_configInterface_Impl.cc
-		 LIBRARIES
-		 TableCore
-		 PluginMakers
-		 ProgressBar
-		cetlib_except
+cet_make_library(LIBRARY_NAME IConfigurationInterface INTERFACE
+		EXPORT_SET CIPluginTypes
+		SOURCE ConfigurationInterface.h
+		 LIBRARIES INTERFACE
+		 otsdaq::TableCore
+		 otsdaq::ProgressBar
+		 otsdaq::Macros
 )
 
-basic_plugin(Database "configInterface"
-IMPL_SOURCE Database_configInterface_Impl.cc
-LIBRARIES
-ConfigurationInterface
+cet_make_library(LIBRARY_NAME ConfigurationInterface
+		SOURCE ConfigurationInterface.cc ConfigurationHandler.cc ConfigurationManager.cc ConfigurationManagerRW.cc TimeFormatter.cc ConfigurationTree.cc
+		 LIBRARIES PUBLIC
+		 otsdaq_plugin_support::configInterfaceMaker
+		 PRIVATE
+		 otsdaq::XmlUtilities
+		 artdaq::Application
+)
+
+
+cet_make_library(LIBRARY_NAME configInterfaceMaker
+  EXPORT_SET CIPluginSupport
+  SOURCE MakeConfigurationInterface.cc
+  LIBRARIES
+  PUBLIC
+  otsdaq_plugin_types::IConfigurationInterface
+  PRIVATE
+  fhiclcpp::fhiclcpp
+  cetlib::cetlib
+)
+
+include(BasicPlugin)
+cet_write_plugin_builder(otsdaq::configInterface art::plugin Modules
+SUFFIX configInterface INSTALL_BUILDER
+LIBRARIES CONDITIONAL otsdaq::ConfigurationInterface)
+
+include(otsdaq::configInterface)
+cet_build_plugin(Database otsdaq::configInterface
+LIBRARIES REG
+artdaq_database::artdaq-database_ConfigurationDB
+PRIVATE
 artdaq_database::artdaq-database_ConfigurationDB
 )
-target_link_directories(otsdaq_ConfigurationInterface_Database_configInterface PUBLIC $ENV{ARTDAQ_DATABASE_LIB})
 
-basic_plugin(File "configInterface"
-ConfigurationInterface)
+cet_build_plugin(File otsdaq::configInterface)
 
 install_headers()
 install_source()

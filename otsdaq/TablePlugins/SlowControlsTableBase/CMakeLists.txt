@@ -1,7 +1,9 @@
 
-cet_make(LIBRARY_NAME SlowControlsTableBase
+cet_make_library(LIBRARY_NAME SlowControlsTableBase
+SOURCE
+SlowControlsTableBase.cc
 		LIBRARIES
-  		ConfigurationInterface
+  		otsdaq::ConfigurationInterface
 )
 
 install_headers()

@@ -1,4 +1,4 @@
-#include "artdaq-core/Data/FragmentNameHelper.hh"
+#include "artdaq-core/Plugins/FragmentNameHelper.hh"
 #include "artdaq-ots/Overlays/FragmentType.hh"
 
 #include "otsdaq/Macros/CoutMacros.h"
@@ -10,7 +10,7 @@ namespace ots
  * \brief OtsFragmentNameHelper extends ArtdaqFragmentNamingService.
  * This implementation uses artdaq-demo's SystemTypeMap and directly assigns names based on it
  */
-class OtsFragmentNameHelper : public artdaq::ArtdaqFragmentNameHelper
+class OtsFragmentNameHelper : public artdaq::FragmentNameHelper
 {
   public:
 	/**
@@ -31,7 +31,7 @@ class OtsFragmentNameHelper : public artdaq::ArtdaqFragmentNameHelper
 };
 
 OtsFragmentNameHelper::OtsFragmentNameHelper(std::string unidentified_instance_name, std::vector<std::pair<artdaq::Fragment::type_t, std::string>> extraTypes)
-    : ArtdaqFragmentNameHelper(unidentified_instance_name, extraTypes)
+    : FragmentNameHelper(unidentified_instance_name, extraTypes)
 {
 	TLOG(TLVL_DEBUG) << "OtsFragmentNameHelper CONSTRUCTOR START";
 	SetBasicTypes(ots::makeFragmentTypeMap());

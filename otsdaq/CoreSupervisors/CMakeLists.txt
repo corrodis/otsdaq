@@ -4,25 +4,33 @@
 #	message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
-cet_make(LIBRARY_NAME CoreSupervisors
-		 LIBRARIES
-		 ARTDAQDataManager
-         ARTDAQTableBase
-		 DataManager
-		 FECore
-         WorkLoopManager
-         FiniteStateMachine
-         CgiDataUtilities
-         WebUsersUtilities
-         MessageFacility
-         SupervisorInfo
-         SOAPUtilities
-         XmlUtilities
-         CgiDataUtilities         
-         ${XDAQ_BASIC_LIB_LIST}
-         config # From XDAQ
-		 otsdaq_TablePlugins_XDAQContextTable_table
-		 otsdaq_TablePlugins_DesktopIconTable_table
+cet_make_library(LIBRARY_NAME CoreSupervisors
+SOURCE
+ARTDAQDataManagerSupervisor.cc
+ARTDAQFEDataManagerSupervisor.cc
+ConfigurationSupervisorBase.cc
+CorePropertySupervisorBase.cc
+CoreSupervisorBase.cc
+DataManagerSupervisor.cc
+FEDataManagerSupervisor.cc
+FESupervisor.cc
+version.cc
+		 LIBRARIES PUBLIC
+		 otsdaq::ConfigurationInterface
+		 otsdaq::XmlUtilities
+		 otsdaq::DesktopIconTable
+		 otsdaq::MessageFacility
+		 otsdaq::WebUsersUtilities
+		 otsdaq::FiniteStateMachine
+		 otsdaq::XDAQContextTable
+		 ${XDAQ_BASIC_LIB_LIST}
+		 config # From XDAQ
+		 PRIVATE
+		 otsdaq::FECore
+		 otsdaq::SOAPUtilities
+		 otsdaq::CgiDataUtilities
+		 otsdaq::ARTDAQTableBase
+		 otsdaq::ARTDAQDataManager
         )
 
 install_headers()

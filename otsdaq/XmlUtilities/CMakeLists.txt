@@ -1,11 +1,11 @@
 
-cet_make(LIBRARY_NAME XmlUtilities
-	 LIBRARIES
-         ${XDAQ_XERCES-C}
-	 MF_MessageLogger
-	 artdaq_core::artdaq-core_Utilities
-	 ${Boost_REGEX_LIBRARY}
-	 Macros
+cet_make_library(LIBRARY_NAME XmlUtilities
+	SOURCE ConvertFromXML.cc ConvertToXML.cc DOMTreeErrorReporter.cc HttpXmlDocument.cc XmlDocument.cc
+	LIBRARIES PUBLIC
+	 ${XDAQ_XERCES-C}
+	 LIBRARIES PRIVATE
+	 otsdaq::MessageFacility
+	 Boost::regex
         )
 
 #get_cmake_property(_variableNames VARIABLES)

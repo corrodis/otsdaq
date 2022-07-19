@@ -1,18 +1,14 @@
-cet_make(LIBRARY_NAME RootUtilities
-	      LIBRARIES
-	      ${ROOT_BASIC_LIB_LIST}
-	      NetworkUtilities
-	      TableCore
-	      ConfigurationInterface
-          DataManager	      
-          #otsdaq_TablePlugins_DataBufferConfiguration_table
-          #otsdaq_TablePlugins_UDPDataStreamerConsumerConfiguration_table
-          #otsdaq_TablePlugins_UDPDataListenerProducerConfiguration_table
-          #added by RAR after artdaqdb change
-          #otsdaq_TablePlugins_DataManagerConfiguration_table
-          #otsdaq_TablePlugins_FEConfiguration_table
-          #otsdaq_TablePlugins_DetectorToFEConfiguration_table
-          #otsdaq_TablePlugins_DetectorConfiguration_table
+cet_make_library(LIBRARY_NAME RootUtilities
+    SOURCE
+    DQMHistosBase.cc
+    RootFileExplorer.cpp
+    VisualDataManager.cc
+	      LIBRARIES PRIVATE
+          otsdaq::TableCore
+          otsdaq::DataManager
+          otsdaq::ConfigurationInterface
+          ROOT::Core
+          ROOT::RIO
 )
 
 install_headers()

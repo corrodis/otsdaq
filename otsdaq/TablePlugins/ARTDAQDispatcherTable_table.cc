@@ -1,6 +1,5 @@
 #include "otsdaq/Macros/TablePluginMacros.h"
 #include "otsdaq/TablePlugins/ARTDAQDispatcherTable.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 using namespace ots;
 

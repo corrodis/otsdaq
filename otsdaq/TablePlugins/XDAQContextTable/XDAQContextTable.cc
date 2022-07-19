@@ -1,6 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
-#include "otsdaq/Macros/TablePluginMacros.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -685,4 +684,3 @@ std::string XDAQContextTable::getContextOfGateway(ConfigurationManager* configMa
 	__SS_THROW__;
 }  // end getContextOfGateway()
 
-DEFINE_OTS_TABLE(XDAQContextTable)

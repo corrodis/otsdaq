@@ -1,11 +1,8 @@
-cet_make(LIBRARY_NAME MessageFacility
-  LIBRARIES
-  art_Utilities
-  MF_MessageLogger
-  cetlib
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  fhiclcpp
+cet_make_library(LIBRARY_NAME MessageFacility
+	SOURCE MessageFacility.cc TRACEController.cc
+  LIBRARIES PUBLIC
+  otsdaq::Macros
+  artdaq_core::artdaq-core_Utilities
   )
 
 install_headers()

@@ -1,6 +1,6 @@
 #include <cetlib/BasicPluginFactory.h>
 
-#include "MakeConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/MakeConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 
 namespace ots

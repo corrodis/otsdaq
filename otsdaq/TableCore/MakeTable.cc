@@ -1,6 +1,6 @@
 #include <cetlib/BasicPluginFactory.h>
 
-#include "MakeTable.h"
+#include "otsdaq/TableCore/MakeTable.h"
 #include "otsdaq/TableCore/TableBase.h"
 
 namespace ots

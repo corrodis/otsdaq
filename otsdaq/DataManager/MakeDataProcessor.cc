@@ -1,4 +1,4 @@
-#include "otsdaq/PluginMakers/MakeDataProcessor.h"
+#include "otsdaq/DataManager/MakeDataProcessor.h"
 #include "otsdaq/DataManager/DataProcessor.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 

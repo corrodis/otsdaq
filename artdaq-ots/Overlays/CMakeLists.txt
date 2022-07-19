@@ -1,17 +1,14 @@
-art_make(LIBRARY_NAME artdaq-ots_Overlays
-EXCLUDE OTS_fragmentNameHelper.cc
-    LIB_LIBRARIES
-    artdaq_core::artdaq-core_Utilities
-    artdaq_DAQdata
-    cetlib
-    cetlib_except
+cet_make_library(LIBRARY_NAME artdaq-ots_Overlays
+SOURCE FragmentType.cc UDPFragment.cc
+    LIBRARIES PUBLIC
+  artdaq_core::artdaq-core_Utilities
+  artdaq_core::artdaq-core_Data
+  TRACE::TRACE
   )
 
-  basic_plugin(OTS "fragmentNameHelper"
-  artdaq_core::artdaq-core_Data
-  artdaq-ots_Overlays
-  artdaq_core::artdaq-core_Data_Artdaq_fragmentNameHelper
-  MF_MessageLogger
-)
+  include(ArtdaqCorePlugins)
+  cet_build_plugin(OTS artdaq::fragmentNameHelper LIBRARIES REG otsdaq::artdaq-ots_Overlays)
+
+
 install_headers()
 install_source()
