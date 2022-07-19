@@ -5,3 +5,6 @@ otsdaq::ConfigurationInterface
 PRIVATE
 
 )
+
+install_headers()
+install_source()

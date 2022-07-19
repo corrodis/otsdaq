@@ -25,7 +25,6 @@ version.cc
 		 otsdaq::XDAQContextTable
 		 ${XDAQ_BASIC_LIB_LIST}
 		 config # From XDAQ
-		 PRIVATE
 		 otsdaq::FECore
 		 otsdaq::SOAPUtilities
 		 otsdaq::CgiDataUtilities

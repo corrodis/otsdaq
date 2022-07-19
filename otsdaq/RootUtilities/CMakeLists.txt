@@ -3,12 +3,13 @@ cet_make_library(LIBRARY_NAME RootUtilities
     DQMHistosBase.cc
     RootFileExplorer.cpp
     VisualDataManager.cc
-	      LIBRARIES PRIVATE
+	      LIBRARIES PUBLIC
+          ROOT::Core
+          ROOT::RIO
+          PRIVATE
           otsdaq::TableCore
           otsdaq::DataManager
           otsdaq::ConfigurationInterface
-          ROOT::Core
-          ROOT::RIO
 )
 
 install_headers()

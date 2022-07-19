@@ -35,8 +35,8 @@ cet_make_library(LIBRARY_NAME FECore
 		 otsdaq::Configurable
 		 otsdaq::FiniteStateMachine
 		 otsdaq::SupervisorInfo
-		 PRIVATE
 		 artdaq::DAQdata
+		 PRIVATE
 		 otsdaq::NetworkUtilities
 		 otsdaq::ConfigurationInterface
 		 otsdaq::SOAPUtilities

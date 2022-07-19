@@ -22,7 +22,14 @@ cet_build_plugin(TCPDataListenerProducer otsdaq::dataProcessor )
 
 cet_build_plugin(RawDataSaverConsumer  otsdaq::dataProcessor )
 
-cet_build_plugin(RawDataVisualizerConsumer  otsdaq::dataProcessor  )
+cet_make_library(LIBRARY_NAME RawDataVisualizerConsumer SOURCE RawDataVisualizerConsumerImpl.cc 
+	LIBRARIES PUBLIC 
+		otsdaq::DataManager
+		otsdaq::Configurable
+		PRIVATE
+		 otsdaq::ConfigurationInterface
+		 otsdaq::NetworkUtilities  )
+cet_build_plugin(RawDataVisualizerConsumer  otsdaq::dataProcessor LIBRARIES REG otsdaq::RawDataVisualizerConsumer  )
 
 
 cet_build_plugin(OtsDataSaverConsumer otsdaq::dataProcessor )
