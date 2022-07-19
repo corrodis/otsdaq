@@ -10,12 +10,6 @@ cet_make_library(LIBRARY_NAME SlowControlsInterface INTERFACE
 		 otsdaq::FiniteStateMachine
 )
 
-cet_make_library(LIBRARY_NAME SlowControlsCore
-	SOURCE SlowControlsVInterface.cc
-		LIBRARIES PUBLIC
-		otsdaq_plugin_types::SlowControlsInterface
-                )
-
 
 cet_make_library(LIBRARY_NAME slowControlsMaker
   EXPORT_SET SCPluginSupport
@@ -27,6 +21,14 @@ cet_make_library(LIBRARY_NAME slowControlsMaker
   fhiclcpp::fhiclcpp
   cetlib::cetlib
 )
+
+cet_register_export_set(SET_NAME slowControlsCore SET_DEFAULT)
+cet_make_library(LIBRARY_NAME SlowControlsCore
+	SOURCE SlowControlsVInterface.cc
+		LIBRARIES PUBLIC
+		otsdaq_plugin_types::SlowControlsInterface
+                )
+
 
 include(BasicPlugin)
 cet_write_plugin_builder(otsdaq::slowControls art::plugin Modules

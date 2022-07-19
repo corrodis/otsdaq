@@ -10,16 +10,6 @@ cet_make_library(LIBRARY_NAME RunInfoInterface INTERFACE
 		 otsdaq::Macros
 )
 
-cet_make_library(LIBRARY_NAME FiniteStateMachine
-	SOURCE FiniteStateMachine.cc RunControlStateMachine.cc
-		LIBRARIES PUBLIC
-		otsdaq::ProgressBar
-		${XDAQ_BASIC_LIB_LIST}
-		PRIVATE
-		otsdaq::Macros
-		otsdaq::SOAPUtilities
-                )
-
 
 cet_make_library(LIBRARY_NAME runInfoMaker
   EXPORT_SET RIPluginSupport
@@ -31,6 +21,17 @@ cet_make_library(LIBRARY_NAME runInfoMaker
   fhiclcpp::fhiclcpp
   cetlib::cetlib
 )
+
+cet_register_export_set(SET_NAME finiteStateMachine SET_DEFAULT)
+cet_make_library(LIBRARY_NAME FiniteStateMachine
+	SOURCE FiniteStateMachine.cc RunControlStateMachine.cc
+		LIBRARIES PUBLIC
+		otsdaq::ProgressBar
+		${XDAQ_BASIC_LIB_LIST}
+		PRIVATE
+		otsdaq::Macros
+		otsdaq::SOAPUtilities
+                )
 
 include(BasicPlugin)
 cet_write_plugin_builder(otsdaq::runInfo art::plugin Modules

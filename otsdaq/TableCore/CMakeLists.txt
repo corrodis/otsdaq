@@ -9,14 +9,6 @@ cet_make_library(LIBRARY_NAME ITableBase INTERFACE
 )
 
 
-cet_make_library(LIBRARY_NAME TableCore
-	SOURCE TableBase.cc TableGroupKey.cc TableInfoReader.cc TableVersion.cc TableView.cc TableViewColumnInfo.cc
-		 LIBRARIES PUBLIC
-		otsdaq::MessageFacility
-		otsdaq_plugin_support::tablePluginMaker
-		LIBRARIES PRIVATE
-		otsdaq::XmlUtilities
-)
 
 cet_make_library(LIBRARY_NAME tablePluginMaker
   EXPORT_SET TPluginSupport
@@ -27,6 +19,16 @@ cet_make_library(LIBRARY_NAME tablePluginMaker
   PRIVATE
   fhiclcpp::fhiclcpp
   cetlib::cetlib
+)
+
+cet_register_export_set(SET_NAME tableCore SET_DEFAULT)
+cet_make_library(LIBRARY_NAME TableCore
+	SOURCE TableBase.cc TableGroupKey.cc TableInfoReader.cc TableVersion.cc TableView.cc TableViewColumnInfo.cc
+		 LIBRARIES PUBLIC
+		otsdaq::MessageFacility
+		otsdaq_plugin_support::tablePluginMaker
+		LIBRARIES PRIVATE
+		otsdaq::XmlUtilities
 )
 
 include(BasicPlugin)

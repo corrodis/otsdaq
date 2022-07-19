@@ -10,16 +10,6 @@ cet_make_library(LIBRARY_NAME IConfigurationInterface INTERFACE
 		 otsdaq::Macros
 )
 
-cet_make_library(LIBRARY_NAME ConfigurationInterface
-		SOURCE ConfigurationInterface.cc ConfigurationHandler.cc ConfigurationManager.cc ConfigurationManagerRW.cc TimeFormatter.cc ConfigurationTree.cc
-		 LIBRARIES PUBLIC
-		 otsdaq_plugin_support::configInterfaceMaker
-		 PRIVATE
-		 otsdaq::XmlUtilities
-		 artdaq::Application
-)
-
-
 cet_make_library(LIBRARY_NAME configInterfaceMaker
   EXPORT_SET CIPluginSupport
   SOURCE MakeConfigurationInterface.cc
@@ -29,6 +19,17 @@ cet_make_library(LIBRARY_NAME configInterfaceMaker
   PRIVATE
   fhiclcpp::fhiclcpp
   cetlib::cetlib
+)
+
+
+cet_register_export_set(SET_NAME configurationInterface SET_DEFAULT)
+cet_make_library(LIBRARY_NAME ConfigurationInterface
+		SOURCE ConfigurationInterface.cc ConfigurationHandler.cc ConfigurationManager.cc ConfigurationManagerRW.cc TimeFormatter.cc ConfigurationTree.cc
+		 LIBRARIES PUBLIC
+		 otsdaq_plugin_support::configInterfaceMaker
+		 PRIVATE
+		 otsdaq::XmlUtilities
+		 artdaq::Application
 )
 
 include(BasicPlugin)

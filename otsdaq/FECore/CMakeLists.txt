@@ -11,6 +11,21 @@ cet_make_library(LIBRARY_NAME IFEInterface INTERFACE
 		 ${XDAQ_XERCES-C}
 )
 
+
+
+cet_make_library(LIBRARY_NAME FrontEndInterfaceMaker
+  EXPORT_SET FEPluginSupport
+  SOURCE MakeInterface.cc
+  LIBRARIES
+  PUBLIC
+  otsdaq_plugin_types::IFEInterface
+  PRIVATE
+  fhiclcpp::fhiclcpp
+  cetlib::cetlib
+)
+
+
+cet_register_export_set(SET_NAME feCore SET_DEFAULT)
 cet_make_library(LIBRARY_NAME FECore
 	SOURCE FEProducerVInterface.cc FESlowControlsChannel.cc FESlowControlsWorkLoop.cc FEVInterface.cc FEVInterfacesManager.cc
 		 LIBRARIES PUBLIC
@@ -27,18 +42,6 @@ cet_make_library(LIBRARY_NAME FECore
 		 otsdaq::SOAPUtilities
 )
 
-
-
-cet_make_library(LIBRARY_NAME FrontEndInterfaceMaker
-  EXPORT_SET FEPluginSupport
-  SOURCE MakeInterface.cc
-  LIBRARIES
-  PUBLIC
-  otsdaq_plugin_types::IFEInterface
-  PRIVATE
-  fhiclcpp::fhiclcpp
-  cetlib::cetlib
-)
 
 include(BasicPlugin)
 cet_write_plugin_builder(otsdaq::FEInterface art::plugin Modules
