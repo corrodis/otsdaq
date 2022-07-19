@@ -5,7 +5,7 @@
 #include "otsdaq/DataManager/DataProducerBase.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-#include "otsdaq/PluginMakers/MakeDataProcessor.h"
+#include "otsdaq/DataManager/MakeDataProcessor.h"
 
 #include <unistd.h>  //usleep
 #include <iostream>

@@ -13,7 +13,6 @@
 
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"  //to send errors to Gateway, e.g.
 
-#include "otsdaq/CoreSupervisors/FESupervisor.h"
 
 #include "otsdaq/FECore/FESlowControlsChannel.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"  //for xdaq::ApplicationDescriptor communication

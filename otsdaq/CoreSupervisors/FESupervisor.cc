@@ -7,8 +7,6 @@
 
 #include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
 
-#include "artdaq-utilities/Plugins/MakeParameterSet.hh"
-
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
 // for metric manager include
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
@@ -910,7 +908,7 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 			metricNamePreamble = "";
 
 		// std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
-		fhicl::ParameterSet metric_pset = artdaq::make_pset(metric_string);
+		fhicl::ParameterSet metric_pset = fhicl::ParameterSet::make(metric_string);
 
 		__COUTV__(metricNamePreamble);
 		try

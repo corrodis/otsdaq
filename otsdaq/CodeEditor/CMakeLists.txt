@@ -1,10 +1,11 @@
-cet_make(LIBRARY_NAME CodeEditor
-		 LIBRARIES
-		 ${XDAQ_BASIC_LIB_LIST}
-         CgiDataUtilities
-		 XmlUtilities
-		 Macros
-		 CoreSupervisors
+cet_make_library(LIBRARY_NAME CodeEditor
+SOURCE
+CodeEditor.cc
+CodeEditorSupervisor.cc
+version.cc
+		 LIBRARIES PRIVATE
+		 otsdaq::CoreSupervisors
+		 otsdaq::CgiDataUtilities
 )
 
 

@@ -1,5 +1,5 @@
 #include "otsdaq/TablePlugins/SlowControlsTableBase/SlowControlsTableBase.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 #include <fstream>  // std::fstream
 

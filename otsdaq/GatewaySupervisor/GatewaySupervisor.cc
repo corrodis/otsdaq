@@ -9,13 +9,13 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
 #include "otsdaq/NetworkUtilities/TransceiverSocket.h"  // for UDP state changer
 
 #include "otsdaq/FiniteStateMachine/RunInfoVInterface.h"  // for Run Info plugins
-#include "otsdaq/PluginMakers/MakeRunInfo.h"              // for Run Info plugin macro
+#include "otsdaq/FiniteStateMachine/MakeRunInfo.h"              // for Run Info plugin macro
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"

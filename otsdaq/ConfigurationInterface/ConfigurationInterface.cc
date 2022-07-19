@@ -1,5 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq/PluginMakers/MakeConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/MakeConfigurationInterface.h"
 
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"

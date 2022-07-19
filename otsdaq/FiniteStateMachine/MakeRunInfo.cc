@@ -1,4 +1,4 @@
-#include "otsdaq/PluginMakers/MakeRunInfo.h"
+#include "otsdaq/FiniteStateMachine/MakeRunInfo.h"
 #include <cetlib/BasicPluginFactory.h>
 
 #include "otsdaq/FiniteStateMachine/RunInfoVInterface.h"

@@ -1,9 +1,11 @@
-cet_make(LIBRARY_NAME WorkLoopManager
+cet_make_library(LIBRARY_NAME WorkLoopManager
+	SOURCE WorkLoop.cc WorkLoopManager.cc
 		   LIBRARIES
-		   XmlUtilities
-		   SOAPUtilities
+		   PUBLIC
 		   ${XDAQ_BASIC_LIB_LIST}
-        ${XDAQ_CGICC}
+		   PRIVATE
+		   otsdaq::XmlUtilities
+		   otsdaq::SOAPUtilities
 )
 
 install_headers()

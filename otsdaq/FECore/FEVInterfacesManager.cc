@@ -2,7 +2,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-#include "otsdaq/PluginMakers/MakeInterface.h"
+#include "otsdaq/FECore/MakeInterface.h"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"

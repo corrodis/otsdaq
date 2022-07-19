@@ -1,9 +1,11 @@
 
-cet_make(LIBRARY_NAME ARTDAQTableBase
-		LIBRARIES
-  		ConfigurationInterface
-  		ProgressBar
-  		otsdaq_TablePlugins_XDAQContextTable_table
+cet_make_library(LIBRARY_NAME ARTDAQTableBase
+SOURCE ARTDAQTableBase.cc
+		LIBRARIES 
+        PUBLIC
+  		otsdaq::ConfigurationInterface
+        PRIVATE
+  		otsdaq::XDAQContextTable
 )
 
 install_headers()

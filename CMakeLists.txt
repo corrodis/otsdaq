@@ -8,24 +8,17 @@
 
 
 # use cmake 3.17 or later
-cmake_minimum_required (VERSION 3.17)
+cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
 
-find_package(cetmodules)
-set(CET_CETBUILDTOOLS_COMPAT TRUE)
-include(Compatibility)
-set(CET_WARN_DEPRECATED)
+find_package(cetmodules 3.16.00 REQUIRED)
 
-project(otsdaq VERSION 2.06.05)
-
-set(CMAKE_MODULE_PATH
-        $ENV{XDAQ_DIR}/Modules
-        $ENV{ARTDAQ_UTILITIES_DIR}/Modules
-        ${CMAKE_MODULE_PATH})
-message(STATUS "CMAKE_MODULE_PATH is ${CMAKE_MODULE_PATH}")
+project(otsdaq VERSION 2.06.06)
 
 include(CetCMakeEnv)
 cet_cmake_env()
-include(CetFindPkgConfigPackage)
+
+# Find our own CMake modules, and tell everyone else where to find them.
+cet_cmake_module_directories(Modules BINARY)
 
 cet_set_compiler_flags(
  DIAGS 
@@ -34,36 +27,15 @@ cet_set_compiler_flags(
  NO_UNDEFINED
  EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1
  )
- 
-cet_remove_compiler_flags(-std=c++98)
- 
-#string(TOUPPER ${CMAKE_BUILD_TYPE} BTYPE_UC )
-#if( ${BTYPE_UC} MATCHES "DEBUG" )
-#  cet_add_compiler_flags(-fsanitize=address)
-#endif()
-
-#cet_report_compiler_flags()
-
-# these are minimum required versions, not the actual product versions
-find_ups_product( cetbuildtools v3_03_00 )
-find_ups_product( artdaq v3_09_00 )
-find_ups_product( artdaq_core v3_06_00 )
-find_ups_product( artdaq_utilities v1_00_00 )
-find_ups_product( art v1_06_00 )
-find_ups_product( canvas v1_00_00 )
-find_ups_product( messagefacility v1_10_00 )
-find_ups_product( cetlib v1_03_00 )
-find_ups_product( artdaq_database v1_03_07 )
-find_ups_product( TRACE v3_03_00 )
-find_ups_product( xdaq v16_7_0_1)
-find_ups_root( v5_34_00 )
-find_ups_boost( v1_50_0 filesystem
-                        program_options
-                        unit_test_framework
- )
+  
+find_package(artdaq_core 3.09.00 REQUIRED)
+find_package(artdaq 3.12.00 REQUIRED)
+find_package(artdaq_database 1.07.00 REQUIRED)
+link_directories($ENV{ARTDAQ_DATABASE_LIB}) # Hack?!
+find_package(Boost COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
 
  # XDAQ Extra setup
- include_directories($ENV{XDAQ_INC}/linux)
+ include_directories($ENV{XDAQ_INC}/linux $ENV{XDAQ_INC})
 link_directories($ENV{XDAQ_LIB})
  set(XDAQ_BASIC_LIB_LIST 
    xcept
@@ -75,28 +47,28 @@ link_directories($ENV{XDAQ_LIB})
  )
  set(XDAQ_XERCES-C xerces-c)
 
-string(REGEX MATCHALL "[0-9][0-9]?[0-9]?" ART_VERSION_LIST "$ENV{ART_VERSION}")
-list(GET ART_VERSION_LIST 0 ART_MAJOR_VERSION)
-list(GET ART_VERSION_LIST 1 ART_MINOR_VERSION)
-list(GET ART_VERSION_LIST 2 ART_PATCH_VERSION)
+#string(REGEX MATCHALL "[0-9][0-9]?[0-9]?" ART_VERSION_LIST "$ENV{ART_VERSION}")
+#list(GET ART_VERSION_LIST 0 ART_MAJOR_VERSION)
+#list(GET ART_VERSION_LIST 1 ART_MINOR_VERSION)
+#list(GET ART_VERSION_LIST 2 ART_PATCH_VERSION)
 
-message("-DART_HEX_VERSION=0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION}")
-set(ART_HEX_VERSION 0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION})
-add_definitions(-DART_HEX_VERSION=0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION})
+#message("-DART_HEX_VERSION=0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION}")
+#set(ART_HEX_VERSION 0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION})
+#add_definitions(-DART_HEX_VERSION=0x${ART_MAJOR_VERSION}${ART_MINOR_VERSION}${ART_PATCH_VERSION})
 
-string(REGEX MATCHALL "[0-9][0-9]?[0-9]?" MESSAGEFACILITY_VERSION_LIST "$ENV{MESSAGEFACILITY_VERSION}")
-list(GET MESSAGEFACILITY_VERSION_LIST 0 MESSAGEFACILITY_MAJOR_VERSION)
-list(GET MESSAGEFACILITY_VERSION_LIST 1 MESSAGEFACILITY_MINOR_VERSION)
-list(GET MESSAGEFACILITY_VERSION_LIST 2 MESSAGEFACILITY_PATCH_VERSION)
+#string(REGEX MATCHALL "[0-9][0-9]?[0-9]?" MESSAGEFACILITY_VERSION_LIST "$ENV{MESSAGEFACILITY_VERSION}")
+#list(GET MESSAGEFACILITY_VERSION_LIST 0 MESSAGEFACILITY_MAJOR_VERSION)
+#list(GET MESSAGEFACILITY_VERSION_LIST 1 MESSAGEFACILITY_MINOR_VERSION)
+#list(GET MESSAGEFACILITY_VERSION_LIST 2 MESSAGEFACILITY_PATCH_VERSION)
 
 # as of fhiclcpp v4_15_00 (s108), ParameterSet::make is the preferred way to make a ParameterSet
-check_ups_version(fhiclcpp $ENV{FHICLCPP_VERSION} v4_15_00 PRODUCT_MATCHES_VAR PSET_MAKE)
-if(PSET_MAKE)
-  add_definitions(-DSIMPLER_PSET_MAKE)
-endif()
+#check_ups_version(fhiclcpp $ENV{FHICLCPP_VERSION} v4_15_00 PRODUCT_MATCHES_VAR PSET_MAKE)
+#if(PSET_MAKE)
+#  add_definitions(-DSIMPLER_PSET_MAKE)
+#endif()
 
-message("-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION}")
-add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION})
+#message("-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION}")
+#add_definitions(-DMESSAGEFACILITY_HEX_VERSION=0x${MESSAGEFACILITY_MAJOR_VERSION}${MESSAGEFACILITY_MINOR_VERSION}${MESSAGEFACILITY_PATCH_VERSION})
 
 # For version.h
 message("PROJECT_VERSION ${PROJECT_VERSION}")
@@ -108,16 +80,13 @@ add_definitions(-DOTSDAQ_MAJOR_VERSION=${OTSDAQ_MAJOR_VERSION})
 add_definitions(-DOTSDAQ_MINOR_VERSION=${OTSDAQ_MINOR_VERSION})
 add_definitions(-DOTSDAQ_PATCH_VERSION=${OTSDAQ_PATCH_VERSION})
 
-# macros for art_dictionary and simple_plugin
-
-include(CetMake)
-include(ArtMake)
 include(BuildPlugins)
-include(CetTest)
 
 # source
 add_subdirectory(artdaq-ots)
+cet_register_export_set(SET_NAME artdaqUsers SET_DEFAULT)
 add_subdirectory(otsdaq)
+cet_register_export_set(SET_NAME otsdaqUsers SET_DEFAULT)
 
 # tools
 add_subdirectory(tools)

@@ -1,10 +1,13 @@
 
-cet_make(LIBRARY_NAME ARTDAQDataManager 
-		LIBRARIES
+cet_make_library(LIBRARY_NAME ARTDAQDataManager 
+SOURCE ARTDAQDataManager.cc
+		LIBRARIES PRIVATE
 		
-		DataManager
-        otsdaq_DataProcessorPlugins_ARTDAQConsumer_processor
-        otsdaq_DataProcessorPlugins_ARTDAQProducer_processor
+		otsdaq::DataManager
+		otsdaq::ARTDAQReaderCore
+		otsdaq::ARTDAQProducer
+		otsdaq::ARTDAQConsumer
+		artdaq::BuildInfo
         
         )
 install_headers()

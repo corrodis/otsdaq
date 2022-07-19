@@ -1,4 +1,4 @@
-#include "otsdaq/PluginMakers/MakeSlowControls.h"
+#include "otsdaq/SlowControlsCore/MakeSlowControls.h"
 #include <cetlib/BasicPluginFactory.h>
 
 #include "otsdaq/SlowControlsCore/SlowControlsVInterface.h"
