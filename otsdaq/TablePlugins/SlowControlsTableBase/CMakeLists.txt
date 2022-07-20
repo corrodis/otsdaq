@@ -2,7 +2,7 @@
 cet_make_library(LIBRARY_NAME SlowControlsTableBase
 SOURCE
 SlowControlsTableBase.cc
-		LIBRARIES
+		LIBRARIES PUBLIC
   		otsdaq::ConfigurationInterface
 )
 

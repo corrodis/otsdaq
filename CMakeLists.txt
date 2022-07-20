@@ -28,8 +28,8 @@ cet_set_compiler_flags(
  EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1
  )
   
-find_package(artdaq_core 3.09.00 REQUIRED)
-find_package(artdaq 3.12.00 REQUIRED)
+find_package(artdaq_core 3.09.00 REQUIRED EXPORT)
+find_package(artdaq 3.12.00 REQUIRED EXPORT)
 find_package(artdaq_database 1.07.00 REQUIRED)
 link_directories($ENV{ARTDAQ_DATABASE_LIB}) # Hack?!
 find_package(Boost COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
