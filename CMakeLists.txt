@@ -31,7 +31,9 @@ cet_set_compiler_flags(
 find_package(artdaq_core 3.09.00 REQUIRED EXPORT)
 find_package(artdaq 3.12.00 REQUIRED EXPORT)
 find_package(artdaq_database 1.07.00 REQUIRED)
-link_directories($ENV{ARTDAQ_DATABASE_LIB}) # Hack?!
+set(bsoncxx_DIR ${artdaq_database_DIR})
+set(mongocxx_DIR ${artdaq_database_DIR})
+find_package(mongocxx REQUIRED)
 find_package(Boost COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
 
  # XDAQ Extra setup
