@@ -1938,6 +1938,7 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 		//	__GEN_COUT_WARN__ << "\n" << ss.str();
 		__SS_ONLY_THROW__;
 	}
+	TLOG_DEBUG(30) << "Table " << tableName << " is at " << static_cast<void*>(it->second);
 	return it->second;
 }  // end getTableByName()
 

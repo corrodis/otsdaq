@@ -6,5 +6,8 @@ PRIVATE
 
 )
 
+cet_build_plugin(XDAQContextTable otsdaq::table LIBRARIES REG otsdaq::XDAQContextTable )
+
+
 install_headers()
 install_source()
