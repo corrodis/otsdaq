@@ -1,6 +1,5 @@
 #include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
 
-
 #include <iostream>
 
 using namespace ots;
@@ -173,7 +172,10 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 // been verified 		according to the Supervisor Property settings. The
 // CoreSupervisorBase class provides consistent 		access, responses, and error
 // handling  across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::request(const std::string& /*requestType*/, cgicc::Cgicc& /*cgiIn*/, HttpXmlDocument& xmlOut, const WebUsers::RequestUserInfo& /*userInfo*/)
+void CoreSupervisorBase::request(const std::string& /*requestType*/,
+                                 cgicc::Cgicc& /*cgiIn*/,
+                                 HttpXmlDocument& xmlOut,
+                                 const WebUsers::RequestUserInfo& /*userInfo*/)
 {
 	__SUP_SS__ << "This is the empty Core Supervisor request. Supervisors should "
 	              "override this function."
@@ -236,7 +238,10 @@ void CoreSupervisorBase::request(const std::string& /*requestType*/, cgicc::Cgic
 // been verified 		according to the Supervisor Property settings. The
 // CoreSupervisorBase class provides consistent 		access, responses, and error
 // handling  across all inheriting supervisors that use ::request.
-void CoreSupervisorBase::nonXmlRequest(const std::string& /*requestType*/, cgicc::Cgicc& /*cgiIn*/, std::ostream& out, const WebUsers::RequestUserInfo& /*userInfo*/)
+void CoreSupervisorBase::nonXmlRequest(const std::string& /*requestType*/,
+                                       cgicc::Cgicc& /*cgiIn*/,
+                                       std::ostream& out,
+                                       const WebUsers::RequestUserInfo& /*userInfo*/)
 {
 	__SUP_COUT__ << "This is the empty Core Supervisor non-xml request. Supervisors "
 	                "should override this function."
@@ -288,13 +293,12 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 	// __SUP_COUTV__(theStateMachine_.getCurrentStateName());
 	// __SUP_COUTV__(RunControlStateMachine::theProgressBar_.readPercentageString());
 
-
 	SOAPParameters retParameters;
 	if(err == "")
 	{
 		if(theStateMachine_.isInTransition() || RunControlStateMachine::theProgressBar_.read() < 100)
 		{
-			//attempt to get transition name, otherwise give provenance state
+			// attempt to get transition name, otherwise give provenance state
 			try
 			{
 				retParameters.addParameter("Status", theStateMachine_.getCurrentTransitionName());
@@ -305,7 +309,7 @@ xoap::MessageReference CoreSupervisorBase::applicationStatusRequest(xoap::Messag
 			}
 		}
 		else
-			retParameters.addParameter("Status", theStateMachine_.getCurrentStateName());		
+			retParameters.addParameter("Status", theStateMachine_.getCurrentStateName());
 	}
 	else
 		retParameters.addParameter("Status", (theStateMachine_.getCurrentStateName() == "Paused" ? "Soft-Error:::" : "Error:::") + err);
@@ -325,27 +329,27 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 {
 	std::string  detail;
 	unsigned int cnt = 0;
-	
-	
+
 	/*
 	//__SUP_COUT__ << "Checking..." << CoreSupervisorBase::theStateMachineImplementation_.size() << __E__;
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
-		//__SUP_COUT__ << "Checking..." << __E__;
-		try 
-		{
-			VStateMachine* testFSM = dynamic_cast<VStateMachine*>(fsm);
-		}
-		catch(...)
-		{
-			__SUP_COUT__ << "getStatusProgressDetail() VStateMachine testFSM Failed..." << __E__;
-			throw;
-		}
+	    //__SUP_COUT__ << "Checking..." << __E__;
+	    try
+	    {
+	        VStateMachine* testFSM = dynamic_cast<VStateMachine*>(fsm);
+	    }
+	    catch(...)
+	    {
+	        __SUP_COUT__ << "getStatusProgressDetail() VStateMachine testFSM Failed..." << __E__;
+	        throw;
+	    }
 	}
 	*/
 
-	if(theStateMachine_.getCurrentStateName() == "Halted") return detail;
-	
+	if(theStateMachine_.getCurrentStateName() == "Halted")
+		return detail;
+
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
 		std::string fsmProgressDetail = fsm->getStatusProgressDetail();
@@ -353,13 +357,13 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 			detail += ((cnt++) ? ":" : "") + fsmProgressDetail;  // StringMacros::encodeURIComponent(fsmProgressDetail);
 	}
 
-	//if(detail.size())
+	// if(detail.size())
 	//	__SUP_COUTV__(detail);
 
-	//if empty detail, give last command
+	// if empty detail, give last command
 	if(!detail.size() && RunControlStateMachine::getLastCommand() != "")
 	{
-		detail = "Last Command: " + RunControlStateMachine::getLastCommand();	
+		detail = "Last Command: " + RunControlStateMachine::getLastCommand();
 	}
 
 	return detail;
@@ -396,7 +400,7 @@ xoap::MessageReference CoreSupervisorBase::stateMachineErrorMessageRequest(xoap:
 	SOAPParameters retParameters;
 	retParameters.addParameter("ErrorMessage", theStateMachine_.getErrorMessage());
 	return SOAPUtilities::makeSOAPMessageReference("stateMachineErrorMessageRequestReply", retParameters);
-} //end stateMachineErrorMessageRequest()
+}  // end stateMachineErrorMessageRequest()
 
 //==============================================================================
 void CoreSupervisorBase::stateInitial(toolbox::fsm::FiniteStateMachine& /*fsm*/) { __SUP_COUT__ << "CoreSupervisorBase::stateInitial" << __E__; }
@@ -507,7 +511,7 @@ void CoreSupervisorBase::postStateMachineExecution(unsigned int i)
 			++stateMachinesIterationWorkCount_;               // increment still working count
 		}
 	}
-} //end postStateMachineExecution()
+}  // end postStateMachineExecution()
 
 //==============================================================================
 void CoreSupervisorBase::postStateMachineExecutionLoop(void)
@@ -518,7 +522,7 @@ void CoreSupervisorBase::postStateMachineExecutionLoop(void)
 		__SUP_COUT__ << stateMachinesIterationWorkCount_ << " state machine implementation(s) flagged for another iteration..." << __E__;
 	else
 		__SUP_COUT__ << "Done configuration all state machine implementations..." << __E__;
-} //end postStateMachineExecutionLoop()
+}  // end postStateMachineExecutionLoop()
 
 //==============================================================================
 void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event*/)
@@ -540,7 +544,7 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event
 	CoreSupervisorBase::transitionConfiguringFSMs();
 
 	__SUP_COUT__ << "Configured." << __E__;
-} //end transitionConfiguring()
+}  // end transitionConfiguring()
 
 //==============================================================================
 void CoreSupervisorBase::transitionConfiguringFSMs()
@@ -897,7 +901,8 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference /*event*/)
 //	Static -- thread
 //	Send async error or soft error to gateway
 //	Call this as thread so that parent calling function (workloop) can end.
-void CoreSupervisorBase::sendAsyncExceptionToGateway(const std::string& errorMessage, bool isPauseException, bool isStopException) try
+void CoreSupervisorBase::sendAsyncExceptionToGateway(const std::string& errorMessage, bool isPauseException, bool isStopException)
+try
 {
 	if(isStopException)
 		__SUP_COUT_ERR__ << "Sending Supervisor Async STOP Running Exception... \n" << errorMessage << __E__;
@@ -913,7 +918,8 @@ void CoreSupervisorBase::sendAsyncExceptionToGateway(const std::string& errorMes
 	SOAPParameters parameters;
 	parameters.addParameter("ErrorMessage", errorMessage);
 
-	xoap::MessageReference replyMessage = SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isStopException ? "AsyncStopException": (isPauseException ? "AsyncPauseException" : "AsyncError"), parameters);
+	xoap::MessageReference replyMessage = SOAPMessenger::sendWithSOAPReply(
+	    gatewaySupervisor, isStopException ? "AsyncStopException" : (isPauseException ? "AsyncPauseException" : "AsyncError"), parameters);
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
@@ -929,8 +935,8 @@ catch(const xdaq::exception::Exception& e)
 {
 	if(isStopException)
 		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running STOP "
-						"exception back to Gateway: "
-					 << e.what() << __E__;
+		                "exception back to Gateway: "
+		             << e.what() << __E__;
 	else if(isPauseException)
 		__SUP_COUT__ << "SOAP message failure indicating Supervisor asynchronous running SOFT "
 		                "exception back to Gateway: "
@@ -960,12 +966,6 @@ catch(...)
 
 //==============================================================================
 xoap::MessageReference CoreSupervisorBase::TRACESupervisorRequest(xoap::MessageReference message)
-{ return CorePropertySupervisorBase::TRACESupervisorRequest(message);}  // end TRACESupervisorRequest()
-
-
-
-
-
-
-
-
+{
+	return CorePropertySupervisorBase::TRACESupervisorRequest(message);
+}  // end TRACESupervisorRequest()

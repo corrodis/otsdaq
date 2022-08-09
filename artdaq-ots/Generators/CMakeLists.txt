@@ -1,17 +1,6 @@
-basic_plugin(UDPReceiver "generator"
-  artdaq-ots_Overlays
-  artdaq_Generators
-  artdaq_DAQdata
-  artdaq_core::artdaq-core_Utilities
-  artdaq_core::artdaq-core_Data
-  canvas
-  pthread
-  fhiclcpp
-  cetlib
-  cetlib_except
-  MF_MessageLogger
-  ${Boost_SYSTEM_LIBRARY}
-  )
+
+  include(artdaq::commandableGenerator)
+  cet_build_plugin(UDPReceiver artdaq::commandableGenerator LIBRARIES REG otsdaq::artdaq-ots_Overlays canvas::canvas)
 
 install_headers()
 install_source()

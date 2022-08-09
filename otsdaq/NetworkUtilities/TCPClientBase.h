@@ -23,5 +23,5 @@ class TCPClientBase : public virtual TCPSocket
 
 	void resolveServer(std::string& serverIP);
 };
-}
+}  // namespace ots
 #endif

@@ -232,7 +232,7 @@ void WebUsers::initializeRequestUserInfo(cgicc::Cgicc& cgi, WebUsers::RequestUse
 // userInfo.groupPermissionLevelMap_ and userInfo.permissionLevel_ are properly setup
 //		by either calling userInfo.setGroupPermissionLevels() or
 // userInfo.getGroupPermissionLevel()
-bool WebUsers::checkRequestAccess(cgicc::Cgicc&              /*cgi*/,
+bool WebUsers::checkRequestAccess(cgicc::Cgicc& /*cgi*/,
                                   std::ostringstream*        out,
                                   HttpXmlDocument*           xmldoc,
                                   WebUsers::RequestUserInfo& userInfo,
@@ -470,7 +470,7 @@ bool WebUsers::loadDatabases()
 	const unsigned int LINE_LEN = 1000;
 	char               line[LINE_LEN];
 	unsigned int       i, si, c, len, f;
-	//uint64_t           tmpInt64;
+	// uint64_t           tmpInt64;
 
 	// hashes
 	//	File Organization:
@@ -885,9 +885,9 @@ void WebUsers::createNewAccount(const std::string& username, const std::string& 
 		__SS_THROW__;
 	}
 
-	//enforce unique Display Name
+	// enforce unique Display Name
 	if((i = searchUsersDatabaseForDisplayName(displayName)) != NOT_FOUND_IN_DATABASE)
-		// from being created!
+	// from being created!
 	{
 		__SS__ << "Display Name '" << displayName << "' already exists! Please choose a unique display name." << __E__;
 		__SS_THROW__;
@@ -1127,14 +1127,13 @@ uint64_t WebUsers::attemptActiveSession(
 	newAccountCode = createNewActiveSession(Users_[i].userId_,
 	                                        ip);  // return cookie code by reference
 
-	if(ActiveSessions_.size() == 1) //if only one user, then attempt to take lock for user friendliness
+	if(ActiveSessions_.size() == 1)  // if only one user, then attempt to take lock for user friendliness
 	{
-		__COUT__ << "Attempting to auto-lock for first login user '" <<
-				Users_[i].username_ << "'... " << __E__;
+		__COUT__ << "Attempting to auto-lock for first login user '" << Users_[i].username_ << "'... " << __E__;
 		setUserWithLock(Users_[i].userId_, true /*lock*/, Users_[i].username_);
 	}
 
-	return Users_[i].userId_;                     // return user Id
+	return Users_[i].userId_;  // return user Id
 }  // end attemptActiveSession()
 
 //==============================================================================
@@ -1766,7 +1765,7 @@ uint64_t WebUsers::cookieCodeLogout(const std::string& cookieCode, bool logoutOt
 		}
 		else  // only increment if no delete, for effectively erase rewind
 			++i;
-	} //end cleanup active sessioins loop
+	}  // end cleanup active sessioins loop
 
 	__COUT__ << "Found and removed active session count = " << logoutCount << __E__;
 
@@ -1954,9 +1953,9 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 		if(LoginSessions_[i].startTime_ + LOGIN_SESSION_EXPIRATION_TIME < time(0) ||  // expired
 		   LoginSessions_[i].loginAttempts_ > LOGIN_SESSION_ATTEMPTS_MAX)
 		{
-			__COUT__ << "Found expired login sessions: #" << (i+1) << " of " << LoginSessions_.size() << __E__;
-				//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
-			 	//LoginSessionAttemptsVector[i] << __E__;
+			__COUT__ << "Found expired login sessions: #" << (i + 1) << " of " << LoginSessions_.size() << __E__;
+			//" at time " << LoginSessionStartTimeVector[i] << " with attempts " <<
+			// LoginSessionAttemptsVector[i] << __E__;
 
 			LoginSessions_.erase(LoginSessions_.begin() + i);
 			--i;  // rewind loop
@@ -1980,10 +1979,9 @@ void WebUsers::cleanupExpiredEntries(std::vector<std::string>* loggedOutUsername
 			//	" start time " << tstr << " i: " << i << " size: " <<
 			// ActiveSessionStartTimeVector.size()
 			//	<< __E__;
-			
-			
-			__COUT__ << "Found expired active sessions: #" << (i+1) << " of " << ActiveSessions_.size() << __E__;
-			
+
+			__COUT__ << "Found expired active sessions: #" << (i + 1) << " of " << ActiveSessions_.size() << __E__;
+
 			tmpUid = ActiveSessions_[i].userId_;
 			ActiveSessions_.erase(ActiveSessions_.begin() + i);
 
@@ -2177,7 +2175,7 @@ std::map<std::string /*groupName*/, WebUsers::permissionLevel_t> WebUsers::getPe
 // WebUsers::getPermissionLevelForGroup
 // return WebUsers::PERMISSION_LEVEL_INACTIVE if group not found in permission map
 WebUsers::permissionLevel_t WebUsers::getPermissionLevelForGroup(const std::map<std::string /*groupName*/, WebUsers::permissionLevel_t>& permissionMap,
-                                                                 const std::string&                                                groupName)
+                                                                 const std::string&                                                      groupName)
 {
 	auto it = permissionMap.find(groupName);
 	if(it == permissionMap.end())
@@ -2244,28 +2242,37 @@ std::string WebUsers::getTooltipFilename(const std::string& username, const std:
 std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& fingerprint)
 {
 	__COUT__ << "Checking if user fingerprint " << fingerprint << " is in memory database" << __E__;
-	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
-	
+	if(certFingerprints_.count(fingerprint))
+	{
+		return certFingerprints_[fingerprint];
+	}
+
 	__COUT__ << "Going to read credential database " << WEB_LOGIN_CERTDATA_PATH << __E__;
 	std::ifstream f(WEB_LOGIN_CERTDATA_PATH);
-	bool open =false;	
+	bool          open = false;
 	while(f)
 	{
 		open = true;
 		std::string email;
 		std::string fp;
 		f >> email >> fp;
-		if(fp != "NOKEY" && fp != "") {
-		__COUT__ << "Adding user " << email << " to list with fingerprint " << fp << __E__; 
-		certFingerprints_[fp] = email; }
+		if(fp != "NOKEY" && fp != "")
+		{
+			__COUT__ << "Adding user " << email << " to list with fingerprint " << fp << __E__;
+			certFingerprints_[fp] = email;
+		}
 	}
-	if(open) {
+	if(open)
+	{
 		f.close();
 		remove(WEB_LOGIN_CERTDATA_PATH.c_str());
 	}
 
 	__COUT__ << "Checking again if fingerprint is in memory database" << __E__;
-	if(certFingerprints_.count(fingerprint)) { return certFingerprints_[fingerprint]; }
+	if(certFingerprints_.count(fingerprint))
+	{
+		return certFingerprints_[fingerprint];
+	}
 
 	__COUT__ << "Could not match fingerprint, returning null email" << __E__;
 	return "";
@@ -2275,7 +2282,7 @@ std::string ots::WebUsers::getUserEmailFromFingerprint(const std::string& finger
 // WebUsers::tooltipSetNeverShowForUsername
 //	temporarySilence has priority over the neverShow setting
 void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
-                                              HttpXmlDocument*   /*xmldoc*/,
+                                              HttpXmlDocument* /*xmldoc*/,
                                               const std::string& srcFile,
                                               const std::string& srcFunc,
                                               const std::string& srcId,
@@ -2283,9 +2290,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
                                               bool               temporarySilence)
 {
 	std::string filename;
-	bool isForAll = (srcFile == "ALL" && srcFunc == "ALL" && srcId == "ALL");
-
-
+	bool        isForAll = (srcFile == "ALL" && srcFunc == "ALL" && srcId == "ALL");
 
 	if(isForAll)
 	{
@@ -2298,7 +2303,7 @@ void WebUsers::tooltipSetNeverShowForUsername(const std::string& username,
 		__COUT__ << "Setting tooltip never show for user '" << username << "' to " << doNeverShow << " (temporarySilence=" << temporarySilence << ")" << __E__;
 	}
 
-	FILE*       fp       = fopen(filename.c_str(), "w");
+	FILE* fp = fopen(filename.c_str(), "w");
 	if(fp)
 	{  // file exists, so do NOT show tooltip
 		if(temporarySilence)
@@ -2358,7 +2363,7 @@ void WebUsers::tooltipCheckForUsername(
 		if(val == 1)
 		{
 			xmldoc->addTextElementToData("ShowTooltip", "0");
-			//tooltipSetNeverShowForUsername(username, xmldoc, srcFile, srcFunc, srcId, true, true);
+			// tooltipSetNeverShowForUsername(username, xmldoc, srcFile, srcFunc, srcId, true, true);
 			return;
 		}
 	}
@@ -2588,8 +2593,8 @@ std::string WebUsers::getGenericPreference(uint64_t uid, const std::string& pref
 	if(fp)
 	{
 		fseek(fp, 0, SEEK_END);
-		const long  size = ftell(fp);
-		char* line = new char[size+1]; //std::string with line.reserve(size + 1) does not work for unknown reason
+		const long size = ftell(fp);
+		char*      line = new char[size + 1];  // std::string with line.reserve(size + 1) does not work for unknown reason
 		rewind(fp);
 		fread(line, 1, size, fp);
 		line[size] = '\0';
@@ -2767,10 +2772,11 @@ void WebUsers::modifyAccountSettings(
 			__SS_THROW__;
 		}
 
-		//enforce unique Display Name
+		// enforce unique Display Name
 		{
-			for(uint64_t i=0; i < Users_.size(); ++i)
-				if(i == modi) continue; //skip target user
+			for(uint64_t i = 0; i < Users_.size(); ++i)
+				if(i == modi)
+					continue;  // skip target user
 				else if(Users_[i].displayName_ == displayname)
 				{
 					__SS__ << "Display Name '" << displayname << "' already exists! Please choose a unique display name." << __E__;
@@ -2823,7 +2829,7 @@ void WebUsers::modifyAccountSettings(
 		}
 		break;
 	case MOD_TYPE_ADD:
-		//Note: username, userId, AND displayName must be unique!
+		// Note: username, userId, AND displayName must be unique!
 
 		__COUT__ << "MOD_TYPE_ADD " << username << " - " << displayname << __E__;
 
@@ -2861,22 +2867,25 @@ void WebUsers::modifyAccountSettings(
 //	return comma separated list of active Display Names
 std::string WebUsers::getActiveUsersString()
 {
-	std::set<unsigned int>	activeUserIndices;
+	std::set<unsigned int> activeUserIndices;
 	for(uint64_t i = 0; i < ActiveSessions_.size(); ++i)
 		activeUserIndices.emplace(searchUsersDatabaseForUserId(ActiveSessions_[i].userId_));
 
-	std::string ret = "";
-	bool addComma = false;
-	for(const auto& i:activeUserIndices)
+	std::string ret      = "";
+	bool        addComma = false;
+	for(const auto& i : activeUserIndices)
 	{
-		if(i >= Users_.size()) continue; //skip not found
+		if(i >= Users_.size())
+			continue;  // skip not found
 
-		if(addComma) ret += ",";
-		else addComma = true;
+		if(addComma)
+			ret += ",";
+		else
+			addComma = true;
 
 		ret += Users_[i].displayName_;
 	}
-	if(activeUserIndices.size() == 0 && WebUsers::getSecurity() == WebUsers::SECURITY_TYPE_NONE) //assume only admin is active
+	if(activeUserIndices.size() == 0 && WebUsers::getSecurity() == WebUsers::SECURITY_TYPE_NONE)  // assume only admin is active
 		ret += WebUsers::DEFAULT_ADMIN_DISPLAY_NAME;
 
 	__COUTV__(ret);
@@ -2934,14 +2943,13 @@ void WebUsers::loadUserWithLock()
 	setUserWithLock(Users_[i].userId_, true, username);
 }  // end loadUserWithLock()
 
-
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void WebUsers::addSystemMessage(const std::string& targetUsersCSV,const std::string& message)
+void WebUsers::addSystemMessage(const std::string& targetUsersCSV, const std::string& message)
 {
-	addSystemMessage(targetUsersCSV,"" /*subject*/,message,false /*doEmail*/);
-} //end addSystemMessage()
+	addSystemMessage(targetUsersCSV, "" /*subject*/, message, false /*doEmail*/);
+}  // end addSystemMessage()
 
 //==============================================================================
 // addSystemMessage
@@ -2949,25 +2957,23 @@ void WebUsers::addSystemMessage(const std::string& targetUsersCSV,const std::str
 void WebUsers::addSystemMessage(const std::string& targetUsersCSV, const std::string& subject, const std::string& message, bool doEmail)
 {
 	std::vector<std::string> targetUsers;
-	StringMacros::getVectorFromString(targetUsersCSV,targetUsers);
-	addSystemMessage(targetUsers,subject,message,doEmail);
-} //end addSystemMessage()
+	StringMacros::getVectorFromString(targetUsersCSV, targetUsers);
+	addSystemMessage(targetUsers, subject, message, doEmail);
+}  // end addSystemMessage()
 
 //==============================================================================
 // addSystemMessage
 //	targetUser can be "*" for all users
-void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
-		const std::string& subject, const std::string& message, bool doEmail)
+void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers, const std::string& subject, const std::string& message, bool doEmail)
 {
 	__COUT__ << "Before number of users with system messages: " << systemMessages_.size() << __E__;
 
-	//lock for remainder of scope
+	// lock for remainder of scope
 	std::lock_guard<std::mutex> lock(systemMessageLock_);
 
 	systemMessageCleanup();
 
-	std::string fullMessage = StringMacros::encodeURIComponent((subject == ""?"":(subject + ": ")) +
-			message);
+	std::string fullMessage = StringMacros::encodeURIComponent((subject == "" ? "" : (subject + ": ")) + message);
 
 	__COUTV__(fullMessage);
 	__COUTV__(StringMacros::vectorToString(targetUsers));
@@ -2984,96 +2990,89 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 			continue;
 		}
 		__COUTV__(targetUser);
-		//target user might * or <group name>:<permission threshold> or just <username>
+		// target user might * or <group name>:<permission threshold> or just <username>
 
-
-		//do special ALL email handling
+		// do special ALL email handling
 		if(doEmail && targetUser == "*")
 		{
-			//for each user, look up email and append
+			// for each user, look up email and append
 			for(const auto& user : Users_)
 			{
-				if(user.email_.size() > 5 && //few simple valid email checks
-						user.email_.find('@') != std::string::npos &&
-						user.email_.find('.') != std::string::npos)
+				if(user.email_.size() > 5 &&  // few simple valid email checks
+				   user.email_.find('@') != std::string::npos && user.email_.find('.') != std::string::npos)
 				{
 					__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
 					targetEmails.emplace(user.email_);
 				}
-			} //end add every user loop
+			}  // end add every user loop
 
-		} //end all email handling
+		}  // end all email handling
 		else if(targetUser.find(':') != std::string::npos)
 		{
-			//special group handling.. convert to individual users
+			// special group handling.. convert to individual users
 			__COUT__ << "Treating as group email target: " << targetUser << __E__;
 
 			std::map<std::string, WebUsers::permissionLevel_t> targetGroupMap;
 			StringMacros::getMapFromString(  // re-factor membership string to map
-					targetUser,
-					targetGroupMap);
+			    targetUser,
+			    targetGroupMap);
 
 			__COUTV__(StringMacros::mapToString(targetGroupMap));
 
 			if(targetGroupMap.size() == 1)
 			{
-				//add users to targetUsers, so the loop will catch them at end
+				// add users to targetUsers, so the loop will catch them at end
 
-				//loop through all users, and add users that match group spec
+				// loop through all users, and add users that match group spec
 				for(const auto& user : Users_)
 				{
-					WebUsers::permissionLevel_t userLevel =
-							getPermissionLevelForGroup(getPermissionsForUser(user.userId_),
-									targetGroupMap.begin()->first);
+					WebUsers::permissionLevel_t userLevel = getPermissionLevelForGroup(getPermissionsForUser(user.userId_), targetGroupMap.begin()->first);
 
 					__COUTV__(StringMacros::mapToString(getPermissionsForUser(user.userId_)));
 					__COUTV__((int)userLevel);
 					__COUTV__(targetGroupMap.begin()->first);
 
-					if(userLevel != WebUsers::PERMISSION_LEVEL_INACTIVE &&
-							userLevel >= targetGroupMap.begin()->second &&
-							user.email_.size() > 5 && //few simple valid email checks
-							user.email_.find('@') != std::string::npos &&
-							user.email_.find('.') != std::string::npos)
+					if(userLevel != WebUsers::PERMISSION_LEVEL_INACTIVE && userLevel >= targetGroupMap.begin()->second &&
+					   user.email_.size() > 5 &&  // few simple valid email checks
+					   user.email_.find('@') != std::string::npos && user.email_.find('.') != std::string::npos)
 					{
 						if(doEmail)
 						{
 							targetEmails.emplace(user.email_);
 							__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
 						}
-						addSystemMessageToMap(user.displayName_,fullMessage);
+						addSystemMessageToMap(user.displayName_, fullMessage);
 					}
 				}
 			}
 			else
 				__COUT__ << "target Group Map from '" << targetUser << "' is empty." << __E__;
 
-			continue; //proceed with user loop, do not add group target message
+			continue;  // proceed with user loop, do not add group target message
 		}
 
-		//at this point add to system message map (similar to group individual add, but might be '*')
+		// at this point add to system message map (similar to group individual add, but might be '*')
 
-		addSystemMessageToMap(targetUser,fullMessage);
+		addSystemMessageToMap(targetUser, fullMessage);
 
-		if(doEmail)//find user for email
+		if(doEmail)  // find user for email
 		{
 			for(const auto& user : Users_)
 			{
 				if(user.displayName_ == targetUser)
 				{
-					if(user.email_.size() > 5 && //few simple valid email checks
-							user.email_.find('@') != std::string::npos &&
-							user.email_.find('.') != std::string::npos)
+					if(user.email_.size() > 5 &&  // few simple valid email checks
+					   user.email_.find('@') != std::string::npos && user.email_.find('.') != std::string::npos)
 					{
 						targetEmails.emplace(user.email_);
 						__COUT__ << "Adding " << user.displayName_ << " email: " << user.email_ << __E__;
 					}
-					break; //user found, exit search loop
+					break;  // user found, exit search loop
 				}
-			} //end user search loop
+			}  // end user search loop
 		}
 
-	} //end target user message add loop
+	}  // end target user message add loop
 
 	__COUT__ << "After number of users with system messages: " << systemMessages_.size() << __E__;
 	__COUTV__(targetEmails.size());
@@ -3082,29 +3081,30 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 	{
 		__COUTV__(StringMacros::setToString(targetEmails));
 
-		std::string toList = "";
-		bool addComma = false;
+		std::string toList   = "";
+		bool        addComma = false;
 		for(const auto& email : targetEmails)
 		{
-			if(addComma) toList += ", ";
-			else addComma = true;
+			if(addComma)
+				toList += ", ";
+			else
+				addComma = true;
 			toList += email;
 		}
 
 		std::string filename = (std::string)WEB_LOGIN_DB_PATH + (std::string)USERS_DB_PATH + "/.tmp_email.txt";
-		FILE* fp = fopen(filename.c_str(),"w");
+		FILE*       fp       = fopen(filename.c_str(), "w");
 		if(!fp)
 		{
 			__SS__ << "Could not open email file: " << filename << __E__;
 			__SS_THROW__;
 		}
 
-		fprintf(fp,"From: %s\n",(WebUsers::OTS_OWNER==""?"ots":(
-				StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
-		fprintf(fp,"To: %s\n",toList.c_str());
-		fprintf(fp,"Subject: %s\n",subject.c_str());
-		fprintf(fp,"Content-Type: text/html\n");
-		fprintf(fp,"\n<html><pre>%s</pre></html>",message.c_str());
+		fprintf(fp, "From: %s\n", (WebUsers::OTS_OWNER == "" ? "ots" : (StringMacros::decodeURIComponent(WebUsers::OTS_OWNER) + "_ots")).c_str());
+		fprintf(fp, "To: %s\n", toList.c_str());
+		fprintf(fp, "Subject: %s\n", subject.c_str());
+		fprintf(fp, "Content-Type: text/html\n");
+		fprintf(fp, "\n<html><pre>%s</pre></html>", message.c_str());
 		fclose(fp);
 
 		StringMacros::exec(("sendmail \"" + toList + "\" < " + filename).c_str());
@@ -3112,7 +3112,7 @@ void WebUsers::addSystemMessage(const std::vector<std::string>& targetUsers,
 	else if(doEmail)
 		__COUT_WARN__ << "Do email was attempted, but no target users had email addresses specified!" << __E__;
 
-} //end addSystemMessage()
+}  // end addSystemMessage()
 
 //==============================================================================
 // addSystemMessageToMap
@@ -3122,28 +3122,23 @@ void WebUsers::addSystemMessageToMap(const std::string& targetUser, const std::s
 {
 	auto it = systemMessages_.find(targetUser);
 
-	//check for repeat messages
-	if(it != systemMessages_.end() &&
-			it->second.size() &&
-			it->second[it->second.size() - 1].message_ == fullMessage)
-		return; //skip user add
+	// check for repeat messages
+	if(it != systemMessages_.end() && it->second.size() && it->second[it->second.size() - 1].message_ == fullMessage)
+		return;  // skip user add
 
-	if(it == systemMessages_.end()) //create first message for target user
+	if(it == systemMessages_.end())  // create first message for target user
 	{
 		systemMessages_.emplace(
-				std::pair<std::string /*toUser*/,std::vector<SystemMessage>>(
-						targetUser,
-						std::vector<SystemMessage>({SystemMessage(fullMessage)})
-				));
+		    std::pair<std::string /*toUser*/, std::vector<SystemMessage>>(targetUser, std::vector<SystemMessage>({SystemMessage(fullMessage)})));
 		__COUT__ << targetUser << " Current System Messages count = " << 1 << __E__;
 	}
-	else //add message
+	else  // add message
 	{
 		__COUT__ << __E__;
 		it->second.push_back(SystemMessage(fullMessage));
 		__COUT__ << it->first << " Current System Messages count = " << it->second.size() << __E__;
 	}
-} //end addSystemMessageToMap
+}  // end addSystemMessageToMap
 
 //==============================================================================
 // getSystemMessage
@@ -3156,7 +3151,7 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 {
 	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 
-	//lock for remainder of scope
+	// lock for remainder of scope
 	std::lock_guard<std::mutex> lock(systemMessageLock_);
 
 	// __COUT__ << "Current System Messages: " << targetUser <<
@@ -3168,10 +3163,10 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 
 	//__COUTV__(targetUser);
 	auto it = systemMessages_.find(targetUser);
-	//for(auto systemMessagePair:systemMessages_)
+	// for(auto systemMessagePair:systemMessages_)
 	//	__COUT__ << systemMessagePair.first << " " << systemMessagePair.second.size() << " "
 	//		<< (systemMessagePair.second.size()?systemMessagePair.second[0].message_:"") << __E__;
-	//if(it != systemMessages_.end())
+	// if(it != systemMessages_.end())
 	//	__COUTV__(it->second.size());
 
 	for(uint64_t i = 0; it != systemMessages_.end() && i < it->second.size(); ++i)
@@ -3201,7 +3196,7 @@ std::string WebUsers::getSystemMessage(const std::string& targetUser)
 	systemMessageCleanup();
 	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
 	return retStr;
-} //end getSystemMessage()
+}  // end getSystemMessage()
 
 //==============================================================================
 // systemMessageCleanup
@@ -3216,19 +3211,19 @@ void WebUsers::systemMessageCleanup()
 		//		userMessagesPair.second.size() << __E__;
 
 		for(uint64_t i = 0; i < userMessagesPair.second.size(); ++i)
-			if((userMessagesPair.first != "*" && userMessagesPair.second[i].delivered_) ||  // delivered and != *
-					userMessagesPair.second[i].creationTime_ + SYS_CLEANUP_WILDCARD_TIME < time(0))    // expired
+			if((userMessagesPair.first != "*" && userMessagesPair.second[i].delivered_) ||      // delivered and != *
+			   userMessagesPair.second[i].creationTime_ + SYS_CLEANUP_WILDCARD_TIME < time(0))  // expired
 			{
 				// remove
 				userMessagesPair.second.erase(userMessagesPair.second.begin() + i);
-				--i;                   // rewind
+				--i;  // rewind
 			}
 
 		//__COUT__ << userMessagesPair.first << " remaining system messages: " <<
 		//		userMessagesPair.second.size() << __E__;
 	}
 	//__COUT__ << "Number of users with system messages: " << systemMessages_.size() << __E__;
-} //end systemMessageCleanup()
+}  // end systemMessageCleanup()
 
 //==============================================================================
 // WebUsers::getSecurity
@@ -3265,7 +3260,7 @@ void WebUsers::loadSecuritySelection()
 		CareAboutCookieCodes_ = true;
 
 	__COUT__ << "CareAboutCookieCodes_: " << CareAboutCookieCodes_ << __E__;
-} //end loadSecuritySelection()()
+}  // end loadSecuritySelection()()
 
 //==============================================================================
 void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
@@ -3286,7 +3281,7 @@ void WebUsers::NACDisplayThread(const std::string& nac, const std::string& user)
 		__COUT__ << "\n******************************************************************** " << __E__;
 		__COUT__ << "\n******************************************************************** " << __E__;
 	}
-} //end NACDisplayThread()
+}  // end NACDisplayThread()
 
 //==============================================================================
 void WebUsers::deleteUserData()
@@ -3333,4 +3328,4 @@ void WebUsers::deleteUserData()
 	std::system(("rm -rf " + std::string(__ENV__("LOGBOOK_DATA_PATH")) + "/").c_str());
 
 	__COUT__ << "$$$$$$$$$$$$$$ Successfully deleted ALL service user data $$$$$$$$$$$$" << __E__;
-} //end deleteUserData()
+}  // end deleteUserData()

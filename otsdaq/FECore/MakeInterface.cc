@@ -1,4 +1,4 @@
-#include "otsdaq/PluginMakers/MakeInterface.h"
+#include "otsdaq/FECore/MakeInterface.h"
 #include "otsdaq/FECore/FEVInterface.h"
 
 #include <cetlib/BasicPluginFactory.h>

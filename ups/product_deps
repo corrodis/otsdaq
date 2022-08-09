@@ -19,29 +19,24 @@ old_style_config_vars
 
 #
 product             version     optional
-artdaq              v3_11_00
-artdaq_database     v1_05_07
+artdaq              v3_12_00
+artdaq_database     v1_07_00
 xdaq                v16_7_0_1
-artdaq_daqinterface v3_11_00
-cetmodules	    v2_26_00	-	only_for_build
+artdaq_daqinterface v3_12_00
+cetmodules	    v3_16_00	-	only_for_build
 end_product_list
 
 # -nq- here means there is no qualifier
 # a "-" here means the dependent product is not required by the parent and will not be setup
 qualifier           artdaq              artdaq_database     xdaq       artdaq_daqinterface  notes
-e20:s112:prof       e20:s112:prof       e20:s112:prof       e20:prof   e20:s112:prof                 -std=c++17
-e20:s112:debug      e20:s112:debug      e20:s112:debug      e20:debug  e20:s112:debug                 -std=c++17
-e19:s112:prof       e19:s112:prof       e19:s112:prof       e19:prof   -nq-                 -std=c++17
-e19:s112:debug      e19:s112:debug      e19:s112:debug      e19:debug  -nq-                 -std=c++17
-c7:s112:prof        c7:s112:prof        c7:s112:prof        c7:prof    -nq-                 -std=c++17
-c7:s112:debug       c7:s112:debug       c7:s112:debug       c7:debug   -nq-                 -std=c++17
+e20:s116:prof       e20:s116:prof       e20:s116:ots:prof       e20:prof   -nq-                 -std=c++17
+e20:s116:debug      e20:s116:debug      e20:s116:ots:debug      e20:debug  -nq-                 -std=c++17
 
-e20:s110:prof       e20:s110:prof       e20:s110:prof       e20:prof   -nq-                 -std=c++17
-e20:s110:debug      e20:s110:debug      e20:s110:debug      e20:debug  -nq-                 -std=c++17
-e19:s110:prof       e19:s110:prof       e19:s110:prof       e19:prof   -nq-                 -std=c++17
-e19:s110:debug      e19:s110:debug      e19:s110:debug      e19:debug  -nq-                 -std=c++17
-c7:s110:prof        c7:s110:prof        c7:s110:prof        c7:prof    -nq-                 -std=c++17
-c7:s110:debug       c7:s110:debug       c7:s110:debug       c7:debug   -nq-                 -std=c++17
+e20:s114:prof       e20:s114:prof       e20:s114:ots:prof       e20:prof   -nq-                 -std=c++17
+e20:s114:debug      e20:s114:debug      e20:s114:ots:debug      e20:debug  -nq-                 -std=c++17
+
+e20:s112:prof       e20:s112:prof       e20:s112:ots:prof       e20:prof   -nq-                 -std=c++17
+e20:s112:debug      e20:s112:debug      e20:s112:ots:debug      e20:debug  -nq-                 -std=c++17
 
 end_qualifier_list
 

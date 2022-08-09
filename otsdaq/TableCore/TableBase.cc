@@ -18,8 +18,8 @@ using namespace ots;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-TableBase::TableBase(const std::string&  tableName,
-                     std::string* accumulatedExceptions)
+TableBase::TableBase(const std::string& tableName,
+                     std::string*       accumulatedExceptions)
     : MAX_VIEWS_IN_CACHE(20)  // This is done, so that inheriting table classes could have
                               // varying amounts of cache
     , tableName_(tableName)
@@ -32,9 +32,9 @@ TableBase::TableBase(const std::string&  tableName,
 		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
-	
-	//December 2021 started seeing an issue where traceTID is found to be cleared to 0
-	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+
+	// December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor
 	//	This check and re-initialization seems to cover up the issue for now.
 	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
 	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
@@ -42,20 +42,23 @@ TableBase::TableBase(const std::string&  tableName,
 	{
 		std::cout << "TableBase Before traceTID=" << traceTID << __E__;
 		char buf[40];
-		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)), 0);
 		std::cout << "TableBase After traceTID=" << traceTID << __E__;
 		__COUT__ << "TableBase TRACE reinit and Constructed." << __E__;
 	}
 
-	bool dbg = false; //tableName == "ARTDAQEventBuilderTable";	
-	if(dbg) __COUTV__(tableName);
+	bool dbg = false;  // tableName == "ARTDAQEventBuilderTable";
+	if(dbg)
+		__COUTV__(tableName);
 	// info reader fills up the mockup view
 	TableInfoReader tableInfoReader(accumulatedExceptions);
-	if(dbg) __COUT__ << "Reading..." << __E__;
+	if(dbg)
+		__COUT__ << "Reading..." << __E__;
 	try  // to read info
 	{
 		std::string returnedExceptions = tableInfoReader.read(this);
-		if(dbg) __COUT__ << "Read.";
+		if(dbg)
+			__COUT__ << "Read.";
 		if(returnedExceptions != "")
 			__COUT_ERR__ << returnedExceptions << __E__;
 
@@ -73,12 +76,14 @@ TableBase::TableBase(const std::string&  tableName,
 			throw;
 		return;  // do not proceed with mockup check if this failed
 	}
-	if(dbg) __COUT__ << "Initializing..." << __E__;
+	if(dbg)
+		__COUT__ << "Initializing..." << __E__;
 	// call init on mockup view to verify columns
 	try
 	{
 		getMockupViewP()->init();
-		if(dbg) __COUT__ << "Init." << __E__;
+		if(dbg)
+			__COUT__ << "Init." << __E__;
 	}
 	catch(std::runtime_error& e)  // if accumulating exceptions, continue to and return, else throw
 	{
@@ -86,7 +91,7 @@ TableBase::TableBase(const std::string&  tableName,
 			*accumulatedExceptions += std::string("\n") + e.what();
 		else
 			throw;
-	}	
+	}
 }  // end constructor()
 
 //==============================================================================
@@ -100,19 +105,18 @@ TableBase::TableBase(bool specialTable, const std::string& specialTableName)
     , tableName_(specialTableName)
     , activeTableView_(0)
     , mockupTableView_(specialTableName)
-{	
-	__COUT__ << "Special table '" << tableName_ << "' constructed. " <<  specialTable << __E__;
-} //special table constructor()
-
+{
+	__COUT__ << "Special table '" << tableName_ << "' constructed. " << specialTable << __E__;
+}  // special table constructor()
 
 ////==============================================================================
-//TableBase::TableBase(void)
-// : MAX_VIEWS_IN_CACHE(1)
-// {
+// TableBase::TableBase(void)
+//  : MAX_VIEWS_IN_CACHE(1)
+//  {
 //	__SS__ << "Should not call void constructor, table type is lost!" << __E__;
 //	ss << StringMacros::stackTrace() << __E__;
-//	__SS_THROW__;	
-//}
+//	__SS_THROW__;
+// }
 
 //==============================================================================
 TableBase::~TableBase(void) {}
@@ -156,8 +160,8 @@ void TableBase::print(std::ostream& out) const
 void TableBase::setupMockupView(TableVersion version)
 {
 	if(!isStored(version))
-	{		
-		tableViews_.emplace(std::make_pair(version,TableView(tableName_)));
+	{
+		tableViews_.emplace(std::make_pair(version, TableView(tableName_)));
 		tableViews_.at(version).copy(mockupTableView_, version, mockupTableView_.getAuthor());
 		trimCache();
 		if(!isStored(version))  // the trim cache is misbehaving!
@@ -174,7 +178,7 @@ void TableBase::setupMockupView(TableVersion version)
 		ss << StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
-} //end setupMockupView()
+}  // end setupMockupView()
 
 //==============================================================================
 // trimCache
@@ -188,7 +192,7 @@ void TableBase::trimCache(unsigned int trimSize)
 	if(trimSize == (unsigned int)-1)  // if -1, use MAX_VIEWS_IN_CACHE
 		trimSize = MAX_VIEWS_IN_CACHE;
 
-	//int i = 0;
+	// int i = 0;
 	while(getNumberOfStoredViews() > trimSize)
 	{
 		TableVersion versionToDelete;
@@ -374,7 +378,7 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)
-{	
+{
 	auto tmpIt = tableViews_.find(temporaryVersion);
 	if(tableViews_.find(temporaryVersion) == tableViews_.end())
 	{
@@ -392,7 +396,7 @@ void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, Tabl
 	if(tableViews_.find(version) != tableViews_.end())
 		__COUT_WARN__ << "WARNING: View version " << version << " already exists! Overwriting." << __E__;
 
-	auto emplacePair /*it,bool*/ = tableViews_.emplace(std::make_pair(version,TableView(tableName_)));
+	auto emplacePair /*it,bool*/ = tableViews_.emplace(std::make_pair(version, TableView(tableName_)));
 	emplacePair.first->second.copy(tmpIt->second, version, tmpIt->second.getAuthor());
 	setActiveView(version);
 	eraseView(temporaryVersion);  // delete temp version from tableViews_
@@ -557,18 +561,18 @@ TableVersion TableBase::mergeViews(
     bool                                                                                                                fillRecordConversionMaps,
     bool                                                                                                                applyRecordConversionMaps,
     bool                                                                                                                generateUniqueDataColumns /*=false*/,
-	std::stringstream* 																									mergeReport /*=nullptr*/)
+    std::stringstream*                                                                                                  mergeReport /*=nullptr*/)
 {
 	__COUT__ << "mergeViews starting..." << __E__;
 
-// clang-format off
+	// clang-format off
 	// There 3 modes:
 	//	rename		-- All records from both groups are maintained, but conflicts from B are renamed.
 	//					Must maintain a map of UIDs that are remapped to new name for
 	//					because linkUID fields must be preserved.
 	//	replace		-- Any UID conflicts for a record are replaced by the record from group B.
 	//	skip		-- Any UID conflicts for a record are skipped so that group A record remains
-// clang-format on
+	// clang-format on
 
 	// check valid mode
 	if(!(mergeApproach == "Rename" || mergeApproach == "Replace" || mergeApproach == "Skip"))
@@ -602,9 +606,8 @@ TableVersion TableBase::mergeViews(
 	sourceViewB.print();
 
 	if(mergeReport)
-		(*mergeReport) << "\n'" << mergeApproach << "'-Merging table '" << getTableName() << "' A=v" <<
-			sourceViewA.getVersion() << " with B=v" << sourceViewB.getVersion() << __E__;
-
+		(*mergeReport) << "\n'" << mergeApproach << "'-Merging table '" << getTableName() << "' A=v" << sourceViewA.getVersion() << " with B=v"
+		               << sourceViewB.getVersion() << __E__;
 
 	if(fillRecordConversionMaps && mergeApproach == "Rename")
 	{
@@ -736,11 +739,10 @@ TableVersion TableBase::mergeViews(
 					                                              // future conflict
 					                                              // checking within table
 
-
 					if(mergeReport)
-						(*mergeReport) << "\t" << "Found conflicting B groupID for linkIndex '" <<
-							sourceViewB.getColumnInfo(cb).getChildLinkIndex() <<
-							"' and renamed '" << bGroupid << "' to '" << uniqueIdString << "'" << __E__;
+						(*mergeReport) << "\t"
+						               << "Found conflicting B groupID for linkIndex '" << sourceViewB.getColumnInfo(cb).getChildLinkIndex()
+						               << "' and renamed '" << bGroupid << "' to '" << uniqueIdString << "'" << __E__;
 
 				}  // end row find unique id string loop for groupid
 
@@ -843,10 +845,10 @@ TableVersion TableBase::mergeViews(
 					                                              // future conflict
 					                                              // checking within table
 
-
 					if(mergeReport)
-						(*mergeReport) << "\t" << "Found conflicting B UID and renamed '" <<
-							sourceViewB.getValueAsString(rb, cb) << "' to '" << uniqueIdString << "'" << __E__;
+						(*mergeReport) << "\t"
+						               << "Found conflicting B UID and renamed '" << sourceViewB.getValueAsString(rb, cb) << "' to '" << uniqueIdString << "'"
+						               << __E__;
 				}  // end row find unique id string loop
 
 				// done creating conversion map
@@ -882,9 +884,8 @@ TableVersion TableBase::mergeViews(
 	{
 		// start with a copy of source view A
 
-		tableViews_.emplace(std::make_pair(destinationVersion,TableView(getTableName())));
-		TableView* destinationView = &(tableViews_.at(destinationVersion).copy(
-			sourceViewA, destinationVersion, author));
+		tableViews_.emplace(std::make_pair(destinationVersion, TableView(getTableName())));
+		TableView* destinationView = &(tableViews_.at(destinationVersion).copy(sourceViewA, destinationVersion, author));
 
 		unsigned int destRow, destSize = destinationView->getDataView().size();
 		unsigned int cb;
@@ -935,11 +936,11 @@ TableVersion TableBase::mergeViews(
 							__COUT__ << "Found entry to remap: " << sourceViewB.getDataView()[rb][linkPair.second] << " ==> " << uidConversionIt->second
 							         << __E__;
 
-
 							if(mergeReport)
-								(*mergeReport) << "\t\t" << "Found entry to remap [r,c]=[" << rb << "," << cb << "]" <<
-									": " << sourceViewB.getDataView()[rb][linkPair.second] << " ==> [" << destRow << "," << linkPair.second << uidConversionIt->second
-							         << __E__;
+								(*mergeReport) << "\t\t"
+								               << "Found entry to remap [r,c]=[" << rb << "," << cb << "]"
+								               << ": " << sourceViewB.getDataView()[rb][linkPair.second] << " ==> [" << destRow << "," << linkPair.second
+								               << uidConversionIt->second << __E__;
 							destinationView->setValueAsString(uidConversionIt->second, destRow, linkPair.second);
 						}
 					}
@@ -960,8 +961,10 @@ TableVersion TableBase::mergeViews(
 							         << __E__;
 
 							if(mergeReport)
-								(*mergeReport) << "\t\t" << "Found entry to remap [r,c]=[" << rb << "," << cb << "]" <<
-									": " << sourceViewB.getDataView()[rb][linkPair.second] << " ==> [" << destRow << "," << linkPair.second << "] " << groupidConversionIt->second << __E__;
+								(*mergeReport) << "\t\t"
+								               << "Found entry to remap [r,c]=[" << rb << "," << cb << "]"
+								               << ": " << sourceViewB.getDataView()[rb][linkPair.second] << " ==> [" << destRow << "," << linkPair.second
+								               << "] " << groupidConversionIt->second << __E__;
 							destinationView->setValueAsString(groupidConversionIt->second, destRow, linkPair.second);
 						}
 					}
@@ -973,10 +976,11 @@ TableVersion TableBase::mergeViews(
 						{
 							__COUT__ << "Found entry to remap: " << sourceViewB.getDataView()[rb][cb] << " ==> " << uidConversionIt->second << __E__;
 
-
 							if(mergeReport)
-								(*mergeReport) << "\t\t" << "Found entry to remap [r,c]=[" << rb << "," << cb << "]" <<
-									": " << sourceViewB.getDataView()[rb][cb] << " ==> [" << destRow << "," << cb << "] " << uidConversionIt->second << __E__;
+								(*mergeReport) << "\t\t"
+								               << "Found entry to remap [r,c]=[" << rb << "," << cb << "]"
+								               << ": " << sourceViewB.getDataView()[rb][cb] << " ==> [" << destRow << "," << cb << "] "
+								               << uidConversionIt->second << __E__;
 							destinationView->setValueAsString(uidConversionIt->second, destRow, cb);
 						}
 					}
@@ -993,8 +997,9 @@ TableVersion TableBase::mergeViews(
 							__COUT__ << "Found entry to remap: " << sourceViewB.getDataView()[rb][cb] << " ==> " << groupidConversionIt->second << __E__;
 
 							if(mergeReport)
-								(*mergeReport) << "\t\t" << "Found entry to remap [r,c]=[" << rb << "," << cb << "]" <<
-									sourceViewB.getDataView()[rb][cb] << " ==> [" << destRow << "," << cb << "] " << groupidConversionIt->second << __E__;
+								(*mergeReport) << "\t\t"
+								               << "Found entry to remap [r,c]=[" << rb << "," << cb << "]" << sourceViewB.getDataView()[rb][cb] << " ==> ["
+								               << destRow << "," << cb << "] " << groupidConversionIt->second << __E__;
 							destinationView->setValueAsString(groupidConversionIt->second, destRow, cb);
 						}
 					}
@@ -1026,9 +1031,9 @@ TableVersion TableBase::mergeViews(
 									         << destinationView->getDataView()[destRow][cb] << __E__;
 
 									if(mergeReport)
-										(*mergeReport) << "\t\t" << "Found entry to remap [r,c]=[" << rb << "," << cb << "] " <<
-											sourceViewB.getDataView()[rb][cb] << " ==> [" << destRow << "," << cb << "] "
-											<< destinationView->getDataView()[destRow][cb] << __E__;
+										(*mergeReport) << "\t\t"
+										               << "Found entry to remap [r,c]=[" << rb << "," << cb << "] " << sourceViewB.getDataView()[rb][cb]
+										               << " ==> [" << destRow << "," << cb << "] " << destinationView->getDataView()[destRow][cb] << __E__;
 									break;
 								}
 							}  // end uid conversion map loop
@@ -1070,10 +1075,9 @@ TableVersion TableBase::mergeViews(
 
 			if(mergeApproach == "replace")
 			{
-
 				if(mergeReport)
-					(*mergeReport) << "\t\t" << "Found UID conflict, replacing A with B record row=" << rb << " " <<
-						sourceViewB.getDataView()[rb][colUID] << __E__;
+					(*mergeReport) << "\t\t"
+					               << "Found UID conflict, replacing A with B record row=" << rb << " " << sourceViewB.getDataView()[rb][colUID] << __E__;
 				//	replace		-- Any UID conflicts for a record are replaced by the
 				// record from group B.
 
@@ -1085,12 +1089,11 @@ TableVersion TableBase::mergeViews(
 				// copy row from B to new row
 				destinationView->copyRows(author, sourceViewB, rb, 1 /*srcRowsToCopy*/);
 			}
-			else if (mergeApproach == "skip") //then do nothing with conflicting B record
+			else if(mergeApproach == "skip")  // then do nothing with conflicting B record
 			{
-
 				if(mergeReport)
-					(*mergeReport) << "\t\t" << "Found UID conflict, skipping B record row=" << rb << " " <<
-						sourceViewB.getDataView()[rb][colUID] << __E__;
+					(*mergeReport) << "\t\t"
+					               << "Found UID conflict, skipping B record row=" << rb << " " << sourceViewB.getDataView()[rb][colUID] << __E__;
 			}
 		}
 
@@ -1143,7 +1146,7 @@ TableVersion TableBase::copyView(const TableView& sourceView, TableVersion desti
 
 	try
 	{
-		tableViews_.emplace(std::make_pair(destinationVersion,TableView(tableName_)));
+		tableViews_.emplace(std::make_pair(destinationVersion, TableView(tableName_)));
 		tableViews_.at(destinationVersion).copy(sourceView, destinationVersion, author);
 	}
 	catch(...)  // if the copy fails then delete the destinationVersion view
@@ -1199,17 +1202,15 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 			__SS_THROW__;
 		}
 		//__COUT__ << "Using Mock-up view" << __E__;
-		tableViews_.emplace(std::make_pair(tmpVersion,TableView(tableName_)));
+		tableViews_.emplace(std::make_pair(tmpVersion, TableView(tableName_)));
 		tableViews_.at(tmpVersion).copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
 	}
 	else
 	{
 		try  // do not allow init to throw an exception here..
 		{    // it's ok to copy invalid data, the user may be trying to change it
-			tableViews_.emplace(std::make_pair(tmpVersion,TableView(tableName_)));
-			tableViews_.at(tmpVersion).copy(
-				tableViews_.at(sourceViewVersion), tmpVersion, 
-				tableViews_.at(sourceViewVersion).getAuthor());
+			tableViews_.emplace(std::make_pair(tmpVersion, TableView(tableName_)));
+			tableViews_.at(tmpVersion).copy(tableViews_.at(sourceViewVersion), tmpVersion, tableViews_.at(sourceViewVersion).getAuthor());
 		}
 		catch(...)
 		{

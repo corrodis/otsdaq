@@ -39,8 +39,8 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 	int     startBitInByte = startBit % bitsInAByte;
 	int     finalBitInByte = (startBit + numberOfBits - 1) % bitsInAByte;
 	int     tmp;
-	//int     firstByteLength = bitsInAByte;
-	int     lastByteLength  = (startBit + numberOfBits) % bitsInAByte;
+	// int     firstByteLength = bitsInAByte;
+	int lastByteLength = (startBit + numberOfBits) % bitsInAByte;
 
 	//
 	// std::cout << __COUT_HDR_FL__ << " start from byte : " << startByte << ", finish in
@@ -102,8 +102,8 @@ uint64_t BitManipulator::insertBits(std::string& data, uint64_t value, unsigned 
 		// (uint64_t)overWritten << "\n" << std::endl;
 		data[startByte + j] = overWritten;
 
-	//	if(j == 0)
-	//		firstByteLength = finalBitInByte - startBitInByte + 1;
+		//	if(j == 0)
+		//		firstByteLength = finalBitInByte - startBitInByte + 1;
 	}
 
 	return (uint64_t)overWritten;
@@ -149,8 +149,8 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 	int     startBitInByte = startBit % 8;
 	int     finalBitInByte = (startBit + numberOfBits - 1) % bitsInAByte;
 	int     tmp;
-	//int     firstByteLength = bitsInAByte;
-	int     lastByteLength  = (startBit + numberOfBits) % bitsInAByte;
+	// int     firstByteLength = bitsInAByte;
+	int lastByteLength = (startBit + numberOfBits) % bitsInAByte;
 
 	//
 	// std::cout << __COUT_HDR_FL__ << " start from byte : " << startByte << ", finish in
@@ -212,7 +212,7 @@ uint32_t BitManipulator::insertBits(std::string& data, uint32_t value, unsigned 
 		// (uint64_t)overWritten << "\n" << std::endl;
 		data[startByte + j] = overWritten;
 
-		//if(j == 0)
+		// if(j == 0)
 		//	firstByteLength = finalBitInByte - startBitInByte + 1;
 	}
 

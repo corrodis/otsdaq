@@ -18,7 +18,7 @@ class TCPSocket
 	void       swap(TCPSocket& other);
 
 	// Explicitly deleting copy constructor
-	TCPSocket(TCPSocket const&) = delete;
+	TCPSocket(TCPSocket const&)            = delete;
 	TCPSocket& operator=(TCPSocket const&) = delete;
 
 	int  getSocketId(void) const { return fSocketId; }
@@ -32,5 +32,5 @@ class TCPSocket
   private:
 	int fSocketId;
 };
-}
+}  // namespace ots
 #endif

@@ -37,8 +37,7 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size, bool force
 		// case EBADF:
 		// case ECONNRESET:
 		// case ENXIO:
-		case EPIPE:
-		{
+		case EPIPE: {
 			// Fatal error. Programming bug
 			throw std::runtime_error(std::string("Write: critical error: ") + strerror(errno));
 		}
@@ -47,8 +46,7 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size, bool force
 		// case EIO:
 		// case ENETDOWN:
 		// case ENETUNREACH:
-		case ENOSPC:
-		{
+		case ENOSPC: {
 			// Resource acquisition failure or device error
 			throw std::runtime_error(std::string("Write: resource failure: ") + strerror(errno));
 		}
@@ -56,13 +54,11 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size, bool force
 			// TODO: Check for user interrupt flags.
 			//       Beyond the scope of this project
 			//       so continue normal operations.
-		case EAGAIN:
-		{
+		case EAGAIN: {
 			// Temporary error.
 			throw std::runtime_error(std::string("Write: temporary error: ") + strerror(errno));
 		}
-		default:
-		{
+		default: {
 			throw std::runtime_error(std::string("Write: returned -1: ") + strerror(errno));
 		}
 		}
@@ -70,22 +66,13 @@ void TCPTransmitterSocket::send(char const* buffer, std::size_t size, bool force
 }
 
 //==============================================================================
-void TCPTransmitterSocket::send(const std::string& buffer)
-{
-	send(&buffer.at(0), buffer.size());
-}
+void TCPTransmitterSocket::send(const std::string& buffer) { send(&buffer.at(0), buffer.size()); }
 
 //==============================================================================
-void TCPTransmitterSocket::send(const std::vector<char>& buffer)
-{
-	send(&buffer.at(0), buffer.size());
-}
+void TCPTransmitterSocket::send(const std::vector<char>& buffer) { send(&buffer.at(0), buffer.size()); }
 
 //==============================================================================
-void TCPTransmitterSocket::send(const std::vector<uint16_t>& buffer)
-{
-	send((const char*)&buffer.at(0), buffer.size());
-}
+void TCPTransmitterSocket::send(const std::vector<uint16_t>& buffer) { send((const char*)&buffer.at(0), buffer.size()); }
 
 //==============================================================================
 void TCPTransmitterSocket::setSendTimeout(unsigned int timeoutSeconds, unsigned int timeoutMicroSeconds)

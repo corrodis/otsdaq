@@ -1,5 +1,5 @@
 
-cet_make_exec(InterfacePluginTestMain
+cet_make_exec(NAME InterfacePluginTestMain
   LIBRARIES
 	otsdaq::FECore
 )

@@ -5,8 +5,8 @@
 #include <set>
 
 #include "otsdaq/ConfigurationInterface/ConfigurationHandler.h"
-#include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/ConfigurationInterfacePluginMacros.h"
+#include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/TableCore/TableBase.h"
 

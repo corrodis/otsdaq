@@ -1,8 +1,15 @@
-cet_make(LIBRARY_NAME SupervisorInfo
-		 LIBRARIES
+cet_make_library(LIBRARY_NAME SupervisorInfo
+		SOURCE
+			AllSupervisorInfo.cc
+			SupervisorDescriptorInfoBase.cc
+			SupervisorInfo.cc
+		 LIBRARIES 
+		 PUBLIC
 		 ${XDAQ_BASIC_LIB_LIST}
- #       MessageFacility
-		 otsdaq_TablePlugins_XDAQContextTable_table
+		 PRIVATE
+		 otsdaq::MessageFacility
+		 otsdaq::ConfigurationInterface
+		 otsdaq::XDAQContextTable
 )
 
 

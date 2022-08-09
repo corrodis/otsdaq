@@ -32,7 +32,7 @@ ARTDAQDataManager::ARTDAQDataManager(const ConfigurationTree& theXDAQContextConf
 
 	__CFG_COUTV__(rank_);
 
-	//unsigned short port = 5100;
+	// unsigned short port = 5100;
 
 	// artdaq::setMsgFacAppName(name, port);
 
