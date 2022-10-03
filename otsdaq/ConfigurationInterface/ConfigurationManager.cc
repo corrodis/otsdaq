@@ -850,14 +850,15 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 //	if filePath == "", then output to cout
 void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath, 
 	const std::string& dumpType, const std::string& logEntry,
-	const std::string& activeUsers)
+	const std::string& activeUsers, std::ostream& altOut /* = std::cout */)
 {
 	time_t rawtime = time(0);
 	__GEN_COUT__ << "filePath = " << filePath << __E__;
 	__GEN_COUT__ << "dumpType = " << dumpType << __E__;
 
 	std::ofstream fs;
-	fs.open(filePath, std::fstream::out | std::fstream::trunc);
+	if(filePath != "")
+		fs.open(filePath, std::fstream::out | std::fstream::trunc);
 
 	std::ostream* out;
 
@@ -872,7 +873,7 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
 			__GEN_COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		out = &(std::cout);
+		out = &(altOut);
 	}
 
 	(*out) << "#################################" << __E__;

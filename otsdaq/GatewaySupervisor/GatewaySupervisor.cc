@@ -852,7 +852,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 
 		std::string configurationAlias = parameters.getValue("ConfigurationAlias");
 		__COUT__ << "Configure --> Name: ConfigurationAlias Value: " << configurationAlias << __E__;
-
+		lastConfigurationAlias_ = configurationAlias;
 		// save last used config alias by user
 		std::string fn = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" +
 				FSM_LAST_GROUP_ALIAS_FILE_START +
@@ -897,6 +897,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		if(commandParameters.size() == 0)
 		{
 			runNumber = getNextRunNumber();
+			std::stringstream dumpSs;
 			//Check if run number should come from db, if so create run info record into database
 			try
 			{
@@ -914,9 +915,20 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 						RunInfoVInterface* runInfoInterface = nullptr;
 						try
 						{
+							std::string dumpFormat                    = fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>();
+							
+							// dump configuration
+							CorePropertySupervisorBase::theConfigurationManager_->dumpActiveConfiguration(
+								"", dumpFormat, 								
+								"Configuration Alias: " + lastConfigurationAlias_ +
+								"\n\n" + 
+								"Run note: " + StringMacros::decodeURIComponent(logEntry),
+								theWebUsers_.getActiveUsersString(),dumpSs);
+
 							runInfoInterface = makeRunInfo(
 										runInfoPluginType,
-										activeStateMachineName_);
+										activeStateMachineName_
+										);
 										// ,
 										// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
 										// CorePropertySupervisorBase::getSupervisorConfigurationPath());
@@ -931,7 +943,7 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 							__SS_THROW__;
 						}
 
-						runNumber = runInfoInterface->claimNextRunNumber();
+						runNumber = runInfoInterface->claimNextRunNumber(dumpSs.str());
 					} //end Run Info Plugin handling
 		
 					//test Require user log info
@@ -1121,6 +1133,57 @@ void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
 	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
 
+	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::PAUSED_STATE_NAME)
+	{
+		__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << " coming from resume" << __E__;
+
+		try
+		{
+			ConfigurationTree configLinkNode =
+			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+			if(!configLinkNode.isDisconnected())
+			{
+				ConfigurationTree fsmLinkNode       = configLinkNode.getNode("LinkToStateMachineTable").getNode(activeStateMachineName_);
+				std::string       runInfoPluginType = fsmLinkNode.getNode("RunInfoPluginType").getValue<std::string>();
+				__COUTV__(runInfoPluginType);
+				if(runInfoPluginType != TableViewColumnInfo::DATATYPE_STRING_DEFAULT && runInfoPluginType != "No Run Info Plugin")
+				{
+					RunInfoVInterface* runInfoInterface = nullptr;
+					try
+					{
+						runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
+					}
+					catch(...)
+					{
+					}
+
+					if(runInfoInterface == nullptr)
+					{
+						__SS__ << "Run Info interface plugin construction failed of type " << runInfoPluginType << __E__;
+						__SS_THROW__;
+					}
+
+					runInfoInterface->updateRunInfo(
+						getNextRunNumber(activeStateMachineName_) - 1,
+						RunInfoVInterface::RunStopType::RESUME);
+				}
+			}
+		}
+		catch(const std::runtime_error& e)
+		{
+			//ERROR
+			__SS__ << "RUN INFO RESUME TIME UPDATE INTO DATABASE FAILED!!! "
+				<< e.what() << __E__;
+			__SS_THROW__;
+		}
+		catch(...)
+		{
+			//ERROR
+			__SS__ << "RUN INFO RESUME TIME UPDATE INTO DATABASE FAILED!!! "
+				<< __E__;
+			__SS_THROW__;
+		}  // End update pause time into run info db
+	} //end update Run Info handling
 }  // end stateRunning()
 
 //==============================================================================

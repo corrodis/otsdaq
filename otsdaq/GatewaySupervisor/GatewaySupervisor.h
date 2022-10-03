@@ -280,7 +280,7 @@ namespace ots
 		std::mutex 			stateMachineAccessMutex_;  // for sharing state machine access with
 											  // iterator thread
 		std::string 		stateMachineLastCommandInput_;
-
+		std::string			lastConfigurationAlias_;
 		enum
 		{
 			VERBOSE_MUTEX = 0

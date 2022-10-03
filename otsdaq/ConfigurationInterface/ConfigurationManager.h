@@ -126,7 +126,7 @@ class ConfigurationManager
 	const T* 							getTable					(const std::string& tableName) const { const T* retPtr = dynamic_cast<const T*>(getTableByName(tableName)); if(retPtr == nullptr) { __SS__ << "Illegal cast of '" << tableName << "' to type " << StringMacros::getTypeName<T>() << __E__; __SS_THROW__ } return retPtr;}
 	const TableBase* 					getTableByName				(const std::string& configurationName) const;
 
-	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType, const std::string& logEntry, const std::string& activeUsers);
+	void 								dumpActiveConfiguration		(const std::string& filePath, const std::string& dumpType, const std::string& logEntry, const std::string& activeUsers, std::ostream& altOut = std::cout);
 	void								dumpMacroMakerModeFhicl		(void);	
 	
 	std::map<std::string /*groupAlias*/,
