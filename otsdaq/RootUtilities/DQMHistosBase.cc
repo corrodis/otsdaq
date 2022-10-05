@@ -34,10 +34,9 @@ void DQMHistosBase::openFile(std::string fileName)
 	closeFile();
 	myDirectory_ = nullptr;
 	theFile_     = theDataManager_->openFile(fileName);
-	
+
 	theFile_->cd();
 	myDirectory_ = theFile_;
-	
 }
 
 //==============================================================================

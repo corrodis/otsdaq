@@ -39,23 +39,22 @@ using namespace ots;
 TableInfoReader::TableInfoReader(bool allowIllegalColumns) : allowIllegalColumns_(allowIllegalColumns)
 {
 	initPlatform();
-	rootTag_                       = xercesc::XMLString::transcode("ROOT");
-	tableTag_                      = xercesc::XMLString::transcode("TABLE");
-	tableNameAttributeTag_         = xercesc::XMLString::transcode("Name");
-	viewTag_                       = xercesc::XMLString::transcode("VIEW");
-	viewNameAttributeTag_          = xercesc::XMLString::transcode("Name");
-	viewTypeAttributeTag_          = xercesc::XMLString::transcode("Type");
-	viewDescriptionAttributeTag_   = xercesc::XMLString::transcode("Description");
-	columnTag_                     = xercesc::XMLString::transcode("COLUMN");
-	columnTypeAttributeTag_        = xercesc::XMLString::transcode("Type");
-	columnNameAttributeTag_        = xercesc::XMLString::transcode("Name");
-	columnStorageNameAttributeTag_ = xercesc::XMLString::transcode("StorageName");
-	columnDataTypeAttributeTag_    = xercesc::XMLString::transcode("DataType");
-	columnDataChoicesAttributeTag_ = xercesc::XMLString::transcode("DataChoices");
+	rootTag_                        = xercesc::XMLString::transcode("ROOT");
+	tableTag_                       = xercesc::XMLString::transcode("TABLE");
+	tableNameAttributeTag_          = xercesc::XMLString::transcode("Name");
+	viewTag_                        = xercesc::XMLString::transcode("VIEW");
+	viewNameAttributeTag_           = xercesc::XMLString::transcode("Name");
+	viewTypeAttributeTag_           = xercesc::XMLString::transcode("Type");
+	viewDescriptionAttributeTag_    = xercesc::XMLString::transcode("Description");
+	columnTag_                      = xercesc::XMLString::transcode("COLUMN");
+	columnTypeAttributeTag_         = xercesc::XMLString::transcode("Type");
+	columnNameAttributeTag_         = xercesc::XMLString::transcode("Name");
+	columnStorageNameAttributeTag_  = xercesc::XMLString::transcode("StorageName");
+	columnDataTypeAttributeTag_     = xercesc::XMLString::transcode("DataType");
+	columnDataChoicesAttributeTag_  = xercesc::XMLString::transcode("DataChoices");
 	columnDefaultValueAttributeTag_ = xercesc::XMLString::transcode("DefaultValue");
-	columnMinValueAttributeTag_ 	= xercesc::XMLString::transcode("MinValue");
-	columnMaxValueAttributeTag_ 	= xercesc::XMLString::transcode("MaxValue");
-
+	columnMinValueAttributeTag_     = xercesc::XMLString::transcode("MinValue");
+	columnMaxValueAttributeTag_     = xercesc::XMLString::transcode("MaxValue");
 }
 
 //==============================================================================
@@ -326,20 +325,16 @@ std::string TableInfoReader::read(TableBase& table)
 			if(!checkViewType(viewType))
 				continue;
 			storageTypeFound = true;
-			
-			//table name is now constant, set by parent TableBase			
-			//table.getMockupViewP()->setTableName(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_)));
-			//check for consistency, and show warning
-			if(std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) !=
-				table.getMockupViewP()->getTableName())
-				__COUT_WARN__ << "Table Info name mismatch: " << 
-					std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) << " vs " <<
-					table.getMockupViewP()->getTableName() << __E__;
-			
-			
+
+			// table name is now constant, set by parent TableBase
+			// table.getMockupViewP()->setTableName(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_)));
+			// check for consistency, and show warning
+			if(std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) != table.getMockupViewP()->getTableName())
+				__COUT_WARN__ << "Table Info name mismatch: " << std::string(XML_TO_CHAR(viewElement->getAttribute(viewNameAttributeTag_))) << " vs "
+				              << table.getMockupViewP()->getTableName() << __E__;
+
 			xercesc::DOMNodeList* columnNodeList = viewElement->getElementsByTagName(columnTag_);
-			
-			
+
 			for(XMLSize_t column = 0; column < columnNodeList->getLength(); column++)
 			{
 				//<COLUMN>
@@ -348,32 +343,29 @@ std::string TableInfoReader::read(TableBase& table)
 				// XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)) <<
 				// __E__;
 
-				//Check for default value tag being there (for backwards compatibility)
-				// Documentation :https://xerces.apache.org/xerces-c/apiDocs-3/classDOMElement.html#a9d6a102d853eafe6619be4324c1555c3
+				// Check for default value tag being there (for backwards compatibility)
+				//  Documentation :https://xerces.apache.org/xerces-c/apiDocs-3/classDOMElement.html#a9d6a102d853eafe6619be4324c1555c3
 				std::string defaultValue;
-				bool isDefaultValue = columnElement->getAttributeNode(columnDefaultValueAttributeTag_)?true:false;
+				bool        isDefaultValue = columnElement->getAttributeNode(columnDefaultValueAttributeTag_) ? true : false;
 				if(isDefaultValue)
 				{
-					defaultValue =
-							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnDefaultValueAttributeTag_)));
+					defaultValue = StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnDefaultValueAttributeTag_)));
 
 					//__COUT__ << "FOUND default value! " << defaultValue << __E__;
 				}
 				std::string minValue;
-				bool isMinValue = columnElement->getAttributeNode(columnMinValueAttributeTag_)?true:false;
+				bool        isMinValue = columnElement->getAttributeNode(columnMinValueAttributeTag_) ? true : false;
 				if(isMinValue)
 				{
-					minValue =
-							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMinValueAttributeTag_)));
+					minValue = StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMinValueAttributeTag_)));
 
 					// __COUT__ << "FOUND min value! " << minValue << __E__;
 				}
 				std::string maxValue;
-				bool isMaxValue = columnElement->getAttributeNode(columnMaxValueAttributeTag_)?true:false;
+				bool        isMaxValue = columnElement->getAttributeNode(columnMaxValueAttributeTag_) ? true : false;
 				if(isMaxValue)
 				{
-					maxValue =
-							StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMaxValueAttributeTag_)));
+					maxValue = StringMacros::decodeURIComponent(XML_TO_CHAR(columnElement->getAttribute(columnMaxValueAttributeTag_)));
 
 					// __COUT__ << "FOUND max value! " << maxValue << __E__;
 				}
@@ -391,10 +383,10 @@ std::string TableInfoReader::read(TableBase& table)
 				                        XML_TO_CHAR(columnElement->getAttribute(columnNameAttributeTag_)),
 				                        XML_TO_CHAR(columnElement->getAttribute(columnStorageNameAttributeTag_)),
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataTypeAttributeTag_)),
-										isDefaultValue?&defaultValue:0,
+				                        isDefaultValue ? &defaultValue : 0,
 				                        XML_TO_CHAR(columnElement->getAttribute(columnDataChoicesAttributeTag_)),
-										isMinValue?&minValue:0,
-										isMaxValue?&maxValue:0,
+				                        isMinValue ? &minValue : 0,
+				                        isMaxValue ? &maxValue : 0,
 				                        allowIllegalColumns_ ? &capturedException : 0));  // capture exception string if allowing illegal columns
 
 				// if error detected (this implies allowing illegal columns)

@@ -1,5 +1,5 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
-#include "otsdaq/PluginMakers/MakeConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/MakeConfigurationInterface.h"
 
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
@@ -27,11 +27,13 @@ ConfigurationInterface::ConfigurationInterface() {}
 ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 {
 	auto instanceType = mode ? "File" : "Database";
-	if (theMode_ != mode) {
+	if(theMode_ != mode)
+	{
 		delete theInstance_;
 		theInstance_ = nullptr;
 	}
-	if (theInstance_ == nullptr) {
+	if(theInstance_ == nullptr)
+	{
 		theInstance_ = makeConfigurationInterface(instanceType);
 	}
 

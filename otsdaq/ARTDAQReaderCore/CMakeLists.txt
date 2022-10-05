@@ -1,15 +1,10 @@
 
-cet_make(LIBRARY_NAME ARTDAQReaderCore
-		LIBRARIES
-		
-		artdaq_Application
-		artdaq_DAQdata
-        artdaq_BuildInfo
-        canvas
-		${Boost_SYSTEM_LIBRARY}
-		${Boost_THREAD_LIBRARY}
-		fhiclcpp		
-		Configurable
+cet_make_library(LIBRARY_NAME ARTDAQReaderCore
+SOURCE ARTDAQReaderProcessorBase.cc
+		LIBRARIES PUBLIC
+		otsdaq::Configurable
+		artdaq::Application
+		PRIVATE
 		
         )
 install_headers()

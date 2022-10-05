@@ -28,7 +28,7 @@ TCPDataListenerProducer::TCPDataListenerProducer(std::string              superv
                       theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerMaxClients").getValue<unsigned>())
     , dataP_(nullptr)
     , headerP_(nullptr)
-	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
+    , dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
 {
 }
@@ -44,10 +44,7 @@ void TCPDataListenerProducer::startProcessingData(std::string runNumber)
 }
 
 //==============================================================================
-void TCPDataListenerProducer::stopProcessingData(void)
-{
-	DataProducer::stopProcessingData();
-}
+void TCPDataListenerProducer::stopProcessingData(void) { DataProducer::stopProcessingData(); }
 
 //==============================================================================
 bool TCPDataListenerProducer::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
@@ -80,7 +77,7 @@ void TCPDataListenerProducer::slowWrite(void)
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		return;
 	}
-	header_["Port"]      = std::to_string(port_);
+	header_["Port"] = std::to_string(port_);
 
 	while(DataProducer::write(data_, header_) < 0)
 	{
@@ -108,11 +105,11 @@ void TCPDataListenerProducer::fastWrite(void)
 	try
 	{
 		if(dataType_ == "Packet")
-			*dataP_ = TCPListenServer::receivePacket();  // Throws an exception if it fails
-		else//"Raw" || DEFAULT
+			*dataP_ = TCPListenServer::receivePacket();         // Throws an exception if it fails
+		else                                                    //"Raw" || DEFAULT
 			*dataP_ = TCPListenServer::receive<std::string>();  // Throws an exception if it fails
 
-		if(dataP_->size() == 0)//When it goes in timeout
+		if(dataP_->size() == 0)  // When it goes in timeout
 			return;
 	}
 	catch(const std::exception& e)
@@ -121,7 +118,7 @@ void TCPDataListenerProducer::fastWrite(void)
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return;
 	}
-	(*headerP_)["Port"]      = std::to_string(port_);
+	(*headerP_)["Port"] = std::to_string(port_);
 
 	DataProducer::setWrittenSubBuffer<std::string, std::map<std::string, std::string>>();
 }

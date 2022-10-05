@@ -303,9 +303,9 @@ void ConfigurationHandler::readXML(TableBase& table, TableVersion version)
 
 		//   <PART>
 		//__COUT__ << "Reading Part" << std::endl;
-		//xercesc::DOMNode* partNode       = getNode(partTag_, datasetElement, 0);
-		//xercesc::DOMNode* nameLabelNode  = getNode(nameLabelTag_, partNode, 0);
-		//xercesc::DOMNode* kindOfPartNode = getNode(kindOfPartTag_, partNode, 0);
+		// xercesc::DOMNode* partNode       = getNode(partTag_, datasetElement, 0);
+		// xercesc::DOMNode* nameLabelNode  = getNode(nameLabelTag_, partNode, 0);
+		// xercesc::DOMNode* kindOfPartNode = getNode(kindOfPartTag_, partNode, 0);
 
 		//  </PART>
 		xercesc::DOMNode* versionNode = getNode(versionTag_, datasetElement, 0);

@@ -1,6 +1,5 @@
 #include "otsdaq/Macros/TablePluginMacros.h"
 #include "otsdaq/TablePlugins/ARTDAQEventBuilderTable.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
 
 using namespace ots;
 
@@ -16,15 +15,13 @@ using namespace ots;
 
 //==============================================================================
 ARTDAQEventBuilderTable::ARTDAQEventBuilderTable(void)
-    : TableBase("ARTDAQEventBuilderTable")
-    , ARTDAQTableBase("ARTDAQEventBuilderTable")
-    , SlowControlsTableBase("ARTDAQEventBuilderTable")
+    : TableBase("ARTDAQEventBuilderTable"), ARTDAQTableBase("ARTDAQEventBuilderTable"), SlowControlsTableBase("ARTDAQEventBuilderTable")
 {
 	//////////////////////////////////////////////////////////////////////
 	// WARNING: the names used in C++ MUST match the Table INFO  		//
 	//////////////////////////////////////////////////////////////////////
 	__COUT__ << "ARTDAQEventBuilderTable Constructed." << __E__;
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 ARTDAQEventBuilderTable::~ARTDAQEventBuilderTable(void) {}
@@ -50,10 +47,11 @@ void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 
 	// handle fcl file generation, wherever the level of this table
 
-	auto buiders = lastConfigManager_->getNode(ARTDAQTableBase::getTableName()).getChildren(
-	    /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
-	    /*default byPriority*/ false,
-	    /*TRUE! onlyStatusTrue*/ true);
+	auto buiders = lastConfigManager_->getNode(ARTDAQTableBase::getTableName())
+	                   .getChildren(
+	                       /*default filterMap*/ std::map<std::string /*relative-path*/, std::string /*value*/>(),
+	                       /*default byPriority*/ false,
+	                       /*TRUE! onlyStatusTrue*/ true);
 
 	for(auto& builder : buiders)
 	{
@@ -63,9 +61,10 @@ void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 }  // end init()
 
 //==============================================================================
-unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(std::stringstream&                                                             out,
-                                                              ConfigurationManager*                                                          configManager,
-                                                              std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
+unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(
+    std::stringstream&                                                             out,
+    ConfigurationManager*                                                          configManager,
+    std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/
 ) const
 {
 	/////////////////////////
@@ -114,7 +113,7 @@ unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(std::stringstrea
 					if(daqMetricsLink.second.getNode("metricParametersLink").isDisconnected())
 						continue;
 
-					//ConfigurationTree slowControlsLink = configManager->getNode("ARTDAQMetricAlarmThresholdsTable");
+					// ConfigurationTree slowControlsLink = configManager->getNode("ARTDAQMetricAlarmThresholdsTable");
 					ConfigurationTree slowControlsLink = eventBuilderPair.second.getNode("MetricAlarmThresholdsLink");
 
 					auto metricParametersLinks = daqMetricsLink.second.getNode("metricParametersLink").getChildren();

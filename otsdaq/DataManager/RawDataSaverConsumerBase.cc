@@ -164,7 +164,7 @@ void RawDataSaverConsumerBase::fastRead(void)
 		return;
 	}
 	//__CFG_COUTV__(dataP_->length());
-	//std::string& buffer = *dataP_;
+	// std::string& buffer = *dataP_;
 
 	//__CFG_COUT__ << "Reading from buffer length " << buffer.length() << " bytes!" <<
 	//__E__;

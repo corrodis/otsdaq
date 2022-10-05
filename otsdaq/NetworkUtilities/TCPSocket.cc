@@ -58,8 +58,7 @@ void TCPSocket::close(void)
 			throw std::domain_error(std::string("Close: EBADF: ") + std::to_string(fSocketId) + " " + strerror(errno));
 		case EIO:
 			throw std::runtime_error(std::string("Close: EIO: ") + std::to_string(fSocketId) + " " + strerror(errno));
-		case EINTR:
-		{
+		case EINTR: {
 			// TODO: Check for user interrupt flags.
 			//       Beyond the scope of this project
 			//       so continue normal operations.

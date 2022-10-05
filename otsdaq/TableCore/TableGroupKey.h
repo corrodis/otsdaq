@@ -35,11 +35,11 @@ class TableGroupKey
 		return out;
 	}
 
-	static TableGroupKey      getNextKey(const TableGroupKey& key = TableGroupKey());
-	static std::string        getFullGroupString(const std::string& groupName, const TableGroupKey& key);
-	static void               getGroupNameAndKey(const std::string& fullGroupString, std::string& groupName, TableGroupKey& key);
-	static  unsigned int getDefaultKey(void);
-	static  unsigned int getInvalidKey(void);
+	static TableGroupKey getNextKey(const TableGroupKey& key = TableGroupKey());
+	static std::string   getFullGroupString(const std::string& groupName, const TableGroupKey& key);
+	static void          getGroupNameAndKey(const std::string& fullGroupString, std::string& groupName, TableGroupKey& key);
+	static unsigned int  getDefaultKey(void);
+	static unsigned int  getInvalidKey(void);
 
   private:
 	static const unsigned int INVALID;

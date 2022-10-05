@@ -1,5 +1,5 @@
-#ifndef _ots_ARTDAQRoutingMasterTable_h_
-#define _ots_ARTDAQRoutingMasterTable_h_
+#ifndef _ots_ARTDAQRoutingManagerTable_h_
+#define _ots_ARTDAQRoutingManagerTable_h_
 
 #include "otsdaq/TablePlugins/ARTDAQTableBase/ARTDAQTableBase.h"
 #include "otsdaq/TablePlugins/SlowControlsTableBase/SlowControlsTableBase.h"
@@ -8,11 +8,11 @@ namespace ots
 {
 class XDAQContextTable;
 // clang-format off
-class ARTDAQRoutingMasterTable : public ARTDAQTableBase, public SlowControlsTableBase
+class ARTDAQRoutingManagerTable : public ARTDAQTableBase, public SlowControlsTableBase
 {
   public:
-	ARTDAQRoutingMasterTable(void);
-	virtual ~ARTDAQRoutingMasterTable(void);
+	ARTDAQRoutingManagerTable(void);
+	virtual ~ARTDAQRoutingManagerTable(void);
 
 	// Methods
 	void 					init						(ConfigurationManager* configManager) override;

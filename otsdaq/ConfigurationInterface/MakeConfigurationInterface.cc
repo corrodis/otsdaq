@@ -1,11 +1,11 @@
 #include <cetlib/BasicPluginFactory.h>
 
-#include "MakeConfigurationInterface.h"
+#include "otsdaq/ConfigurationInterface/MakeConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 
 namespace ots
 {
-	ConfigurationInterface* makeConfigurationInterface(std::string const& interfacePluginName)
+ConfigurationInterface* makeConfigurationInterface(std::string const& interfacePluginName)
 {
 	static cet::BasicPluginFactory basicPluginInterfaceFactory("configInterface", "make");
 

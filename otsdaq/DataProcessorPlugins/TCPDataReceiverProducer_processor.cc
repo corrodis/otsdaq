@@ -30,7 +30,7 @@ TCPDataReceiverProducer::TCPDataReceiverProducer(std::string              superv
     , headerP_(nullptr)
     , ipAddress_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerIPAddress").getValue<std::string>())
     , port_(theXDAQContextConfigTree.getNode(configurationPath).getNode("ServerPort").getValue<unsigned int>())
-	, dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
+    , dataType_(theXDAQContextConfigTree.getNode(configurationPath).getNode("DataType").getValue<std::string>())
 {
 }
 
@@ -40,7 +40,7 @@ TCPDataReceiverProducer::~TCPDataReceiverProducer(void) {}
 //==============================================================================
 void TCPDataReceiverProducer::startProcessingData(std::string runNumber)
 {
-	TCPSubscribeClient::connect(30,1000);
+	TCPSubscribeClient::connect(30, 1000);
 	TCPSubscribeClient::setReceiveTimeout(1, 0);
 	DataProducer::startProcessingData(runNumber);
 }
@@ -71,8 +71,8 @@ void TCPDataReceiverProducer::slowWrite(void)
 	try
 	{
 		if(dataType_ == "Packet")
-			data_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
-		else//"Raw" || DEFAULT
+			data_ = TCPSubscribeClient::receivePacket();         // Throws an exception if it fails
+		else                                                     //"Raw" || DEFAULT
 			data_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 		if(data_.size() == 0)
 		{
@@ -115,11 +115,11 @@ void TCPDataReceiverProducer::fastWrite(void)
 	try
 	{
 		if(dataType_ == "Packet")
-			*dataP_ = TCPSubscribeClient::receivePacket();  // Throws an exception if it fails
-		else//"Raw" || DEFAULT
+			*dataP_ = TCPSubscribeClient::receivePacket();         // Throws an exception if it fails
+		else                                                       //"Raw" || DEFAULT
 			*dataP_ = TCPSubscribeClient::receive<std::string>();  // Throws an exception if it fails
 
-		if(dataP_->size() == 0)//When it goes in timeout
+		if(dataP_->size() == 0)  // When it goes in timeout
 			return;
 	}
 	catch(const std::exception& e)

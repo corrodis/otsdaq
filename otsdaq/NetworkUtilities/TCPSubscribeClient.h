@@ -14,5 +14,5 @@ class TCPSubscribeClient : public TCPReceiverSocket, public TCPClientBase
 	TCPSubscribeClient(const std::string& serverIP, int serverPort);
 	virtual ~TCPSubscribeClient(void);
 };
-}
+}  // namespace ots
 #endif
