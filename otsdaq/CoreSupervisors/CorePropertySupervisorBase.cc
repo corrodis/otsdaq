@@ -718,7 +718,7 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 
 	// typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap =
 	ITRACEController::HostTraceLevelMap traceHostMap = theTRACEController_->getTraceLevels();
-	for(const std::pair<std::string, ITRACEController::TraceLevelMap>& traceMap : traceHostMap)
+	for(const auto& traceMap : traceHostMap)
 	{
 		//__COUTV__(traceMap.first);
 
@@ -728,7 +728,7 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 		traceReturnHostString_ = ";" + traceMap.first;
 		traceReturnString_ += ";" + traceMap.first;
 
-		for(const std::pair<std::string, ITRACEController::TraceMasks>& traceMask : traceMap.second)
+		for(const auto& traceMask : traceMap.second)
 		{
 			//__COUTV__(traceMask.first);
 			//__COUTV__(traceMask.second);
