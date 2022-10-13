@@ -4,13 +4,10 @@
 # You can adjust the behavior by modifying this file.
 # For more information, see:
 # https://github.com/github/super-linter
-name: Lint Code Base
+name: Lint Full Code Base
 
-on:
-  push:
-    branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
+on: []
+
 jobs:
   run-lint:
     runs-on: ubuntu-latest
