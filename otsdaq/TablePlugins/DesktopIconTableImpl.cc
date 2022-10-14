@@ -198,11 +198,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 			// now add each paramter separated by &
 			auto paramGroupMap = child.second.getNode(COL_PARAMETER_LINK).getChildren();
 			bool notFirst      = false;
-<<<<<<< HEAD
-			for(const auto param : paramGroupMap)
-=======
 			for(const auto& param : paramGroupMap)
->>>>>>> develop
 			{
 				if(!param.second.isEnabled())
 					continue;
