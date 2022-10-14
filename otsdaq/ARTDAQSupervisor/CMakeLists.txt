@@ -5,27 +5,16 @@ include_directories("/usr/include/python2.7/")
 #    message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
-cet_make(LIBRARY_NAME ARTDAQSupervisor
-		 LIBRARIES
-		 
-		 #fhiclcpp
-		 #cetlib
-		 #cetlib_except
-  		 #${ROOT_CORE}
-		 #canvas
-		 
-		 
-		 #${Boost_SYSTEM_LIBRARY}
-		 #${Boost_FILESYSTEM_LIBRARY}
+cet_make_library(LIBRARY_NAME ARTDAQSupervisor
+SOURCE
+ARTDAQSupervisor.cc
+ARTDAQSupervisorTRACEController.cc
+version.cc
+		 LIBRARIES PRIVATE
 		 /usr/lib64/libpython2.7.so.1.0
-		 #artdaq_Application
-		 #artdaq_core::artdaq-core_Utilities
-		 #artdaq_DAQdata
-		 #artdaq_BuildInfo
-		 artdaq_ExternalComms
-		 CoreSupervisors
-		 
-		 ARTDAQTableBase
+		 artdaq_plugin_support::commanderMaker
+		 otsdaq::CoreSupervisors
+		 otsdaq::ARTDAQTableBase
 )
 
 install_headers()

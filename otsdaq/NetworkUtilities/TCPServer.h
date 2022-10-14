@@ -1,9 +1,9 @@
 #ifndef _ots_TCPServer_h_
 #define _ots_TCPServer_h_
 
+#include <iostream>
 #include <string>
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
-#include <iostream>
 
 namespace ots
 {
@@ -26,6 +26,6 @@ class TCPServer : public TCPServerBase
 	struct timeval fSendTimeout;
 	bool           fInDestructor;
 };
-}
+}  // namespace ots
 
 #endif

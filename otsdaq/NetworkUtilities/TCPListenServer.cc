@@ -6,10 +6,7 @@
 using namespace ots;
 
 //==============================================================================
-TCPListenServer::TCPListenServer(unsigned int serverPort, unsigned int maxNumberOfClients)
-    : TCPServerBase(serverPort, maxNumberOfClients)
-{
-}
+TCPListenServer::TCPListenServer(unsigned int serverPort, unsigned int maxNumberOfClients) : TCPServerBase(serverPort, maxNumberOfClients) {}
 
 //==============================================================================
 TCPListenServer::~TCPListenServer(void)
@@ -19,13 +16,14 @@ TCPListenServer::~TCPListenServer(void)
 
 std::string ots::TCPListenServer::receivePacket()
 {
-	if(!fConnectedClients.empty()) {
-	auto it = fConnectedClients.find(lastReceived);
-	if(it == fConnectedClients.end() || ++it == fConnectedClients.end())
-		it = fConnectedClients.begin();
-	lastReceived = it->first;
+	if(!fConnectedClients.empty())
+	{
+		auto it = fConnectedClients.find(lastReceived);
+		if(it == fConnectedClients.end() || ++it == fConnectedClients.end())
+			it = fConnectedClients.begin();
+		lastReceived = it->first;
 		TLOG(25, "TCPListenServer") << "Reading from socket " << lastReceived << ", there are " << fConnectedClients.size() << " clients connected.";
-	return dynamic_cast<TCPReceiverSocket*>(it->second)->receivePacket();
+		return dynamic_cast<TCPReceiverSocket*>(it->second)->receivePacket();
 	}
 	throw std::runtime_error("No clients connected!");
 }

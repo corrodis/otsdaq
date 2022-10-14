@@ -13,13 +13,13 @@ using namespace ots;
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "ConfigurationManager"
 
-
-const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH 			=  ((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + "/RunControlData/";
-const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE 	= "CFGLastActivatedConfigGroup.hist";
-const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE 	= "CFGLastActivatedContextGroup.hist";
-const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE 	= "CFGLastActivatedBackboneGroup.hist";
-const std::string ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE 	= "CFGLastActivatedIteratorGroup.hist";
-
+const std::string ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH =
+    ((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) +
+    "/RunControlData/";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE   = "CFGLastActivatedConfigGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_CONTEXT_GROUP_FILE  = "CFGLastActivatedContextGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE = "CFGLastActivatedBackboneGroup.hist";
+const std::string ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE = "CFGLastActivatedIteratorGroup.hist";
 
 const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
 
@@ -50,36 +50,35 @@ const uint8_t ConfigurationManager::METADATA_COL_AUTHOR    = 3;
 const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
-                                                                         ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
-                                                                         "XDAQApplicationPropertyTable",
-                                                                         ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
-                                                                         "MessageFacilityTable",
-                                                                         "GatewaySupervisorTable",
-                                                                         "StateMachineTable",
-                                                                         "DesktopWindowParameterTable",
-                                                                         "SlowControlsDashboardSupervisorTable"};
+                                                                          ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
+                                                                          "XDAQApplicationPropertyTable",
+                                                                          ConfigurationManager::DESKTOP_ICON_TABLE_NAME,
+                                                                          "MessageFacilityTable",
+                                                                          "GatewaySupervisorTable",
+                                                                          "StateMachineTable",
+                                                                          "DesktopWindowParameterTable",
+                                                                          "SlowControlsDashboardSupervisorTable"};
 const std::set<std::string> ConfigurationManager::backboneMemberNames_ = {ConfigurationManager::GROUP_ALIASES_TABLE_NAME,
                                                                           ConfigurationManager::VERSION_ALIASES_TABLE_NAME};
 const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"IterateTable",
-                                                                         "IterationPlanTable",
-                                                                         "IterationTargetTable",
-                                                                         /*command specific tables*/ "IterationCommandBeginLabelTable",
-                                                                         "IterationCommandChooseFSMTable",
-                                                                         "IterationCommandConfigureAliasTable",
-                                                                         "IterationCommandConfigureGroupTable",
-                                                                         "IterationCommandExecuteFEMacroTable",
-                                                                         "IterationCommandExecuteMacroTable",
-                                                                         "IterationCommandMacroDimensionalLoopTable",
-                                                                         "IterationCommandMacroDimensionalLoopParameterTable",
-                                                                         "IterationCommandModifyGroupTable",
-                                                                         "IterationCommandRepeatLabelTable",
-                                                                         "IterationCommandRunTable"};
-
+                                                                          "IterationPlanTable",
+                                                                          "IterationTargetTable",
+                                                                          /*command specific tables*/ "IterationCommandBeginLabelTable",
+                                                                          "IterationCommandChooseFSMTable",
+                                                                          "IterationCommandConfigureAliasTable",
+                                                                          "IterationCommandConfigureGroupTable",
+                                                                          "IterationCommandExecuteFEMacroTable",
+                                                                          "IterationCommandExecuteMacroTable",
+                                                                          "IterationCommandMacroDimensionalLoopTable",
+                                                                          "IterationCommandMacroDimensionalLoopParameterTable",
+                                                                          "IterationCommandModifyGroupTable",
+                                                                          "IterationCommandRepeatLabelTable",
+                                                                          "IterationCommandRunTable"};
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
     : mfSubject_(ConfigurationManager::READONLY_USER)
-	, username_(ConfigurationManager::READONLY_USER)
+    , username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
     , theContextTableGroupKey_(0)
@@ -87,7 +86,7 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theConfigurationTableGroup_("")
     , theContextTableGroup_("")
     , theBackboneTableGroup_("")
-    , groupMetadataTable_(true /*special table*/,ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
+    , groupMetadataTable_(true /*special table*/, ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
@@ -110,38 +109,44 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		                                       "UnusedUID",
 		                                       "UNUSED_UID",
 		                                       TableViewColumnInfo::DATATYPE_NUMBER,
-											   0 /*Default*/,
+		                                       0 /*Default*/,
 		                                       "",
-											   0 /*Min*/,
-											   0 /*Max*/,
+		                                       0 /*Min*/,
+		                                       0 /*Max*/,
 		                                       0));
 		// TODO add min/max
-		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING,
-				   0 /*Default*/, "",0 /*Min*/,0 /*Max*/, 0));
+		colInfo->push_back(TableViewColumnInfo(
+		    TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING, 0 /*Default*/, "", 0 /*Min*/, 0 /*Max*/, 0));
 		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_COMMENT,  // just to make init() happy
 		                                       TableViewColumnInfo::COL_NAME_COMMENT,
 		                                       "COMMENT_DESCRIPTION",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
-											   0 /*Default*/,
+		                                       0 /*Default*/,
 		                                       "",
-											   0 /*Min*/,
-											   0 /*Max*/,
+		                                       0 /*Min*/,
+		                                       0 /*Max*/,
 		                                       0));
 		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_AUTHOR,  // just to make init() happy
 		                                       "GroupAuthor",
 		                                       "AUTHOR",
 		                                       TableViewColumnInfo::DATATYPE_STRING,
-											   0 /*Default*/,
+		                                       0 /*Default*/,
 		                                       "",
-											   0 /*Min*/,
-											   0 /*Max*/,
+		                                       0 /*Min*/,
+		                                       0 /*Max*/,
 		                                       0));
-		// TODO add min/max									   
-		colInfo->push_back(
-		    TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP, "GroupCreationTime", "GROUP_CREATION_TIME", TableViewColumnInfo::DATATYPE_TIME,
-					   0 /*Default*/, "", 0 /*Min*/, 0/*Max*/, 0));
+		// TODO add min/max
+		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP,
+		                                       "GroupCreationTime",
+		                                       "GROUP_CREATION_TIME",
+		                                       TableViewColumnInfo::DATATYPE_TIME,
+		                                       0 /*Default*/,
+		                                       "",
+		                                       0 /*Min*/,
+		                                       0 /*Max*/,
+		                                       0));
 		auto tmpVersion = groupMetadataTable_.createTemporaryView();
 		groupMetadataTable_.setActiveView(tmpVersion);
 		// only need this one and only row for all time
@@ -160,13 +165,12 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 }  // end constructor()
 
 //==============================================================================
-ConfigurationManager::ConfigurationManager(const std::string& username) 
-: ConfigurationManager(true /*initForWriteAccess*/)
+ConfigurationManager::ConfigurationManager(const std::string& username) : ConfigurationManager(true /*initForWriteAccess*/)
 {
 	__GEN_COUT_INFO__ << "Private constructor for write access called." << __E__;
-	//overwrite read-only username initialization with write-access username:
+	// overwrite read-only username initialization with write-access username:
 	mfSubject_ = username;
-	username_ = username;
+	username_  = username;
 }  // end constructor(username)
 
 //==============================================================================
@@ -226,10 +230,11 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 //	load the active groups from file
 //	Note: this should be used by the Supervisor to maintain
 //		the same configurationGroups surviving software system restarts
-void ConfigurationManager::restoreActiveTableGroups(bool               throwErrors /*=false*/,
-                                                    const std::string& pathToActiveGroupsFile /*=""*/,
-                                                    ConfigurationManager::LoadGroupType     onlyLoadIfBackboneOrContext /*= ConfigurationManager::LoadGroupType::ALL_TYPES */,
-                                                    std::string*       accumulatedWarnings /*=0*/)
+void ConfigurationManager::restoreActiveTableGroups(
+    bool                                throwErrors /*=false*/,
+    const std::string&                  pathToActiveGroupsFile /*=""*/,
+    ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /*= ConfigurationManager::LoadGroupType::ALL_TYPES */,
+    std::string*                        accumulatedWarnings /*=0*/)
 {
 	destroyTableGroup("", true);  // deactivate all
 
@@ -294,7 +299,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool               throwErro
 				strVal[j] = '\0';
 
 				if(groupName.size() > 3)  // notify if seems like a real group name
-					__GEN_COUT_INFO__ << "Skipping active group with illegal character in group key '" << strVal << ".' Check active groups file: " << fn << __E__;
+					__GEN_COUT_INFO__ << "Skipping active group with illegal character in group key '" << strVal << ".' Check active groups file: " << fn
+					                  << __E__;
 
 				skip = true;
 				break;
@@ -310,8 +316,8 @@ void ConfigurationManager::restoreActiveTableGroups(bool               throwErro
 		catch(...)
 		{
 			__GEN_COUT__ << "illegal group according to TableGroupKey::getFullGroupString... "
-			            "Check active groups file: "
-			         << fn << __E__;
+			                "Check active groups file: "
+			             << fn << __E__;
 			skip = true;
 		}
 
@@ -745,8 +751,8 @@ void ConfigurationManager::dumpMacroMakerModeFhicl()
 	catch(...)
 	{
 		__GEN_COUT_ERR__ << "Failed to complete MacroMaker mode fcl "
-		                "file configuration dump due to error."
-		             << __E__;
+		                    "file configuration dump due to error."
+		                 << __E__;
 	}
 
 	out.close();
@@ -815,7 +821,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 		// skip last 3 fields that are always common
 		for(unsigned int i = 0; i < fields.size() - 3; ++i)
 		{
-		  //__COUT__ << fields[i].first << __E__;
+			//__COUT__ << fields[i].first << __E__;
 
 			if(fields[i].second.isLinkNode())
 			{
@@ -879,8 +885,8 @@ void ConfigurationManager::dumpActiveConfiguration(const std::string& filePath,
 	(*out) << "#################################" << __E__;
 	(*out) << "This is an ots configuration dump.\n" << __E__;
 	(*out) << "Source database is $ARTDAQ_DATABASE_URI: " << __ENV__("ARTDAQ_DATABASE_URI") << __E__;
-	(*out) << "Original location of dump:               " << filePath << __E__;	
-	(*out) << "\nActive ots users: \t" << (activeUsers.size()?activeUsers:"no active users") << __E__;	
+	(*out) << "Original location of dump:               " << filePath << __E__;
+	(*out) << "\nActive ots users: \t" << (activeUsers.size() ? activeUsers : "no active users") << __E__;
 	(*out) << "Type of dump: \t\t" << dumpType << __E__;
 	(*out) << "Time of dump: \t\t" << rawtime;
 
@@ -1184,7 +1190,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
                                           bool                                                   doNotLoadMembers /*=false*/,
                                           std::string*                                           groupTypeString,
                                           std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
-                                          ConfigurationManager::LoadGroupType                    onlyLoadIfBackboneOrContext /* = ConfigurationManager::LoadGroupType::ALL_TYPES*/) try
+                                          ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /* = ConfigurationManager::LoadGroupType::ALL_TYPES*/)
+try
 {
 	// clear to defaults
 	if(groupComment)
@@ -1374,28 +1381,27 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			groupType = getTypeOfGroup(memberMap);
 
 		if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES &&
-			groupType != ConfigurationManager::GroupType::CONTEXT_TYPE &&
-		   	groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+		   groupType != ConfigurationManager::GroupType::CONTEXT_TYPE && groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
 			__GEN_COUT__ << "Not loading group because it is not of type Context or "
-			            "Backbone (it is type '"
-			         << convertGroupTypeToName(groupType) << "')." << __E__;
+			                "Backbone (it is type '"
+			             << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
 		}
 		else if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE &&
-		   	groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+		        groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
 		{
 			__GEN_COUT__ << "Not loading group because it is not of type "
-			            "Backbone (it is type '"
-			         << convertGroupTypeToName(groupType) << "')." << __E__;
+			                "Backbone (it is type '"
+			             << convertGroupTypeToName(groupType) << "')." << __E__;
 			return;
 		}
 
 		if(doActivate)
 			__GEN_COUT__ << "------------------------------------- init start    \t [for all "
-			            "plug-ins in "
-			         << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
-			         << "']" << __E__;
+			                "plug-ins in "
+			             << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
+			             << "']" << __E__;
 
 		if(doActivate)
 		{
@@ -1451,8 +1457,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 			if(*accumulatedWarnings != "")
 			{
 				__GEN_COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Ignoring the following errors: "
-				             << "\n"
-				             << *accumulatedWarnings << __E__;
+				                 << "\n"
+				                 << *accumulatedWarnings << __E__;
 			}
 		}
 
@@ -1559,9 +1565,9 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 
 		if(doActivate)
 			__GEN_COUT__ << "------------------------------------- init complete \t [for all "
-			            "plug-ins in "
-			         << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
-			         << "']" << __E__;
+			                "plug-ins in "
+			             << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
+			             << "']" << __E__;
 	}  // end failed group load try
 	catch(...)
 	{
@@ -1687,14 +1693,14 @@ ConfigurationTree ConfigurationManager::getContextNode(const std::string& contex
 ConfigurationTree ConfigurationManager::getSupervisorNode(const std::string& contextUID, const std::string& applicationUID) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" + contextUID + "/LinkToApplicationTable/" + applicationUID);
-} //end getSupervisorNode()
+}  // end getSupervisorNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getSupervisorTableNode(const std::string& contextUID, const std::string& applicationUID) const
 {
 	return getNode("/" + getTableByName(XDAQ_CONTEXT_TABLE_NAME)->getTableName() + "/" + contextUID + "/LinkToApplicationTable/" + applicationUID +
 	               "/LinkToSupervisorTable");
-} //end getSupervisorTableNode()
+}  // end getSupervisorTableNode()
 
 //==============================================================================
 ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks) const
@@ -1736,7 +1742,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 		return configTree.getNode(childPath, doNotThrowOnBrokenUIDLinks);
 	else
 		return configTree;
-} //end getNode()
+}  // end getNode()
 
 //==============================================================================
 // getFirstPathToNode
@@ -1746,7 +1752,7 @@ std::string ConfigurationManager::getFirstPathToNode(const ConfigurationTree& /*
 {
 	std::string path = "/";
 	return path;
-} //end getFirstPathToNode()
+}  // end getFirstPathToNode()
 
 //==============================================================================
 // getChildren
@@ -1837,9 +1843,9 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::get
 				{
 					*accumulatedTreeErrors += e.what();
 					__GEN_COUT_ERR__ << "Skipping " << memberPair.first
-					             << " since the table "
-					                "is not active."
-					             << __E__;
+					                 << " since the table "
+					                    "is not active."
+					                 << __E__;
 					continue;
 				}
 			}
@@ -1932,8 +1938,9 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 		//	__GEN_COUT_WARN__ << "\n" << ss.str();
 		__SS_ONLY_THROW__;
 	}
+	TLOG_DEBUG(30) << "Table " << tableName << " is at " << static_cast<void*>(it->second);
 	return it->second;
-} //end getTableByName()
+}  // end getTableByName()
 
 //==============================================================================
 // loadConfigurationBackbone
@@ -1951,7 +1958,7 @@ TableGroupKey ConfigurationManager::loadConfigurationBackbone()
 	loadTableGroup(theBackboneTableGroup_, *theBackboneTableGroupKey_);
 
 	return *theBackboneTableGroupKey_;
-} //end loadConfigurationBackbone()
+}  // end loadConfigurationBackbone()
 
 // Getters
 //==============================================================================
@@ -2020,18 +2027,18 @@ std::pair<std::string, TableGroupKey> ConfigurationManager::getTableGroupFromAli
 		progressBar->step();
 
 	return std::pair<std::string, TableGroupKey>("", TableGroupKey());
-} //end getTableGroupFromAlias()
+}  // end getTableGroupFromAlias()
 
 //==============================================================================
-//Aliases are pulled from latest active Backbone group
+// Aliases are pulled from latest active Backbone group
 //  (i.e. the latest activated at the ConfigurationGUISupervisor)!
 std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableGroupKey>> ConfigurationManager::getActiveGroupAliases(void)
 {
 	restoreActiveTableGroups(
-		false /* throwErrors */,
-    	"" /* pathToActiveGroupsFile */,		
-		ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE);  // make sure the active configuration backbone is
-	                             // loaded from disk (i.e. the latest activated at the ConfigurationGUISupervisor)!
+	    false /* throwErrors */,
+	    "" /* pathToActiveGroupsFile */,
+	    ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE);  // make sure the active configuration backbone is
+	                                                               // loaded from disk (i.e. the latest activated at the ConfigurationGUISupervisor)!
 
 	std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableGroupKey>> retMap;
 
@@ -2042,7 +2049,7 @@ std::map<std::string /*groupAlias*/, std::pair<std::string /*groupName*/, TableG
 		                                                                TableGroupKey(entryPair.second.getNode("GroupKey").getValueAsString()));
 	}
 	return retMap;
-} //end getActiveGroupAliases()
+}  // end getActiveGroupAliases()
 
 //==============================================================================
 // getVersionAliases()
@@ -2106,7 +2113,7 @@ std::map<std::string, TableVersion> ConfigurationManager::getActiveVersions(void
 		}
 	}
 	return retMap;
-} //end getActiveVersions()
+}  // end getActiveVersions()
 
 ////==============================================================================
 // const DACStream& ConfigurationManager::getDACStream(std::string fecName)
@@ -2439,7 +2446,8 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 			if(groupName != "")  // then set groupID for this record
 			{
 				int groupIDCol = view->getLinkGroupIDColumn(groupLinkIndex);
-				__GEN_COUT__ << "Setting group ID for group link ID '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'" << __E__;
+				__GEN_COUT__ << "Setting group ID for group link ID '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'"
+				             << __E__;
 
 				view->setValue(groupName, r, groupIDCol);
 			}
@@ -2633,8 +2641,7 @@ TableBase* ConfigurationManager::getDesktopIconTable(void)
 //==============================================================================
 void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*group name*/, TableGroupKey>& theGroup, const std::string& fileName)
 {
-	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
-			"/" + fileName;
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" + fileName;
 
 	std::ofstream groupFile(fullPath.c_str());
 	if(!groupFile.is_open())
@@ -2656,8 +2663,7 @@ void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*gro
 //	Note: this is static so the GatewaySupervisor and WizardSupervisor can call it
 std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
 {
-	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH +
-			"/" + fileName;
+	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" + fileName;
 
 	FILE* groupFile = fopen(fullPath.c_str(), "r");
 	if(!groupFile)
@@ -2674,8 +2680,8 @@ std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadG
 	std::pair<std::string /*group name*/, TableGroupKey> theGroup;
 
 	fgets(line, 500, groupFile);  // name
-	if(strlen(line) && line[strlen(line)-1] == '\n')
-		line[strlen(line)-1] = '\0'; //remove trailing newline
+	if(strlen(line) && line[strlen(line) - 1] == '\n')
+		line[strlen(line) - 1] = '\0';  // remove trailing newline
 	theGroup.first = line;
 
 	fgets(line, 500, groupFile);  // key
@@ -2696,7 +2702,3 @@ std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadG
 
 	return theGroup;
 }  // end loadGroupNameAndKey()
-
-
-
-

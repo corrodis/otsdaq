@@ -318,9 +318,8 @@ std::string HttpXmlDocument::recursiveFindElementValue(xercesc::DOMElement* curr
 {
 	if(XML_TO_CHAR(currEl->getNodeName()) == field && occurance == count++)  // found, done!!
 	{
-		if(currEl->getFirstChild() != NULL &&
-		   currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, return as value
-		                                                                           // attribute
+		if(currEl->getFirstChild() != NULL && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, return as
+		                                                                                                              // value attribute
 			return StringMacros::escapeString(XML_TO_CHAR(currEl->getFirstChild()->getNodeValue()));
 		else
 			return "";  // empty value attribute
@@ -396,9 +395,8 @@ xercesc::DOMElement* HttpXmlDocument::recursiveFindElement(xercesc::DOMElement* 
 {
 	if(XML_TO_CHAR(currEl->getNodeName()) == field && occurance == count++)  // found, done!!
 	{
-		if(currEl->getFirstChild() != NULL &&
-		   currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, return as value
-		                                                                           // attribute
+		if(currEl->getFirstChild() != NULL && currEl->getFirstChild()->getNodeType() == xercesc::DOMNode::TEXT_NODE)  // if has a text node first, return as
+		                                                                                                              // value attribute
 			return currEl;
 		else
 			return 0;  // empty value attribute
@@ -523,7 +521,7 @@ bool HttpXmlDocument::loadXmlDocument(const std::string& filePath)
 	{
 		//__SS__ << "File not accessible: " << filePath << std::endl;
 		//__SS_THROW__;
-		return false; //not an error for file to not exist
+		return false;  // not an error for file to not exist
 	}
 
 	// reset xml platform and theDocument_

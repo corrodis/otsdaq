@@ -4,74 +4,36 @@
 #	message(STATUS "${_variableName}=${${_variableName}}")
 #endforeach()
 
+include(otsdaq::dataProcessor)
 
-basic_plugin(ARTDAQConsumer "processor"
-  		cetlib
-  		DataManager
-  		ARTDAQReaderCore
-  )
+cet_make_library(LIBRARY_NAME ARTDAQConsumer SOURCE ARTDAQConsumerImpl.cc LIBRARIES PUBLIC otsdaq::ARTDAQReaderCore PRIVATE otsdaq::DataManager)
+cet_build_plugin(ARTDAQConsumer otsdaq::dataProcessor LIBRARIES REG otsdaq::ARTDAQConsumer  )
 
-basic_plugin(ARTDAQProducer "processor"
-  		cetlib
-  		DataManager
- 		ARTDAQReaderCore
-  )
+cet_make_library(LIBRARY_NAME ARTDAQProducer SOURCE ARTDAQProducerImpl.cc LIBRARIES PUBLIC otsdaq::ARTDAQReaderCore PRIVATE otsdaq::DataManager)
+cet_build_plugin(ARTDAQProducer  otsdaq::dataProcessor LIBRARIES REG otsdaq::ARTDAQProducer )
 
-basic_plugin(UDPDataListenerProducer "processor"
-	DataManager
-	NetworkUtilities
-	cetlib
-  )
+cet_build_plugin(UDPDataListenerProducer  otsdaq::dataProcessor )
 
-basic_plugin(UDPDataStreamerConsumer "processor"
-	DataManager
-	NetworkUtilities
-	cetlib
-  )
+cet_build_plugin(UDPDataStreamerConsumer  otsdaq::dataProcessor )
   
-basic_plugin(TCPDataReceiverProducer "processor"
-	DataManager
-	NetworkUtilities
-	cetlib
-  )
+cet_build_plugin(TCPDataReceiverProducer otsdaq::dataProcessor )
 
-basic_plugin(TCPDataListenerProducer "processor"
-	DataManager
-	NetworkUtilities
-	cetlib
-  )
+cet_build_plugin(TCPDataListenerProducer otsdaq::dataProcessor )
 
-#basic_plugin(TCPDataStreamerConsumer "processor"
-#	DataManager
-#	NetworkUtilities
-#	cetlib
-#  )
+cet_build_plugin(RawDataSaverConsumer  otsdaq::dataProcessor )
 
-basic_plugin(RawDataSaverConsumer "processor"
-	DataManager
-	cetlib
-  )
-
-basic_plugin(RawDataVisualizerConsumer "processor"
-    DataManager
-    WorkLoopManager
-	#MessageFacility
-    ConfigurationInterface
-    TableCore
-	MF_MessageLogger
-  )
+cet_make_library(LIBRARY_NAME RawDataVisualizerConsumer SOURCE RawDataVisualizerConsumerImpl.cc 
+	LIBRARIES PUBLIC 
+		otsdaq::DataManager
+		otsdaq::Configurable
+		PRIVATE
+		 otsdaq::ConfigurationInterface
+		 otsdaq::NetworkUtilities  )
+cet_build_plugin(RawDataVisualizerConsumer  otsdaq::dataProcessor LIBRARIES REG otsdaq::RawDataVisualizerConsumer  )
 
 
-basic_plugin(OtsDataSaverConsumer "processor"
-	DataManager
-	cetlib
-  )
+cet_build_plugin(OtsDataSaverConsumer otsdaq::dataProcessor )
 
-#basic_plugin(DataDecoderConsumer "processor"
-#	DataManager
-#	DataDecoders
-#	cetlib
-#  )
 
 
 install_headers()

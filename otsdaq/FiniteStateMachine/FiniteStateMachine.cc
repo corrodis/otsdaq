@@ -17,7 +17,7 @@ FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
 {
 	__GEN_COUT__ << "Constructing FiniteStateMachine" << __E__;
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 FiniteStateMachine::~FiniteStateMachine(void) {}
@@ -36,7 +36,7 @@ toolbox::fsm::State FiniteStateMachine::getTransitionFinalState(const std::strin
 		__GEN_COUT__ << ss.str();
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
-} //end getTransitionFinalState()
+}  // end getTransitionFinalState()
 
 //==============================================================================
 std::string FiniteStateMachine::getProvenanceStateName(void) { return getStateName(getProvenanceState()); }
@@ -66,37 +66,33 @@ std::string FiniteStateMachine::getCurrentTransitionName(const std::string& tran
 	// 	__GEN_COUTV__(getStateName(startState.first));
 	// 	std::cout << startState.first << __E__;
 	// 	for(auto trans : stateTransitionNameTable_.at(startState.first))
-	// 		__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;	
+	// 		__GEN_COUT__ << "\t" << trans.first <<  " " << trans.second << __E__;
 	// }
 
-	//if looking for current active transition, calculate from provenance state
+	// if looking for current active transition, calculate from provenance state
 	if(transition == "")
 	{
-		if(stateTransitionNameTable_.at(provenanceState_).find(currentTransition_) != 
-								stateTransitionNameTable_.at(provenanceState_).end())	
-			return stateTransitionNameTable_.at(provenanceState_).at(currentTransition_);		
+		if(stateTransitionNameTable_.at(provenanceState_).find(currentTransition_) != stateTransitionNameTable_.at(provenanceState_).end())
+			return stateTransitionNameTable_.at(provenanceState_).at(currentTransition_);
 		else
 		{
-			__GEN_SS__ << "Cannot find transition name from '" <<
-				getProvenanceStateName() << "' with transition: " << currentTransition_ << "...";
+			__GEN_SS__ << "Cannot find transition name from '" << getProvenanceStateName() << "' with transition: " << currentTransition_ << "...";
 			__GEN_COUT_ERR__ << ss.str();
 			XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 		}
 	}
 
-	if(stateTransitionNameTable_.at(currentState_).find(transition) != 
-													stateTransitionNameTable_.at(currentState_).end())
+	if(stateTransitionNameTable_.at(currentState_).find(transition) != stateTransitionNameTable_.at(currentState_).end())
 	{
 		return stateTransitionNameTable_.at(currentState_).at(transition);
 	}
 	else
 	{
-		__GEN_SS__ << "Cannot find transition name from '" <<
-			getCurrentStateName() << "' with transition: " << transition << "...";
+		__GEN_SS__ << "Cannot find transition name from '" << getCurrentStateName() << "' with transition: " << transition << "...";
 		__GEN_COUT_ERR__ << ss.str();
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
-} //end getCurrentTransitionName()
+}  // end getCurrentTransitionName()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from, const std::string& transition)
@@ -111,7 +107,7 @@ std::string FiniteStateMachine::getTransitionName(const toolbox::fsm::State from
 		error << "Cannot find transition name from " << from << " with transition: " << transition << ", unknown!";
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, error.str());
 	}
-} //end getTransitionName()
+}  // end getTransitionName()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State from, const std::string& transition)
@@ -121,7 +117,7 @@ std::string FiniteStateMachine::getTransitionParameter(const toolbox::fsm::State
 		return stateTransitionParameterTable_[from][transition];
 	}
 	return "";
-} //end getTransitionParameter()
+}  // end getTransitionParameter()
 
 //==============================================================================
 std::string FiniteStateMachine::getTransitionFinalStateName(const std::string& transition) { return getStateName(getTransitionFinalState(transition)); }
@@ -131,7 +127,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition)
 {
 	const xoap::MessageReference message;
 	return execTransition(transition, message);
-} //end execTransition()
+}  // end execTransition()
 
 //==============================================================================
 // execTransition
@@ -252,7 +248,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 	inTransition_      = false;
 	stateEntranceTime_ = time(0);
 	return transitionSuccessful;
-} //end execTransition()
+}  // end execTransition()
 
 //==============================================================================
 bool FiniteStateMachine::isInTransition(void) { return inTransition_; }
@@ -264,7 +260,7 @@ void FiniteStateMachine::setErrorMessage(const std::string& errMessage, bool app
 		theErrorMessage_ += errMessage;
 	else
 		theErrorMessage_ = errMessage;
-} //end setErrorMessage()
+}  // end setErrorMessage()
 
 //==============================================================================
 const std::string& FiniteStateMachine::getErrorMessage() const { return theErrorMessage_; }
@@ -275,5 +271,4 @@ void FiniteStateMachine::setInitialState(toolbox::fsm::State state)
 	toolbox::fsm::FiniteStateMachine::setInitialState(state);
 	provenanceState_   = state;
 	stateEntranceTime_ = time(0);
-} //end setInitialState()
-
+}  // end setInitialState()

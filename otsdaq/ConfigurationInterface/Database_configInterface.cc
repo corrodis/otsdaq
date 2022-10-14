@@ -1,6 +1,6 @@
 #include "otsdaq/ConfigurationInterface/Database_configInterface.h"
-#include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/Macros/ConfigurationInterfacePluginMacros.h"
+#include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
 
 #include <algorithm>
@@ -147,7 +147,8 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 
 //==============================================================================
 // find all configuration versions by configuration type
-std::set<TableVersion> DatabaseConfigurationInterface::getVersions(const TableBase* table) const noexcept try
+std::set<TableVersion> DatabaseConfigurationInterface::getVersions(const TableBase* table) const noexcept
+try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.template getVersions<decltype(table)>(table, default_entity);
@@ -179,7 +180,8 @@ catch(std::exception const& e)
 
 //==============================================================================
 // returns a list of all configuration names
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const try
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const
+try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -200,7 +202,8 @@ catch(...)
 
 //==============================================================================
 // find all configuration groups in database
-std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(std::string const& filterString) const try
+std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(std::string const& filterString) const
+try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
@@ -253,7 +256,8 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(const st
 
 //==============================================================================
 // return the contents of a configuration group
-config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable) const try
+config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable) const
+try
 {
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(tableGroup);
@@ -294,7 +298,8 @@ catch(...)
 
 //==============================================================================
 // create a new configuration group from the contents map
-void DatabaseConfigurationInterface::saveTableGroup(config_version_map_t const& configurationMap, std::string const& configurationGroup) const try
+void DatabaseConfigurationInterface::saveTableGroup(config_version_map_t const& configurationMap, std::string const& configurationGroup) const
+try
 {
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 

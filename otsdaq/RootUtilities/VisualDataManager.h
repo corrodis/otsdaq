@@ -19,8 +19,7 @@ class ConfigurationManager;
 class VisualDataManager : public DataManager
 {
   public:
-	VisualDataManager(const ConfigurationTree& theXDAQContextConfigTree,
-	                  const std::string&       supervisorConfigurationPath);
+	VisualDataManager(const ConfigurationTree& theXDAQContextConfigTree, const std::string& supervisorConfigurationPath);
 	virtual ~VisualDataManager(void);
 
 	void configure(void) override;
@@ -32,33 +31,30 @@ class VisualDataManager : public DataManager
 
 	void load(std::string fileName, std::string type);
 	// Getters
-	const std::vector<DQMHistosBase*>& getLiveDQMs(void){return theLiveDQMs_;};
+	const std::vector<DQMHistosBase*>& getLiveDQMs(void) { return theLiveDQMs_; };
 
-	void  setDoNotStop(bool doNotStop){doNotStop_ = doNotStop;}
-	bool  isReady(void){return ready_;}
+	void   setDoNotStop(bool doNotStop) { doNotStop_ = doNotStop; }
+	bool   isReady(void) { return ready_; }
 	TFile* openFile(std::string fileName);
 
-	bool           getLiveDQMHistos(void);
-	DQMHistosBase& getFileDQMHistos(void);//TO BE DELETED
-	const std::string& getRawData(void);//TO BE DELETED
+	bool               getLiveDQMHistos(void);
+	DQMHistosBase&     getFileDQMHistos(void);  // TO BE DELETED
+	const std::string& getRawData(void);        // TO BE DELETED
 	// const Visual3DEvents&   getVisual3DEvents   (void);
 	// const Visual3DGeometry& getVisual3DGeometry (void);
 
-
   private:
-	std::vector<DQMHistosBase*> theLiveDQMs_;
-	bool                        doNotStop_;
-	bool                        ready_;
+	std::vector<DQMHistosBase*>   theLiveDQMs_;
+	bool                          doNotStop_;
+	bool                          ready_;
 	std::map<std::string, TFile*> fileMap_;
 	// MonicelliEventAnalyzer     theMonicelliEventAnalyzer_;
 	// MonicelliGeometryConverter theMonicelliGeometryConverter_;
 	// Visual3DData           the3DData_;
 
-
-	bool theLiveDQMHistos_;//TO BE DELETED
-	DQMHistosBase  theFileDQMHistos_;//TO BE DELETED
-
+	bool          theLiveDQMHistos_;  // TO BE DELETED
+	DQMHistosBase theFileDQMHistos_;  // TO BE DELETED
 };
-}
+}  // namespace ots
 
 #endif

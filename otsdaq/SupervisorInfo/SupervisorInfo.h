@@ -3,7 +3,7 @@
 
 #include <string>
 #include "otsdaq/Macros/CoutMacros.h" /* also for XDAQ_CONST_CALL */
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

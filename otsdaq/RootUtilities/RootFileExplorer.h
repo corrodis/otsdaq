@@ -17,8 +17,8 @@
 #include <vector>
 
 #include <TBuffer.h>
-#include <TBufferJSON.h>
 #include <TBufferFile.h>
+#include <TBufferJSON.h>
 #include <TList.h>
 #include <TRegexp.h>
 
@@ -47,9 +47,9 @@
 #include <xercesc/framework/LocalFileFormatTarget.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>
-#include <xercesc/util/XMLUni.hpp>
-#include <xercesc/util/XMLString.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/XMLUni.hpp>
 #include <xercesc/util/XercesDefs.hpp>
 #include <xercesc/validators/common/Grammar.hpp>
 //#include <xercesc/dom/DOMLSSerializer.hpp>

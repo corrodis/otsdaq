@@ -1,6 +1,7 @@
-cet_make(LIBRARY_NAME BitManipulator 
-         LIBRARIES 
-       	 MF_MessageLogger 
+cet_make_library(LIBRARY_NAME BitManipulator 
+SOURCE
+BitManipulator.cc
+         LIBRARIES PRIVATE otsdaq::MessageFacility
         )
 
 install_headers()

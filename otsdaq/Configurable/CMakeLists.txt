@@ -1,7 +1,8 @@
-cet_make(LIBRARY_NAME Configurable
+cet_make_library(LIBRARY_NAME Configurable
+		SOURCE Configurable.cc
 		 LIBRARIES
-		 ConfigurationInterface
-		 otsdaq_TablePlugins_XDAQContextTable_table
+		 otsdaq::ConfigurationInterface
+		 otsdaq::XDAQContextTable
 )
 
 

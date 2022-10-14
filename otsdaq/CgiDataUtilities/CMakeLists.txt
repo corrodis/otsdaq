@@ -1,10 +1,10 @@
-cet_make(LIBRARY_NAME CgiDataUtilities
-		LIBRARIES
-		pthread
-		dl
+cet_make_library(LIBRARY_NAME CgiDataUtilities
+SOURCE
+CgiDataUtilities.cc
+		LIBRARIES PUBLIC
 		${XDAQ_BASIC_LIB_LIST}
-        ${XDAQ_CGICC}
-	MF_MessageLogger
+		PRIVATE
+		otsdaq::Macros
 )
 
 install_headers()

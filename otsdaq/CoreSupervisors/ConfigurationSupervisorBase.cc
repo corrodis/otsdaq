@@ -1,6 +1,6 @@
 #include "otsdaq/CoreSupervisors/ConfigurationSupervisorBase.h"
 
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 using namespace ots;
 
@@ -17,41 +17,39 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xml
 		//__SUP_COUT__ << "ActiveGroup " << type.first << " " << type.second.first << "("
 		//<< type.second.second << ")" << __E__;
 	}
-	try //try to get matching group alias for active groups
+	try  // try to get matching group alias for active groups
 	{
-		std::map<std::string, TableVersion> activeVersions = cfgMgr->getActiveVersions();
-		std::string groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
+		std::map<std::string, TableVersion> activeVersions        = cfgMgr->getActiveVersions();
+		std::string                         groupAliasesTableName = ConfigurationManager::GROUP_ALIASES_TABLE_NAME;
 		if(activeVersions.find(groupAliasesTableName) != activeVersions.end())
 		{
-			//have an active group aliases table at this point
-			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
-	    		cfgMgr->getNode(groupAliasesTableName).getChildren();
+			// have an active group aliases table at this point
+			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs = cfgMgr->getNode(groupAliasesTableName).getChildren();
 
 			std::string groupName, groupKey, groupComment, groupType;
 			std::string activeGroupName, activeGroupKey;
 			for(auto& type : activeGroupMap)
 			{
 				activeGroupName = type.second.first;
-				activeGroupKey = type.second.second.toString(); 
+				activeGroupKey  = type.second.second.toString();
 				for(auto& aliasNodePair : aliasNodePairs)
-				{					
+				{
 					groupName = aliasNodePair.second.getNode("GroupName").getValueAsString();
 					groupKey  = aliasNodePair.second.getNode("GroupKey").getValueAsString();
 					if(groupName == activeGroupName && groupKey == activeGroupKey)
-					{	//found match!
+					{  // found match!
 						xmlOut.addTextElementToData(type.first + "-ActiveGroupAlias", aliasNodePair.first);
 						break;
 					}
-				} //end alias match search loop
-			} //end active group loop
-		} //end handling of matching group alias to active groups
-		//else ignore missing active group alias table or active backbone
+				}  // end alias match search loop
+			}      // end active group loop
+		}          // end handling of matching group alias to active groups
+		// else ignore missing active group alias table or active backbone
 	}
 	catch(...)
 	{
 		__COUT__ << "Ignoring failure getting alias for active groups" << __E__;
 	}
-	
 
 	// always add version tracking bool
 	xmlOut.addTextElementToData("versionTracking", ConfigurationInterface::isVersionTrackingEnabled() ? "ON" : "OFF");
@@ -76,7 +74,8 @@ void ConfigurationSupervisorBase::handleCreateTableXML(HttpXmlDocument&        x
                                                        const std::string&      author,
                                                        const std::string&      comment,
                                                        bool                    sourceTableAsIs,
-                                                       bool                    lookForEquivalent) try
+                                                       bool                    lookForEquivalent)
+try
 {
 	//__COUT__ << "handleCreateTableXML: " << tableName << " version: " <<
 	// version
@@ -397,7 +396,8 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
                                                             bool                    allowDuplicates,
                                                             bool                    ignoreWarnings,
                                                             const std::string&      groupComment,
-                                                            bool                    lookForEquivalent) try
+                                                            bool                    lookForEquivalent)
+try
 {
 	__COUT__ << "handleCreateTableGroupXML \n";
 
@@ -530,19 +530,19 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 		try
 		{
 			TableGroupKey foundKey = cfgMgr->findTableGroup(groupName, groupMembers, groupAliases);
-	
+
 			if(!foundKey.isInvalid())
 			{
 				// return found equivalent key
 				xmlOut.addTextElementToData("TableGroupName", groupName);
 				xmlOut.addTextElementToData("TableGroupKey", foundKey.toString());
-	
+
 				if(lookForEquivalent)
 				{
 					__COUT__ << "Found equivalent group key (" << foundKey << ") for " << groupName << "." << __E__;
 					// allow this equivalent group to be the response without an error
 					xmlOut.addTextElementToData("foundEquivalentKey", "1");  // indicator
-	
+
 					// insert get table info
 					handleGetTableGroupXML(xmlOut, cfgMgr, groupName, foundKey, ignoreWarnings);
 					return;
@@ -556,12 +556,12 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 					return;
 				}
 			}
-	
+
 			__COUT__ << "Check for duplicate groups complete." << __E__;
 		}
 		catch(...)
 		{
-			__COUT_WARN__ << "Ignoring errors looking for duplicate groups! Proceeding with new group creation." << __E__;			
+			__COUT_WARN__ << "Ignoring errors looking for duplicate groups! Proceeding with new group creation." << __E__;
 		}
 	}
 
@@ -580,7 +580,7 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
 				// const std::set<std::string> srcColNames = cfgViewPtr->getSourceColumnNames();
 				__SS__ << "\n\nThere were errors found in loading a member table " << groupMemberPair.first << ":v" << cfgViewPtr->getVersion()
 				       << ". Please see the details below:\n\n"
-					   << cfgViewPtr->getMismatchColumnInfo();
+				       << cfgViewPtr->getMismatchColumnInfo();
 
 				__COUT_ERR__ << "\n" << ss.str();
 				xmlOut.addTextElementToData("Error", ss.str());
@@ -676,9 +676,10 @@ catch(...)
 //		...
 //		</table>
 void ConfigurationSupervisorBase::handleGetTableGroupXML(
-    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr, const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings) try
+    HttpXmlDocument& xmlOut, ConfigurationManagerRW* cfgMgr, const std::string& groupName, TableGroupKey groupKey, bool ignoreWarnings)
+try
 {
-	//char                 tmpIntStr[100];
+	// char                 tmpIntStr[100];
 	xercesc::DOMElement *parentEl, *configEl;
 
 	// steps:
@@ -705,28 +706,27 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 	{
 		const GroupInfo&               groupInfo  = cfgMgr->getGroupInfo(groupName);
 		const std::set<TableGroupKey>& sortedKeys = groupInfo.keys_;  // rename
-	
+
 		if(groupKey.isInvalid() ||  // if invalid or not found, get latest
 		   sortedKeys.find(groupKey) == sortedKeys.end())
 		{
 			// report error if group key not found
 			if(!groupKey.isInvalid())
 			{
-			
 				// attempt to reload all group info and power through
-				std::string                             accumulatedWarnings;
-				/*const std::map<std::string, TableInfo>& allTableInfo = */cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+				std::string accumulatedWarnings;
+				/*const std::map<std::string, TableInfo>& allTableInfo = */ cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
 				__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
-	
+
 				// xmlOut.addTextElementToData("Error", ss.str());
-							
+
 				const GroupInfo&               groupInfo2  = cfgMgr->getGroupInfo(groupName);
 				const std::set<TableGroupKey>& sortedKeys2 = groupInfo2.keys_;  // rename
-				
-				__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;			
+
+				__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
 				ss << "Her are the found " << sortedKeys2.size() << " '" << groupName << "' keys: " << __E__;
 				for(auto& keyInOrder : sortedKeys2)
-				{	
+				{
 					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 					ss << "\t" << keyInOrder << __E__;
 				}
@@ -737,24 +737,22 @@ void ConfigurationSupervisorBase::handleGetTableGroupXML(
 				if(sortedKeys.size())
 					groupKey = *sortedKeys.rbegin();
 				__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
-	
+
 				// add all other sorted keys for this groupName
 				for(auto& keyInOrder : sortedKeys)
 					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 			}
 		}
 		else
-		{			
+		{
 			// add all other sorted keys for this groupName
 			for(auto& keyInOrder : sortedKeys)
-					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
+				xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 		}
-			
 	}
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
 	xmlOut.addTextElementToData("TableGroupKey", groupKey.toString());
-
 
 	parentEl = xmlOut.addTextElementToData("TableGroupMembers", "");
 
@@ -921,7 +919,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
                                                           std::string             windowLinkedApp /*= ""*/,
                                                           unsigned int            windowLinkedAppLID /*= 0*/,
                                                           bool                    enforceOneWindowInstance /*= false*/,
-                                                          const std::string&      windowParameters /*= ""*/) try
+                                                          const std::string&      windowParameters /*= ""*/)
+try
 {
 	cfgMgr->getAllTableInfo(true /*refresh*/);
 
@@ -950,8 +949,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 	//			);
 
-	cfgMgr->restoreActiveTableGroups(true /*throwErrors*/, "" /*pathToActiveGroupsFile*/, 
-		ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES /*onlyLoadIfBackboneOrContext*/
+	cfgMgr->restoreActiveTableGroups(
+	    true /*throwErrors*/, "" /*pathToActiveGroupsFile*/, ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES /*onlyLoadIfBackboneOrContext*/
 	);
 
 	const std::string backboneGroupName = cfgMgr->getActiveGroupName(ConfigurationManager::GroupType::BACKBONE_TYPE);
@@ -973,14 +972,13 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 	try
 	{
 		unsigned int row;
-		std::string  iconUID = "";
+		std::string  iconUID        = "";
 		std::string  decodedCaption = StringMacros::decodeURIComponent(iconCaption);
 
-		for(unsigned int i=0;i<decodedCaption.size();++i)
-			if((decodedCaption[i] >='a' && decodedCaption[i] <= 'z') ||
-				(decodedCaption[i] >='A' && decodedCaption[i] <= 'Z') ||
-				(decodedCaption[i] >='0' && decodedCaption[i] <= '9') )
-			iconUID += decodedCaption[i];
+		for(unsigned int i = 0; i < decodedCaption.size(); ++i)
+			if((decodedCaption[i] >= 'a' && decodedCaption[i] <= 'z') || (decodedCaption[i] >= 'A' && decodedCaption[i] <= 'Z') ||
+			   (decodedCaption[i] >= '0' && decodedCaption[i] <= '9'))
+				iconUID += decodedCaption[i];
 
 		// create icon record
 		row     = iconTable.tableView_->addRow(author, true /*incrementUniqueData*/, "generatedIcon" + iconUID);
@@ -1030,7 +1028,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 				try
 				{
 					windowLinkedApp = StringMacros::decodeURIComponent(windowLinkedApp);
-				/*	int appRow      = */appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+					/*	int appRow      = */ appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 				}
 				catch(const std::runtime_error& e)
 				{
@@ -1278,7 +1276,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 				{
 					try
 					{
-						/*int appRow =*/ appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
+						/*int appRow =*/appTable.tableView_->findRow(appTable.tableView_->getColUID(), windowLinkedApp);
 					}
 					catch(const std::runtime_error& e)
 					{
@@ -1485,7 +1483,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 			TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
 			TableView*   tableView        = table->getTemporaryView(temporaryVersion);
 
-		//	unsigned int col;
+			//	unsigned int col;
 			unsigned int row = 0;
 
 			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
@@ -1541,7 +1539,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 			TableVersion temporaryVersion = table->createTemporaryView(originalVersion);
 			TableView*   tableView        = table->getTemporaryView(temporaryVersion);
 
-			//unsigned int col;
+			// unsigned int col;
 			unsigned int row = 0;
 
 			std::vector<std::pair<std::string, ConfigurationTree>> aliasNodePairs =
@@ -1630,8 +1628,8 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
 
 		// acquire all active groups and ignore errors, so that activateTableGroup does not
 		// erase other active groups
-		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, 
-			ConfigurationManager::LoadGroupType::ALL_TYPES /*onlyLoadIfBackboneOrContext*/
+		cfgMgr->restoreActiveTableGroups(
+		    false /*throwErrors*/, "" /*pathToActiveGroupsFile*/, ConfigurationManager::LoadGroupType::ALL_TYPES /*onlyLoadIfBackboneOrContext*/
 		);
 
 		// activate group

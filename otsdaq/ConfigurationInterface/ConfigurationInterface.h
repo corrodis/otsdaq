@@ -6,7 +6,7 @@
 #include <sstream>
 #include "otsdaq/Macros/CoutMacros.h"
 
-#include "otsdaq/PluginMakers/MakeTable.h"
+#include "otsdaq/TableCore/MakeTable.h"
 #include "otsdaq/TableCore/TableBase.h"
 #include "otsdaq/TableCore/TableGroupKey.h"
 #include "otsdaq/TableCore/TableVersion.h"

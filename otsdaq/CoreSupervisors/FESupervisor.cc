@@ -7,8 +7,6 @@
 
 #include "artdaq-core/Utilities/ExceptionHandler.hh" /*for artdaq::ExceptionHandler*/
 
-#include "artdaq-utilities/Plugins/MakeParameterSet.hh"
-
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/DAQdata/Globals.hh
 // for metric manager include
 // https://cdcvs.fnal.gov/redmine/projects/artdaq/repository/revisions/develop/entry/artdaq/Application/DataReceiverCore.cc
@@ -883,8 +881,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 
 		ConfigurationTree feSupervisorNode = CorePropertySupervisorBase::getSupervisorTableNode();
 
-		std::string metric_string = "";
-		bool metricStringSetup = true;
+		std::string metric_string     = "";
+		bool        metricStringSetup = true;
 		try
 		{
 			std::ostringstream oss;
@@ -896,7 +894,7 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 		catch(...)
 		{
 			metricStringSetup = false;
-			metric_string = "";
+			metric_string     = "";
 		}  // ignore error
 
 		if(!metricMan)
@@ -909,8 +907,8 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 		if(metricNamePreamble == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 			metricNamePreamble = "";
 
-		//std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
-		fhicl::ParameterSet metric_pset=artdaq::make_pset(metric_string);
+		// std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
+		fhicl::ParameterSet metric_pset = fhicl::ParameterSet::make(metric_string);
 
 		__COUTV__(metricNamePreamble);
 		try
@@ -919,8 +917,10 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 		}
 		catch(...)
 		{
-			if(metricStringSetup) throw;
-			else __SUP_COUT__ << "Ignore metric manager initialize error because metric string is not setup." << __E__;
+			if(metricStringSetup)
+				throw;
+			else
+				__SUP_COUT__ << "Ignore metric manager initialize error because metric string is not setup." << __E__;
 		}
 		__SUP_COUT__ << "transitionConfiguring metric manager(" << metricMan << ") initialized = " << metricMan->Initialized() << __E__;
 	}

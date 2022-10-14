@@ -13,6 +13,6 @@ class TCPClient : public TCPTransceiverSocket, public TCPClientBase
 	TCPClient(const std::string& serverIP, int serverPort);
 	virtual ~TCPClient(void);
 };
-}
+}  // namespace ots
 
 #endif
