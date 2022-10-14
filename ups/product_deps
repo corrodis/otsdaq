@@ -19,10 +19,10 @@ old_style_config_vars
 
 #
 product             version     optional
-artdaq              v3_12_00
-artdaq_database     v1_07_00
+artdaq              v3_12_01
+artdaq_database     v1_07_01
 xdaq                v16_20_0_1
-artdaq_daqinterface v3_12_00
+artdaq_daqinterface v3_12_01
 cetmodules	    v3_19_02	-	only_for_build
 end_product_list
 
