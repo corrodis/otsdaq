@@ -35,14 +35,8 @@ class RunInfoVInterface  // : public Configurable
 	}
 	virtual ~RunInfoVInterface(void) { ; }
 
-<<<<<<< HEAD
 	virtual unsigned int 	claimNextRunNumber	(const std::string& runInfoConditions = "")         				= 0;
 	virtual void 			updateRunInfo		(unsigned int runNumber, RunInfoVInterface::RunStopType runStopType)    = 0;
-=======
-	virtual unsigned int claimNextRunNumber(void)                                                          = 0;
-	virtual void         updateRunInfo(unsigned int runNumber, RunInfoVInterface::RunStopType runStopType) = 0;
-
->>>>>>> b1b026b2aec9410e6ee0e513bf83f9285e0a36fd
   private:
 	const std::string mfSubject_;
 	// ConfigurationTree 		theXDAQContextConfigTree_;

@@ -888,12 +888,8 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 		if(commandParameters.size() == 0)
 		{
 			runNumber = getNextRunNumber();
-<<<<<<< HEAD
 			std::stringstream dumpSs;
 			//Check if run number should come from db, if so create run info record into database
-=======
-			// Check if run number should come from db, if so create run info record into database
->>>>>>> b1b026b2aec9410e6ee0e513bf83f9285e0a36fd
 			try
 			{
 				ConfigurationTree configLinkNode =
@@ -909,7 +905,6 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 						RunInfoVInterface* runInfoInterface = nullptr;
 						try
 						{
-<<<<<<< HEAD
 							std::string dumpFormat                    = fsmLinkNode.getNode("ConfigurationDumpOnRunFormat").getValue<std::string>();
 							
 							// dump configuration
@@ -927,12 +922,6 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 										// ,
 										// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
 										// CorePropertySupervisorBase::getSupervisorConfigurationPath());
-=======
-							runInfoInterface = makeRunInfo(runInfoPluginType, activeStateMachineName_);
-							// ,
-							// CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_),
-							// CorePropertySupervisorBase::getSupervisorConfigurationPath());
->>>>>>> b1b026b2aec9410e6ee0e513bf83f9285e0a36fd
 						}
 						catch(...)
 						{
@@ -944,17 +933,10 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 							__SS_THROW__;
 						}
 
-<<<<<<< HEAD
 						runNumber = runInfoInterface->claimNextRunNumber(dumpSs.str());
 					} //end Run Info Plugin handling
 		
 					//test Require user log info
-=======
-						runNumber = runInfoInterface->claimNextRunNumber();
-					}  // end Run Info Plugin handling
-
-					// test Require user log info
->>>>>>> b1b026b2aec9410e6ee0e513bf83f9285e0a36fd
 					try
 					{
 						bool requireUserLogInput = fsmLinkNode.getNode("RequireUserLogInputOnRunTransition").getValue<bool>();
