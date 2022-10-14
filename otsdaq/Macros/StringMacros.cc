@@ -157,7 +157,7 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 	bool doit = false;
 
 	unsigned int ws = -1;
-	char         htmlTmp[6];
+	char         htmlTmp[10];
 
 	for(unsigned int i = 0; i < inString.length(); i++)
 		if(inString[i] != ' ')
@@ -182,7 +182,7 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 					if(allowWhiteSpace)
 					{
 						sprintf(htmlTmp, "&#%3.3d", inString[i]);
-						inString.insert(i, htmlTmp);         // insert html str sequence
+						inString.insert(i, std::string(htmlTmp));         // insert html str sequence
 						inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
 						i += 6;                              // skip to next char to check
 						--i;
@@ -199,7 +199,7 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 						{
 							// tab = 8 spaces
 							sprintf(htmlTmp, "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160");
-							inString.insert(i, htmlTmp);          // insert html str sequence
+							inString.insert(i, std::string(htmlTmp));  // insert html str sequence
 							inString.replace(i + 47, 1, 1, ';');  // replace special character with ;
 							i += 48;                              // skip to next char to check
 							--i;
@@ -207,7 +207,7 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 						else  // tab =  0x09
 						{
 							sprintf(htmlTmp, "&#009");
-							inString.insert(i, htmlTmp);         // insert html str sequence
+							inString.insert(i, std::string(htmlTmp));  // insert html str sequence
 							inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
 							i += 6;                              // skip to next char to check
 							--i;
@@ -254,7 +254,7 @@ std::string StringMacros::escapeString(std::string inString, bool allowWhiteSpac
 			else if(inString[i] >= char(161) && inString[i] <= char(255))  // printable special characters
 			{
 				sprintf(htmlTmp, "&#%3.3d", inString[i]);
-				inString.insert(i, htmlTmp);         // insert html number sequence
+				inString.insert(i, std::string(htmlTmp));  // insert html number sequence
 				inString.replace(i + 5, 1, 1, ';');  // replace special character with ;
 				i += 5;                              // skip to next char to check
 			}
