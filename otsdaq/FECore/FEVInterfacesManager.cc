@@ -568,7 +568,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 			__SS_THROW__;
 		}
 		macroMultiDimensionalStatusMap_.emplace(std::make_pair(interfaceID, "Active"));
-	}
+	} // unlock mutex scope
 
 	// start thread
 	std::thread(
