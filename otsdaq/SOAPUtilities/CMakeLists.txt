@@ -1,8 +1,12 @@
-cet_make(LIBRARY_NAME SOAPUtilities
-		   LIBRARIES
+cet_make_library(LIBRARY_NAME SOAPUtilities
+SOURCE
+SOAPCommand.cc
+SOAPMessenger.cc
+SOAPParameters.cc
+SOAPUtilities.cc
+		   LIBRARIES PUBLIC
+		   otsdaq::MessageFacility
 		   ${XDAQ_BASIC_LIB_LIST}
-		   MF_MessageLogger
-		   pthread
 )
 
 install_headers()

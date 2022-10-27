@@ -137,8 +137,8 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	char        portStr[100] = "0";
 	std::string hostname     = "wiz";
 
-	/* Note: the environment variable __ENV__("HOSTNAME") 
-	//	fails in multinode ots systems started through ssh 
+	/* Note: the environment variable __ENV__("HOSTNAME")
+	//	fails in multinode ots systems started through ssh
 	//	because it will change meaning from host to host
 	*/
 
@@ -146,16 +146,16 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	{
 		unsigned int port = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Port").getValue<unsigned int>();
 
-		//help the user out if the config has old defaults for port/address
-		//Same as XDAQContextTable_table.cc:extractContexts:L164
-		if(port == 0) //convert 0 to ${OTS_MAIN_PORT}
+		// help the user out if the config has old defaults for port/address
+		// Same as XDAQContextTable_table.cc:extractContexts:L164
+		if(port == 0)  // convert 0 to ${OTS_MAIN_PORT}
 			port = atoi(__ENV__("OTS_MAIN_PORT"));
-		
+
 		sprintf(portStr, "%u", port);
 
 		hostname = properties->getContextTreeNode().getNode(properties->supervisorContextUID_).getNode("Address").getValue<std::string>();
 		if(hostname == "DEFAULT")  // convert DEFAULT to http://${HOSTNAME}
-			hostname = "http://" +  std::string(__ENV__("HOSTNAME"));
+			hostname = "http://" + std::string(__ENV__("HOSTNAME"));
 
 		size_t i = hostname.find("//");
 		if(i != std::string::npos)
@@ -176,15 +176,14 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 	fclose(fp);
 
 	__COUT__ << "Marked alive: " << filename << __E__;
-} //end indicateOtsAlive()
+}  // end indicateOtsAlive()
 
 //==============================================================================
-//will be wizard supervisor in wiz mode, otherwise Gateway Supervisor descriptor
+// will be wizard supervisor in wiz mode, otherwise Gateway Supervisor descriptor
 XDAQ_CONST_CALL xdaq::ApplicationDescriptor* CorePropertySupervisorBase::getGatewaySupervisorDescriptor(void)
 {
-	return allSupervisorInfo_.isWizardMode() ? allSupervisorInfo_.getWizardDescriptor()
-			: allSupervisorInfo_.getGatewayDescriptor();
-} //end getGatewaySupervisorDescriptor()
+	return allSupervisorInfo_.isWizardMode() ? allSupervisorInfo_.getWizardDescriptor() : allSupervisorInfo_.getGatewayDescriptor();
+}  // end getGatewaySupervisorDescriptor()
 
 //==============================================================================
 // When overriding, setup default property values here
@@ -353,12 +352,13 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	__SUP_COUT__ << "Final supervisor property settings:" << __E__;
 	for(auto& property : propertyMap_)
 		__SUP_COUT__ << "\t" << property.first << " = " << property.second << __E__;
-} //end checkSupervisorPropertySetup()
+}  // end checkSupervisorPropertySetup()
 
 //==============================================================================
 // getSupervisorTreeNode ~
 //	try to get this Supervisors configuration tree node
-ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void) try
+ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void)
+try
 {
 	if(supervisorContextUID_ == "" || supervisorApplicationUID_ == "")
 	{
@@ -366,7 +366,7 @@ ConfigurationTree CorePropertySupervisorBase::getSupervisorTreeNode(void) try
 		__SUP_SS_THROW__;
 	}
 	return theConfigurationManager_->getSupervisorNode(supervisorContextUID_, supervisorApplicationUID_);
-} //end getSupervisorTreeNode()
+}  // end getSupervisorTreeNode()
 catch(...)
 {
 	__SUP_COUT_ERR__ << "XDAQ Supervisor could not access it's configuration node through "
@@ -374,7 +374,7 @@ catch(...)
 	                 << "(Did you remember to initialize using CorePropertySupervisorBase::init()?)."
 	                 << " The supervisorContextUID_ = " << supervisorContextUID_ << ". The supervisorApplicationUID = " << supervisorApplicationUID_ << __E__;
 	throw;
-} //end getSupervisorTreeNode() exception handling
+}  // end getSupervisorTreeNode() exception handling
 
 //==============================================================================
 // loadUserSupervisorProperties ~
@@ -411,7 +411,7 @@ void CorePropertySupervisorBase::loadUserSupervisorProperties(void)
 	//	__SUP_COUT__ << "Done loading user properties for supervisor '" <<
 	//			supervisorContextUID_ << "/" << supervisorApplicationUID_ <<
 	//			"'" << __E__;
-} //end loadUserSupervisorProperties()
+}  // end loadUserSupervisorProperties()
 
 //==============================================================================
 void CorePropertySupervisorBase::setSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
@@ -419,7 +419,7 @@ void CorePropertySupervisorBase::setSupervisorProperty(const std::string& proper
 	propertyMap_[propertyName] = propertyValue;
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 	//			"] = " << propertyMap_[propertyName] << __E__;
-} //end setSupervisorProperty()
+}  // end setSupervisorProperty()
 
 //==============================================================================
 void CorePropertySupervisorBase::addSupervisorProperty(const std::string& propertyName, const std::string& propertyValue)
@@ -427,7 +427,7 @@ void CorePropertySupervisorBase::addSupervisorProperty(const std::string& proper
 	propertyMap_[propertyName] = propertyValue + " | " + getSupervisorProperty(propertyName);
 	//	__SUP_COUT__ << "Set propertyMap_[" << propertyName <<
 	//			"] = " << propertyMap_[propertyName] << __E__;
-} //end addSupervisorProperty()
+}  // end addSupervisorProperty()
 
 //==============================================================================
 // getSupervisorProperty
@@ -444,7 +444,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 		__SS_THROW__;  //__SUP_SS_THROW__;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
-} //end getSupervisorProperty()
+}  // end getSupervisorProperty()
 
 //==============================================================================
 // getSupervisorProperty
@@ -460,7 +460,7 @@ std::string CorePropertySupervisorBase::getSupervisorProperty(const std::string&
 		return defaultValue;
 	}
 	return StringMacros::validateValueForDefaultStringDataType(it->second);
-} //end getSupervisorProperty()
+}  // end getSupervisorProperty()
 
 //==============================================================================
 // getSupervisorPropertyUserPermissionsThreshold
@@ -480,7 +480,7 @@ WebUsers::permissionLevel_t CorePropertySupervisorBase::getSupervisorPropertyUse
 	//		__SS_THROW__; //__SUP_SS_THROW__;
 	//	}
 	//	return it->second;
-} //end getSupervisorPropertyUserPermissionsThreshold()
+}  // end getSupervisorPropertyUserPermissionsThreshold()
 
 //==============================================================================
 // getRequestUserInfo ~
@@ -560,7 +560,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 	}  //**** end LOGIN GATEWAY CODE ***//
 
 	// completed user info, for the request type, is returned to caller
-} //end getRequestUserInfo()
+}  // end getRequestUserInfo()
 
 //==============================================================================
 xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::MessageReference message)
@@ -601,12 +601,12 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			parameters.addParameter("SetValueLSB");
 			SOAPUtilities::receive(message, parameters);
 
-			int individualValues = parameters.getValueAsInt("IndividualValues");
-			std::string host = parameters.getValue("Host");
-			std::string setMode = parameters.getValue("SetMode");
-			std::string labelsStr = parameters.getValue("Labels");
-			int setValueMSB = parameters.getValueAsInt("SetValueMSB");
-			int setValueLSB = parameters.getValueAsInt("SetValueLSB");
+			int         individualValues = parameters.getValueAsInt("IndividualValues");
+			std::string host             = parameters.getValue("Host");
+			std::string setMode          = parameters.getValue("SetMode");
+			std::string labelsStr        = parameters.getValue("Labels");
+			int         setValueMSB      = parameters.getValueAsInt("SetValueMSB");
+			int         setValueLSB      = parameters.getValueAsInt("SetValueLSB");
 			__SUP_COUTV__(individualValues);
 			__SUP_COUTV__(host);
 			__SUP_COUTV__(setMode);
@@ -615,13 +615,10 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			__SUP_COUTV__(labelsStr);
 
 			if(individualValues)
-				retParameters.addParameter("TRACEList", setIndividualTraceLevels(
-					host,setMode,labelsStr));
+				retParameters.addParameter("TRACEList", setIndividualTraceLevels(host, setMode, labelsStr));
 			else
-				retParameters.addParameter("TRACEList", setTraceLevels(
-					host,setMode,labelsStr,setValueMSB,setValueLSB));
+				retParameters.addParameter("TRACEList", setTraceLevels(host, setMode, labelsStr, setValueMSB, setValueLSB));
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
-
 		}
 		else if(request == "GetTriggerStatus")
 		{
@@ -634,11 +631,11 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			parameters.addParameter("EntriesAfterTrigger");
 			SOAPUtilities::receive(message, parameters);
 
-			std::string host = parameters.getValue("Host");
-			int entriesAfterTrigger = parameters.getValueAsInt("EntriesAfterTrigger");
+			std::string host                = parameters.getValue("Host");
+			int         entriesAfterTrigger = parameters.getValueAsInt("EntriesAfterTrigger");
 			__SUP_COUTV__(host);
 			__SUP_COUTV__(entriesAfterTrigger);
-			retParameters.addParameter("TRACETriggerStatus", setTraceTriggerEnable(host,entriesAfterTrigger));
+			retParameters.addParameter("TRACETriggerStatus", setTraceTriggerEnable(host, entriesAfterTrigger));
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
 		else if(request == "ResetTRACE")
@@ -657,12 +654,12 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			parameters.addParameter("SetEnable");
 			SOAPUtilities::receive(message, parameters);
 
-			std::string host = parameters.getValue("Host");
-			bool enable = parameters.getValueAsInt("SetEnable")?true:false;
+			std::string host   = parameters.getValue("Host");
+			bool        enable = parameters.getValueAsInt("SetEnable") ? true : false;
 			__SUP_COUTV__(host);
 			__SUP_COUTV__(enable);
 
-			retParameters.addParameter("TRACETriggerStatus", enableTRACE(host,enable));
+			retParameters.addParameter("TRACETriggerStatus", enableTRACE(host, enable));
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
 		else if(request == "GetSnapshot")
@@ -672,13 +669,13 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 			parameters.addParameter("FilterOutCSV");
 			SOAPUtilities::receive(message, parameters);
 
-			std::string host = parameters.getValue("Host");
+			std::string host      = parameters.getValue("Host");
 			std::string filterFor = parameters.getValue("FilterForCSV");
 			std::string filterOut = parameters.getValue("FilterOutCSV");
 			__SUP_COUTV__(host);
 			__SUP_COUTV__(filterFor);
 			__SUP_COUTV__(filterOut);
-			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host,filterFor,filterOut));
+			retParameters.addParameter("TRACESnapshot", getTraceSnapshot(host, filterFor, filterOut));
 			retParameters.addParameter("TRACETriggerStatus", getTraceTriggerStatus());
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
@@ -710,54 +707,45 @@ const std::string& CorePropertySupervisorBase::getTraceLevels()
 {
 	__SUP_COUT__ << "getTraceLevels()" << __E__;
 
-	traceReturnString_ = ""; //reset;
-	traceReturnHostString_ = ""; //reset;
+	traceReturnString_     = "";  // reset;
+	traceReturnHostString_ = "";  // reset;
 
 	if(!theTRACEController_)
 	{
 		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
 		theTRACEController_ = new TRACEController();
-
 	}
 
-
-	//typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap =
+	// typedef std::unordered_map<std::string, TraceLevelMap> HostTraceLevelMap =
 	ITRACEController::HostTraceLevelMap traceHostMap = theTRACEController_->getTraceLevels();
-	for(const std::pair<std::string,
-			ITRACEController::TraceLevelMap>& traceMap: traceHostMap)
+	for(const auto& traceMap : traceHostMap)
 	{
 		//__COUTV__(traceMap.first);
 
-
-		//NOTE: TRACE hostname resolution is not necessarily the same as xdaq context name resolution
-		// so return TRACE hostname resolution so a map can be generated at the controller
+		// NOTE: TRACE hostname resolution is not necessarily the same as xdaq context name resolution
+		//  so return TRACE hostname resolution so a map can be generated at the controller
 
 		traceReturnHostString_ = ";" + traceMap.first;
 		traceReturnString_ += ";" + traceMap.first;
 
-		for(const std::pair<std::string,
-				ITRACEController::TraceMasks>& traceMask: traceMap.second)
+		for(const auto& traceMask : traceMap.second)
 		{
 			//__COUTV__(traceMask.first);
 			//__COUTV__(traceMask.second);
-			//give in 32b chunks since javascript is 32-bit
-			traceReturnString_ += "," + traceMask.first +
-					",M:" + std::to_string((unsigned int)(traceMask.second.M>>32)) +
-					":" + std::to_string((unsigned int)traceMask.second.M) +
-					":S:" + std::to_string((unsigned int)(traceMask.second.S>>32)) +
-					":" + std::to_string((unsigned int)traceMask.second.S) +
-					":T:" + std::to_string((unsigned int)(traceMask.second.T>>32)) +
-					":" + std::to_string((unsigned int)traceMask.second.T);
-		} //end label loop
-	} //end host loop
+			// give in 32b chunks since javascript is 32-bit
+			traceReturnString_ += "," + traceMask.first + ",M:" + std::to_string((unsigned int)(traceMask.second.M >> 32)) + ":" +
+			                      std::to_string((unsigned int)traceMask.second.M) + ":S:" + std::to_string((unsigned int)(traceMask.second.S >> 32)) + ":" +
+			                      std::to_string((unsigned int)traceMask.second.S) + ":T:" + std::to_string((unsigned int)(traceMask.second.T >> 32)) + ":" +
+			                      std::to_string((unsigned int)traceMask.second.T);
+		}  // end label loop
+	}      // end host loop
 	__SUP_COUT__ << "end getTraceLevels()" << __E__;
 	return traceReturnString_;
-} //end getTraceLevels()
+}  // end getTraceLevels()
 
 //==============================================================================
-const std::string& CorePropertySupervisorBase::setTraceLevels(std::string const& host,
-			std::string const& mode, std::string const& labelsStr,
-			uint32_t setValueMSB, uint32_t setValueLSB)
+const std::string& CorePropertySupervisorBase::setTraceLevels(
+    std::string const& host, std::string const& mode, std::string const& labelsStr, uint32_t setValueMSB, uint32_t setValueLSB)
 {
 	__SUP_COUT__ << "setTraceLevels()" << __E__;
 
@@ -765,34 +753,31 @@ const std::string& CorePropertySupervisorBase::setTraceLevels(std::string const&
 	{
 		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
 		theTRACEController_ = new TRACEController();
-
 	}
 
 	ITRACEController::TraceMasks setMask;
-	bool allMode = mode == "ALL";
+	bool                         allMode = mode == "ALL";
 	if(allMode || mode == "FAST")
-		setMask.M = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
+		setMask.M = ((uint64_t(setValueMSB)) << 32) | (uint64_t(uint32_t(setValueLSB)));
 	if(allMode || mode == "SLOW")
-		setMask.S = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
+		setMask.S = ((uint64_t(setValueMSB)) << 32) | (uint64_t(uint32_t(setValueLSB)));
 	if(allMode || mode == "TRIGGER")
-		setMask.T = ((uint64_t(setValueMSB))<<32) | (uint64_t(uint32_t(setValueLSB)));
+		setMask.T = ((uint64_t(setValueMSB)) << 32) | (uint64_t(uint32_t(setValueLSB)));
 
 	std::vector<std::string /*labels*/> labels;
-	StringMacros::getVectorFromString(
-			labelsStr,labels,{','});
-	for(const auto& label:labels)
+	StringMacros::getVectorFromString(labelsStr, labels, {','});
+	for(const auto& label : labels)
 	{
 		__SUP_COUTV__(label);
-		theTRACEController_->setTraceLevelMask(label,setMask,host,mode);
+		theTRACEController_->setTraceLevelMask(label, setMask, host, mode);
 	}
 
 	__SUP_COUT__ << "end setTraceLevels()" << __E__;
 	return getTraceLevels();
-} //end setTraceLevels()
+}  // end setTraceLevels()
 
 //==============================================================================
-const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::string const& host,
-			std::string const& mode, std::string const& labelValuesStr)
+const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::string const& host, std::string const& mode, std::string const& labelValuesStr)
 {
 	__SUP_COUT__ << "setIndividualTraceLevels()" << __E__;
 
@@ -803,54 +788,50 @@ const std::string& CorePropertySupervisorBase::setIndividualTraceLevels(std::str
 	}
 
 	ITRACEController::TraceMasks setMask;
-	bool allMode = mode == "ALL";
-	bool fastMode = mode == "FAST";
-	bool slowMode = mode == "SLOW";
-	bool triggerMode = mode == "TRIGGER";
+	bool                         allMode     = mode == "ALL";
+	bool                         fastMode    = mode == "FAST";
+	bool                         slowMode    = mode == "SLOW";
+	bool                         triggerMode = mode == "TRIGGER";
 
 	std::vector<std::string /*labels,msb,lsb*/> labelValues;
-	StringMacros::getVectorFromString(
-			labelValuesStr,labelValues,{','});
-	for(unsigned int i=0; i<labelValues.size();i+=3 /*label,msb,lsb*/)
+	StringMacros::getVectorFromString(labelValuesStr, labelValues, {','});
+	for(unsigned int i = 0; i < labelValues.size(); i += 3 /*label,msb,lsb*/)
 	{
-		__SUP_COUT__ << "Label = " << labelValues[i] << " msb/lsb " <<
-				labelValues[i+1] << "/" << labelValues[i+2] << __E__;
+		__SUP_COUT__ << "Label = " << labelValues[i] << " msb/lsb " << labelValues[i + 1] << "/" << labelValues[i + 2] << __E__;
 
 		if(allMode || fastMode)
-			setMask.M = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
+			setMask.M = ((uint64_t(atoi(labelValues[i + 1].c_str()))) << 32) | (uint64_t(uint32_t(atoi(labelValues[i + 2].c_str()))));
 		if(allMode || slowMode)
-			setMask.S = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
+			setMask.S = ((uint64_t(atoi(labelValues[i + 1].c_str()))) << 32) | (uint64_t(uint32_t(atoi(labelValues[i + 2].c_str()))));
 		if(allMode || triggerMode)
-			setMask.T = ((uint64_t(atoi(labelValues[i+1].c_str())))<<32) | (uint64_t(uint32_t(atoi(labelValues[i+2].c_str()))));
+			setMask.T = ((uint64_t(atoi(labelValues[i + 1].c_str()))) << 32) | (uint64_t(uint32_t(atoi(labelValues[i + 2].c_str()))));
 
-		theTRACEController_->setTraceLevelMask(labelValues[i],setMask,host,mode);
+		theTRACEController_->setTraceLevelMask(labelValues[i], setMask, host, mode);
 	}
 
 	__SUP_COUT__ << "end setIndividualTraceLevels()" << __E__;
 	return getTraceLevels();
-} //end setTraceLevels()
+}  // end setTraceLevels()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::getTraceTriggerStatus()
 {
 	__SUP_COUT__ << "getTraceTriggerStatus()" << __E__;
 
-	traceReturnString_ = ""; //reset;
+	traceReturnString_ = "";  // reset;
 
 	if(!theTRACEController_)
 	{
 		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
 		theTRACEController_ = new TRACEController();
-
 	}
 
 	bool isTriggered = theTRACEController_->getIsTriggered();
-	traceReturnString_ += ";" + theTRACEController_->getHostnameString() +
-			"," + (isTriggered?"1":"0");
+	traceReturnString_ += ";" + theTRACEController_->getHostnameString() + "," + (isTriggered ? "1" : "0");
 
 	__SUP_COUT__ << "end getTraceTriggerStatus() " << traceReturnString_ << __E__;
 	return traceReturnString_;
-} //end getTraceTriggerStatus()
+}  // end getTraceTriggerStatus()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::setTraceTriggerEnable(std::string const& host, size_t entriesAfterTrigger)
@@ -865,7 +846,7 @@ const std::string& CorePropertySupervisorBase::setTraceTriggerEnable(std::string
 	theTRACEController_->setTriggerEnable(entriesAfterTrigger);
 	__SUP_COUT__ << "end setTraceTriggerEnable()" << __E__;
 	return getTraceTriggerStatus();
-} //end setTraceTriggerEnable()
+}  // end setTraceTriggerEnable()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::resetTRACE(std::string const& host)
@@ -881,7 +862,7 @@ const std::string& CorePropertySupervisorBase::resetTRACE(std::string const& hos
 	theTRACEController_->enableTrace();
 	__SUP_COUT__ << "end resetTRACE()" << __E__;
 	return getTraceTriggerStatus();
-} //end resetTRACE()
+}  // end resetTRACE()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::enableTRACE(std::string const& host, bool enable)
@@ -896,24 +877,23 @@ const std::string& CorePropertySupervisorBase::enableTRACE(std::string const& ho
 	theTRACEController_->enableTrace(enable);
 	__SUP_COUT__ << "end enableTRACE()" << __E__;
 	return getTraceTriggerStatus();
-} //end enableTRACE()
+}  // end enableTRACE()
 
 //==============================================================================
 const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string const& host, std::string const& filterFor, std::string const& filterOut)
 {
 	__SUP_COUT__ << "getTraceSnapshot()" << host << __E__;
 
-	traceReturnString_ = ""; //reset;
+	traceReturnString_ = "";  // reset;
 
 	if(!theTRACEController_)
 	{
 		__SUP_COUT__ << "No TRACE Controller found, constructing!" << __E__;
 		theTRACEController_ = new TRACEController();
-
 	}
 
-	traceReturnString_ = theTRACEController_->getTraceBufferDump(filterFor,filterOut);
-	//std::cout << traceReturnString_ << __E__;
+	traceReturnString_ = theTRACEController_->getTraceBufferDump(filterFor, filterOut);
+	// std::cout << traceReturnString_ << __E__;
 
 	const size_t MAX_SZ = 200000;
 	if(traceReturnString_.size() > MAX_SZ)
@@ -929,7 +909,4 @@ const std::string& CorePropertySupervisorBase::getTraceSnapshot(std::string cons
 	}
 	__SUP_COUT__ << "end getTraceSnapshot() Bytes = " << traceReturnString_.size() << __E__;
 	return traceReturnString_;
-} //end getTraceSnapshot()
-
-
-
+}  // end getTraceSnapshot()

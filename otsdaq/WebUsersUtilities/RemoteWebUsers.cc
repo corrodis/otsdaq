@@ -93,14 +93,12 @@ using namespace ots;
 // clang-format on
 
 //==============================================================================
-RemoteWebUsers::RemoteWebUsers(xdaq::Application* application,
-		XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisorDescriptor)
-: SOAPMessenger(application)
-, gatewaySupervisorDescriptor_(gatewaySupervisorDescriptor)
+RemoteWebUsers::RemoteWebUsers(xdaq::Application* application, XDAQ_CONST_CALL xdaq::ApplicationDescriptor* gatewaySupervisorDescriptor)
+    : SOAPMessenger(application), gatewaySupervisorDescriptor_(gatewaySupervisorDescriptor)
 {
 	ActiveUserLastUpdateTime_ = 0;   // init to never
 	ActiveUserList_           = "";  // init to empty
-} //end constructor()
+}  // end constructor()
 
 //==============================================================================
 // xmlRequestGateway
@@ -254,8 +252,7 @@ std::string RemoteWebUsers::getActiveUserList()
 	{
 		__COUT__ << "Need to update " << std::endl;
 
-		xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
-				gatewaySupervisorDescriptor_, "SupervisorGetActiveUsers");
+		xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(gatewaySupervisorDescriptor_, "SupervisorGetActiveUsers");
 
 		SOAPParameters retParameters("UserList");
 		SOAPUtilities::receive(retMsg, retParameters);
@@ -265,7 +262,7 @@ std::string RemoteWebUsers::getActiveUserList()
 	}
 	else
 		return ActiveUserList_;
-} //end getActiveUserList()
+}  // end getActiveUserList()
 
 //==============================================================================
 // getLastTableGroup
@@ -273,16 +270,11 @@ std::string RemoteWebUsers::getActiveUserList()
 //	returns empty "" for actionTimeString on failure
 //	returns "Wed Dec 31 18:00:01 1969 CST" for actionTimeString (in CST) if action never
 // has occurred
-std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTableGroup( const std::string&                           actionOfLastGroup,
-                                                                                        std::string&                                 actionTimeString)
+std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTableGroup(const std::string& actionOfLastGroup, std::string& actionTimeString)
 {
-	actionTimeString = "";
-	xoap::MessageReference retMsg =
-	    ots::SOAPMessenger::sendWithSOAPReply(
-	    		gatewaySupervisorDescriptor_,
-				"SupervisorLastTableGroupRequest",
-				SOAPParameters("ActionOfLastGroup",
-				actionOfLastGroup));
+	actionTimeString              = "";
+	xoap::MessageReference retMsg = ots::SOAPMessenger::sendWithSOAPReply(
+	    gatewaySupervisorDescriptor_, "SupervisorLastTableGroupRequest", SOAPParameters("ActionOfLastGroup", actionOfLastGroup));
 
 	SOAPParameters retParameters;
 	retParameters.addParameter("GroupName");
@@ -304,7 +296,7 @@ std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTabl
 	theGroup.second  = strtol(retParameters.getValue("GroupKey").c_str(), 0, 0);
 	actionTimeString = retParameters.getValue("GroupActionTime");
 	return theGroup;
-} //end getLastTableGroup()
+}  // end getLastTableGroup()
 
 //==============================================================================
 // sendSystemMessage
@@ -313,7 +305,7 @@ std::pair<std::string /*group name*/, TableGroupKey> RemoteWebUsers::getLastTabl
 void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::string& message, bool doEmail /*=false*/)
 {
 	sendSystemMessage(toUser, "" /*subject*/, message, doEmail);
-} //end sendSystemMessage)
+}  // end sendSystemMessage)
 
 //==============================================================================
 // sendSystemMessage
@@ -322,16 +314,15 @@ void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::str
 void RemoteWebUsers::sendSystemMessage(const std::string& toUser, const std::string& subject, const std::string& message, bool doEmail /*=false*/)
 {
 	SOAPParameters parameters;
-	parameters.addParameter("ToUser", toUser); // CSV list or *
+	parameters.addParameter("ToUser", toUser);  // CSV list or *
 	parameters.addParameter("Subject", subject);
 	parameters.addParameter("Message", message);
-	parameters.addParameter("DoEmail", doEmail?"1":"0");
+	parameters.addParameter("DoEmail", doEmail ? "1" : "0");
 
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
-			gatewaySupervisorDescriptor_, "SupervisorSystemMessage", parameters);
+	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisorDescriptor_, "SupervisorSystemMessage", parameters);
 
 	//__COUT__ << SOAPUtilities::translate(retMsg) << __E__;
-} //end sendSystemMessage)
+}  // end sendSystemMessage)
 
 //==============================================================================
 // makeSystemLogEntry
@@ -341,8 +332,7 @@ void RemoteWebUsers::makeSystemLogEntry(const std::string& entryText)
 	SOAPParameters parameters;
 	parameters.addParameter("EntryText", entryText);
 
-	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(
-			gatewaySupervisorDescriptor_, "SupervisorSystemLogbookEntry", parameters);
+	xoap::MessageReference retMsg = SOAPMessenger::sendWithSOAPReply(gatewaySupervisorDescriptor_, "SupervisorSystemLogbookEntry", parameters);
 
 	//__COUT__ << SOAPUtilities::translate(retMsg) << __E__;
-} //end makeSystemLogEntry()
+}  // end makeSystemLogEntry()

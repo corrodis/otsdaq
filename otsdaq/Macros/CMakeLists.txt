@@ -1,7 +1,8 @@
-cet_make(LIBRARY_NAME Macros
-		 LIBRARIES
-		 MF_MessageLogger
-		 #${ROOT_CORE} #added for ROOT's stackTrace() in StringMacros:: and then removed when it caused ugly things
+
+cet_make_library(LIBRARY_NAME Macros
+SOURCE BinaryStringMacros.cc StringMacros.cc
+		 LIBRARIES PUBLIC
+		 TRACE::MF
         )
         
 install_headers()

@@ -1,13 +1,12 @@
 #include "otsdaq/TablePlugins/SlowControlsTableBase/SlowControlsTableBase.h"
-#include "otsdaq/TablePlugins/XDAQContextTable.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
-#include <fstream>     // std::fstream
+#include <fstream>  // std::fstream
 
 using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "SlowControlsTableBase"
-
 
 //==============================================================================
 // TableBase
@@ -15,11 +14,10 @@ using namespace ots;
 //	then allowIllegalColumns is set for InfoReader
 //	If accumulatedExceptions pointer = 0, then illegal columns throw std::runtime_error
 // exception
-SlowControlsTableBase::SlowControlsTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */)
-: TableBase(tableName,accumulatedExceptions)
+SlowControlsTableBase::SlowControlsTableBase(std::string tableName, std::string* accumulatedExceptions /* =0 */) : TableBase(tableName, accumulatedExceptions)
 {
-	//December 2021 started seeing an issue where traceTID is found to be cleared to 0
-	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor 
+	// December 2021 started seeing an issue where traceTID is found to be cleared to 0
+	//	which crashes TRACE if __COUT__ is used in a Table plugin constructor
 	//	This check and re-initialization seems to cover up the issue for now.
 	//	Why it is cleared to 0 after the constructor sets it to -1 is still unknown.
 	//		Note: it seems to only happen on the first alphabetially ARTDAQ Configure Table plugin.
@@ -27,7 +25,7 @@ SlowControlsTableBase::SlowControlsTableBase(std::string tableName, std::string*
 	{
 		std::cout << "SlowControlsTableBase Before traceTID=" << traceTID << __E__;
 		char buf[40];
-		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)),0);
+		traceInit(trace_name(TRACE_NAME, __TRACE_FILE__, buf, sizeof(buf)), 0);
 		std::cout << "SlowControlsTableBase After traceTID=" << traceTID << __E__;
 		__COUT__ << "SlowControlsTableBase TRACE reinit and Constructed." << __E__;
 	}
@@ -36,8 +34,7 @@ SlowControlsTableBase::SlowControlsTableBase(std::string tableName, std::string*
 //==============================================================================
 // SlowControlsTableBase
 //	Default constructor should never be used because table type is lost
-SlowControlsTableBase::SlowControlsTableBase(void) 
-: TableBase("SlowControlsTableBase")
+SlowControlsTableBase::SlowControlsTableBase(void) : TableBase("SlowControlsTableBase")
 {
 	__SS__ << "Should not call void constructor, table type is lost!" << __E__;
 	__SS_THROW__;
@@ -47,12 +44,10 @@ SlowControlsTableBase::SlowControlsTableBase(void)
 SlowControlsTableBase::~SlowControlsTableBase(void) {}  // end destructor()
 
 //==============================================================================
-void SlowControlsTableBase::getSlowControlsChannelList(
-    std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>&
-        channelList) const
-{	
-	outputEpicsPVFile(lastConfigManager_,&channelList);
-} //end getSlowControlsChannelList()
+void SlowControlsTableBase::getSlowControlsChannelList(std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>& channelList) const
+{
+	outputEpicsPVFile(lastConfigManager_, &channelList);
+}  // end getSlowControlsChannelList()
 
 //==============================================================================
 bool SlowControlsTableBase::slowControlsChannelListHasChanged(void) const
@@ -60,18 +55,18 @@ bool SlowControlsTableBase::slowControlsChannelListHasChanged(void) const
 	__COUT__ << "channelListHasChanged()" << __E__;
 	if(isFirstAppInContext_)
 		return channelListHasChanged_;
-				
-	if(lastConfigManager_ == nullptr)	
+
+	if(lastConfigManager_ == nullptr)
 	{
 		__SS__ << "Illegal call to get status of channel list, no config manager has been initialized!" << __E__;
 		__SS_THROW__;
 	}
 
-	//if here, lastConfigManager_ pointer is defined
+	// if here, lastConfigManager_ pointer is defined
 	bool changed = outputEpicsPVFile(lastConfigManager_);
 	__COUT__ << "slowControlsChannelListHasChanged(): return " << std::boolalpha << std::to_string(changed) << __E__;
 	return changed;
-} //end slowControlsChannelListHasChanged()
+}  // end slowControlsChannelListHasChanged()
 
 //==============================================================================
 unsigned int SlowControlsTableBase::slowControlsHandler(std::stringstream&                                                             out,
@@ -87,7 +82,7 @@ unsigned int SlowControlsTableBase::slowControlsHandler(std::stringstream&      
 	__COUT__ << "slowControlsHandler" << __E__;
 
 	if(!slowControlsLink.isDisconnected())
-	//if(1)
+	// if(1)
 	{
 		std::vector<std::pair<std::string, ConfigurationTree>> channelChildren = slowControlsLink.getChildren();
 
@@ -213,7 +208,7 @@ unsigned int SlowControlsTableBase::slowControlsHandler(std::stringstream&      
 //==============================================================================
 // return channel list if pointer passed
 bool SlowControlsTableBase::outputEpicsPVFile(ConfigurationManager*                                                          configManager,
-                                          std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/) const
+                                              std::vector<std::pair<std::string /*channelName*/, std::vector<std::string>>>* channelList /*= 0*/) const
 {
 	/*
 	    the file will look something like this:
@@ -305,7 +300,7 @@ bool SlowControlsTableBase::outputEpicsPVFile(ConfigurationManager*             
 			fout << out.str();
 			fout.close();
 
-			std::string csvFilename = filename.substr(0, filename.length()-3) + "csv";
+			std::string csvFilename = filename.substr(0, filename.length() - 3) + "csv";
 			fout.open(csvFilename, std::fstream::out | std::fstream::trunc);
 			if(fout.fail())
 			{
@@ -314,16 +309,23 @@ bool SlowControlsTableBase::outputEpicsPVFile(ConfigurationManager*             
 			}
 
 			std::string csvOut = out.str();
-			//if (csvOut.find("file \"dbt/subst_ai.dbt\" {\n") != std::string::npos) csvOut = csvOut.replace(csvOut.find("file \"dbt/subst_ai.dbt\" {\n"), 26, "");
+			// if (csvOut.find("file \"dbt/subst_ai.dbt\" {\n") != std::string::npos) csvOut = csvOut.replace(csvOut.find("file \"dbt/subst_ai.dbt\" {\n"), 26,
+			// "");
 			csvOut.erase(0, csvOut.find("\n") + 1);
-			if (csvOut.find("pattern  {") != std::string::npos) csvOut = csvOut.replace(csvOut.find("pattern  {"), 10, "");
-			while (csvOut.find("{") != std::string::npos) csvOut = csvOut.replace(csvOut.find("{"), 1, "");
-			while (csvOut.find("}") != std::string::npos) csvOut = csvOut.replace(csvOut.find("}"), 1, "");
-			while (csvOut.find("\"") != std::string::npos) csvOut = csvOut.replace(csvOut.find("\""), 1, "");
-			while (csvOut.find(" ") != std::string::npos) csvOut = csvOut.replace(csvOut.find(" "), 1, "");
-			while (csvOut.find("\t") != std::string::npos) csvOut = csvOut.replace(csvOut.find("\t"), 1, "");
-			
-			fout << csvOut.substr(0, csvOut.length()-1);
+			if(csvOut.find("pattern  {") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find("pattern  {"), 10, "");
+			while(csvOut.find("{") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find("{"), 1, "");
+			while(csvOut.find("}") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find("}"), 1, "");
+			while(csvOut.find("\"") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find("\""), 1, "");
+			while(csvOut.find(" ") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find(" "), 1, "");
+			while(csvOut.find("\t") != std::string::npos)
+				csvOut = csvOut.replace(csvOut.find("\t"), 1, "");
+
+			fout << csvOut.substr(0, csvOut.length() - 1);
 			fout.close();
 
 			std::FILE* fp = fopen(EPICS_DIRTY_FILE_PATH.c_str(), "w");

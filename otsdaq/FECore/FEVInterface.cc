@@ -44,13 +44,14 @@ void FEVInterface::configureSlowControls(void)
 {
 	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
-	{		
+	{
 		__GEN_COUT__ << "Metric manager starting..." << __E__;
 		metricMan->do_start();
 		__GEN_COUT__ << "Metric manager started." << __E__;
 	}
 	else if(!metricMan || !metricMan->Initialized())
-		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan?metricMan->Initialized():0) << __E__;
+		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan ? metricMan->Initialized() : 0)
+		             << __E__;
 	else
 		__GEN_COUT__ << "Metric manager already started." << __E__;
 
@@ -144,7 +145,8 @@ void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::str
 unsigned int FEVInterface::getSlowControlsChannelCount(void) { return mapOfSlowControlsChannels_.size(); }  // end getSlowControlsChannelCount()
 
 //==============================================================================
-bool FEVInterface::slowControlsRunning(void) try
+bool FEVInterface::slowControlsRunning(void)
+try
 {
 	__FE_COUT__ << "slowControlsRunning" << __E__;
 
@@ -287,8 +289,7 @@ bool FEVInterface::slowControlsRunning(void) try
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
 
 			// Use artdaq Metric Manager if available,
-			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() && 
-				universalAddressSize_ <= 8)
+			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() && universalAddressSize_ <= 8)
 			{
 				uint64_t val = 0;  // 64 bits!
 				for(size_t ii = 0; ii < universalAddressSize_; ++ii)
@@ -298,11 +299,9 @@ bool FEVInterface::slowControlsRunning(void) try
 				metricMan->sendMetric(channel->fullChannelName_, val, "", 3, artdaq::MetricMode::LastPoint);
 			}
 			else
-				__FE_COUT__ << "Skipping sample to Metric Manager: " <<
-					" channel->monitoringEnabled_=" << channel->monitoringEnabled_ <<
-					" metricMan=" << metricMan <<
-				  " metricMan->Running()=" << (metricMan && metricMan->Running()) << __E__;
-					
+				__FE_COUT__ << "Skipping sample to Metric Manager: "
+				            << " channel->monitoringEnabled_=" << channel->monitoringEnabled_ << " metricMan=" << metricMan
+				            << " metricMan->Running()=" << (metricMan && metricMan->Running()) << __E__;
 
 			// make sure buffer hasn't exploded somehow
 			if(txBuffer.size() > txBufferSz)
@@ -360,7 +359,7 @@ catch(...)  //
 	__FE_SS__;
 
 	bool isPauseException = false;
-	bool isStopException = false;
+	bool isStopException  = false;
 
 	try
 	{
@@ -394,15 +393,14 @@ catch(...)  //
 	__FE_COUT_ERR__ << ss.str();
 
 	std::thread(
-	    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException)
-		{
-			FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
-		},
+	    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException) {
+		    FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
+	    },
 	    // pass the values
 	    this /*fe*/,
 	    ss.str() /*errorMessage*/,
 	    isPauseException,
-		isStopException)
+	    isStopException)
 	    .detach();
 
 	return false;
@@ -416,7 +414,8 @@ catch(...)  //
 //
 //	Note: be careful not to access fe pointer after HALT
 //		has potentially propagated.. because the pointer might be destructed!
-void FEVInterface::sendAsyncExceptionToGateway(FEVInterface* fe, const std::string& errorMessage, bool isPauseException, bool isStopException) try
+void FEVInterface::sendAsyncExceptionToGateway(FEVInterface* fe, const std::string& errorMessage, bool isPauseException, bool isStopException)
+try
 {
 	std::stringstream feHeader;
 	feHeader << ":FE:" << fe->getInterfaceType() << ":" << fe->getInterfaceUID() << ":" << fe->theConfigurationRecordName_ << "\t";
@@ -439,8 +438,8 @@ void FEVInterface::sendAsyncExceptionToGateway(FEVInterface* fe, const std::stri
 	SOAPParameters parameters;
 	parameters.addParameter("ErrorMessage", errorMessage);
 
-	xoap::MessageReference replyMessage =
-	    fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(gatewaySupervisor, isPauseException ? "AsyncPauseException" : "AsyncError", parameters);
+	xoap::MessageReference replyMessage = fe->VStateMachine::parentSupervisor_->SOAPMessenger::sendWithSOAPReply(
+	    gatewaySupervisor, isPauseException ? "AsyncPauseException" : "AsyncError", parameters);
 
 	std::stringstream replyMessageSStream;
 	replyMessageSStream << SOAPUtilities::translate(replyMessage);
@@ -492,7 +491,7 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		__FE_SS__;
 
 		bool isPauseException = false;
-		bool isStopException = false;
+		bool isStopException  = false;
 
 		try
 		{
@@ -525,15 +524,14 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		__FE_COUT_ERR__ << ss.str();
 
 		std::thread(
-		    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException)
-			{
-				FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
-			},
+		    [](FEVInterface* fe, const std::string errorMessage, bool isPauseException, bool isStopException) {
+			    FEVInterface::sendAsyncExceptionToGateway(fe, errorMessage, isPauseException, isStopException);
+		    },
 		    // pass the values
 		    this /*fe*/,
 		    ss.str() /*errorMessage*/,
 		    isPauseException,
-			isStopException)
+		    isStopException)
 		    .detach();
 
 		return false;
@@ -556,7 +554,7 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
                                            const std::vector<std::string>& namesOfOutputArgs,
                                            uint8_t                         requiredUserPermissions,
                                            const std::string&              allowedCallingFEs,
-										   const std::string&			   feMacroTooltip)
+                                           const std::string&              feMacroTooltip)
 {
 	if(mapOfFEMacroFunctions_.find(feMacroName) != mapOfFEMacroFunctions_.end())
 	{
@@ -566,8 +564,9 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
 	}
 
 	mapOfFEMacroFunctions_.insert(std::pair<std::string, frontEndMacroStruct_t>(
-	    feMacroName, frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs, feMacroTooltip)));
-} // end registerFEMacroFunction()
+	    feMacroName,
+	    frontEndMacroStruct_t(feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, requiredUserPermissions, allowedCallingFEs, feMacroTooltip)));
+}  // end registerFEMacroFunction()
 
 //==============================================================================
 // getFEMacroConstArgument
@@ -840,8 +839,8 @@ void FEVInterface::receiveFromFrontEnd(const std::string& requester, std::string
 	__FE_COUTV__(requester);
 	__FE_COUTV__(parentSupervisor_);
 
-	std::string data  = "0";
-	//bool        found = false;
+	std::string data = "0";
+	// bool        found = false;
 	while(1)
 	{
 		// mutex scope
@@ -1007,8 +1006,7 @@ FEVInterface::macroStruct_t::macroStruct_t(const std::string& macroString)
 				    if(!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')))
 					    return true;  // is variable name!
 			    return false;         // else is a valid hex string, so not variable name
-
-		    };  //end local lambda localIsVariable()
+		    };                        // end local lambda localIsVariable()
 
 		if(commandPieces[1][0] == 'r' && commandPieces.size() == 4)  // read type
 		{

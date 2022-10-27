@@ -84,8 +84,8 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/datalogger/DataLogger/g *ableInfo.x*	
 		sed -i s/dispatcher/Dispatcher/g *ableInfo.x*	
 		sed -i s/monitor/Monitor/g *ableInfo.x*	
-		sed -i s/routingMaster/RoutingMaster/g *ableInfo.x*	
-		sed -i s/routingmaster/RoutingMaster/g *ableInfo.x*	
+		sed -i s/routingManager/RoutingManager/g *ableInfo.x*	
+		sed -i s/routingmanager/RoutingManager/g *ableInfo.x*	
 		
 		#fix plurality of group ID
 		sed -i s/BoardReadersGroupID/BoardReaderGroupID/g *ableInfo.x*	
@@ -93,13 +93,13 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/DataLoggersGroupID/DataLoggerGroupID/g *ableInfo.x*	
 		sed -i s/DispatchersGroupID/DispatcherGroupID/g *ableInfo.x*	
 		sed -i s/MonitorsGroupID/MonitorGroupID/g *ableInfo.x*	
-		sed -i s/RoutingMastersGroupID/RoutingMasterGroupID/g *ableInfo.x*	
+		sed -i s/RoutingManagersGroupID/RoutingManagerGroupID/g *ableInfo.x*	
 		sed -i s/BOARD_READERS_GROUP_ID/BOARD_READER_GROUP_ID/g *ableInfo.x*	
 		sed -i s/EVENT_BUILDERS_GROUP_ID/EVENT_BUILDER_GROUP_ID/g *ableInfo.x*	
 		sed -i s/DATA_LOGGERS_GROUP_ID/DATA_LOGGER_GROUP_ID/g *ableInfo.x*	
 		sed -i s/DISPATCHERS_GROUP_ID/DISPATCHER_GROUP_ID/g *ableInfo.x*	
 		sed -i s/MONITORS_GROUP_ID/MONITOR_GROUP_ID/g *ableInfo.x*	
-		sed -i s/ROUTING_MASTERS_GROUP_ID/ROUTING_MASTER_GROUP_ID/g *ableInfo.x*	
+		sed -i s/ROUTING_MANAGERS_GROUP_ID/ROUTING_MANAGER_GROUP_ID/g *ableInfo.x*	
 		
 		#fix UID
 		sed -i s/SupervisorUID/BoardReaderUID/g *BoardReader*ableInfo.x*	
@@ -107,13 +107,13 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/SupervisorUID/DataLoggerUID/g *DataLogger*ableInfo.x*	
 		sed -i s/SupervisorUID/DispatcherUID/g *Dispatcher*ableInfo.x*	
 		#sed -i s/SupervisorUID/MonitorUID/g *Monitor*ableInfo.x*	
-		sed -i s/SupervisorUID/RoutingMasterUID/g *Routing*ableInfo.x*	
+		sed -i s/SupervisorUID/RoutingManagerUID/g *Routing*ableInfo.x*	
 		sed -i s/SUPERVISOR_UID/BOARD_READER_UID/g *BoardReader*ableInfo.x*	
 		sed -i s/SUPERVISOR_UID/EVENT_BUILDER_UID/g *EventBuilder*ableInfo.x*	
 		sed -i s/SUPERVISOR_UID/DATA_LOGGER_UID/g *DataLogger*ableInfo.x*	
 		sed -i s/SUPERVISOR_UID/DISPATCHER_UID/g *Dispatcher*ableInfo.x*	
 		#sed -i s/SUPERVISOR_UID/MONITOR_UID/g *Monitor*ableInfo.x*	
-		sed -i s/SUPERVISOR_UID/ROUTING_MASTER_UID/g *Routing*ableInfo.x*	
+		sed -i s/SUPERVISOR_UID/ROUTING_MANAGER_UID/g *Routing*ableInfo.x*	
 
 
 
@@ -146,8 +146,8 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/datalogger/DataLogger/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/dispatcher/Dispatcher/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/monitor/Monitor/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/routingMaster/RoutingMaster/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/routingmaster/RoutingMaster/g *Table/*.json #*/ end C++ comment coloring
+		sed -i s/routingManager/RoutingManager/g *Table/*.json #*/ end C++ comment coloring
+		sed -i s/routingmanager/RoutingManager/g *Table/*.json #*/ end C++ comment coloring
 			
 		#fix plurality of group ID
 		sed -i s/BoardReadersGroupID/BoardReaderGroupID/g *Table/*.json #*/ end C++ comment coloring
@@ -155,13 +155,13 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/DataLoggersGroupID/DataLoggerGroupID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/DispatchersGroupID/DispatcherGroupID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/MonitorsGroupID/MonitorGroupID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/RoutingMastersGroupID/RoutingMasterGroupID/g *Table/*.json #*/ end C++ comment coloring
+		sed -i s/RoutingManagersGroupID/RoutingManagerGroupID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/BOARD_READERS_GROUP_ID/BOARD_READER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/EVENT_BUILDERS_GROUP_ID/EVENT_BUILDER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/DATA_LOGGERS_GROUP_ID/DATA_LOGGER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/DISPATCHERS_GROUP_ID/DISPATCHER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
 		sed -i s/MONITORS_GROUP_ID/MONITOR_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
-		sed -i s/ROUTING_MASTERS_GROUP_ID/ROUTING_MASTER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
+		sed -i s/ROUTING_MANAGERS_GROUP_ID/ROUTING_MANAGER_GROUP_ID/g *Table/*.json #*/ end C++ comment coloring
 
 		#fix UID
 		sed -i s/SupervisorUID/BoardReaderUID/g *BoardReader*Table/*.json #*/ end C++ comment coloring
@@ -169,13 +169,13 @@ echo -e `date +"%h%y %T"` "beautify_artdaq_tables.sh [${LINENO}]  \t Modifying T
 		sed -i s/SupervisorUID/DataLoggerUID/g *DataLogger*Table/*.json #*/ end C++ comment coloring
 		sed -i s/SupervisorUID/DispatcherUID/g *Dispatcher*Table/*.json #*/ end C++ comment coloring
 		#sed -i s/SupervisorUID/MonitorUID/g *Monitor*Table/*.json #*/ end C++ comment coloring
-		sed -i s/SupervisorUID/RoutingMasterUID/g *Routing*Table/*.json #*/ end C++ comment coloring
+		sed -i s/SupervisorUID/RoutingManagerUID/g *Routing*Table/*.json #*/ end C++ comment coloring
 		sed -i s/SUPERVISOR_UID/BOARD_READER_UID/g *BoardReader*Table/*.json #*/ end C++ comment coloring
 		sed -i s/SUPERVISOR_UID/EVENT_BUILDER_UID/g *EventBuilder*Table/*.json #*/ end C++ comment coloring
 		sed -i s/SUPERVISOR_UID/DATA_LOGGER_UID/g *DataLogger*Table/*.json #*/ end C++ comment coloring
 		sed -i s/SUPERVISOR_UID/DISPATCHER_UID/g *Dispatcher*Table/*.json #*/ end C++ comment coloring
 		#sed -i s/SUPERVISOR_UID/MONITOR_UID/g *Monitor*Table/*.json #*/ end C++ comment coloring
-		sed -i s/SUPERVISOR_UID/ROUTING_MASTER_UID/g *Routing*Table/*.json #*/ end C++ comment coloring
+		sed -i s/SUPERVISOR_UID/ROUTING_MANAGER_UID/g *Routing*Table/*.json #*/ end C++ comment coloring
 
 #done!
 

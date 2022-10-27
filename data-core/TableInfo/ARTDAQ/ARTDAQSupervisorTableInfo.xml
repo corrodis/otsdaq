@@ -13,8 +13,8 @@
 				<COLUMN Type="ChildLinkGroupID-DataLoggers" 	 Name="DataLoggersLinkGroupID" 	 StorageName="DATALOGGERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="ChildLink-Dispatchers" 	 Name="DispatchersLink" 	 StorageName="DISPATCHERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQDispatcherTable"/>
 				<COLUMN Type="ChildLinkGroupID-Dispatchers" 	 Name="DispatchersLinkGroupID" 	 StorageName="DISPATCHERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
-        <COLUMN Type="ChildLink-RoutingMasters" 	 Name="RoutingMastersLink" 	 StorageName="ROUTINGMASTERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQRoutingMasterTable"/>
-        <COLUMN Type="ChildLinkGroupID-RoutingMasters" 	 Name="RoutingMastersLinkGroupID" 	 StorageName="ROUTINGMASTERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
+        <COLUMN Type="ChildLink-RoutingManagers" 	 Name="RoutingManagersLink" 	 StorageName="ROUTINGMANAGERS_LINK" 		DataType="VARCHAR2" 		DataChoices="arbitraryBool=0,NO_LINK,ARTDAQRoutingManagerTable"/>
+        <COLUMN Type="ChildLinkGroupID-RoutingManagers" 	 Name="RoutingManagersLinkGroupID" 	 StorageName="ROUTINGMANAGERS_LINK_GROUP_ID" 		DataType="VARCHAR2" 		DataChoices=""/>
         <COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="VARCHAR2" 		DataChoices=""/>
 				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>

@@ -5,7 +5,7 @@
 #include "otsdaq/DataManager/DataProducerBase.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-#include "otsdaq/PluginMakers/MakeDataProcessor.h"
+#include "otsdaq/DataManager/MakeDataProcessor.h"
 
 #include <unistd.h>  //usleep
 #include <iostream>
@@ -593,7 +593,7 @@ void DataManager::registerProducer(const std::string& bufferUID, DataProducerBas
 		           << ".' Make sure that your configuration is correct!" << __E__;
 
 		ss << "\n\n Here is the list of buffers:" << __E__;
-		for(const auto bufferPair : buffers_)
+		for(const auto& bufferPair : buffers_)
 			ss << bufferPair.first << __E__;
 		ss << "\n\n";
 
@@ -629,7 +629,7 @@ void DataManager::registerConsumer(const std::string& bufferUID, DataConsumer* c
 		           << ".' Make sure that your configuration is correct!" << __E__;
 
 		ss << "\n\n Here is the list of buffers:" << __E__;
-		for(const auto bufferPair : buffers_)
+		for(const auto& bufferPair : buffers_)
 			ss << bufferPair.first << __E__;
 
 		__CFG_SS_THROW__;

@@ -1,13 +1,14 @@
-cet_make(LIBRARY_NAME WebUsersUtilities
-		 LIBRARIES
-		 ${XDAQ_BASIC_LIB_LIST}
-		 crypto
-		 SOAPUtilities
-		 XmlUtilities
-		 CgiDataUtilities
-		 TableCore
-		 SupervisorInfo
-		 Macros
+cet_make_library(LIBRARY_NAME WebUsersUtilities
+SOURCE RemoteWebUsers.cc
+WebUsers.cc
+		 LIBRARIES PUBLIC
+		 otsdaq::MessageFacility
+		 otsdaq::SOAPUtilities
+		 otsdaq::TableCore
+		 PRIVATE
+		 otsdaq::XmlUtilities
+		 otsdaq::CgiDataUtilities
+		 otsdaq::SupervisorInfo
 )
 
 install_headers()

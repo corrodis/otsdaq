@@ -11,10 +11,7 @@ TCPPacket::TCPPacket() : fBuffer("") {}
 TCPPacket::~TCPPacket(void) {}
 
 //==============================================================================
-std::string TCPPacket::encode(char const* message, std::size_t length)
-{
-	return encode(std::string(message, length));
-}
+std::string TCPPacket::encode(char const* message, std::size_t length) { return encode(std::string(message, length)); }
 
 //==============================================================================
 std::string TCPPacket::encode(const std::string& message)
@@ -45,7 +42,7 @@ std::string TCPPacket::encode(const std::string& message)
 void TCPPacket::reset(void) { fBuffer.clear(); }
 
 //==============================================================================
-bool TCPPacket::isEmpty(void) {return !fBuffer.size(); }
+bool TCPPacket::isEmpty(void) { return !fBuffer.size(); }
 
 //==============================================================================
 bool TCPPacket::decode(std::string& message)

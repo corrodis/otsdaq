@@ -10,7 +10,6 @@
 #include "TRACE/trace.h"
 #include "otsdaq/Macros/StringMacros.h"
 
-
 #if TRACE_REVNUM < 1394
 #define traceLvls_p traceNamLvls_p
 #define TRACE_TID2NAME(idx) traceNamLvls_p[idx].name
@@ -38,74 +37,73 @@ class ITRACEController
 	ITRACEController() {}
 	virtual ~ITRACEController() = default;
 
-	virtual const HostTraceLevelMap& 	getTraceLevels		(void) = 0; // pure virtual
-	virtual void              			setTraceLevelMask	(std::string const& name, TraceMasks const& lvl, std::string const& hostname = "localhost", std::string const& mode = "ALL") = 0; // pure virtual
+	virtual const HostTraceLevelMap& getTraceLevels(void)                               = 0;  // pure virtual
+	virtual void                     setTraceLevelMask(std::string const& name,
+	                                                   TraceMasks const&  lvl,
+	                                                   std::string const& hostname = "localhost",
+	                                                   std::string const& mode     = "ALL") = 0;  // pure virtual
 
-	virtual bool 						getIsTriggered		(void) = 0;	// pure virtual
-	virtual void 						setTriggerEnable	(size_t entriesAfterTrigger) = 0; // pure virtual
+	virtual bool getIsTriggered(void)                         = 0;  // pure virtual
+	virtual void setTriggerEnable(size_t entriesAfterTrigger) = 0;  // pure virtual
 
-	virtual void                   		resetTraceBuffer	(void) = 0;	// pure virtual
-	virtual void                   		enableTrace			(bool enable = true) = 0;	// pure virtual
+	virtual void resetTraceBuffer(void)          = 0;  // pure virtual
+	virtual void enableTrace(bool enable = true) = 0;  // pure virtual
 
 	//=====================================
-	std::string getTraceBufferDump	(std::string const& filterFor = "", std::string const& filterOut = "")
+	std::string getTraceBufferDump(std::string const& filterFor = "", std::string const& filterOut = "")
 	{
-		std::string command = "";//"trace_cntl show";
+		std::string command = "";  //"trace_cntl show";
 
 		std::vector<std::string> grepArr;
-		StringMacros::getVectorFromString(filterFor,grepArr,{','});
+		StringMacros::getVectorFromString(filterFor, grepArr, {','});
 
 		std::string safeGrep = "";
 		for(const auto& grepVal : grepArr)
 		{
 			std::cout << "grepVal = " << grepVal << std::endl;
 
-			if(grepVal.size() < 3) continue;
+			if(grepVal.size() < 3)
+				continue;
 
 			safeGrep += " | grep \" ";
-			for(unsigned int i=0;i<grepVal.size();++i)
-				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
-						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
-						(grepVal[i] >= '0' && grepVal[i] <= '9') ||
-						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
-						(grepVal[i] == '-' || grepVal[i] == '_'))
+			for(unsigned int i = 0; i < grepVal.size(); ++i)
+				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') || (grepVal[i] >= 'A' && grepVal[i] <= 'Z') || (grepVal[i] >= '0' && grepVal[i] <= '9') ||
+				   (grepVal[i] == '.' && i && grepVal[i - 1] != '.') || (grepVal[i] == '-' || grepVal[i] == '_'))
 					safeGrep += grepVal[i];
 			safeGrep += " \"";
 		}
 		std::cout << "safeGrep = " << safeGrep << std::endl;
 
-		grepArr.clear(); //reset
-		StringMacros::getVectorFromString(filterOut,grepArr,{','});
+		grepArr.clear();  // reset
+		StringMacros::getVectorFromString(filterOut, grepArr, {','});
 
 		for(const auto& grepVal : grepArr)
 		{
 			std::cout << "grepVal = " << grepVal << std::endl;
 
-			if(grepVal.size() < 3) continue;
+			if(grepVal.size() < 3)
+				continue;
 
 			safeGrep += " | grep -v \" ";
-			for(unsigned int i=0;i<grepVal.size();++i)
-				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') ||
-						(grepVal[i] >= 'A' && grepVal[i] <= 'Z') ||
-						(grepVal[i] >= '0' && grepVal[i] <= '9') ||
-						(grepVal[i] == '.' && i && grepVal[i-1] != '.') ||
-						(grepVal[i] == '-' || grepVal[i] == '_'))
+			for(unsigned int i = 0; i < grepVal.size(); ++i)
+				if((grepVal[i] >= 'a' && grepVal[i] <= 'z') || (grepVal[i] >= 'A' && grepVal[i] <= 'Z') || (grepVal[i] >= '0' && grepVal[i] <= '9') ||
+				   (grepVal[i] == '.' && i && grepVal[i - 1] != '.') || (grepVal[i] == '-' || grepVal[i] == '_'))
 					safeGrep += grepVal[i];
 			safeGrep += " \"";
 		}
 		std::cout << "safeGrep = " << safeGrep << std::endl;
 
-		//command += " | grep \"" + safeGrep + "\"";
-		//command += " | tdelta";
-		//command += " | test -n \"${PAGER-}\" && trace_delta \"$@\" | $PAGER || trace_delta \"$@\";";
-		// try source $TRACE_BIN/trace_functions.sh; tshow | tdelta
+		// command += " | grep \"" + safeGrep + "\"";
+		// command += " | tdelta";
+		// command += " | test -n \"${PAGER-}\" && trace_delta \"$@\" | $PAGER || trace_delta \"$@\";";
+		//  try source $TRACE_BIN/trace_functions.sh; tshow | tdelta
 		command += " source $TRACE_BIN/trace_functions.sh; tshow ";
-		//command += " | grep Console ";// 2>/dev/null ;
+		// command += " | grep Console ";// 2>/dev/null ;
 		command += safeGrep;
 		command += " | tdelta -d 1 ";
 		TLOG(TLVL_DEBUG) << "getTraceBufferDump command: " << command;
 		return StringMacros::exec(command.c_str());
-	} //end getTraceBufferDump()
+	}  // end getTraceBufferDump()
 
 	//=====================================
 	std::string getHostnameString(void)
@@ -113,7 +111,7 @@ class ITRACEController
 		char hostname_c[HOST_NAME_MAX];
 		gethostname(hostname_c, HOST_NAME_MAX);
 		return std::string(hostname_c);
-	} //end getHostnameString()
+	}  // end getHostnameString()
 
   protected:
 	//=====================================
@@ -133,7 +131,7 @@ class ITRACEController
 				traceLevelsMap_[hostname][name].T = traceLvls_p[ii].T;
 			}
 		}
-	}  //end addTraceLevelsForThisHost()
+	}  // end addTraceLevelsForThisHost()
 
 	//=====================================
 	void setTraceLevelsForThisHost(std::string const& name, TraceMasks const& lvl, std::string const& mode = "ALL")
@@ -142,8 +140,7 @@ class ITRACEController
 		TLOG(TLVL_DEBUG) << "Setting TRACE levels [" << hostname << "]";
 
 		bool allMode = mode == "ALL";
-		TLOG(TLVL_DEBUG) << "Setting " << mode << " levels for name '" << name << "' to " <<
-				std::hex << std::showbase << lvl.M << " " << lvl.S << " " << lvl.T;
+		TLOG(TLVL_DEBUG) << "Setting " << mode << " levels for name '" << name << "' to " << std::hex << std::showbase << lvl.M << " " << lvl.S << " " << lvl.T;
 		if(name != "ALL")
 		{
 			if(allMode || mode == "FAST")
@@ -162,7 +159,7 @@ class ITRACEController
 			if(allMode || mode == "TRIGGER")
 				TRACE_CNTL("lvlmskTg", lvl.T);
 		}
-	}  //end setTraceLevelsForThisHost()
+	}  // end setTraceLevelsForThisHost()
 
 	HostTraceLevelMap traceLevelsMap_;
 };

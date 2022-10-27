@@ -1,7 +1,7 @@
 #ifndef _ots_FEVInterface_h_
 #define _ots_FEVInterface_h_
 
-#define TRACEMF_USE_VERBATIM 1 //for trace longer path filenames
+#define TRACEMF_USE_VERBATIM 1  // for trace longer path filenames
 #include "artdaq/DAQdata/Globals.hh"
 
 #include "otsdaq/Configurable/Configurable.h"
@@ -13,7 +13,6 @@
 
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"  //to send errors to Gateway, e.g.
 
-#include "otsdaq/CoreSupervisors/FESupervisor.h"
 
 #include "otsdaq/FECore/FESlowControlsChannel.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"  //for xdaq::ApplicationDescriptor communication
@@ -25,7 +24,9 @@
 
 #include "otsdaq/Macros/CoutMacros.h"
 
-#define __ARGS__ [[maybe_unused]] const frontEndMacroStruct_t &feMacroStruct,[[maybe_unused]] FEVInterface::frontEndMacroConstArgs_t argsIn, [[maybe_unused]] FEVInterface::frontEndMacroArgs_t argsOut
+#define __ARGS__                                                                                                                 \
+	[[maybe_unused]] const frontEndMacroStruct_t &feMacroStruct, [[maybe_unused]] FEVInterface::frontEndMacroConstArgs_t argsIn, \
+	    [[maybe_unused]] FEVInterface::frontEndMacroArgs_t argsOut
 
 #define __GET_ARG_IN__(X, Y) getFEMacroConstArgumentValue<Y>(argsIn, X)
 #define __GET_ARG_OUT__(X, Y) getFEMacroArgumentValue<Y>(argsOut, X)

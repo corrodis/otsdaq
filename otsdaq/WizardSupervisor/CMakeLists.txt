@@ -1,15 +1,12 @@
-cet_make(LIBRARY_NAME WizardSupervisor
-		 LIBRARIES
-		 ${XDAQ_BASIC_LIB_LIST}
-		 ConfigurationInterface
-		 TableCore
-		 SupervisorInfo
-		 GatewaySupervisor
-		 CoreSupervisors
-		 CgiDataUtilities
-		 WebUsersUtilities
-		 CodeEditor
-		 Boost::filesystem
+cet_make_library(LIBRARY_NAME WizardSupervisor
+SOURCE
+WizardSupervisor.cc
+version.cc
+		 LIBRARIES PRIVATE
+		 otsdaq::CoreSupervisors
+		 otsdaq::CgiDataUtilities
+		 otsdaq::GatewaySupervisor
+          otsdaq::SupervisorInfo
 )
 install_headers()
 install_source()

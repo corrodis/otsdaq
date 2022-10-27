@@ -1,20 +1,18 @@
-cet_make(LIBRARY_NAME GatewaySupervisor
-		 LIBRARIES
-		 ${XDAQ_BASIC_LIB_LIST}		 
-         xgi # From XDAQ
-		 ConfigurationInterface
-		 SupervisorInfo
-         WorkLoopManager
-         FiniteStateMachine
-         CgiDataUtilities
-         WebUsersUtilities
-         CodeEditor         
-         CoreSupervisors
-         NetworkUtilities
-         
-		 otsdaq_TablePlugins_XDAQContextTable_table
-		 otsdaq_TablePlugins_IterateTable_table
-		 otsdaq_TablePlugins_DesktopIconTable_table
+cet_make_library(LIBRARY_NAME GatewaySupervisor
+SOURCE
+GatewaySupervisor.cc
+Iterator.cc
+version.cc
+		 LIBRARIES PRIVATE
+		 otsdaq::CoreSupervisors
+		 otsdaq::IterateTable
+		 otsdaq::CgiDataUtilities
+		 otsdaq::WorkLoopManager
+		 otsdaq::CodeEditor
+		 otsdaq::SupervisorInfo
+		 otsdaq::NetworkUtilities
+		 otsdaq_plugin_support::runInfoMaker
+		 xgi # From XDAQ
 )
 
 
