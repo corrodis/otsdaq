@@ -1,4 +1,3 @@
-include_directories("/usr/include/python2.7/")
 
 #get_cmake_property(_variableNames VARIABLES)
 #foreach (_variableName ${_variableNames})

@@ -31,7 +31,7 @@ cet_set_compiler_flags(
 find_package(artdaq_core 3.09.00 REQUIRED EXPORT)
 find_package(artdaq 3.12.00 REQUIRED EXPORT)
 find_package(artdaq_database 1.07.00 REQUIRED)
-find_package(Python COMPONENTS Development.Embed REQUIRED)
+find_package(Python 3.6 COMPONENTS Development.Embed REQUIRED)
 
 if (EXISTS ${artdaq_database_DIR})
 set(bsoncxx_DIR ${artdaq_database_DIR})
