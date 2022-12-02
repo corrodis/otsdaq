@@ -9,7 +9,6 @@ SCRIPT_DIR="$(
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
-# TODO: get rid of/move to seperate setup script/merge into optional script handling that comes later
 function setupTrace() 
 {
 	
@@ -65,6 +64,7 @@ export XDAQ_CONFIGURATION_XML=otsConfiguration_CMake_Run #used by xdaq superviso
 # setup defaults:
 KILLALL=0
 ISMACROMAKER=0
+ISFINDLOGFILES=0
 ISCONFIG=0
 QUIET=1
 CHROME=0
@@ -91,7 +91,6 @@ if [ "$1" != "-x" ]; then
 fi
 
 # Check for options
-# TODO: One of the options (I feel like it was -r) seemed to be broken? Not sure what's up with that
 while :; do
 	case "$1" in
 	--macromaker | -mm)
@@ -108,6 +107,11 @@ while :; do
 		# Enable verbose mode (disable quiet mode)
 		info "VERBOSE MODE ENABLED!"
 		QUIET=0
+		;;
+	--logfind | -l)
+		# Printout the potential location of all log files based on current xdaq xml launch configuration
+		info "DISPLAYING LOG FILE LOCATIONS!"
+		ISFINDLOGFILES=1
 		;;
 	--chrome | -c)
 		# Enable launching chrome after startup
@@ -170,6 +174,10 @@ while :; do
 		out "To start otsdaq with 'verbose mode' enabled, add one of these options:"
 		out "--verbose  -v"
 		out "	e.g.: ots --wiz -v     or    ots --verbose"
+		out
+		out "To display potential log file locations based on current otsdaq configuration, add one of these options:"
+		out "--logfind  -l"
+		out "	e.g.: ots -l     or    ots --logfind"
 		out
 		out "To start otsdaq and launch google-chrome, add one of these options:"
 		out "--chrome  -c"
@@ -259,6 +267,8 @@ CONF:OpBase_C    0x1ff 0 0
 " ${TRACE_BIN}/trace_cntl namlvlset
 	
 	
+	# tonSg DEBUG+7 #to enable targeted bitmask
+
 	#enable kernel trace to memory buffer:
 	#+test -f /proc/trace/buffer && { export TRACE_FILE=/proc/trace/buffer; tlvls | grep 'KERNEL 0xffffffff00ffffff' >/dev/null || { tonMg 0-63; toffM 24-31 -nKERNEL; }; }
 	
@@ -304,8 +314,6 @@ do
 	mkdir -p $SAP_PATH &>/dev/null #hide output
 done
 
-#exit any old action loops
-echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
 
 #done initializing StartOTS action file
@@ -352,25 +360,25 @@ function killprocs
 	if [[ "x$1" == "x" ]]; then #kill all ots processes
 		pids=`ps aux|grep [o]ts.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
-			killproc $pid
+			killproc $pid &
 		done
 		pids=`ps aux|grep [x]daq.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
-			killproc $pid
+			killproc $pid &
 		done
 		pids=`ps aux|grep [o]tsConsoleFwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
-			killproc $pid
+			killproc $pid &
 		done
 		pids=`ps aux|grep [m]f_rcv_n_fwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
-			killproc $pid
+			killproc $pid &
 		done
 		
 		usershort=`echo $USER|cut -c 1-10`
 		for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
-
 		
+		sleep 1 #give time for cleanup to occur
 	else #then killing only non-gateway contexts
 
 		for contextPID in "${ContextPIDArray[@]}"
@@ -380,14 +388,14 @@ function killprocs
 				out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
 			fi
 			
-			killproc ${contextPID}
+			killproc ${contextPID} &
 
 		done
 	
 		unset ContextPIDArray #done with array of PIDs, so clear
-	fi
-		
-	sleep 1 #give time for cleanup to occur
+
+		sleep 1 #give time for cleanup to occur
+	fi		
 	
     #now hard kill any processes that may be stuck and detached:
 
@@ -398,13 +406,14 @@ function killprocs
 	killall -9 dispatcher &>/dev/null 2>&1 #hide output
 	killall -9 routing_manager &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
-	
+	killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
+	killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
+
 	if [ $ISREMOTE == 0 ]; then
 		out "Done killing processes $1 ${RstClr}"
 	fi
 	
 } #end killprocs
-# TODO (Iris): Why do we export this? 
 export -f killprocs
 
 
@@ -420,7 +429,15 @@ if [[ $KILLALL != 0 ]]; then
 	echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
     echo  -e "${IBRed}"
-    killprocs	
+
+	killall -9 art &>/dev/null 2>&1 #hide output
+	killall -9 boardreader &>/dev/null 2>&1 #hide output
+	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
+	killall -9 datalogger &>/dev/null 2>&1 #hide output
+	killall -9 dispatcher &>/dev/null 2>&1 #hide output
+	killall -9 routing_manager &>/dev/null 2>&1 #hide output
+	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
+    #killprocs	
 	
     out "Done with ots kill-all." 
 	
@@ -432,8 +449,6 @@ if [[ $KILLALL != 0 ]]; then
 	exit
 fi
 
-# TODO (Iris): These should just go behind the verbose flag (and they're already printed after command parsing...)
-
 #KEEP for debugging of defaults
 #echo "ISMACROMAKER $ISMACROMAKER"
 #echo "ISCONFIG $ISCONFIG"
@@ -444,25 +459,18 @@ fi
 #echo "RELAUNCHCHECK $RELAUNCHCHECK"
 
 
-# TODO (Iris): This is clearly trying to potentially solve an issue but this should essentially always
-# get the fqdn, especially since all this code is commented out
+# Old host resolution approach:
 #SERVER=`hostname -f || ifconfig eth0|grep "inet addr"|cut -d":" -f2|awk '{print $1}'`
 export SUPERVISOR_SERVER=$THIS_HOST #$SERVER
 if [ $ISCONFIG == 1 ]; then
     export OTS_CONFIGURATION_WIZARD_SUPERVISOR_SERVER=$SUPERVISOR_SERVER
 fi
 
-# TODO (Iris): Verify this is only used internally and get rid of it if it no longer means anything
 #At one point, could be File, Database, DatabaseTest
 #  Now,.. artdaq_database expects File, and the ARTDAQ_DATABASE_URI decides the rest
 export CONFIGURATION_TYPE=File
 
-# Setup environment when building with MRB
-
-# TODO (Iris): All of these do weird things with mrb. But I'm pretty sure MRB would handle this on it's own/in setup_ots.sh
-# Figure out if these are used anymore, the definitions aren't already setup by setup but they seem strange
-
-# TODO (Iris): Fix old syntax comparisions
+# Setup extra environment pointers when building with MRB
 if [ "x$MRB_BUILDDIR" != "x" ] && [ -e $OTSDAQ_DEMO_DIR/CMakeLists.txt ]; then
     export OTSDAQDEMO_BUILD=${MRB_BUILDDIR}/otsdaq_demo
     export OTSDAQ_DEMO_LIB=`echo ${MRB_BUILDDIR}/otsdaq_demo/slf7*/lib`
@@ -491,27 +499,21 @@ if [ "x$USER_WEB_PATH" == "x" ]; then  #setup the location for user web-apps
     export USER_WEB_PATH=$OTSDAQ_DEMO_DIR/UserWebGUI 
 fi
 
-# TODO (Iris): What does this mean? We have USER_WEB_PATH which is set to point to the demo dir's UserWebGUI if it's not setup earlier (would be in setup_ots.sh)
-# then we replace ${WEB_PATH}/UserWebPath with a symbolic link to ${USER_WEB_PATH}.
-
 #setup web path as XDAQ is setup.. 
 #then make a link to user specified web path.
 WEB_PATH=${OTSDAQ_UTILITIES_DIR}/WebGUI
 
-# TODO (Iris): Maybe bring these back if user starts in verbose (quiet=0)
+# TODO: Maybe bring these back if user starts in verbose (quiet=0)
 #out "WEB_PATH=$WEB_PATH"
 #out "USER_WEB_PATH=$USER_WEB_PATH"
 #out "Making symbolic link to USER_WEB_PATH"
 #out "ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath"
-
-# TODO (Iris): Use quotes for these and remove forwarding to /dev/null. Also use rm -d to remove empty dirs in case it's created wrong (won't delete user files if there's any though)
 
 rm $WEB_PATH/UserWebPath &>/dev/null  #delete link first, hide output
 ln -s $USER_WEB_PATH $WEB_PATH/UserWebPath &>/dev/null  #make link, hide output
 
 
 if [ "x$USER_DATA" == "x" ]; then
-# TODO (Iris): replace with use of die or error functions
 
     out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
     out "Environment variable ${Cyan}${Bold}USER_DATAr${RstClr} has not been setup!"
@@ -524,7 +526,6 @@ if [ "x$USER_DATA" == "x" ]; then
     exit    
 fi
 
-# TODO (Iris): Combine this with the above and make similar changes
 if [ ! -d $USER_DATA ]; then
 
     out "${Red}${Bold}${Blink}Fatal Error${RstClr}."
@@ -539,8 +540,6 @@ if [ ! -d $USER_DATA ]; then
     
     exit   
 fi
-
-# TODO (Iris): Quoting
 
 #check for new Slow Controls context table
 if [ ! -e ${USER_DATA}/TableInfo/SlowControlsDashboardSupervisorTableInfo.xml ]; then
@@ -561,9 +560,6 @@ ARTDAQ_DATABASE_TYPE=$(echo ${ARTDAQ_DATABASE_URI}|sed 's|:.*||')
 
 #out "Database type = $ARTDAQ_DATABASE_TYPE"
 
-# TODO (Iris): Put this functionality in a seperate script file that gets run here. Failing that maybe we can just stuff it into a function.
-# that will make it easier to remove
-	    
 #if not using filesystem point to a db "services" folder
 if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 
@@ -628,8 +624,6 @@ else
 	mkdir $ARTDAQ_DATABASE_FILESYSTEM_PATH &>/dev/null 2>&1 #hide output
 fi	
 		
-
-# TODO (Iris): Fix the file names and the output prints, otherwise this does exactly what the above should do, 
 #check for somewhat-antiquated artdaq 'DAQ' tables and auto-fix
 if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
     out "Converting artdaq 'daq' tables in databases..."
@@ -647,7 +641,6 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
     fi
 fi
 
-# TODO (Iris): Exports should be after definitions due to weird shell issues
 export TABLE_INFO_PATH=${USER_DATA}/TableInfo
 export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
 export XDAQ_CONFIGURATION_DATA_PATH=${USER_DATA}/XDAQConfigurations
@@ -656,17 +649,12 @@ export LOGBOOK_DATA_PATH=${USER_DATA}/ServiceData/LogbookData
 export PROGRESS_BAR_DATA_PATH=${USER_DATA}/ServiceData/ProgressBarData
 export ROOT_DISPLAY_CONFIG_PATH=${USER_DATA}/RootDisplayConfigData
 
-# TODO (Iris): remove pointless x pattern
 if [ "x$OTSDAQ_DATA" == "x" ];then
     export OTSDAQ_DATA=/tmp
 fi
 
-# Make OTSDAQ_DATA directory if it does not exist
-# TODO (Iris): Switch this to a die so that continuing doesn't occur without it, add quoting
-
-mkdir -p ${OTSDAQ_DATA} || out "Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!"
-
-# TODO (Iris): remove x patterns
+# Make directories if they do not exist
+out "Checking directories..."
 
 if [ "x$ROOT_BROWSER_PATH" == "x" ];then
     export ROOT_BROWSER_PATH=${OTSDAQ_DATA}
@@ -680,21 +668,27 @@ if [ "x${ARTDAQ_OUTPUT_DIR}" == "x" ]; then
     export ARTDAQ_OUTPUT_DIR="${USER_DATA}/ArtdaqData"
 fi
 
-# TODO (Iris): quoting
+if [ ! -d $OTSDAQ_DATA ]; then
+	if [ ! -L $OTSDAQ_DATA ]; then
+		mkdir -p $OTSDAQ_DATA || die "Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!" 
+	else
+		mkdir -p `readlink -f $OTSDAQ_DATA`  || die "Error: OTSDAQ_DATA path (${OTSDAQ_DATA}) does not exist and mkdir failed!" 
+	fi
+fi
 
 if [ ! -d $ARTDAQ_OUTPUT_DIR ]; then
 	if [ ! -L $ARTDAQ_OUTPUT_DIR ]; then
-		mkdir -p $ARTDAQ_OUTPUT_DIR
+		mkdir -p $ARTDAQ_OUTPUT_DIR || die "Error: ARTDAQ_OUTPUT_DIR path (${ARTDAQ_OUTPUT_DIR}) does not exist and mkdir failed!" 
 	else
-		mkdir -p `readlink -f $ARTDAQ_OUTPUT_DIR`
+		mkdir -p `readlink -f $ARTDAQ_OUTPUT_DIR`  || die "Error: ARTDAQ_OUTPUT_DIR path (${ARTDAQ_OUTPUT_DIR}) does not exist and mkdir failed!" 
 	fi
 fi
 
 if [ ! -d $OTSDAQ_LOG_DIR ]; then
 	if [ ! -L $OTSDAQ_LOG_DIR ]; then
-		mkdir -p $OTSDAQ_LOG_DIR
+		mkdir -p $OTSDAQ_LOG_DIR  || die "Error: OTSDAQ_LOG_DIR path (${OTSDAQ_LOG_DIR}) does not exist and mkdir failed!" 
 	else
-		mkdir -p `readlink -f $OTSDAQ_LOG_DIR`
+		mkdir -p `readlink -f $OTSDAQ_LOG_DIR`  || die "Error: OTSDAQ_LOG_DIR path (${OTSDAQ_LOG_DIR}) does not exist and mkdir failed!" 
 	fi
 fi
 
@@ -703,9 +697,9 @@ export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
 	if [ ! -L ${USER_DATA}/MessageFacilityConfigurations ]; then
-		mkdir -p ${USER_DATA}/MessageFacilityConfigurations
+		mkdir -p ${USER_DATA}/MessageFacilityConfigurations || die "Error: USER_DATA/MessageFacilityConfiguration path (${USER_DATA}/MessageFacilityConfiguration) does not exist and mkdir failed!" 
 	else
-		mkdir -p `readlink -f ${USER_DATA}/MessageFacilityConfigurations`
+		mkdir -p `readlink -f ${USER_DATA}/MessageFacilityConfigurations` die "Error: USER_DATA/MessageFacilityConfiguration path (${USER_DATA}/MessageFacilityConfiguration) does not exist and mkdir failed!" 
 	fi
 fi
 
@@ -821,17 +815,14 @@ launchOTSMacromaker() {
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
-	
-	# Iris: TODO Quiet is actually quite loud, maybe we should change this to "VERBOSE" if off and "QUIET" doesn't have any echos enabled
+		
 	if [ $QUIET == 1 ]; then
-
 
 		if [ $BACKUPLOGS == 1 ]; then
 			DATESTRING=`date +'%s'`
 			out "     Backing up logfile to *** ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt ***"
 			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt
-		fi
-		
+		fi		
 
 		out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
 		echo "${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &"
@@ -1307,7 +1298,8 @@ launchOTS() {
 	unset xdaqHost #reset
 	unset xdaqContextUID #reset	
 	unset contextPort #reset	
-	unset contextHostname #reset	
+	unset contextHostname #reset
+	unset contextUIDArray #reset	
 	unset TempContextPIDArray #reset  
 	unset ContextPIDArray #reset
 
@@ -1360,6 +1352,7 @@ launchOTS() {
 				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
 					contextHostname+=(${BASH_REMATCH[2]})
 					contextPort+=(${BASH_REMATCH[3]})
+					contextUIDArray+=($contextUID)
 					#echo ${BASH_REMATCH[1]}    
 				fi
 			fi
@@ -1653,7 +1646,7 @@ launchOTS() {
 				fi
 			done 		
 			
-			info "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch..."
+			info "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch."
 			#add successful launch to Context PID array	
 			ContextPIDArray+=($LAST_OTS_PID)
 			#ContextPIDArray+=(${TempContextPIDArray[$j]})
@@ -1761,8 +1754,9 @@ launchOTS() {
 	#fi
 	
 	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
-		out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
-		out "These are the corresponding ports for the Context processes: ${contextPort[@]}"  	 
+		out "These are the${RstClr} ${Bold}hosts${RstClr} configured to run ots Context processes: ${contextHostname[@]}"
+		out "These are the corresponding${RstClr} ${Bold}ports${RstClr} for the Context processes: ${contextPort[@]}"  	 
+		out "These are the corresponding${RstClr} ${Bold}UIDs${RstClr} for the Context processes: ${contextUIDArray[@]}"   
 	fi
 	
 
@@ -1792,6 +1786,204 @@ launchOTS() {
 }   #end launchOTS
 export -f launchOTS
 
+launchOTSLogFind() {
+	
+
+	##############################################################################
+	XDAQ_OTS_XML="ots" 	#used for normal mode launch as copy location for stable script launching
+	##############################################################################
+	
+	out #blank line
+	out "${Purple}${REV}                                                       ${RstClr}"
+	out "${Purple}${REV} *********************************************************************** ${RstClr}"
+	out "${Purple}${REV} ***********       Finding potential ots log files!         ************ ${RstClr}"
+	out "${Purple}${REV} *********************************************************************** ${RstClr}"
+	out "${Purple}${REV}                                                       ${RstClr}"
+	out #blank line
+	out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"	
+	
+	value=`cat ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml`	
+		
+	re="http(s*)://(.+):([0-9]+)"
+	superRe="id=\"([0-9]+)\""	
+	contextUidRe="ContextUID='(.+)' source"	
+		
+	haveXDAQContextPort=false
+	insideContext=false
+	ignore=false
+	isLocal=false
+	gatewayHostname=""
+	gatewayPort=0
+	contextUID=""
+
+	unset xdaqPort #reset
+	unset xdaqHost #reset
+	unset xdaqContextUID #reset	
+	unset contextPort #reset	
+	unset contextHostname #reset	
+	unset contextUIDArray #reset
+	unset TempContextPIDArray #reset  
+	unset ContextPIDArray #reset
+
+	####################################################################
+	########### read from context config and launch Gateway ############
+	####################################################################
+		
+	while read line; do    
+		if [[ ($line == *"<!--"*) ]]; then		
+			ignore=true
+			
+			#out "$line ${RstClr}"
+			#if a context comment line, extract the context UID
+			if [[ ($line =~ $contextUidRe) ]]; then
+				contextUID=${BASH_REMATCH[1]}
+				
+				# out "$contextUID ${RstClr}"
+			fi
+		fi
+		if [[ ($line == *"-->"*) ]]; then
+			ignore=false
+		fi
+		if [[ ${ignore} == true ]]; then
+			continue
+		fi
+		#out "$line${RstClr}"
+				
+		if [[ ($line == *"xc:Context"*) && ($line == *"url"*) ]]; then
+			if [[ ($line =~ $re) ]]; then
+				#if https && hostname matches
+				#   convert hostname to localhost
+				#   create node config files with https:port forwarding to localhost:madeupport
+				#   run nodejs
+				#   run xdaq
+			
+				#echo ${BASH_REMATCH[1]}
+				#echo ${BASH_REMATCH[2]}
+			
+				port=${BASH_REMATCH[3]}
+				host=${BASH_REMATCH[2]}
+				insideContext=true
+						
+				#out "$host $port ${RstClr}"				
+						
+				if [[ (${BASH_REMATCH[2]} == ${THIS_HOST}) || (${BASH_REMATCH[2]} == ${THIS_HOST}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
+				    isLocal=true
+				else
+				    isLocal=false
+				fi
+				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
+					contextHostname+=(${BASH_REMATCH[2]})
+					contextPort+=(${BASH_REMATCH[3]})
+					contextUIDArray+=($contextUID)
+					#echo ${BASH_REMATCH[1]}    
+				fi
+			fi
+			#out "------------------------------------------ out"
+	
+		fi
+		if [[ $line == *"/xc:Context"* ]]; then
+			insideContext=false
+			haveXDAQContextPort=false
+			#out "in ------------------------------------------"
+		fi
+		if [[ ($insideContext == true) ]]; then 
+			
+			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
+				
+				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
+					if [[ ($line =~ $superRe) ]]; then
+					    gatewayHostname=${host}
+						gatewayPort=${port}
+						
+						####################################################################
+						########### 		logfile Gateway context	 	 		############
+						####################################################################
+							
+						out #empty line
+						out "${Red}${Bold}Log file for${RstClr} '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
+				
+					fi
+				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
+									
+					xdaqPort+=($port)
+					xdaqHost+=($host)	
+					xdaqContextUID+=($contextUID)				
+					haveXDAQContextPort=true
+				fi
+ 				
+			  #IF THERE IS AT LEAST ONE NOT ARTDAQ APP THEN I CAN GET OUT OF THIS CONTEXT AND RUN XDAQ ONCE JUST FOR THIS
+			  #insideContext=false #RAR commented because need Super Supervisor connection LID for URL
+			  #echo $line          
+			fi
+		fi   
+	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
+		
+
+	####################################################################
+	########### 		logfile non-Gateway contexts 		############
+	####################################################################
+		
+	if [[ (${#xdaqPort[@]} > 0) ]]; then	
+		info "There are ${#xdaqPort[@]} additional local non-Gateway Context log files for host {${THIS_HOST}}...${RstClr}"
+	else
+		out "${Green}${Bold}There are no additional local non-Gateway Context log files on host {${THIS_HOST}}...${RstClr}"
+	fi
+	
+	i=0	
+	for port in "${xdaqPort[@]}"
+	do
+	  : 
+	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+		  
+
+		out "${Red}${Bold}Log file for${RstClr} '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"			
+		
+		i=$(( $i + 1 ))
+	done	
+
+	############################################################################
+	########### 	   Lunch of remote non-Gateway contexts			############
+	############################################################################	
+	i=0	
+	for port in "${contextPort[@]}"
+	do
+		: 
+		
+			
+		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
+		
+			out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+						
+		fi
+		i=$(( $i + 1 ))
+	done
+	
+
+	out #blank line
+	out "Here are example commands for viewing all potential log files:"
+	out #blank line
+	i=0	
+	for port in "${contextPort[@]}"
+	do
+		: 
+					
+		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
+			out "         vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+		else
+			out "         less ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+		fi
+		i=$(( $i + 1 ))
+	done
+	out #blank line
+
+	out #blank line
+	out "These are the${RstClr} ${Bold}hosts${RstClr} configured to run ots Context processes: ${contextHostname[@]}"
+	out "These are the corresponding${RstClr} ${Bold}ports${RstClr} for the Context processes: ${contextPort[@]}"  	 
+	out "These are the corresponding${RstClr} ${Bold}UIDs${RstClr} for the Context processes: ${contextUIDArray[@]}"  	 
+	out #blank line	
+	
+}   #end launchOTSLogFind
+export -f launchOTSLogFind
 
 #########################################################
 #########################################################
@@ -1848,8 +2040,6 @@ printMainURL() {
 }  #end printMainURL
 export -f printMainURL
 
-# TODO: This should really go into a script instead of a function
-
 #########################################################
 #########################################################
 otsActionHandler() {
@@ -1882,14 +2072,6 @@ otsActionHandler() {
 		
 	FIRST_TIME=1 #to enable url printouts
 	
-	# TODO: Refactor this
-    # I think ideally this would be rolled into XDAQ somehow so that it could be told how to launch processes and then invoke commands to do so, then
-    # a supervisor component could monitor the status in XDAQ instead of trying to guess via the shell/process ids.
-
-    # Short of that I think we should probably split this loop out into it's own script and have it define the inner body as the handler for a SIGHUP which
-    # it would handle as a new command coming in and that would allow it to wait on the SSH children to the remote server and recover them when they die
-    # This is probably what I will do (Iris) if I have the time
-
 	#listen for file commands
 	while true; do
 		#In OTSDAQ_STARTOTS_ACTION_FILE
@@ -1906,8 +2088,7 @@ otsActionHandler() {
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
 		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
-		# TODO (Iris): Replace with case statement
-		
+				
 		#echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
@@ -1965,10 +2146,9 @@ otsActionHandler() {
 
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "FLATTEN_TO_SYSTEM_ALIASES" ]; then
 
-			out "Removing unused tables and groups based on active System Aliases..."
+			out "Removing unused tables and groups based on active System Aliases..."			
 			out "otsdaq_flatten_system_aliases 0"
-
-
+			
 
 			if [ $QUIET == 1 ]; then			
 
@@ -2013,6 +2193,15 @@ export -f otsActionHandler
 
 #functions have been declared
 #now launch things
+
+
+if [ $ISFINDLOGFILES == 1 ]; then
+	launchOTSLogFind
+	exit
+fi
+
+#exit any old action loops (do not exit for just displaying log files)
+echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
 if [ $ISREMOTE == 0 ]; then
 	out #blank line

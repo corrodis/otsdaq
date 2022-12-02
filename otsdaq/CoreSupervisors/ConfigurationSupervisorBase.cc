@@ -116,6 +116,16 @@ try
 		}
 	}
 
+	bool ignoreDuplicates = false;
+	if(!version.isTemporaryVersion() && sourceTableAsIs && 
+		table->getViewP()->getSourceColumnNames().size() != table->getViewP()->getDataColumnSize())
+	{
+		__COUT__ << "table->getViewP()->getNumberOfColumns() " << table->getViewP()->getNumberOfColumns() << __E__;	
+		__COUTV__(table->getViewP()->getSourceColumnNames().size());
+		__COUT_INFO__ << "Source view v" << version << " has a mismatch in the number of columns, so forcing new version saved." << __E__;
+		ignoreDuplicates = true;
+	}
+
 	// create a temporary version from the source version
 	TableVersion temporaryVersion = table->createTemporaryView(version);
 
@@ -196,15 +206,21 @@ try
 	}
 
 	// note: if sourceTableAsIs, accept equivalent versions
-	ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
+	auto newVersion = ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
 	                                                    cfgMgr,
 	                                                    tableName,
 	                                                    version,
 	                                                    makeTemporary,
 	                                                    table,
 	                                                    temporaryVersion,
-	                                                    false /*ignoreDuplicates*/,
+	                                                    ignoreDuplicates /*ignoreDuplicates*/,
 	                                                    lookForEquivalent || sourceTableAsIs /*lookForEquivalent*/);
+
+	if(ignoreDuplicates && sourceTableAsIs) //reset cache for this table
+	{
+		table = cfgMgr->getTableByName(tableName);
+		table->eraseView(newVersion);
+	}
 }  // end handleCreateTableXML()
 catch(std::runtime_error& e)
 {

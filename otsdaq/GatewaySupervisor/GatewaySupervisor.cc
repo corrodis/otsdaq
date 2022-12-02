@@ -3258,14 +3258,13 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 
 			std::string stateMachineAliasFilter = "*";  // default to all
 
-			// IMPORTANT -- use temporary ConfigurationManager to get the Active Group Aliases, to avoid changine the Context Configuration tree for the Gateway
-			// Supervisor
+			// IMPORTANT -- use temporary ConfigurationManager to get the Active Group Aliases,
+			//	 to avoid changing the Context Configuration tree for the Gateway Supervisor
+			ConfigurationManager temporaryConfigMgr;
 			std::map<std::string /*alias*/, std::pair<std::string /*group name*/, TableGroupKey>> aliasMap;
-			{
-				ConfigurationManager temporaryConfigMgr;
-				aliasMap = temporaryConfigMgr.getActiveGroupAliases();
-			}  // end temporary scope for ConfigurationManager to get active group aliases
+			aliasMap = temporaryConfigMgr.getActiveGroupAliases();
 
+			// AND IMPORTANT -- to use ConfigurationManager to get the Context settings for the Gateway Supervisor
 			// get stateMachineAliasFilter if possible
 			ConfigurationTree configLinkNode =
 			    CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
@@ -3377,11 +3376,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					xmlOut.addTextElementToData("config_alias", aliasMapPair.first);
 					xmlOut.addTextElementToData("config_key", TableGroupKey::getFullGroupString(aliasMapPair.second.first, aliasMapPair.second.second).c_str());
 
-					// __COUT__ << "config_alias_comment" << " " <<  CorePropertySupervisorBase::theConfigurationManager_->getNode(
+					// __COUT__ << "config_alias_comment" << " " <<  temporaryConfigMgr.getNode(
 					// 	ConfigurationManager::GROUP_ALIASES_TABLE_NAME).getNode(aliasMapPair.first).getNode(
 					// 		TableViewColumnInfo::COL_NAME_COMMENT).getValue<std::string>() << __E__;
 					xmlOut.addTextElementToData("config_alias_comment",
-					                            CorePropertySupervisorBase::theConfigurationManager_->getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME)
+					                            temporaryConfigMgr.getNode(ConfigurationManager::GROUP_ALIASES_TABLE_NAME)
 					                                .getNode(aliasMapPair.first)
 					                                .getNode(TableViewColumnInfo::COL_NAME_COMMENT)
 					                                .getValue<std::string>());
@@ -3389,16 +3388,16 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 					std::string groupComment, groupAuthor, groupCreationTime;
 					try
 					{
-						CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(aliasMapPair.second.first,
-						                                                                     aliasMapPair.second.second,
-						                                                                     false,
-						                                                                     0,
-						                                                                     0,
-						                                                                     0,
-						                                                                     &groupComment,
-						                                                                     &groupAuthor,
-						                                                                     &groupCreationTime,
-						                                                                     true /*doNotLoadMembers*/);
+						temporaryConfigMgr.loadTableGroup(aliasMapPair.second.first,
+														aliasMapPair.second.second,
+														false,
+														0,
+														0,
+														0,
+														&groupComment,
+														&groupAuthor,
+														&groupCreationTime,
+														true /*doNotLoadMembers*/);
 
 						xmlOut.addTextElementToData("config_comment", groupComment);
 						xmlOut.addTextElementToData("config_author", groupAuthor);
