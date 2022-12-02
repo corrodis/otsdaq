@@ -108,6 +108,10 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
 
+
+	std::cout << __COUT_HDR_FL__ << "Done Loading active Aliases." << std::endl;
+	// return;
+
 	// create set of groups to persist
 	//	include active context
 	//	include active backbone
@@ -156,8 +160,12 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	// add active groups to set
 	std::map<std::string, std::pair<std::string, TableGroupKey>> activeGroupsMap = cfgMgr->getActiveTableGroups();
 
+	bool foundAnyActiveGroups = false;
+
 	for(const auto& activeGroup : activeGroupsMap)
 	{
+		if(activeGroup.second.second.TableGroupKey::isInvalid()) continue;
+
 		groupSet.insert(std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
 		    std::pair<std::string, TableGroupKey>(activeGroup.second.first, activeGroup.second.second), TableGroupKey()));
 		activeGroupKeys.insert(std::pair<std::string, std::pair<TableGroupKey, TableGroupKey>>(
@@ -167,24 +175,37 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 		{
 			activeBackboneGroupName = activeGroup.second.first;
 			__COUT__ << "found activeBackboneGroupName = " << activeBackboneGroupName << std::endl;
+			foundAnyActiveGroups = true;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
 		{
 			activeContextGroupName = activeGroup.second.first;
 			__COUT__ << "found activeContextGroupName = " << activeContextGroupName << std::endl;
+			foundAnyActiveGroups = true;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
 		{
 			activeIterateGroupName = activeGroup.second.first;
 			__COUT__ << "found activeIterateGroupName = " << activeIterateGroupName << std::endl;
+			foundAnyActiveGroups = true;
 		}
 		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
 		{
 			activeConfigGroupName = activeGroup.second.first;
 			__COUT__ << "found activeConfigGroupName = " << activeConfigGroupName << std::endl;
+			foundAnyActiveGroups = true;
 		}
 	}
 
+	if(!foundAnyActiveGroups)
+	{
+		__SS__ << "Did not find any active groups to convert! Should not be possible, must have a backbone at least?" << std::endl;
+		__SS_THROW__;
+	}
+
+	__COUT__ << "Identified active groups:" << std::endl;
+	for(auto& group : groupSet)
+		__COUT__ << " ==> Group to convert: " << group.first.first << " (" << group.first.second << ")" << std::endl;
 	// return;
 
 	// add system alias groups to set
@@ -205,11 +226,17 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 		                                          TableGroupKey(groupPair.second.getNode("GroupKey").getValueAsString())),
 		    TableGroupKey()));
 
-	__COUT__ << "Identified groups:" << std::endl;
+	__COUT__ << "All identified groups:" << std::endl;
 	for(auto& group : groupSet)
-		__COUT__ << group.first.first << " " << group.first.second << std::endl;
+		__COUT__ << " ==> Group to convert: " << group.first.first << " (" << group.first.second << ")" << std::endl;
 	__COUT__ << std::endl;
 	__COUT__ << std::endl;
+
+	if(!groupSet.size())
+	{
+		__SS__ << "No groups identified to convert!" << __E__;
+		__SS_THROW__;
+	}
 
 	// return;
 	//==============================================================================
@@ -776,14 +803,14 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups:" << std::endl;
 	for(const auto& group : groupSet)
-		__COUT__ << "\t" << group.first.first << ": " << group.first.second << " => " << group.second << std::endl;
+		__COUT__ << "------------ " << group.first.first << ": " << group.first.second << " => " << group.second << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Groups end." << std::endl;
 
 	// print resulting active groups
 
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups:" << std::endl;
 	for(const auto& activeGroup : activeGroupKeys)
-		__COUT__ << "\t" << activeGroup.first << ": " << activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
+		__COUT__ << "------------ " << activeGroup.first << ": " << activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
 
 	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
@@ -795,10 +822,15 @@ CLEAN_UP:
 	__COUT__ << "****************************" << std::endl;
 	__COUT__ << "There were " << groupSet.size() << " groups considered, and there were " << groupErrors.size() << " errors found handling those groups."
 	         << std::endl;
-	__COUT__ << "The following errors were found handling the groups:" << std::endl;
-	for(auto& groupErr : groupErrors)
-		__COUT__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
-	__COUT__ << "End of errors.\n\n" << std::endl;
+	if(groupErrors.size())
+	{
+		__COUT_ERR__ << "There were " << groupErrors.size() << " errors found while loading and converting groups. The following errors were found handling the groups:" << std::endl;
+		for(auto& groupErr : groupErrors)
+			__COUT_ERR__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
+		__COUT_ERR__ << "End of errors.\n\n" << std::endl;
+	}
+	else
+		__COUT_INFO__ << "There were NO ERRORS found while loading and converting groups." << __E__;
 
 	__COUT__ << "Run the following to return to your previous database structure:" << std::endl;
 	__COUT__ << "\t otsdaq_flatten_system_aliases -1 " << moveToDir << "\n\n" << std::endl;

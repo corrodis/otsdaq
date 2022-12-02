@@ -422,6 +422,30 @@ void TableView::init(void)
 		bool                                                               tmpIsGroup;
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> tmpLinkPair;
 
+
+		//check sanity of data view rows x cols (have seen weird out-of-range crashes)
+		if(getNumberOfRows() != theDataView_.size())
+		{
+			__SS__ << "Impossible row mismatch " << getNumberOfRows() << " vs " << theDataView_.size() << "! How did you get here?" << __E__;
+			__SS_THROW__;
+		}
+		for(unsigned int row = 0; row < getNumberOfRows(); ++row)
+			if(getNumberOfColumns() != theDataView_[row].size())
+			{
+				__SS__ << "Impossible col mismatch " << getNumberOfColumns() << " vs [" << row << "]" << theDataView_[row].size() << "! How did you get here?" << __E__;
+				__SS_THROW__;
+			}
+		if(getNumberOfColumns() != columnsInfo_.size())
+		{
+			__SS__ << "Impossible col info mismatch " << getNumberOfColumns() << " vs " << columnsInfo_.size() << "! How did you get here?" << __E__;
+			__SS_THROW__;
+		}
+		if(getNumberOfColumns() != rowDefaults.size())
+		{
+			__SS__ << "Impossible col default mismatch " << getNumberOfColumns() << " vs " << rowDefaults.size() << "! How did you get here?" << __E__;
+			__SS_THROW__;
+		}
+
 		for(unsigned int col = 0; col < getNumberOfColumns(); ++col)
 		{
 			if(columnsInfo_[col].getType() == TableViewColumnInfo::TYPE_FIXED_CHOICE_DATA)
