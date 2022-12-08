@@ -958,18 +958,23 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 {
 	__SUP_COUT__ << "transitionHalting" << __E__;
-TLOG_DEBUG(7) << "transitionHalting";
+	TLOG_DEBUG(7) << "transitionHalting";
+
+	//shutdown workloops first, then shutdown metric manager
+	CoreSupervisorBase::transitionHalting(event);
+
 	try
 	{
 		if(metricMan && metricMan->Initialized())
 		{
 			TLOG_DEBUG(7) << "Metric manager(" << metricMan << ") shutting down..." << __E__;
 			metricMan->shutdown();  // will set initilized_ to false with mutex, which should prevent races
-			metricMan.reset(nullptr);
 			TLOG_DEBUG(7) << "Metric manager shutdown." << __E__;
 		}
 		else
 			__SUP_COUT__ << "Metric manager(" << metricMan << ") already shutdown." << __E__;
+
+		metricMan.reset(nullptr);
 	}
 	catch(...)
 	{
@@ -984,6 +989,5 @@ TLOG_DEBUG(7) << "transitionHalting";
 		);
 	}
 
-	CoreSupervisorBase::transitionHalting(event);
 	__SUP_COUT__ << "transitionHalting done." << __E__;
 }  // end transitionHalting()

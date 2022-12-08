@@ -61,7 +61,7 @@ class AllSupervisorInfo : public SupervisorDescriptorInfoBase
 	XDAQ_CONST_CALL xdaq::ApplicationDescriptor* 			getWizardDescriptor					(void) const;
 	const SupervisorInfo& 									getArtdaqSupervisorInfo				(void) const;
 
-	std::vector<std::vector<const SupervisorInfo*>> 		getOrderedSupervisorDescriptors		(const std::string& stateMachineCommand) const;
+	std::vector<std::vector<const SupervisorInfo*>> 		getOrderedSupervisorDescriptors		(const std::string& stateMachineCommand, bool onlyGatewayContextSupervisors = false) const;
 	std::recursive_mutex&									getSupervisorInfoMutex				(unsigned int lid) { return allSupervisorInfoMutex_[lid]; }
   private:
 	SupervisorInfo* 											theSupervisorInfo_;

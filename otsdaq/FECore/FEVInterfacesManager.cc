@@ -195,14 +195,18 @@ void FEVInterfacesManager::configure(void)
 		fe->configure();
 		postStateMachineExecution(i);
 
-		// configure slow controls and start slow controls workloop
-		//	slow controls workloop stays alive through start/stop.. and dies on halt
-		fe->configureSlowControls();
-		fe->startSlowControlsWorkLoop();
+		//when done with fe configure, configure slow controls
+		if(!fe->VStateMachine::getSubIterationWork() && !fe->VStateMachine::getIterationWork())
+		{
+			// configure slow controls and start slow controls workloop
+			//	slow controls workloop stays alive through start/stop.. and dies on halt
+			fe->configureSlowControls();
+			fe->startSlowControlsWorkLoop();
 
-		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
-		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
-		__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+			__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+			__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+			__CFG_COUT__ << "Done " << transitionName << " interface " << name << __E__;
+		}
 	}
 	postStateMachineExecutionLoop();
 

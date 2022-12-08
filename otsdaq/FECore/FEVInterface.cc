@@ -42,6 +42,8 @@ FEVInterface::~FEVInterface(void)
 //==============================================================================
 void FEVInterface::configureSlowControls(void)
 {
+	__COUT__ << "configureSlowControls" << __E__;
+
 	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
 	{

@@ -53,7 +53,7 @@ HOSTNAME="$(hostname -f)"
 THIS_HOST="${HOSTNAME}"
 HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
-STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
+STARTTIME=`date +"%d%h%y.%T"` #to fully ID one StartOTS from another
 
 #export products, used by artdaq daqInterface
 export OTS_PRODUCTS=`echo $PRODUCTS|tr ':' '\n'|grep -v localProducts|head -1`
@@ -348,8 +348,6 @@ export -f killproc
 
 #############################
 # function to kill all things ots
-# TODO (Iris): Using ps and grep isn't a safe way to try to find processes, we should handle shutdown and cleanup
-# in some kind of management process/script that cleans up properly
 function killprocs 
 {	
 	
@@ -379,6 +377,8 @@ function killprocs
 		for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
 		
 		sleep 1 #give time for cleanup to occur
+		
+
 	else #then killing only non-gateway contexts
 
 		for contextPID in "${ContextPIDArray[@]}"
@@ -386,7 +386,10 @@ function killprocs
 			
 			if [ $ISREMOTE == 0 ]; then
 				out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
+			else
+				out "${Red}${Rev}Killing Non-gateway process ID ${contextPID}${RstClr}"
 			fi
+
 			
 			killproc ${contextPID} &
 
@@ -397,8 +400,7 @@ function killprocs
 		sleep 1 #give time for cleanup to occur
 	fi		
 	
-    #now hard kill any processes that may be stuck and detached:
-
+	#now hard kill any processes that may be stuck and detached:
 	killall -9 art &>/dev/null 2>&1 #hide output
 	killall -9 boardreader &>/dev/null 2>&1 #hide output
 	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
@@ -406,9 +408,12 @@ function killprocs
 	killall -9 dispatcher &>/dev/null 2>&1 #hide output
 	killall -9 routing_manager &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
-	killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
-	killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
-
+	
+	if [[ "x$1" == "x" ]]; then #kill all ots processes
+		killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
+		killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
+	fi
+   
 	if [ $ISREMOTE == 0 ]; then
 		out "Done killing processes $1 ${RstClr}"
 	fi
@@ -1416,18 +1421,31 @@ launchOTS() {
 								#test for relaunch
 								# 4 times quietly, then get louder
 								
+								sleep 2
 								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 								#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
-	
-								# Test for start 4 times with short sleep
-								for t in {1..4}; do
+								# sleep 10
+								
+								# Test for start 8 times with short sleep
+								for t in {1..8}; do
 									if [ "x$OTS_IS_ALIVE" == "x" ]; then		
-										sleep 1
+										sleep 2
 										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+										out "Checking http://${THIS_HOST}:${port}..."
 									else
 										break
 									fi
 								done
+
+								
+								# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+								# so clear alive, if ots script can not connect to port
+								OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+								# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+								if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+									out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+									OTS_IS_ALIVE=
+								fi
 									
 								# Alert the user to the problem and keep relaunching
 
@@ -1449,8 +1467,26 @@ launchOTS() {
 									LAST_OTS_PID=$!
 									
 									#verify relaunch
+									sleep 2
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"
+									# Test for start 16 times with short sleep
+									for t in {1..16}; do
+										if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+											sleep 2
+											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+											out "Checking http://${THIS_HOST}:${port}..."
+										else
+											break
+										fi
+									done
+									
 									sleep 8 #give time before relaunch test
-									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat)"
+									OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+									out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+									if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+										out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+										OTS_IS_ALIVE=
+									fi
 									
 									#check if exit requested to avoid endless looping (e.g. on remote hosts)
 									OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
@@ -1592,17 +1628,28 @@ launchOTS() {
 			#test for relaunch
 			# 4 times quietly, then get louder		
 			
+			sleep 2
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			
-			for t in {1..4}; do
+			for t in {1..8}; do
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
-					sleep 1
-					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+					sleep 2
+					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
+					out "Checking http://${THIS_HOST}:${port}..."
 				else
 					break
 				fi
 			done
+			
+			# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+			# so clear alive, if ots script can not connect to port
+			OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+			# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+			if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+				out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+				OTS_IS_ALIVE=
+			fi
 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
 				warning "Could not verify successful ots non-gateway context launch, relaunching non-gateway context..."
@@ -1624,8 +1671,24 @@ launchOTS() {
 				fi
 				
 				#test for relaunch
-				sleep 8 #give time before relaunch test
-				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat)"
+				sleep 2
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"
+				for t in {1..16}; do
+					if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+						sleep 2
+						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
+						out "Checking http://${THIS_HOST}:${port}..."
+					else
+						break
+					fi
+				done
+
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+					OTS_IS_ALIVE=
+				fi
 				
 				#check if exit requested to avoid endless looping (e.g. on remote hosts)
 				OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
@@ -2119,7 +2182,11 @@ otsActionHandler() {
 			out "Starting up non-gateway contexts..."
 			out " "	
 			
-			launchOTS nongateway #launch all non-gateway apps			
+			#prevent remote ssh launches
+			TMP_REMOTELAUNCH=$REMOTELAUNCH
+			REMOTELAUNCH=0
+			launchOTS nongateway #launch all non-gateway apps	
+			REMOTELAUNCH=$TMP_REMOTELAUNCH	
 	
 		elif [ "$OTSDAQ_STARTOTS_ACTION" == "LAUNCH_WIZ" ]; then
 			

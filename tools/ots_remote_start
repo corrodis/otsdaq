@@ -8,7 +8,7 @@ SCRIPT_DIR="$(
 # Get color code variables
 source ${SCRIPT_DIR}/common.sh ots_remote_start
 
-STARTTIME=`date +"%h%y.%T"` #to fully ID one StartOTS from another
+STARTTIME=`date +"%d%h%y.%T"` #to fully ID one StartOTS from another
 out "${Green}=========================== ots REMOTE ============================="
 info "ots script path = ${SCRIPT_DIR}/ots_remote_start"
 info "Expected setup path     = ${SCRIPT_DIR}/../../../../setup_ots.sh"

@@ -198,6 +198,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 		//	sleep
 
 		// __COUT__ << "Just debugging App status checking" << __E__;
+		bool oneStatusReqHasFailed = false;
 		for(const auto& it : theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
 		{
 			auto appInfo = it.second;
@@ -291,19 +292,33 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
-					//__COUT__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
+					__COUT__ << "Getting Status "
+									         << " Supervisor instance = '" << appInfo.getName()
+									         << "' [LID=" << appInfo.getId() << "] in Context '"
+									         << appInfo.getContextName() << "' [URL=" <<
+						 					appInfo.getURL()
+									         << "].\n\n";
+					__COUTV__(SOAPUtilities::translate(tempMessage));
+					__COUT_WARN__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
 					detail   = "SOAP Message Error";
-					sleep(5);  // sleep to not overwhelm server with errors
+					oneStatusReqHasFailed = true;
 				}
 				catch(...)
 				{
-					//__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
+					__COUT__ << "Getting Status "
+									         << " Supervisor instance = '" << appInfo.getName()
+									         << "' [LID=" << appInfo.getId() << "] in Context '"
+									         << appInfo.getContextName() << "' [URL=" <<
+						 					appInfo.getURL()
+									         << "].\n\n";
+					__COUTV__(SOAPUtilities::translate(tempMessage));
+					__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
 					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
 					progress = "0";
 					detail   = "Unknown SOAP Message Error";
-					sleep(5);  // sleep to not overwhelm server with errors
+					oneStatusReqHasFailed = true;
 				}
 			}  // end with non-gateway status request handling
 
@@ -319,6 +334,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger, detail);
 
 		}  // end of app loop
+		if(oneStatusReqHasFailed)
+			sleep(5);  // sleep to not overwhelm server with errors
 	}      // end of infinite status checking loop
 }  // end AppStatusWorkLoop
 
@@ -1734,7 +1751,8 @@ catch(...)
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
 try
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << __E__;
+	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" message: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	RunControlStateMachine::theProgressBar_.step();
 	makeSystemLogEntry("System shutting down.");
@@ -1751,6 +1769,9 @@ try
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
+
+	broadcastMessage(theStateMachine_.getCurrentMessage());
+
 }  // end transitionShuttingDown()
 catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 {
@@ -1802,6 +1823,8 @@ try
 		sleep(1);
 		RunControlStateMachine::theProgressBar_.step();
 	}
+
+	broadcastMessage(theStateMachine_.getCurrentMessage());
 
 }  // end transitionStartingUp()
 catch(const xdaq::exception::Exception& e)  // due to xoap send failure
@@ -2257,6 +2280,8 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		RunControlStateMachine::theProgressBar_.step();
 
 		std::string  givenAppStatus   = theStateMachine_.getCurrentTransitionName(command);
+		__COUTV__(givenAppStatus.capacity());
+
 		unsigned int givenAppProgress = appInfo.getProgress();
 		std::string  givenAppDetail   = appInfo.getDetail();
 		if(givenAppProgress >= 100)
@@ -2317,6 +2342,7 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			// for transition attempt, set status for app, in case the request occupies the target app
 			reply = send(appInfo.getDescriptor(), message);
 			// then release mutex here using scope change, to allow the app to start giving its own updates
+			__COUTV__(givenAppStatus.capacity());
 		}
 		catch(const xdaq::exception::Exception& e)  // due to xoap send failure
 		{
@@ -2553,7 +2579,10 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	try
 	{
-		orderedSupervisors = allSupervisorInfo_.getOrderedSupervisorDescriptors(command);
+		orderedSupervisors = allSupervisorInfo_.getOrderedSupervisorDescriptors(command,
+			//only gateway apps for special shutdown and startup command broadcast
+			command == RunControlStateMachine::SHUTDOWN_TRANSITION_NAME ||
+			command == RunControlStateMachine::STARTUP_TRANSITION_NAME);
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -3919,7 +3948,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 				if(context.address_[i] == '/')
 					j = i + 1;
 			hostnames.push_back(context.address_.substr(j));
-			__COUT__ << "StartOTS.sh hostname = " << hostnames.back() << __E__;
+			__COUT__ << "StartOTS.sh command '" << command << "' launching on hostname = " << hostnames.back() << __E__;
 		}
 	}
 	catch(...)

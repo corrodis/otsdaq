@@ -352,9 +352,9 @@ const SupervisorInfo& AllSupervisorInfo::getArtdaqSupervisorInfo(void) const
 }  // end getArtdaqSupervisorInfo()
 
 //==============================================================================
-std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand) const
+std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand, bool onlyGatewayContextSupervisors) const
 {
-	__COUT__ << "getOrderedSupervisorDescriptors" << __E__;
+	__COUT__ << "getOrderedSupervisorDescriptors for command " << stateMachineCommand << __E__;
 
 	std::map<uint64_t /*priority*/, std::vector<unsigned int /*appId*/>> orderedByPriority;
 
@@ -416,6 +416,11 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			//__COUT__ << it->second.getName() << " [" << it->second.getId() << "]: " << "
 			// priority? " << 				(unsigned int)priorityAppVector.first <<
 			//__E__;
+
+
+			if(onlyGatewayContextSupervisors && 
+				it->second.getContextName() != theSupervisorInfo_->getContextName())
+				continue; //for shutdown and startup only broadcast to apps that are local to the Gateway supervisor
 
 			if(it->second.isGatewaySupervisor())
 				continue;  // skip gateway supervisor

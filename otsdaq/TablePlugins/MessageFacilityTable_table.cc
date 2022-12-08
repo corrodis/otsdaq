@@ -117,7 +117,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 				child.second.getNode(COL_QT_PORT).getValue(fwdPort);
 		}
 
-		__COUT__ << "Foud FWD/WEB/QT " << (COL_ENABLE_FWD ? "true" : "false") << "/" << (COL_USE_WEB ? "true" : "false") << "/"
+		__COUT__ << "Found FWD/WEB/QT " << (COL_ENABLE_FWD ? "true" : "false") << "/" << (COL_USE_WEB ? "true" : "false") << "/"
 		         << (COL_USE_QT ? "true" : "false") << " and IP:Port:FwdPort " << fwdIP << ":" << fwdPort << ":" << destFwdPort << " in MesageFacility table."
 		         << __E__;
 		break;  // take first enable row only!
