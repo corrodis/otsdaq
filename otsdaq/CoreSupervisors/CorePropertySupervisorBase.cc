@@ -107,6 +107,17 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorApplicationUID_);
 	__SUP_COUTV__(CorePropertySupervisorBase::supervisorConfigurationPath_);
 
+	//try to verify binding port for context was established
+	//All this code failed to do the trick 
+	// {
+	// 			application->ptr_;
+			
+	// 			PeerTransportHTTP(this)
+	// 			const xdaq::NetGroup* netGroupPtr = application->getApplicationContext()->getNetGroup();
+	// 			auto netVector = netGroupPtr->getNetworks();
+	// 			__SUP_COUTV__(netVector.size());
+	// }
+
 	CorePropertySupervisorBase::indicateOtsAlive(this);
 
 	theConfigurationManager_->setOwnerContext(CorePropertySupervisorBase::supervisorContextUID_);

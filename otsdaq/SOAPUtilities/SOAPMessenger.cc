@@ -51,7 +51,20 @@ std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, 
 
 {
 	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(command);
-	return send(d, message);
+	std::string msgStr;
+	try
+	{
+		msgStr = send(d, message);
+	}
+	catch(...)
+	{
+		__COUT__ << "send failed?!" << __E__;
+		__COUT__ << SOAPUtilities::translate(message) << __E__;
+		throw;
+	}
+	
+	
+	return msgStr;
 }
 
 //==============================================================================

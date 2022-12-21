@@ -24,6 +24,9 @@ const std::string RunControlStateMachine::HALTED_STATE_NAME  = "Halted";
 const std::string RunControlStateMachine::PAUSED_STATE_NAME  = "Paused";
 const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
 
+const std::string RunControlStateMachine::SHUTDOWN_TRANSITION_NAME = "Shutdown";
+const std::string RunControlStateMachine::STARTUP_TRANSITION_NAME = "Startup";
+
 //==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
     : theStateMachine_(name), asyncFailureReceived_(false), asyncPauseExceptionReceived_(false), asyncStopExceptionReceived_(false)
@@ -51,14 +54,14 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	//clang-format off
 	// this line was added to get out of Failed state
 	RunControlStateMachine::addStateTransition('F', 'H', "Halt", "Halting", this, &RunControlStateMachine::transitionHalting);
-	RunControlStateMachine::addStateTransition('F', 'X', "Shutdown", "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	RunControlStateMachine::addStateTransition('F', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition('F', 'F', "Error", "Erroring", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition('F', 'F', "Fail", "Failing", this, &RunControlStateMachine::transitionShuttingDown);
 
 	RunControlStateMachine::addStateTransition(
 	    'H', 'C', "Configure", "Configuring", "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
-	RunControlStateMachine::addStateTransition('H', 'X', "Shutdown", "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
-	RunControlStateMachine::addStateTransition('X', 'I', "Startup", "Starting Up", this, &RunControlStateMachine::transitionStartingUp);
+	RunControlStateMachine::addStateTransition('H', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	RunControlStateMachine::addStateTransition('X', 'I', RunControlStateMachine::STARTUP_TRANSITION_NAME, "Starting Up", this, &RunControlStateMachine::transitionStartingUp);
 
 	// Every state can transition to halted
 	RunControlStateMachine::addStateTransition('I', 'H', "Initialize", "Initializing", this, &RunControlStateMachine::transitionInitializing);
@@ -84,8 +87,8 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Resume", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Halt", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Abort", XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Shutdown", XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Startup", XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::STARTUP_TRANSITION_NAME, XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Fail", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Error", XDAQ_NS_URI);
 

@@ -1271,7 +1271,7 @@ char* StringMacros::otsGetEnvironmentVarable(const char* name, const std::string
 	{
 		__SS__ << "Environment variable '" << name << "' not defined at " << location << "[" << line << "]" << __E__;
 		ss << "\n\n" << StringMacros::stackTrace() << __E__;
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 	return environmentVariablePtr;
 }  // end otsGetEnvironmentVarable()
