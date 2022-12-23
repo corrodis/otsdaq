@@ -1676,7 +1676,7 @@ void FEVInterfacesManager::runFEMacroByFE(const std::string& callingInterfaceID,
 		__CFG_SS_THROW__;
 	}
 
-	auto& feMacro = FEMacroIt->second;
+	const FEVInterface::frontEndMacroStruct_t& feMacro = FEMacroIt->second;
 
 	std::set<std::string> allowedFEsSet;
 	StringMacros::getSetFromString(feMacro.allowedCallingFrontEnds_, allowedFEsSet);
@@ -1855,7 +1855,7 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID, const std:
 {
 	// check for interfaceID
 	FEVInterface* fe = getFEInterfaceP(interfaceID);
-
+			
 	// have pointer to virtual FEInterface, find Macro structure
 	auto FEMacroIt = fe->getMapOfFEMacroFunctions().find(feMacroName);
 	if(FEMacroIt == fe->getMapOfFEMacroFunctions().end())
@@ -2023,10 +2023,11 @@ void FEVInterfacesManager::runFEMacro(const std::string&                        
 // getFEMacrosString
 //	returns string with each new line indicating the macros for a FE
 //	each line:
-//		<parent supervisor name>:<parent supervisor lid>:<interface type>:<interface UID>
-//		:<macro name>:<macro permissions req>:<macro num of inputs>:...<input names :
+//		<parent supervisor name>;<parent supervisor lid>;<interface type>;<interface UID>
+//		;<macro name>;<macro permissions req>;<macro num of inputs>;...<input names ;
 // separated>...
-//		:<macro num of outputs>:...<output names : separated>...
+//		;<macro num of outputs>;...<output names ; separated>...
+//	do not use :-separator because of the : in user permissions strings
 std::string FEVInterfacesManager::getFEMacrosString(const std::string& supervisorName, const std::string& supervisorLid)
 {
 	std::string retList = "";
@@ -2035,21 +2036,21 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string& superviso
 	{
 		__CFG_COUT__ << "FE interface UID = " << it.first << __E__;
 
-		retList += supervisorName + ":" + supervisorLid + ":" + it.second->getInterfaceType() + ":" + it.second->getInterfaceUID();
+		retList += supervisorName + ";" + supervisorLid + ";" + it.second->getInterfaceType() + ";" + it.second->getInterfaceUID();
 
 		for(const auto& macroPair : it.second->getMapOfFEMacroFunctions())
 		{
 			__CFG_COUT__ << "FE Macro name = " << macroPair.first << __E__;
-			retList += ":" + macroPair.first + ":" + std::to_string(macroPair.second.requiredUserPermissions_);
-			retList += ":" + StringMacros::encodeURIComponent(macroPair.second.feMacroTooltip_);
+			retList += ";" + macroPair.first + ";" + macroPair.second.requiredUserPermissions_;
+			retList += ";" + StringMacros::encodeURIComponent(macroPair.second.feMacroTooltip_);
 
-			retList += ":" + std::to_string(macroPair.second.namesOfInputArguments_.size());
+			retList += ";" + std::to_string(macroPair.second.namesOfInputArguments_.size());
 			for(const auto& name : macroPair.second.namesOfInputArguments_)
-				retList += ":" + StringMacros::encodeURIComponent(name);
+				retList += ";" + StringMacros::encodeURIComponent(name);
 
-			retList += ":" + std::to_string(macroPair.second.namesOfOutputArguments_.size());
+			retList += ";" + std::to_string(macroPair.second.namesOfOutputArguments_.size());
 			for(const auto& name : macroPair.second.namesOfOutputArguments_)
-				retList += ":" + StringMacros::encodeURIComponent(name);
+				retList += ";" + StringMacros::encodeURIComponent(name);
 		}
 
 		retList += "\n";

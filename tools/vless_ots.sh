@@ -7,8 +7,8 @@ if [ "x$1" == "x" ]; then
     echo
     echo "    Usage: vless_ots.sh <node name> <file name>"
     echo
-    echo "    e.g.: vless_ots.sh mu2e-cfo-01.fnal.gov /home/mu2ehwdev/ots/srcs/otsdaq_mu2e_config/Data_HWDev/Logs/otsdaq_quiet_run-gateway-mu2e-cfo-01.fnal.gov-3055.txt"
-    echo "    e.g.: vless_ots.sh mu2e-trk-05.fnal.gov /home/mu2ehwdev/ots/srcs/otsdaq_mu2e_config/Data_HWDev/Logs/otsdaq_quiet_run-mu2e-trk-05.fnal.gov-3061.txt"
+    echo "    e.g.: vless_ots.sh server01.fnal.gov /home/user/ots/Data_user/Logs/otsdaq_quiet_run-gateway-server01.fnal.gov-3055.txt"
+    echo "    e.g.: vless_ots.sh server02.fnal.gov /home/user/ots/Data_user/Logs/otsdaq_quiet_run-server02.fnal.gov-3061.txt"
     echo
     echo
     exit

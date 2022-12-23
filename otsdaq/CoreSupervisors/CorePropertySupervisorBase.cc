@@ -239,6 +239,8 @@ void CorePropertySupervisorBase::setSupervisorPropertyDefaults(void)
 //		for example, to give access admins and pixel team but not calorimeter team:
 //			allUsers:255 | pixelTeam:1 | calorimeterTeam:0
 //
+//	Note: WebUsers::DEFAULT_USER_GROUP = allUsers
+//
 //	Use with CorePropertySupervisorBase::doPermissionsGrantAccess to determine
 //		if access is allowed.
 void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::string&                                  permissionsString,
@@ -246,7 +248,12 @@ void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::stri
 {
 	permissionsMap.clear();
 	StringMacros::getMapFromString(permissionsString, permissionsMap);
-}
+	if(permissionsMap.size() == 0) //do not allow empty permissions map
+		permissionsMap.emplace(std::pair<std::string, WebUsers::permissionLevel_t>(
+			WebUsers::DEFAULT_USER_GROUP,
+			atoi(permissionsString.c_str())) //convert to integer
+		);
+} //end extractPermissionsMapFromString()
 
 //==============================================================================
 // doPermissionsGrantAccess

@@ -702,17 +702,55 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 			requestParameters.addParameter("inputArgs");
 			requestParameters.addParameter("outputArgs");
 			requestParameters.addParameter("InterfaceID");
+			requestParameters.addParameter("userPermissions");
 			SOAPUtilities::receive(message, requestParameters);
 			std::string interfaceID = requestParameters.getValue("InterfaceID");
 			std::string feMacroName = requestParameters.getValue("feMacroName");
 			std::string inputArgs   = requestParameters.getValue("inputArgs");
 			std::string outputArgs  = requestParameters.getValue("outputArgs");
+			std::string userPermissions  	= requestParameters.getValue("userPermissions");
+			
+			//check user permission
+			// userPermissions = "allUsers:1";
+			// userPermissions = "allUsers:1 & TDAQ:255";
+			__COUTV__(userPermissions);
+			std::map<std::string, WebUsers::permissionLevel_t> userPermissionLevelsMap;
+			CorePropertySupervisorBase::extractPermissionsMapFromString(userPermissions, userPermissionLevelsMap);
+			__COUTV__(StringMacros::mapToString(userPermissionLevelsMap));
+			
 
 			// outputArgs must be filled with the proper argument names
 			//	and then the response output values will be returned in the string.
 			try
 			{
-				theFEInterfacesManager_->runFEMacro(interfaceID, feMacroName, inputArgs, outputArgs);
+				// check for interfaceID
+				FEVInterface* fe = theFEInterfacesManager_->getFEInterfaceP(interfaceID);
+						
+				// have pointer to virtual FEInterface, find Macro structure
+				auto FEMacroIt = fe->getMapOfFEMacroFunctions().find(feMacroName);
+				if(FEMacroIt == fe->getMapOfFEMacroFunctions().end())
+				{
+					__SUP_SS__ << "FE Macro '" << feMacroName << "' of interfaceID '" << interfaceID << "' was not found!" << __E__;					
+					__SUP_SS_THROW__;
+				}
+				const FEVInterface::frontEndMacroStruct_t& FEMacro = FEMacroIt->second;
+
+				__COUTV__(FEMacro.requiredUserPermissions_);
+				std::map<std::string, WebUsers::permissionLevel_t> FERequiredUserPermissionsMap;
+				CorePropertySupervisorBase::extractPermissionsMapFromString(FEMacro.requiredUserPermissions_, FERequiredUserPermissionsMap);
+				__COUTV__(StringMacros::mapToString(FERequiredUserPermissionsMap));
+			
+				if(!CorePropertySupervisorBase::doPermissionsGrantAccess(userPermissionLevelsMap, FERequiredUserPermissionsMap))
+				{						
+					__SUP_SS__ << "Invalid user permission for FE Macro '" << feMacroName << "' of interfaceID '" << interfaceID << "'!\n\n" <<
+						"Must have access level of at least '" << StringMacros::mapToString(FERequiredUserPermissionsMap) << 
+						".' Users permissions level is only '" << userPermissions << ".'" << __E__;					
+					__SUP_SS_THROW__;
+				};  // skip icon if no access
+
+				theFEInterfacesManager_->runFEMacro(interfaceID, FEMacro, inputArgs, outputArgs);
+
+				// theFEInterfacesManager_->runFEMacro(interfaceID, feMacroName, inputArgs, outputArgs);
 			}
 			catch(std::runtime_error& e)
 			{

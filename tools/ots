@@ -409,9 +409,9 @@ function killprocs
 	killall -9 routing_manager &>/dev/null 2>&1 #hide output
 	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
 	
-	if [[ "x$1" == "x" ]]; then #kill all ots processes
-		killall -9 xdaq.exe  &>/dev/null 2>&1 #hide output
-		killall -9 otsConsoleFwd  &>/dev/null 2>&1 #hide output
+	if [[ "x$1" == "x" ]]; then #kill all ots processes, not in background or it kills the new launch sometimes!
+		killall -9 xdaq.exe  >/dev/null 2>&1 #hide output
+		killall -9 otsConsoleFwd  >/dev/null 2>&1 #hide output
 	fi
    
 	if [ $ISREMOTE == 0 ]; then
@@ -429,9 +429,9 @@ if [[ $KILLALL != 0 ]]; then
     out "${Yellow}${Bold}${REV}******************************************************${RstClr}"
 	
 	#try to force kill other StartOTS scripts
-	echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_QUIT_FILE
+	echo "KILL_ALL" > $OTSDAQ_STARTOTS_QUIT_FILE
 	#echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
-	echo "EXIT_LOOP ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
+	echo "KILL_ALL ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
     echo  -e "${IBRed}"
 
@@ -1038,13 +1038,24 @@ launchOTSWiz() {
 		
 		#test for relaunch
 		# 4 times quietly, then get louder
+
+		sleep 2
 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 		
 		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
-				sleep 1
+				sleep 2
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-			else
+				out "Checking http://${THIS_HOST}:${port}..."
+			else # found the supervisor!
+				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+				# so clear alive, if ots script can not connect to port
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+					OTS_IS_ALIVE=
+				fi
 				break
 			fi
 		done
@@ -1066,9 +1077,25 @@ launchOTSWiz() {
 			fi
 			LAST_OTS_PID=$!
 			
-			#test for relaunch
-			sleep 8 #give time before relaunch test
+			#verify relaunch
+			sleep 2
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+			# Test for start 16 times with short sleep
+			for t in {1..16}; do
+				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+					sleep 2
+					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+					out "Checking http://${THIS_HOST}:${port}..."
+				else  # found the supervisor!
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						OTS_IS_ALIVE=
+					fi
+					break
+				fi
+			done
 	
 		done
 		
@@ -1115,8 +1142,6 @@ export -f launchOTSWiz
 #ContextPIDArray is context PID array 
 launchOTS() {
 	
-
-
 	ISGATEWAYLAUNCH=1
 	if [ "x$1" != "x" ]; then #if parameter, then is nongateway launch
 		ISGATEWAYLAUNCH=0
@@ -1432,20 +1457,19 @@ launchOTS() {
 										sleep 2
 										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 										out "Checking http://${THIS_HOST}:${port}..."
-									else
+									else # found the supervisor!
+										# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+										# so clear alive, if ots script can not connect to port
+										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+										# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+										if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+											out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+											OTS_IS_ALIVE=
+										fi
 										break
 									fi
-								done
-
+								done								
 								
-								# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-								# so clear alive, if ots script can not connect to port
-								OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
-								# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
-								if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-									out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
-									OTS_IS_ALIVE=
-								fi
 									
 								# Alert the user to the problem and keep relaunching
 
@@ -1475,25 +1499,24 @@ launchOTS() {
 											sleep 2
 											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 											out "Checking http://${THIS_HOST}:${port}..."
-										else
+										else  # found the supervisor!
+											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+											# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+											if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+												out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+												OTS_IS_ALIVE=
+											fi
 											break
 										fi
 									done
 									
-									sleep 8 #give time before relaunch test
-									OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
-									out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
-									if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-										out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
-										OTS_IS_ALIVE=
-									fi
 									
 									#check if exit requested to avoid endless looping (e.g. on remote hosts)
 									OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
 									OTSDAQ_STARTOTS_QUIT="$(cat ${OTSDAQ_STARTOTS_QUIT_FILE})"
 									OTSDAQ_STARTOTS_LOCAL_QUIT="$(cat ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE})"
 							
-									if [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
+									if [[ "$OTSDAQ_STARTOTS_ACTION" == "KILL_ALL" || "$OTSDAQ_STARTOTS_QUIT" == "KILL_ALL" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "KILL_ALL ${THIS_HOST}" ]]; then
 
 										out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 													
@@ -1637,19 +1660,19 @@ launchOTS() {
 					sleep 2
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
 					out "Checking http://${THIS_HOST}:${port}..."
-				else
+				else   # found the supervisor!
+					# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+					# so clear alive, if ots script can not connect to port
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						OTS_IS_ALIVE=
+					fi
 					break
 				fi
-			done
+			done			
 			
-			# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-			# so clear alive, if ots script can not connect to port
-			OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
-			# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
-			if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-				out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
-				OTS_IS_ALIVE=
-			fi
 
 			while [ "x$OTS_IS_ALIVE" == "x" ]; do
 				warning "Could not verify successful ots non-gateway context launch, relaunching non-gateway context..."
@@ -1678,24 +1701,25 @@ launchOTS() {
 						sleep 2
 						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
 						out "Checking http://${THIS_HOST}:${port}..."
-					else
+					else   # found the supervisor!
+						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+						# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+						if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+							out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+							OTS_IS_ALIVE=
+						fi
 						break
 					fi
 				done
 
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
-				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
-				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
-					OTS_IS_ALIVE=
-				fi
+				
 				
 				#check if exit requested to avoid endless looping (e.g. on remote hosts)
 				OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
 				OTSDAQ_STARTOTS_QUIT="$(cat ${OTSDAQ_STARTOTS_QUIT_FILE})"
 				OTSDAQ_STARTOTS_LOCAL_QUIT="$(cat ${OTSDAQ_STARTOTS_LOCAL_QUIT_FILE})"
 		
-				if [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
+				if [[ "$OTSDAQ_STARTOTS_ACTION" == "KILL_ALL" || "$OTSDAQ_STARTOTS_QUIT" == "KILL_ALL" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "KILL_ALL ${THIS_HOST}" ]]; then
 
 					out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 								
@@ -2029,11 +2053,17 @@ launchOTSLogFind() {
 	for port in "${contextPort[@]}"
 	do
 		: 
-					
-		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
-			out "         vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+
+		if [[ $gatewayHostname == ${THIS_HOST} && $gatewayPort == ${port} ]]; then
+			fn="otsdaq_quiet_run-gateway-${THIS_HOST}-${port}"
 		else
-			out "         less ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+			fn="otsdaq_quiet_run-${contextHostname[$i]}-${port}"
+		fi
+
+		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
+			out "         vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		else
+			out "         less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		fi
 		i=$(( $i + 1 ))
 	done
@@ -2056,13 +2086,7 @@ export -f launchOTSLogFind
 printMainURL() {	
 	
 	#out "printMainURL()"
-	
-	#check if ots was aborted
-	#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
-	#	if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
-	#		exit
-	#	fi
-	
+		
 	if [ $QUIET == 0 ]; then
 		sleep 5 #give a little more time before injecting printouts in scrolling printouts
 	else
@@ -2084,13 +2108,7 @@ printMainURL() {
 	out "\t(Note: This URL may need to be modified depending on your network configuration)"
 		
 	for t in {1..5}
-	do
-		#check if ots was aborted
-		#OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
-		#if [ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" ]; then
-		#exit
-		#fi		
-		
+	do		
 		out "${Green}${Bold}${EUNDERLINE}${MAIN_URL}${RstClr}"
 
 		#echo -e "${Reset}"
@@ -2141,7 +2159,8 @@ otsActionHandler() {
 		#0 is the default. No action is taken
 		#REBUILD_OTS will rebuild otsdaq
 		#Reset_MPI will reboot artdaq MPI runs
-		#EXIT_LOOP will exit StartOTS loop
+		#EXIT_LOOP will exit ots action loop
+		#KILL_ALL will kill all and exit ots action loop
 		#if cmd file is missing, exit StartOTS loop
 		
 		OTSDAQ_STARTOTS_ACTION="$(cat ${OTSDAQ_STARTOTS_ACTION_FILE})"
@@ -2233,7 +2252,14 @@ otsActionHandler() {
 						
 		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_QUIT" == "EXIT_LOOP" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "EXIT_LOOP ${THIS_HOST}" ]]; then
 
+			#only exit action loop
+			out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
+			
+		    exit
 
+		elif [[ "$OTSDAQ_STARTOTS_ACTION" == "KILL_ALL" || "$OTSDAQ_STARTOTS_QUIT" == "KILL_ALL" || "$OTSDAQ_STARTOTS_LOCAL_QUIT" == "KILL_ALL ${THIS_HOST}" ]]; then
+
+			#kill all and exit action loop
 			out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 						
 			killprocs	
@@ -2267,7 +2293,7 @@ if [ $ISFINDLOGFILES == 1 ]; then
 	exit
 fi
 
-#exit any old action loops (do not exit for just displaying log files)
+#exit any old action loops (do not exit for just displaying log files, above)
 echo "EXIT_LOOP" > $OTSDAQ_STARTOTS_ACTION_FILE
 
 if [ $ISREMOTE == 0 ]; then
