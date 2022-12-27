@@ -187,8 +187,12 @@ void GatewaySupervisor::init(void)
 //	child thread
 void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 {
+	sleep(5); //wait for apps to get started
+
+	bool firstError = true;
 	std::string status, progress, detail, appName;
 	int         progressInteger;
+	bool oneStatusReqHasFailed = false;
 	while(1)
 	{
 		sleep(1);
@@ -197,8 +201,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 		//	Loop through all Apps and request status
 		//	sleep
 
+ 		oneStatusReqHasFailed = false;
 		// __COUT__ << "Just debugging App status checking" << __E__;
-		bool oneStatusReqHasFailed = false;
 		for(const auto& it : theSupervisor->allSupervisorInfo_.getAllSupervisorInfo())
 		{
 			auto appInfo = it.second;
@@ -291,7 +295,16 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					detail = parameters.getValue("Detail");
 				}
 				catch(const xdaq::exception::Exception& e)
-				{
+				{					
+					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
+					progress = "0";
+					detail   = "SOAP Message Error";
+					oneStatusReqHasFailed = true;
+					if(firstError) //first error, give some more time for apps to boot
+					{
+						firstError = false;
+						break;
+					}
 					__COUT__ << "Getting Status "
 									         << " Supervisor instance = '" << appInfo.getName()
 									         << "' [LID=" << appInfo.getId() << "] in Context '"
@@ -300,13 +313,18 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 									         << "].\n\n";
 					__COUTV__(SOAPUtilities::translate(tempMessage));
 					__COUT_WARN__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
-					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
-					progress = "0";
-					detail   = "SOAP Message Error";
-					oneStatusReqHasFailed = true;
 				}
 				catch(...)
 				{
+					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
+					progress = "0";
+					detail   = "Unknown SOAP Message Error";
+					oneStatusReqHasFailed = true;
+					if(firstError) //first error, give some more time for apps to boot
+					{
+						firstError = false;
+						break;
+					}
 					__COUT__ << "Getting Status "
 									         << " Supervisor instance = '" << appInfo.getName()
 									         << "' [LID=" << appInfo.getId() << "] in Context '"
@@ -315,10 +333,6 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 									         << "].\n\n";
 					__COUTV__(SOAPUtilities::translate(tempMessage));
 					__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
-					status   = SupervisorInfo::APP_STATUS_UNKNOWN;
-					progress = "0";
-					detail   = "Unknown SOAP Message Error";
-					oneStatusReqHasFailed = true;
 				}
 			}  // end with non-gateway status request handling
 
@@ -2587,8 +2601,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error getting supervisor priority. Was there a change in the context?"
-		       << " Remember, if the context was changed, it is safest to relaunch "
-		          "StartOTS.sh. "
+		       << " Remember, if the context was changed, it is recommended to relaunch the "
+		          "ots script. "
 		       << e.what() << __E__;
 		XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 	}
@@ -3925,7 +3939,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 //	throws exception if command fails to start
 void GatewaySupervisor::launchStartOTSCommand(const std::string& command, ConfigurationManager* cfgMgr)
 {
-	__COUT__ << "launch StartOTS Command = " << command << __E__;
+	__COUT__ << "launch ots script Command = " << command << __E__;
 	__COUT__ << "Extracting target context hostnames... " << __E__;
 
 	std::vector<std::string> hostnames;
@@ -3948,7 +3962,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 				if(context.address_[i] == '/')
 					j = i + 1;
 			hostnames.push_back(context.address_.substr(j));
-			__COUT__ << "StartOTS.sh command '" << command << "' launching on hostname = " << hostnames.back() << __E__;
+			__COUT__ << "ots script command '" << command << "' launching on hostname = " << hostnames.back() << __E__;
 		}
 	}
 	catch(...)
@@ -3990,7 +4004,7 @@ void GatewaySupervisor::launchStartOTSCommand(const std::string& command, Config
 
 			if(strcmp(line, command.c_str()) == 0)
 			{
-				__SS__ << "The command looks to have been ignored by " << hostname << ". Is StartOTS.sh still running on that node?" << __E__;
+				__SS__ << "The command looks to have been ignored by " << hostname << ". Is the ots launch script still running on that node?" << __E__;
 				__SS_THROW__;
 			}
 			__COUTV__(line);

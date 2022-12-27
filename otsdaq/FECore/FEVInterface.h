@@ -144,7 +144,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		    const frontEndMacroFunction_t&  feMacroFunction,
 		    const std::vector<std::string>& namesOfInputArgs,
 		    const std::vector<std::string>& namesOfOutputArgs,
-		    const uint8_t      				requiredUserPermissions = 1 /*1:=user,255:=admin*/,
+		    const std::string& 				requiredUserPermissions = "1" /*Level definition: 0:no-access,1:=user,255:=admin*/,
 		    const std::string& 				allowedCallingFrontEnds = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/,
 		    const std::string& 				feMacroTooltip = "")
 		    : feMacroName_					(feMacroName)
@@ -160,7 +160,7 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 		const std::string 				feMacroName_;
 		const frontEndMacroFunction_t	macroFunction_;  // Note: must be called using this instance
 		const std::vector<std::string> 	namesOfInputArguments_, namesOfOutputArguments_;
-		const uint8_t                  	requiredUserPermissions_;
+		const std::string              	requiredUserPermissions_;
 		const std::string              	allowedCallingFrontEnds_;
 		const std::string              	feMacroTooltip_;
 	}; //end frontEndMacroStruct_t
@@ -275,7 +275,15 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	    frontEndMacroFunction_t         							feMacroFunction,
 	    const std::vector<std::string>& 							namesOfInputArgs,
 	    const std::vector<std::string>& 							namesOfOutputArgs,
-	    uint8_t            											requiredUserPermissions = 1 /*1:=user,255:=admin*/,
+	    uint8_t            											requiredUserPermissions = 1 /*Level definition: 0:no-access,1:=user,255:=admin*/,
+	    const std::string& 											allowedCallingFEs = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/,
+		const std::string&											feMacroTooltip = "");
+	void 							registerFEMacroFunction		(
+	    const std::string&              							feMacroName,
+	    frontEndMacroFunction_t         							feMacroFunction,
+	    const std::vector<std::string>& 							namesOfInputArgs,
+	    const std::vector<std::string>& 							namesOfOutputArgs,
+	    const std::string& 											requiredUserPermissions = WebUsers::DEFAULT_USER_GROUP + ":1" /*Level definition: 0:no-access,1:=user,255:=admin*/,
 	    const std::string& 											allowedCallingFEs = "*" /*StringMacros:: wild card set match string (i.e. string-to-set, then wild-card-set match)*/,
 		const std::string&											feMacroTooltip = "");
 

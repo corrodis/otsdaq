@@ -16,6 +16,7 @@ FEDataManagerSupervisor.cc
 FESupervisor.cc
 version.cc
 		 LIBRARIES PUBLIC
+                 artdaq::DAQdata
 		 otsdaq::ConfigurationInterface
 		 otsdaq::XmlUtilities
 		 otsdaq::DesktopIconTable
