@@ -99,7 +99,7 @@ add_subdirectory(tools)
 
 # tools
 FILE(COPY tools DESTINATION .)
-INSTALL(DIRECTORY tools DESTINATION ${product}/${version})
+INSTALL(DIRECTORY tools DESTINATION ./${product}/${version})
 
 # Documentation (to comment out if not needed DOXYGEN locally)
 if( $ENV{OTS_DOXY} MATCHES "DOIT" )
@@ -111,10 +111,10 @@ add_subdirectory(test)
 
 # test
 FILE(COPY test DESTINATION .)
-INSTALL(DIRECTORY test DESTINATION ${product}/${version})
+INSTALL(DIRECTORY test DESTINATION ./${product}/${version})
 
 # data-core
 FILE(COPY data-core DESTINATION .)
-INSTALL(DIRECTORY data-core DESTINATION ${product}/${version})
+INSTALL(DIRECTORY data-core DESTINATION ./${product}/${version})
 
 cet_cmake_config()
