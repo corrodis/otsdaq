@@ -20,12 +20,19 @@ cet_cmake_env()
 # Find our own CMake modules, and tell everyone else where to find them.
 cet_cmake_module_directories(Modules BINARY)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND
+     CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
+  set(DT_FLAG -Wno-dtor-name)
+else()
+  set(DT_FLAG)
+endif()
+
 cet_set_compiler_flags(
  DIAGS 
  VIGILANT
  WERROR
  NO_UNDEFINED
- EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1
+ EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1 ${DT_FLAG}
  )
   
 find_package(artdaq_core 3.09.00 REQUIRED EXPORT)
@@ -38,7 +45,7 @@ set(bsoncxx_DIR ${artdaq_database_DIR})
 set(mongocxx_DIR ${artdaq_database_DIR})
 find_package(mongocxx REQUIRED)
 endif()
-find_package(Boost COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
+find_package(Boost QUIET COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
 
  # XDAQ Extra setup
  include_directories($ENV{XDAQ_INC}/linux $ENV{XDAQ_INC})
