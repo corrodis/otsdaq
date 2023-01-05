@@ -20,12 +20,23 @@ cet_cmake_env()
 # Find our own CMake modules, and tell everyone else where to find them.
 cet_cmake_module_directories(Modules BINARY)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND
+     CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14.0.0)
+  # Clang 14 has a bug in which it complains about destructors of template classes
+  # e.g. ArtdaqInput<T>::~ArtdaqInput(), when it is expecting the destructor name to
+  # match what is on the left-hand side of the ::. This is a violation, however, of
+  # the C++20 standard. https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1787r6.html
+  set(DT_FLAG -Wno-dtor-name)
+else()
+  set(DT_FLAG)
+endif()
+
 cet_set_compiler_flags(
  DIAGS 
  VIGILANT
  WERROR
  NO_UNDEFINED
- EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1
+ EXTRA_FLAGS -pedantic -D_LIBCPP_ENABLE_CXX17_REMOVED_FEATURES=1 ${DT_FLAG}
  )
   
 find_package(artdaq_core 3.09.00 REQUIRED EXPORT)
@@ -38,7 +49,7 @@ set(bsoncxx_DIR ${artdaq_database_DIR})
 set(mongocxx_DIR ${artdaq_database_DIR})
 find_package(mongocxx REQUIRED)
 endif()
-find_package(Boost COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
+find_package(Boost QUIET COMPONENTS date_time program_options regex thread REQUIRED EXPORT)
 
  # XDAQ Extra setup
  include_directories($ENV{XDAQ_INC}/linux $ENV{XDAQ_INC})
@@ -99,7 +110,7 @@ add_subdirectory(tools)
 
 # tools
 FILE(COPY tools DESTINATION .)
-INSTALL(DIRECTORY tools DESTINATION ${product}/${version})
+INSTALL(DIRECTORY tools DESTINATION ./${product}/${version})
 
 # Documentation (to comment out if not needed DOXYGEN locally)
 if( $ENV{OTS_DOXY} MATCHES "DOIT" )
@@ -111,10 +122,10 @@ add_subdirectory(test)
 
 # test
 FILE(COPY test DESTINATION .)
-INSTALL(DIRECTORY test DESTINATION ${product}/${version})
+INSTALL(DIRECTORY test DESTINATION ./${product}/${version})
 
 # data-core
 FILE(COPY data-core DESTINATION .)
-INSTALL(DIRECTORY data-core DESTINATION ${product}/${version})
+INSTALL(DIRECTORY data-core DESTINATION ./${product}/${version})
 
 cet_cmake_config()
