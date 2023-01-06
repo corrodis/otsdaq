@@ -108,7 +108,6 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
 
-
 	std::cout << __COUT_HDR_FL__ << "Done Loading active Aliases." << std::endl;
 	// return;
 
@@ -164,7 +163,8 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 
 	for(const auto& activeGroup : activeGroupsMap)
 	{
-		if(activeGroup.second.second.TableGroupKey::isInvalid()) continue;
+		if(activeGroup.second.second.TableGroupKey::isInvalid())
+			continue;
 
 		groupSet.insert(std::pair<std::pair<std::string, TableGroupKey>, TableGroupKey>(
 		    std::pair<std::string, TableGroupKey>(activeGroup.second.first, activeGroup.second.second), TableGroupKey()));
@@ -824,7 +824,8 @@ CLEAN_UP:
 	         << std::endl;
 	if(groupErrors.size())
 	{
-		__COUT_ERR__ << "There were " << groupErrors.size() << " errors found while loading and converting groups. The following errors were found handling the groups:" << std::endl;
+		__COUT_ERR__ << "There were " << groupErrors.size()
+		             << " errors found while loading and converting groups. The following errors were found handling the groups:" << std::endl;
 		for(auto& groupErr : groupErrors)
 			__COUT_ERR__ << "\t" << groupErr.first.first << " " << groupErr.first.second << ": \t" << groupErr.second << std::endl;
 		__COUT_ERR__ << "End of errors.\n\n" << std::endl;

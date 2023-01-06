@@ -352,7 +352,8 @@ const SupervisorInfo& AllSupervisorInfo::getArtdaqSupervisorInfo(void) const
 }  // end getArtdaqSupervisorInfo()
 
 //==============================================================================
-std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand, bool onlyGatewayContextSupervisors) const
+std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSupervisorDescriptors(const std::string& stateMachineCommand,
+                                                                                                   bool               onlyGatewayContextSupervisors) const
 {
 	__COUT__ << "getOrderedSupervisorDescriptors for command " << stateMachineCommand << __E__;
 
@@ -409,7 +410,8 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			if(it == allSupervisorInfo_.end())
 			{
 				__SS__ << "Error! Was AllSupervisorInfo properly initialized? The app.id_ " << priorityApp << " priority "
-				       << (unsigned int)priorityAppVector.first << " could not be found in AllSupervisorInfo. Was the Context changed? Rebooting ots may fix this issue." << __E__;
+				       << (unsigned int)priorityAppVector.first
+				       << " could not be found in AllSupervisorInfo. Was the Context changed? Rebooting ots may fix this issue." << __E__;
 				__SS_THROW__;
 			}
 
@@ -417,10 +419,8 @@ std::vector<std::vector<const SupervisorInfo*>> AllSupervisorInfo::getOrderedSup
 			// priority? " << 				(unsigned int)priorityAppVector.first <<
 			//__E__;
 
-
-			if(onlyGatewayContextSupervisors && 
-				it->second.getContextName() != theSupervisorInfo_->getContextName())
-				continue; //for shutdown and startup only broadcast to apps that are local to the Gateway supervisor
+			if(onlyGatewayContextSupervisors && it->second.getContextName() != theSupervisorInfo_->getContextName())
+				continue;  // for shutdown and startup only broadcast to apps that are local to the Gateway supervisor
 
 			if(it->second.isGatewaySupervisor())
 				continue;  // skip gateway supervisor

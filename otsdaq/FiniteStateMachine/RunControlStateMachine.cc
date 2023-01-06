@@ -25,7 +25,7 @@ const std::string RunControlStateMachine::PAUSED_STATE_NAME  = "Paused";
 const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
 
 const std::string RunControlStateMachine::SHUTDOWN_TRANSITION_NAME = "Shutdown";
-const std::string RunControlStateMachine::STARTUP_TRANSITION_NAME = "Startup";
+const std::string RunControlStateMachine::STARTUP_TRANSITION_NAME  = "Startup";
 
 //==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
@@ -54,14 +54,17 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	//clang-format off
 	// this line was added to get out of Failed state
 	RunControlStateMachine::addStateTransition('F', 'H', "Halt", "Halting", this, &RunControlStateMachine::transitionHalting);
-	RunControlStateMachine::addStateTransition('F', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	RunControlStateMachine::addStateTransition(
+	    'F', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition('F', 'F', "Error", "Erroring", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition('F', 'F', "Fail", "Failing", this, &RunControlStateMachine::transitionShuttingDown);
 
 	RunControlStateMachine::addStateTransition(
 	    'H', 'C', "Configure", "Configuring", "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
-	RunControlStateMachine::addStateTransition('H', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
-	RunControlStateMachine::addStateTransition('X', 'I', RunControlStateMachine::STARTUP_TRANSITION_NAME, "Starting Up", this, &RunControlStateMachine::transitionStartingUp);
+	RunControlStateMachine::addStateTransition(
+	    'H', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
+	RunControlStateMachine::addStateTransition(
+	    'X', 'I', RunControlStateMachine::STARTUP_TRANSITION_NAME, "Starting Up", this, &RunControlStateMachine::transitionStartingUp);
 
 	// Every state can transition to halted
 	RunControlStateMachine::addStateTransition('I', 'H', "Initialize", "Initializing", this, &RunControlStateMachine::transitionInitializing);

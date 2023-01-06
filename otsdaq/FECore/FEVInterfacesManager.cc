@@ -1,8 +1,8 @@
 #include "otsdaq/FECore/FEVInterfacesManager.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
+#include "otsdaq/FECore/MakeInterface.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-#include "otsdaq/FECore/MakeInterface.h"
 
 #include "artdaq-core/Utilities/configureMessageFacility.hh"
 #include "artdaq/BuildInfo/GetPackageBuildInfo.hh"
@@ -195,7 +195,7 @@ void FEVInterfacesManager::configure(void)
 		fe->configure();
 		postStateMachineExecution(i);
 
-		//when done with fe configure, configure slow controls
+		// when done with fe configure, configure slow controls
 		if(!fe->VStateMachine::getSubIterationWork() && !fe->VStateMachine::getIterationWork())
 		{
 			// configure slow controls and start slow controls workloop
@@ -572,7 +572,7 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 			__SS_THROW__;
 		}
 		macroMultiDimensionalStatusMap_.emplace(std::make_pair(interfaceID, "Active"));
-	} // unlock mutex scope
+	}  // unlock mutex scope
 
 	// start thread
 	std::thread(
@@ -1855,7 +1855,7 @@ void FEVInterfacesManager::runFEMacro(const std::string& interfaceID, const std:
 {
 	// check for interfaceID
 	FEVInterface* fe = getFEInterfaceP(interfaceID);
-			
+
 	// have pointer to virtual FEInterface, find Macro structure
 	auto FEMacroIt = fe->getMapOfFEMacroFunctions().find(feMacroName);
 	if(FEMacroIt == fe->getMapOfFEMacroFunctions().end())

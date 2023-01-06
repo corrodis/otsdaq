@@ -558,8 +558,8 @@ void FEVInterface::registerFEMacroFunction(const std::string&              feMac
                                            const std::string&              allowedCallingFEs,
                                            const std::string&              feMacroTooltip)
 {
-	registerFEMacroFunction(feMacroName,feMacroFunction,namesOfInputArgs,namesOfOutputArgs,
-		std::to_string(requiredUserPermissions),allowedCallingFEs,feMacroTooltip);
+	registerFEMacroFunction(
+	    feMacroName, feMacroFunction, namesOfInputArgs, namesOfOutputArgs, std::to_string(requiredUserPermissions), allowedCallingFEs, feMacroTooltip);
 }  // end registerFEMacroFunction()
 void FEVInterface::registerFEMacroFunction(const std::string&              feMacroName,
                                            frontEndMacroFunction_t         feMacroFunction,

@@ -3,9 +3,9 @@
 #include "otsdaq/DataManager/CircularBuffer.h"
 #include "otsdaq/DataManager/DataConsumer.h"
 #include "otsdaq/DataManager/DataProducerBase.h"
+#include "otsdaq/DataManager/MakeDataProcessor.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-#include "otsdaq/DataManager/MakeDataProcessor.h"
 
 #include <unistd.h>  //usleep
 #include <iostream>

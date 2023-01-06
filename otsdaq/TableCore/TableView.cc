@@ -422,8 +422,7 @@ void TableView::init(void)
 		bool                                                               tmpIsGroup;
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> tmpLinkPair;
 
-
-		//check sanity of data view rows x cols (have seen weird out-of-range crashes)
+		// check sanity of data view rows x cols (have seen weird out-of-range crashes)
 		if(getNumberOfRows() != theDataView_.size())
 		{
 			__SS__ << "Impossible row mismatch " << getNumberOfRows() << " vs " << theDataView_.size() << "! How did you get here?" << __E__;
@@ -432,7 +431,8 @@ void TableView::init(void)
 		for(unsigned int row = 0; row < getNumberOfRows(); ++row)
 			if(getNumberOfColumns() != theDataView_[row].size())
 			{
-				__SS__ << "Impossible col mismatch " << getNumberOfColumns() << " vs [" << row << "]" << theDataView_[row].size() << "! How did you get here?" << __E__;
+				__SS__ << "Impossible col mismatch " << getNumberOfColumns() << " vs [" << row << "]" << theDataView_[row].size() << "! How did you get here?"
+				       << __E__;
 				__SS_THROW__;
 			}
 		if(getNumberOfColumns() != columnsInfo_.size())

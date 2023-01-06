@@ -276,4 +276,3 @@ void ARTDAQConsumer::stopProcessingData(void) { ARTDAQReaderProcessorBase::stop(
 //		// return false;
 //	}
 //}
-

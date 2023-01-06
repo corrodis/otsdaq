@@ -1,5 +1,5 @@
-#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
+#include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 
 #include <stdio.h>
 #include <fstream>  // std::fstream
@@ -683,4 +683,3 @@ std::string XDAQContextTable::getContextOfGateway(ConfigurationManager* configMa
 	__SS__ << "Gateway Application search found no parent context!" << __E__;
 	__SS_THROW__;
 }  // end getContextOfGateway()
-

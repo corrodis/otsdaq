@@ -65,4 +65,3 @@ void RawDataVisualizerConsumer::slowRead(void)
 	}
 	__MOUT__ << DataProcessor::processorUID_ << " UID: " << supervisorApplicationUID_ << std::endl;
 }
-

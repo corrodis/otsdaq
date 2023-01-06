@@ -248,12 +248,11 @@ void CorePropertySupervisorBase::extractPermissionsMapFromString(const std::stri
 {
 	permissionsMap.clear();
 	StringMacros::getMapFromString(permissionsString, permissionsMap);
-	if(permissionsMap.size() == 0) //do not allow empty permissions map
-		permissionsMap.emplace(std::pair<std::string, WebUsers::permissionLevel_t>(
-			WebUsers::DEFAULT_USER_GROUP,
-			atoi(permissionsString.c_str())) //convert to integer
+	if(permissionsMap.size() == 0)  // do not allow empty permissions map
+		permissionsMap.emplace(std::pair<std::string, WebUsers::permissionLevel_t>(WebUsers::DEFAULT_USER_GROUP,
+		                                                                           atoi(permissionsString.c_str()))  // convert to integer
 		);
-} //end extractPermissionsMapFromString()
+}  // end extractPermissionsMapFromString()
 
 //==============================================================================
 // doPermissionsGrantAccess

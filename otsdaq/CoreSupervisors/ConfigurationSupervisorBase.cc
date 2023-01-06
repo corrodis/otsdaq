@@ -44,7 +44,7 @@ void ConfigurationSupervisorBase::getConfigurationStatusXML(HttpXmlDocument& xml
 				}  // end alias match search loop
 			}      // end active group loop
 		}          // end handling of matching group alias to active groups
-		// else ignore missing active group alias table or active backbone
+		           // else ignore missing active group alias table or active backbone
 	}
 	catch(...)
 	{
@@ -117,10 +117,9 @@ try
 	}
 
 	bool ignoreDuplicates = false;
-	if(!version.isTemporaryVersion() && sourceTableAsIs && 
-		table->getViewP()->getSourceColumnNames().size() != table->getViewP()->getDataColumnSize())
+	if(!version.isTemporaryVersion() && sourceTableAsIs && table->getViewP()->getSourceColumnNames().size() != table->getViewP()->getDataColumnSize())
 	{
-		__COUT__ << "table->getViewP()->getNumberOfColumns() " << table->getViewP()->getNumberOfColumns() << __E__;	
+		__COUT__ << "table->getViewP()->getNumberOfColumns() " << table->getViewP()->getNumberOfColumns() << __E__;
 		__COUTV__(table->getViewP()->getSourceColumnNames().size());
 		__COUT_INFO__ << "Source view v" << version << " has a mismatch in the number of columns, so forcing new version saved." << __E__;
 		ignoreDuplicates = true;
@@ -207,16 +206,16 @@ try
 
 	// note: if sourceTableAsIs, accept equivalent versions
 	auto newVersion = ConfigurationSupervisorBase::saveModifiedVersionXML(xmlOut,
-	                                                    cfgMgr,
-	                                                    tableName,
-	                                                    version,
-	                                                    makeTemporary,
-	                                                    table,
-	                                                    temporaryVersion,
-	                                                    ignoreDuplicates /*ignoreDuplicates*/,
-	                                                    lookForEquivalent || sourceTableAsIs /*lookForEquivalent*/);
+	                                                                      cfgMgr,
+	                                                                      tableName,
+	                                                                      version,
+	                                                                      makeTemporary,
+	                                                                      table,
+	                                                                      temporaryVersion,
+	                                                                      ignoreDuplicates /*ignoreDuplicates*/,
+	                                                                      lookForEquivalent || sourceTableAsIs /*lookForEquivalent*/);
 
-	if(ignoreDuplicates && sourceTableAsIs) //reset cache for this table
+	if(ignoreDuplicates && sourceTableAsIs)  // reset cache for this table
 	{
 		table = cfgMgr->getTableByName(tableName);
 		table->eraseView(newVersion);

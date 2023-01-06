@@ -51,7 +51,7 @@ std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, 
 
 {
 	xoap::MessageReference message = SOAPUtilities::makeSOAPMessageReference(command);
-	std::string msgStr;
+	std::string            msgStr;
 	try
 	{
 		msgStr = send(d, message);
@@ -62,8 +62,7 @@ std::string SOAPMessenger::send(XDAQ_CONST_CALL xdaq::ApplicationDescriptor* d, 
 		__COUT__ << SOAPUtilities::translate(message) << __E__;
 		throw;
 	}
-	
-	
+
 	return msgStr;
 }
 
