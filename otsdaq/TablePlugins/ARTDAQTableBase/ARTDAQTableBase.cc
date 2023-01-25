@@ -887,7 +887,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 		OUT << "source.commanderPluginType: xmlrpc\n";
 
 		int om_rank        = monitorNode.getNode("MonitorID").getValue<int>();
-		int disp_fake_rank = om_rank + 1;
+		int disp_fake_rank = dispatcherLink.getNode("DispatcherID").getValueWithDefault<int>(200);
 
 		size_t      max_fragment_size    = monitorNode.getNode("max_fragment_size_words").getValueWithDefault(0x100000);
 		std::string transfer_plugin_type = monitorNode.getNode("transfer_plugin_type").getValueWithDefault("Autodetect");
