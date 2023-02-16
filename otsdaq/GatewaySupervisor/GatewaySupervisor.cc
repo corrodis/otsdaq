@@ -671,6 +671,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	if(VERBOSE_MUTEX)
 		__COUT__ << "Have FSM access" << __E__;
 
+	out->getHTTPResponseHeader().addHeader("Access-Control-Allow-Origin", "*");  // to avoid block by blocked by CORS policy of browser
 	cgicc::Cgicc cgiIn(in);
 
 	std::string command     = CgiDataUtilities::getData(cgiIn, "StateMachine");
