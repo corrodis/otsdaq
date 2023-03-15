@@ -90,7 +90,6 @@ unsigned int ARTDAQBoardReaderTable::slowControlsHandlerConfig(
 	// loop through ARTDAQ BoardReader records starting at ARTDAQSupervisorTable
 	std::vector<std::pair<std::string, ConfigurationTree>> artdaqRecords = configManager->getNode("ARTDAQSupervisorTable").getChildren();
 
-	unsigned int numberOfBoardReaders                = 0;
 	unsigned int numberOfBoardReaderMetricParameters = 0;
 
 	for(auto& artdaqPair : artdaqRecords)  // start main artdaq record loop
@@ -105,8 +104,6 @@ unsigned int ARTDAQBoardReaderTable::slowControlsHandlerConfig(
 		{
 			if(!boardReaderPair.second.status())
 				continue;
-
-			numberOfBoardReaders++;
 
 			try
 			{
