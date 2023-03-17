@@ -89,7 +89,6 @@ unsigned int ARTDAQDataLoggerTable::slowControlsHandlerConfig(std::stringstream&
 	// loop through ARTDAQ DataLogger records starting at ARTDAQSupervisorTable
 	std::vector<std::pair<std::string, ConfigurationTree>> artdaqRecords = configManager->getNode("ARTDAQSupervisorTable").getChildren();
 
-	unsigned int numberOfDataLoggers                = 0;
 	unsigned int numberOfDataLoggerMetricParameters = 0;
 
 	for(auto& artdaqPair : artdaqRecords)  // start main artdaq record loop
@@ -104,8 +103,6 @@ unsigned int ARTDAQDataLoggerTable::slowControlsHandlerConfig(std::stringstream&
 		{
 			if(!dataLoggerPair.second.status())
 				continue;
-
-			numberOfDataLoggers++;
 
 			try
 			{

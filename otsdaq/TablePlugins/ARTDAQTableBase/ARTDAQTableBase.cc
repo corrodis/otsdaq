@@ -887,7 +887,7 @@ void ARTDAQTableBase::outputOnlineMonitorFHICL(const ConfigurationTree& monitorN
 		OUT << "source.commanderPluginType: xmlrpc\n";
 
 		int om_rank        = monitorNode.getNode("MonitorID").getValue<int>();
-		int disp_fake_rank = om_rank + 1;
+		int disp_fake_rank = dispatcherLink.getNode("DispatcherID").getValueWithDefault<int>(200);
 
 		size_t      max_fragment_size    = monitorNode.getNode("max_fragment_size_words").getValueWithDefault(0x100000);
 		std::string transfer_plugin_type = monitorNode.getNode("transfer_plugin_type").getValueWithDefault("Autodetect");
@@ -2142,9 +2142,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						// check for alpha-based similarity groupings (ignore numbers and special characters)
 						unsigned int              maxScore = 0;
 						unsigned int              score;
-						unsigned int              numberAtMaxScore = 0;
 						unsigned int              minScore         = -1;
-						unsigned int              numberAtMinScore = 0;
 						std::vector<unsigned int> scoreVector;
 						scoreVector.push_back(-1);  // for 0 index (it's perfect)
 						for(unsigned int i = 1; i < multiNodeNames.size(); ++i)
@@ -2206,25 +2204,17 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 							if(score > maxScore)
 							{
 								maxScore         = score;
-								numberAtMaxScore = 1;
 							}
-							else if(score == maxScore)
-								++numberAtMaxScore;
 
 							if(score < minScore)
 							{
 								minScore         = score;
-								numberAtMinScore = 1;
 							}
-							else if(score == minScore)
-								++numberAtMinScore;
 
 						}  // end multi-node member scoring loop
 
 						//__COUTV__(minScore);
 						//__COUTV__(maxScore);
-						//__COUTV__(numberAtMaxScore);
-						//__COUTV__(numberAtMinScore);
 
 						__COUT__ << "Trimming multi-node members with low match score..." << __E__;
 
