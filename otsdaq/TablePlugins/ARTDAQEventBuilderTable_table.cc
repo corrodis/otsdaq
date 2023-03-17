@@ -76,7 +76,6 @@ unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(
 	// loop through ARTDAQ EventBuilder records starting at ARTDAQSupervisorTable
 	std::vector<std::pair<std::string, ConfigurationTree>> artdaqRecords = configManager->getNode("ARTDAQSupervisorTable").getChildren();
 
-	unsigned int numberOfEventBuilders               = 0;
 	unsigned int numberOfEventBuiderMetricParameters = 0;
 
 	for(auto& artdaqPair : artdaqRecords)  // start main artdaq record loop
@@ -91,8 +90,6 @@ unsigned int ARTDAQEventBuilderTable::slowControlsHandlerConfig(
 		{
 			if(!eventBuilderPair.second.status())
 				continue;
-
-			numberOfEventBuilders++;
 
 			try
 			{

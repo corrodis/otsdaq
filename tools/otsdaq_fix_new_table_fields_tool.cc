@@ -265,7 +265,6 @@ void FixNewTableFields(int argc, char* argv[])
 
 	bool        errDetected      = false;
 	std::string accumulateErrors = "";
-	int         count            = 0;  // for number of groups converted successfully
 
 	std::map<std::string /*name*/, TableVersion>          memberMap;
 	std::map<std::string /*name*/, std::string /*alias*/> groupAliases;
@@ -466,7 +465,6 @@ void FixNewTableFields(int argc, char* argv[])
 		}
 		//=========================
 
-		++count;
 	}  // end group loop
 
 	// record in readme of moveToDir
