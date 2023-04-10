@@ -17,10 +17,10 @@ TCPClientBase::TCPClientBase(const std::string& serverIP, int serverPort) : fSer
 //==============================================================================
 TCPClientBase::~TCPClientBase(void)
 {
-	__COUT__ << "Closing TCPSocket #" << getSocketId() << std::endl;
+	//__COUT__ << "Closing TCPSocket #" << getSocketId() << std::endl;
 	if(fConnected)
 		close();
-	__COUT__ << "TCPSocket #" << getSocketId() << " closed." << std::endl;
+	//__COUT__ << "TCPSocket #" << getSocketId() << " closed." << std::endl;
 }
 
 //==============================================================================
