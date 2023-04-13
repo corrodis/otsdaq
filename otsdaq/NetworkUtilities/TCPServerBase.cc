@@ -24,6 +24,9 @@ using namespace ots;
 TCPServerBase::TCPServerBase(unsigned int serverPort, unsigned int maxNumberOfClients)
     : fMaxNumberOfClients(maxNumberOfClients), fServerPort(serverPort), fAccept(true)
 {
+	//0 or -1 means no restrictions on the number of clients
+	if(fMaxNumberOfClients == 0) 
+		fMaxNumberOfClients = (unsigned)-1;
 	// CANNOT GO IN THE CONSTRUCTOR OR IT MIGHT START BEFORE THE CHILD CLASS CONSTRUCTOR IS FULLY CONSTRUCTED
 	// THIS MIGHT RESULT IN THE CALL OF THE VIRTUAL TCPServerBase::acceptConnections
 	// startAccept();
@@ -109,7 +112,7 @@ int TCPServerBase::accept(bool blocking)
 			}
 			break;
 		}
-		std::cout << __LINE__ << "] " << __PRETTY_FUNCTION__ << "fAccept? " << fAccept << std::endl;
+		__COUT__ << "fAccept? " << fAccept << std::endl;
 		if(!fAccept)
 		{
 			throw E_SHUTDOWN;
