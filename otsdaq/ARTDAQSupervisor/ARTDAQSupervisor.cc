@@ -146,9 +146,10 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	o << "eventbuilder timeout: " << getSupervisorProperty("eventbuilder_timeout", 30) << std::endl;
 	o << "datalogger timeout: " << getSupervisorProperty("datalogger_timeout", 30) << std::endl;
 	o << "dispatcher timeout: " << getSupervisorProperty("dispatcher_timeout", 30) << std::endl;
-	if(getSupervisorProperty("advanced_memory_usage", false))
+	    // Only put max_fragment_size_bytes into DAQInterface settings file if advanced_memory_usage is disabled
+	if(!getSupervisorProperty("advanced_memory_usage", false))
 	{
-		//		o << "max_fragment_size_bytes: " << getSupervisorProperty("max_fragment_size_bytes", 1048576) << std::endl;
+				o << "max_fragment_size_bytes: " << getSupervisorProperty("max_fragment_size_bytes", 1048576) << std::endl;
 	}
 	o << "transfer_plugin_to_use: " << getSupervisorProperty("transfer_plugin_to_use", "Autodetect") << std::endl;
 	o << "all_events_to_all_dispatchers: " << std::boolalpha << getSupervisorProperty("all_events_to_all_dispatchers", true) << std::endl;
