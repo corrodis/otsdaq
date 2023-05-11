@@ -40,10 +40,6 @@ void TCPListenServer::acceptConnections()
 		}
 		catch(int e)
 		{
-			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
-			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
-			std::cout << __PRETTY_FUNCTION__ << "SHUTTING DOWN SOCKET" << std::endl;
-
 			if(e == E_SHUTDOWN)
 				break;
 		}
