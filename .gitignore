@@ -14,4 +14,3 @@ obj/*
 *.bk
 *.tmp
 .StartOTS_*.cmd
-CMakePresets.json
