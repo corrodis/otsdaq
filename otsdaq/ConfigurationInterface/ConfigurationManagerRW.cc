@@ -364,7 +364,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			}
 			catch(...)
 			{
-				__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '" << groupInfo.first << "'..." << __E__;
+				__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '" << 
+					"(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
 				groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
 				groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
 				groupInfo.second.latestKeyGroupCreationTime_ = "0";

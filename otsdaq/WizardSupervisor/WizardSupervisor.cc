@@ -157,7 +157,7 @@ void WizardSupervisor::requestIcons(xgi::Input* in, xgi::Output* out)
 	}
 	else
 	{
-		__COUT__ << "***Successfully authenticated security sequence. " << time(0) << std::endl;
+		__COUT__ << "*** Successfully authenticated security sequence @ " << time(0) << std::endl;
 	}
 	// SECURITY CHECK END ****
 

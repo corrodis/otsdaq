@@ -174,6 +174,9 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	}
 	CorePropertySupervisorBase::theTRACEController_ = new ARTDAQSupervisorTRACEController();
 	((ARTDAQSupervisorTRACEController*)CorePropertySupervisorBase::theTRACEController_)->setSupervisorPtr(this);
+
+	
+
 	__SUP_COUT__ << "Constructed." << __E__;
 }  // end constructor()
 
@@ -227,6 +230,7 @@ void ARTDAQSupervisor::destroy(void)
 void ARTDAQSupervisor::init(void)
 {
 	stop_runner_();
+	
 
 	__SUP_COUT__ << "Initializing..." << __E__;
 	{
@@ -313,6 +317,26 @@ void ARTDAQSupervisor::init(void)
 		}
 
 		getDAQState_();
+
+		// { //attempt to cleanup old artdaq processes DOES NOT WORK because artdaq interface knows it hasn't started
+		// 	__SUP_COUT__ << "Attempting artdaq stale cleanup..." << __E__;
+		// 	std::lock_guard<std::recursive_mutex> lk(daqinterface_mutex_);
+		// 	getDAQState_();
+		// 	__SUP_COUT__ << "Status before cleanup: " << daqinterface_state_ << __E__;
+
+		// 	PyObject* pName = PyUnicode_FromString("do_recover");
+		// 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+
+		// 	if(res == NULL)
+		// 	{
+		// 		PyErr_Print();
+		// 		__SS__ << "Error with clean up calling do_recover" << __E__;
+		// 		__SUP_SS_THROW__;
+		// 	}
+		// 	getDAQState_();
+		// 	__SUP_COUT__ << "Status after cleanup: " << daqinterface_state_ << __E__;
+		// 	__SUP_COUT__ << "cleanup DONE." << __E__;
+		// }
 	}
 	start_runner_();
 	__SUP_COUT__ << "Initialized." << __E__;
@@ -342,8 +366,8 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/
 		std::thread(&ARTDAQSupervisor::configuringThread, this).detach();
 
 		__SUP_COUT__ << "Configuring thread started." << __E__;
-
-		RunControlStateMachine::indicateSubIterationWork();
+		 
+		RunControlStateMachine::indicateIterationWork(); //use Iteration to allow other steps to complete in the system
 	}
 	else  // not first time
 	{
@@ -383,7 +407,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/
 
 		if(!thread_progress_bar_.isComplete())
 		{
-			RunControlStateMachine::indicateSubIterationWork();
+			RunControlStateMachine::indicateIterationWork(); //use Iteration to allow other steps to complete in the system
 
 			if(last_thread_progress_read_ != progress)
 			{
@@ -720,6 +744,20 @@ try
 	getDAQState_();
 	__SUP_COUT__ << "Status before halt: " << daqinterface_state_ << __E__;
 
+	if(daqinterface_state_ == "running")
+	{
+		//First stop before halting
+		PyObject* pName = PyUnicode_FromString("do_stop_running");
+		PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, NULL);
+
+		if(res == NULL)
+		{
+			PyErr_Print();
+			__SS__ << "Error calling stop transition" << __E__;
+			__SUP_SS_THROW__;
+		}
+	}
+
 	PyObject* pName = PyUnicode_FromString("do_command");
 	PyObject* pArg  = PyUnicode_FromString("Shutdown");
 	PyObject* res   = PyObject_CallMethodObjArgs(daqinterface_ptr_, pName, pArg, NULL);
@@ -905,7 +943,7 @@ try
 
 		__SUP_COUT__ << "Starting thread started." << __E__;
 
-		RunControlStateMachine::indicateSubIterationWork();
+		RunControlStateMachine::indicateIterationWork(); //use Iteration to allow other steps to complete in the system
 	}
 	else  // not first time
 	{
@@ -945,7 +983,7 @@ try
 
 		if(!thread_progress_bar_.isComplete())
 		{
-			RunControlStateMachine::indicateSubIterationWork();
+			RunControlStateMachine::indicateIterationWork(); //use Iteration to allow other steps to complete in the system
 
 			if(last_thread_progress_read_ != progress)
 			{

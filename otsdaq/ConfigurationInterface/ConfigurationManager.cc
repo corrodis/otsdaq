@@ -545,8 +545,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isContext = false;
 			if(inContext)  // there was a member in context!
 			{
-				__SS__ << "This group is an incomplete match to a Context group.\n";
-				__COUT_ERR__ << "\n" << ss.str();
+				__SS__ << "This group is an incomplete match to a Context group.\n";				
 				ss << "\nTo be a Context group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -556,7 +555,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 				i = 0;
 				for(const auto& memberPairTmp : memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 			}
 		}
 
@@ -575,8 +574,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isBackbone = false;
 			if(inBackbone)  // there was a member in backbone!
 			{
-				__SS__ << "This group is an incomplete match to a Backbone group.\n";
-				__COUT_ERR__ << "\n" << ss.str();
+				__SS__ << "This group is an incomplete match to a Backbone group.\n";				
 				ss << "\nTo be a Backbone group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -587,7 +585,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 				for(const auto& memberPairTmp : memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 			}
 		}
 
@@ -607,7 +605,6 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			if(inIterate)  // there was a member in iterate!
 			{
 				__SS__ << "This group is an incomplete match to a Iterate group.\n";
-				__COUT_ERR__ << "\n" << ss.str();
 				ss << "\nTo be a Iterate group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -618,7 +615,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 				for(const auto& memberPairTmp : memberMap)
 					ss << ++i << ". " << memberPairTmp.first << "\n";
 				//__COUT_ERR__ << "\n" << ss.str();
-				__SS_THROW__;
+				__SS_ONLY_THROW__;
 			}
 		}
 	}
@@ -627,7 +624,6 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 	{
 		__SS__ << "This group is an incomplete match to a Context group: "
 		       << " Size=" << matchCount << " but should be " << contextMemberNames_.size() << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto& memberPair : memberMap)
@@ -637,14 +633,13 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		for(auto& memberName : contextMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 
 	if((isBackbone || inBackbone) && matchCount != backboneMemberNames_.size())
 	{
 		__SS__ << "This group is an incomplete match to a Backbone group: "
 		       << " Size=" << matchCount << " but should be " << backboneMemberNames_.size() << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto& memberPair : memberMap)
@@ -654,14 +649,13 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		for(auto& memberName : backboneMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 
 	if((isIterate || inIterate) && matchCount != iterateMemberNames_.size())
 	{
 		__SS__ << "This group is an incomplete match to a Iterate group: "
 		       << " Size=" << matchCount << " but should be " << iterateMemberNames_.size() << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		ss << "\nThe members currently are...\n";
 		int i = 0;
 		for(auto& memberPair : memberMap)
@@ -671,7 +665,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		for(auto& memberName : iterateMemberNames_)
 			ss << ++i << ". " << memberName << "\n";
 		//__COUT_ERR__ << "\n" << ss.str();
-		__SS_THROW__;
+		__SS_ONLY_THROW__;
 	}
 
 	return isContext ? ConfigurationManager::GroupType::CONTEXT_TYPE

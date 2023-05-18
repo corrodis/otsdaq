@@ -393,9 +393,15 @@ function killprocs
 			
 			killproc ${contextPID} &
 
-		done
-	
+		done	
+
 		unset ContextPIDArray #done with array of PIDs, so clear
+		
+		if [[ $1 == "ownedProcesses" && -v GATEWAY_PID ]]; then #in this case if variable is set, kill gateway too
+			out "${Red}${Rev}Killing Gateway process ID ${GATEWAY_PID}${RstClr}"
+			killproc ${GATEWAY_PID} &
+			unset GATEWAY_PID 
+		fi
 
 		sleep 1 #give time for cleanup to occur
 	fi		
@@ -1159,7 +1165,7 @@ launchOTS() {
 		
 		
 	else 					#else is full gateway and nongateway launch
-		GATEWAY_PID=-1
+		unset GATEWAY_PID
 		#kill all things otsdaq, before launching new things	
 		killprocs
 
@@ -1975,20 +1981,14 @@ launchOTSLogFind() {
 		fi
 		if [[ ($insideContext == true) ]]; then 
 			
-			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
+			if [[ ($line == *"class"*) ]] ; then #IT'S A XDAQ SUPERVISOR		
 				
 				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
+
 					    gatewayHostname=${host}
 						gatewayPort=${port}
-						
-						####################################################################
-						########### 		logfile Gateway context	 	 		############
-						####################################################################
-							
-						out #empty line
-						out "${Red}${Bold}Log file for${RstClr} '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
-				
+
 					fi
 				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
 									
@@ -2007,35 +2007,35 @@ launchOTSLogFind() {
 		
 
 	####################################################################
-	########### 		logfile non-Gateway contexts 		############
+	########### 		logfile of Gateway context	 		############
 	####################################################################
-		
-	if [[ (${#xdaqPort[@]} > 0) ]]; then	
-		info "There are ${#xdaqPort[@]} additional local non-Gateway Context log files for host {${THIS_HOST}}...${RstClr}"
-	else
-		out "${Green}${Bold}There are no additional local non-Gateway Context log files on host {${THIS_HOST}}...${RstClr}"
-	fi
-	
-	i=0	
-	for port in "${xdaqPort[@]}"
-	do
-	  : 
-	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-		  
+	out #empty line
+	out "${Red}${Bold}Log file for${RstClr} '${Bold}Gateway${RstClr}' on host${RstClr} '${Bold}${gatewayHostname}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${gatewayHostname}-${gatewayPort}.txt${RstClr}"
 
-		out "${Red}${Bold}Log file for${RstClr} '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"			
+	####################################################################
+	########### 	logfile of Local non-Gateway contexts 	############
+	####################################################################
+					
+	i=0	
+	for port in "${contextPort[@]}"
+	do
+		: 		
+			
+		if [[ ${contextHostname[$i]} == ${THIS_HOST} ]]; then
 		
+			out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
+						
+		fi
 		i=$(( $i + 1 ))
-	done	
+	done
 
 	############################################################################
-	########### 	   Lunch of remote non-Gateway contexts			############
+	########### 	  logfile of remote non-Gateway contexts		############
 	############################################################################	
 	i=0	
 	for port in "${contextPort[@]}"
 	do
-		: 
-		
+		: 		
 			
 		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
 		
@@ -2054,11 +2054,12 @@ launchOTSLogFind() {
 	do
 		: 
 
-		if [[ $gatewayHostname == ${THIS_HOST} && $gatewayPort == ${port} ]]; then
-			fn="otsdaq_quiet_run-gateway-${THIS_HOST}-${port}"
+		if [[ $gatewayHostname == ${contextHostname[$i]} && $gatewayPort == ${port} ]]; then
+			fn="otsdaq_quiet_run-gateway-${contextHostname[$i]}-${port}"
 		else
 			fn="otsdaq_quiet_run-${contextHostname[$i]}-${port}"
 		fi
+		# out "[$i] == $fn - ${contextHostname[$i]} - ${port} - $gatewayHostname : $gatewayPort"
 
 		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
 			out "         vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
@@ -2262,7 +2263,7 @@ otsActionHandler() {
 			#kill all and exit action loop
 			out "Exit of (stale) ots... Action:${OTSDAQ_STARTOTS_ACTION}-Quit:${OTSDAQ_STARTOTS_QUIT}-Local:${OTSDAQ_STARTOTS_LOCAL_QUIT}"
 						
-			killprocs	
+			killprocs ownedProcesses #do not call killall and kill whichever process asked for kill
 
 			if [ $ISREMOTE == 1 ]; then
 				out "Done killing (stale) processes"

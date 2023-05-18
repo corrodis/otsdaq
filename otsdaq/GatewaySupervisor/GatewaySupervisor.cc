@@ -251,6 +251,9 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					detail = (theSupervisor->theStateMachine_.isInTransition()
 					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(theSupervisor->stateMachineLastCommandInput_)
 					              : "");
+					//make sure broadcast message status is not being updated
+					std::lock_guard<std::mutex> lock(theSupervisor->broadcastCommandStatusUpdateMutex_);
+					if(detail != "" && theSupervisor->broadcastCommandStatus_ != "") detail += " - " + theSupervisor->broadcastCommandStatus_;
 				}
 				catch(...)
 				{
@@ -259,6 +262,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			}
 			else  // get non-gateway status
 			{
+
 				// pass the application as a parameter to tempMessage
 				SOAPParameters appPointer;
 				appPointer.addParameter("ApplicationPointer");
@@ -1406,6 +1410,13 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	__SS__;
 
+	// if already in Failed state, just append new error message
+	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+	{
+		__COUT__ << "Appending new error to already existing error." << __E__;
+		ss << "\n" << theStateMachine_.getErrorMessage();
+	}
+
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
 	{
@@ -1424,10 +1435,14 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	}
 
 	__COUT_ERR__ << "\n" << ss.str();
+
+
 	theStateMachine_.setErrorMessage(ss.str());
 
-	// move everything else to Error!
-	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
+	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
+	else 	// move everything else to Error!
+		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
 }  // end enteringError()
 
 //==============================================================================
@@ -2349,7 +2364,17 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 		try  // attempt transmit of transition command
 		{
 			__COUTV__(givenAppStatus);
-			// start recursive mutex scope
+
+			__COUTV__(appInfo.getStatus());
+			//wait for app to exist in status before sending commands
+			while(appInfo.getStatus() == SupervisorInfo::APP_STATUS_UNKNOWN)
+			{
+				__COUT__ << "Broadcast thread " << threadIndex << "\t"
+					         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state." << __E__;
+				sleep(2);
+			}
+
+			// start recursive mutex scope (same thread can lock multiple times, but needs to unlock the same)
 			std::lock_guard<std::recursive_mutex> lock(allSupervisorInfo_.getSupervisorInfoMutex(appInfo.getId()));
 			// set app status, but leave progress and detail alone
 			allSupervisorInfo_.setSupervisorStatus(appInfo, givenAppStatus, givenAppProgress, givenAppDetail);
@@ -2405,9 +2430,11 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
 			         << "2nd try passed.." << __E__;
 		}  // end send catch
+	
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Reply received = " << reply << __E__;
+		         << "Reply received from " << appInfo.getName() << " [LID=" << appInfo.getId() << 
+				 "]: " << reply << __E__;
 
 		if((reply != command + "Done") && (reply != command + "Response") && (reply != command + "Iterate") && (reply != command + "SubIterate"))
 		{
@@ -2579,6 +2606,11 @@ void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr,
 //	Update Supervisor Info based on result of transition.
 void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 {
+	{ //create lock scope and clear status
+		std::lock_guard<std::mutex> lock(broadcastCommandStatusUpdateMutex_);
+		broadcastCommandStatus_ = "";
+	}
+
 	RunControlStateMachine::theProgressBar_.step();
 
 	// transition of Gateway Supervisor is assumed successful so update status
@@ -2764,13 +2796,15 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					do
 					{
 						done = true;
+						unsigned int numOfThreadsWithWork = 0;
+						unsigned int lastUnfinishedThread = -1;
+
 						for(unsigned int i = 0; i < numberOfThreads; ++i)
 							if(broadcastThreadStructs[i].workToDo_)
 							{
 								done = false;
-								__COUT__ << "Still waiting on thread " << i << "..." << __E__;
-								usleep(100 * 1000 /*100ms*/);
-								break;
+								++numOfThreadsWithWork;
+								lastUnfinishedThread = i;								
 							}
 							else if(broadcastThreadStructs[i].error_)
 							{
@@ -2779,6 +2813,28 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 								         << broadcastThreadStructs[i].getReply() << __E__;
 								XCEPT_RAISE(toolbox::fsm::exception::Exception, broadcastThreadStructs[i].getReply());
 							}
+						
+						if(!done) //update status and sleep
+						{
+							std::stringstream waitSs;
+							waitSs << "Waiting on " << numOfThreadsWithWork << " of " <<
+								numberOfThreads << " threads.";
+							if(numOfThreadsWithWork == 1)
+							{		
+								waitSs << ".. " <<					
+									broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getName() << ":" << 
+									broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getId();
+							}
+							waitSs << __E__;
+							__COUT__ << waitSs.str();
+							
+							{ //create lock scope that does not include sleep
+								std::lock_guard<std::mutex> lock(broadcastCommandStatusUpdateMutex_);
+								broadcastCommandStatus_ = waitSs.str();
+							}
+							usleep(100 * 1000 /*100ms*/);
+						}
+
 					} while(!done);
 					__COUT__ << "All threads done with priority level work." << __E__;
 				}  // end thread complete verification
