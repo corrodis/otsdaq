@@ -417,7 +417,6 @@ void WebUsers::loadActiveSessions()
 	{
 		__COUT__ << "Extracting active sessions..." << __E__;
 	}
-	unsigned int i = 0;
 	while(fgets(line, LINELEN, fp))
 	{
 		if(strlen(line))
@@ -446,7 +445,6 @@ void WebUsers::loadActiveSessions()
 		fgets(line, LINELEN, fp);
 		sscanf(line, "%ld", &(ActiveSessions_.back().startTime_));
 
-		++i;
 	}
 
 	__COUT__ << "Active Sessions loaded with size " << ActiveSessions_.size() << __E__;

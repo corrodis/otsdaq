@@ -76,7 +76,6 @@ unsigned int ARTDAQDispatcherTable::slowControlsHandlerConfig(std::stringstream&
 	// loop through ARTDAQ Dispatcher records starting at ARTDAQSupervisorTable
 	std::vector<std::pair<std::string, ConfigurationTree>> artdaqRecords = configManager->getNode("ARTDAQSupervisorTable").getChildren();
 
-	unsigned int numberOfDispatchers                = 0;
 	unsigned int numberOfDispatcherMetricParameters = 0;
 
 	for(auto& artdaqPair : artdaqRecords)  // start main artdaq record loop
@@ -91,8 +90,6 @@ unsigned int ARTDAQDispatcherTable::slowControlsHandlerConfig(std::stringstream&
 		{
 			if(!dispatcherPair.second.status())
 				continue;
-
-			numberOfDispatchers++;
 
 			try
 			{

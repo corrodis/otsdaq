@@ -76,7 +76,6 @@ unsigned int ARTDAQRoutingManagerTable::slowControlsHandlerConfig(
 	// loop through ARTDAQ RoutingManager records starting at ARTDAQSupervisorTable
 	std::vector<std::pair<std::string, ConfigurationTree>> artdaqRecords = configManager->getNode("ARTDAQSupervisorTable").getChildren();
 
-	unsigned int numberOfRoutingManagers                = 0;
 	unsigned int numberOfRoutingManagerMetricParameters = 0;
 
 	for(auto& artdaqPair : artdaqRecords)  // start main artdaq record loop
@@ -91,8 +90,6 @@ unsigned int ARTDAQRoutingManagerTable::slowControlsHandlerConfig(
 		{
 			if(!routingManagerPair.second.status())
 				continue;
-
-			numberOfRoutingManagers++;
 
 			try
 			{
