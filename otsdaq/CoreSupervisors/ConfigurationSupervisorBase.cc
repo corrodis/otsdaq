@@ -1782,7 +1782,7 @@ try
 
 	__COUT__ << "Created temporary version " << temporaryVersion << __E__;
 
-	TableView* cfgView = table->getTemporaryView(temporaryVersion);
+	cfgView = table->getTemporaryView(temporaryVersion);
 	cfgView->init();  // prepare maps
 
 	try //while editing
