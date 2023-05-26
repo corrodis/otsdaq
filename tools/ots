@@ -1887,11 +1887,11 @@ launchOTSLogFind() {
 	##############################################################################
 	
 	out #blank line
-	out "${Purple}${REV}                                                       ${RstClr}"
+	out "${Purple}${REV}                                                                         ${RstClr}"
 	out "${Purple}${REV} *********************************************************************** ${RstClr}"
 	out "${Purple}${REV} ***********       Finding potential ots log files!         ************ ${RstClr}"
 	out "${Purple}${REV} *********************************************************************** ${RstClr}"
-	out "${Purple}${REV}                                                       ${RstClr}"
+	out "${Purple}${REV}                                                                         ${RstClr}"
 	out #blank line
 	out "XDAQ Configuration XML   = ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml"	
 	
@@ -2006,42 +2006,25 @@ launchOTSLogFind() {
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
 		
 
-	####################################################################
-	########### 		logfile of Gateway context	 		############
-	####################################################################
-	out #empty line
-	out "${Red}${Bold}Log file for${RstClr} '${Bold}Gateway${RstClr}' on host${RstClr} '${Bold}${gatewayHostname}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${gatewayHostname}-${gatewayPort}.txt${RstClr}"
-
-	####################################################################
-	########### 	logfile of Local non-Gateway contexts 	############
-	####################################################################
-					
-	i=0	
-	for port in "${contextPort[@]}"
-	do
-		: 		
-			
-		if [[ ${contextHostname[$i]} == ${THIS_HOST} ]]; then
-		
-			out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
-						
-		fi
-		i=$(( $i + 1 ))
-	done
-
 	############################################################################
-	########### 	  logfile of remote non-Gateway contexts		############
+	########### 	  logfiles of contexts							############
 	############################################################################	
+	out #blank line
 	i=0	
 	for port in "${contextPort[@]}"
 	do
 		: 		
-			
-		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
 		
-			out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${contextHostname[$i]}-${port}.txt${RstClr}"			
-						
+		if [[ $gatewayHostname == ${contextHostname[$i]} && $gatewayPort == ${port} ]]; then
+			fn="otsdaq_quiet_run-gateway-${contextHostname[$i]}-${port}"
+		else
+			fn="otsdaq_quiet_run-${contextHostname[$i]}-${port}"
 		fi
+		# out "[$i] == $fn - ${contextHostname[$i]} - ${port} - $gatewayHostname : $gatewayPort"
+
+		out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+						
+	
 		i=$(( $i + 1 ))
 	done
 	
@@ -2062,9 +2045,9 @@ launchOTSLogFind() {
 		# out "[$i] == $fn - ${contextHostname[$i]} - ${port} - $gatewayHostname : $gatewayPort"
 
 		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
-			out "         vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out "   vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		else
-			out "         less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		fi
 		i=$(( $i + 1 ))
 	done
