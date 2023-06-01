@@ -1,10 +1,12 @@
 #ifndef _ots_TCPTransmitterSocket_h_
 #define _ots_TCPTransmitterSocket_h_
 
+#include "otsdaq/NetworkUtilities/TCPSocket.h"
+
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "otsdaq/NetworkUtilities/TCPSocket.h"
 
 namespace ots
 {

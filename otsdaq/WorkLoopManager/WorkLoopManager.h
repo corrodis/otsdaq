@@ -45,14 +45,8 @@ class WorkLoopManager
 
   private:
 	const std::string cWorkLoopType_;
-	enum
-	{
-		maxWorkLoops = 5
-	};
-	enum
-	{
-		timeOutInSeconds = 20
-	};
+	static constexpr int maxWorkLoops = 5;
+	static constexpr int     timeOutInSeconds = 20;
 	struct WorkLoopStruct
 	{
 		toolbox::task::WorkLoop* workLoop;

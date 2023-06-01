@@ -432,7 +432,7 @@ void ARTDAQSupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/
 void ARTDAQSupervisor::configuringThread()
 try
 {
-	const std::string& uid =
+	std::string uid =
 	    theConfigurationManager_
 	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" + CorePropertySupervisorBase::getSupervisorUID() + "/" + "LinkToSupervisorTable")
 	        .getValueAsString();
@@ -1020,7 +1020,7 @@ catch(...)
 void ARTDAQSupervisor::startingThread()
 try
 {
-	const std::string& uid =
+	std::string uid =
 	    theConfigurationManager_
 	        ->getNode(ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME + "/" + CorePropertySupervisorBase::getSupervisorUID() + "/" + "LinkToSupervisorTable")
 	        .getValueAsString();

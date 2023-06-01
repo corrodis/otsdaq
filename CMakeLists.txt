@@ -139,10 +139,6 @@ cet_register_export_set(SET_NAME otsdaqUsers SET_DEFAULT)
 # tools
 add_subdirectory(tools)
 
-# tools
-FILE(COPY tools DESTINATION .)
-INSTALL(DIRECTORY tools DESTINATION ./${product}/${version})
-
 # Documentation (to comment out if not needed DOXYGEN locally)
 if( $ENV{OTS_DOXY} MATCHES "DOIT" )
 	add_subdirectory(doc)
@@ -151,12 +147,9 @@ endif()
 # test programs
 add_subdirectory(test)
 
-# test
-FILE(COPY test DESTINATION .)
-INSTALL(DIRECTORY test DESTINATION ./${product}/${version})
 
 # data-core
 FILE(COPY data-core DESTINATION .)
-INSTALL(DIRECTORY data-core DESTINATION ./${product}/${version})
+INSTALL(DIRECTORY data-core DESTINATION .)
 
 cet_cmake_config()
