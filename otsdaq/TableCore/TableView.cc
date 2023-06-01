@@ -1908,7 +1908,7 @@ void TableView::reset(void)
 {
 	version_ = -1;
 	comment_ = "";
-	author_ + "";
+	author_ = "";
 	columnsInfo_.clear();
 	theDataView_.clear();
 }  // end reset()

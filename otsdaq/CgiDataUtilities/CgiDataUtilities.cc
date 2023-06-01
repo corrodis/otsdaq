@@ -36,7 +36,7 @@ std::string CgiDataUtilities::postData(cgicc::Cgicc& cgi, const std::string& nee
 	start_pos += needle.length() + 2;         // get past & and field
 	end_pos = postData.find('&', start_pos);  // skip needle and = sign
 	if(end_pos == std::string::npos)
-		postData.length();  // not found, so take data to end
+		end_pos = postData.length();  // not found, so take data to end
 
 	//__COUT__ << "start_pos=" << start_pos
 	//		<< "end_pos=" << end_pos << std::endl;

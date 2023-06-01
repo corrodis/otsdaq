@@ -1,6 +1,7 @@
 #ifndef _ots_TCPPacket_h_
 #define _ots_TCPPacket_h_
 
+#include <cstdint>
 #include <string>
 
 namespace ots
