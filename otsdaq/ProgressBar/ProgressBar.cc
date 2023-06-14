@@ -73,6 +73,11 @@ void ProgressBar::step()
 {
 	std::lock_guard<std::mutex> lock(theMutex_);  // lock out for remainder of scope
 	++stepCount_;
+
+	//do not allow to get to 100% until complete (in case stepsToComplete is not constant for all time)
+	if(stepsToComplete_ && stepCount_ >= stepsToComplete_)
+		stepsToComplete_ = stepCount_ + 1;
+
 	// std::cout << __COUT_HDR_FL__  << totalStepsFileName_ << " " <<
 	// readPercentageString() << "% complete" << std::endl;
 }

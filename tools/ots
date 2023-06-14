@@ -1328,14 +1328,15 @@ launchOTS() {
 	gatewayHostname=""
 	gatewayPort=0
 	contextUID=""
+	gatewayUID=""
 
 
 	unset xdaqPort #reset
 	unset xdaqHost #reset
 	unset xdaqContextUID #reset	
-	unset contextPort #reset	
-	unset contextHostname #reset
-	unset contextUIDArray #reset	
+	unset contextHostname #reset (all xdaq context hostnames - maybe with repeats for remote launches, but remote launch loop checks for repeats)
+	unset contextPort #reset
+	unset contextUIDArray #reset
 	unset TempContextPIDArray #reset  
 	unset ContextPIDArray #reset
 
@@ -1371,8 +1372,6 @@ launchOTS() {
 				#   run nodejs
 				#   run xdaq
 			
-				#echo ${BASH_REMATCH[1]}
-				#echo ${BASH_REMATCH[2]}
 			
 				port=${BASH_REMATCH[3]}
 				host=${BASH_REMATCH[2]}
@@ -1385,12 +1384,10 @@ launchOTS() {
 				else
 				    isLocal=false
 				fi
-				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
-					contextHostname+=(${BASH_REMATCH[2]})
-					contextPort+=(${BASH_REMATCH[3]})
-					contextUIDArray+=($contextUID)
-					#echo ${BASH_REMATCH[1]}    
-				fi
+
+				contextHostname+=(${host})
+				contextPort+=(${port})
+				contextUIDArray+=(${contextUID})
 			fi
 			#out "------------------------------------------ out"
 	
@@ -1402,12 +1399,13 @@ launchOTS() {
 		fi
 		if [[ ($insideContext == true) ]]; then 
 			
-			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A XDAQ SUPERVISOR		
+			if [[ ($line == *"class"*) ]] && [[ "${isLocal}" == "true" ]]; then #IT'S A LOCAL XDAQ SUPERVISOR		
 				
 				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
 					    gatewayHostname=${host}
 						gatewayPort=${port}
+						gatewayUID=${contextUID}
 						
 						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
 						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
@@ -1765,21 +1763,19 @@ launchOTS() {
 		
 		out #blank line
 		info "Launching ${remoteHostCount} remote host otsdaq Context procesess (to disable remote start, use ots -s)...${RstClr}"
-		i=0	
-		for port in "${contextPort[@]}"
+		
+		for host in "${contextHostname[@]}"
 		do
 		  : 
-		  	#out "${xdaqPrefix} xdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-
-			  
-			if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
+		  				  
+			if [[ ${host} != ${THIS_HOST} ]]; then
 			
 				#first check that we have not done a remote launch on host already
 				j=0
 				alreadyLaunched=0
-				for host in "${remoteLaunchHosts[@]}"
+				for launchedHost in "${remoteLaunchHosts[@]}"
 				do						
-					if [[ ${contextHostname[$i]} == ${host} ]]; then
+					if [[ ${host} == ${launchedHost} ]]; then
 						alreadyLaunched=1
 						break
 					fi
@@ -1787,47 +1783,22 @@ launchOTS() {
 			
 				#skip all repeating hostnames
 				if [[ $alreadyLaunched == 1 ]]; then
-					i=$(( $i + 1 ))
 					continue;
 				fi
 			
-				out "\tRemote launch of ots Context processes on host {${contextHostname[$i]}}."
-				out "\t\tssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start" 
+				out "\tRemote launch of ots Context processes on host {${host}}."
+				out "\t\tssh ${host} ${SCRIPT_DIR}/ots_remote_start" 
 				
 				# launch ssh remote start (attempt twice)
-				ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || ssh ${contextHostname[$i]} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				ssh ${host} ${SCRIPT_DIR}/ots_remote_start || ssh ${host} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
-				remoteLaunchHosts+=(${contextHostname[$i]})					
+				remoteLaunchHosts+=(${host})					
 			fi
-			i=$(( $i + 1 ))
 		done
 		
-		
-		############################################################################
-		###########  test for relaunch of remote non-Gateway contexts	############
-		############################################################################	
-		
-		sleep 1 #give time before relaunch test
-		
-
-		#out "${Green}${Bold}Launching ${remoteHostCount} remote host otsdaq Context procesess...${RstClr}"
-		i=0	
-		for port in "${contextPort[@]}"
-		do
-		  : 
-		  	#out "${xdaqPrefix} xdaq.exe -h ${contextHostname[$i]} -p ${port} -e ${XDAQ_ARGS} &"
-
-			  
-			#if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
-			
-				#out "\tChecking remote launch ${contextHostname[$i]}:${port}"
-			
-								
-			#fi
-			i=$(( $i + 1 ))
-		done			
+							
 	
 	fi #end remote launch handling
 	####################################################################
@@ -1846,11 +1817,13 @@ launchOTS() {
 	#	out "Note: This host is ${THIS_HOST}."
 	#fi
 	
-	if [[ (${#xdaqPort[@]} == 0) && "x${gatewayHostname}" != "x" ]]; then
-		out "These are the${RstClr} ${Bold}hosts${RstClr} configured to run ots Context processes: ${contextHostname[@]}"
-		out "These are the corresponding${RstClr} ${Bold}ports${RstClr} for the Context processes: ${contextPort[@]}"  	 
-		out "These are the corresponding${RstClr} ${Bold}UIDs${RstClr} for the Context processes: ${contextUIDArray[@]}"   
-	fi
+	# if [[ (${#xdaqPort[@]} != 0) && "x${gatewayHostname}" != "x" ]]; then
+	# 	out
+	# 	out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
+	# 	out "These are the corresponding ports for the Context processes: ${contextPort[@]}"
+	# 	out "These are the corresponding UIDs for the Context processes:  ${contextUIDArray[@]}"
+	# 	out  
+	# fi
 	
 
 	  
@@ -1860,10 +1833,11 @@ launchOTS() {
 		
 		out "${Red}${Bold}${Blink}WARNING${RstClr}: There are no configured processes for hostname ${THIS_HOST}." 
 		out "Are you sure your configuration is written for ${Red}${Bold}${Blink}${THIS_HOST}${RstClr}?" 
-
-		out "These are the hosts configured to run ots applications: ${gatewayHostname} ${xdaqHost[@]}"
-		out "These are the corresponding ports for the applications: ${gatewayPort} ${xdaqPort[@]}"
-
+		out
+		out "These are the hosts configured to run ots Context processes: ${contextHostname[@]}"
+		out "These are the corresponding ports for the Context processes: ${contextPort[@]}"
+		out "These are the corresponding UIDs for the Context processes:  ${contextUIDArray[@]}"
+		out  
 		out "You can change the configuration for ${THIS_HOST} in wiz mode by..."
 		out "\tGoing to the Configure App   -> click 'Tree-View' next to Active-Context"
 		out "\t-> expand 'XDAQContextTable' -> change 'Address' to set desired host name."
@@ -1908,13 +1882,12 @@ launchOTSLogFind() {
 	gatewayHostname=""
 	gatewayPort=0
 	contextUID=""
+	gatewayUID=""
 
 	unset xdaqPort #reset
 	unset xdaqHost #reset
 	unset xdaqContextUID #reset	
-	unset contextPort #reset	
-	unset contextHostname #reset	
-	unset contextUIDArray #reset
+	unset contextHostname #reset (a Set of hostnames only for remove launches)	
 	unset TempContextPIDArray #reset  
 	unset ContextPIDArray #reset
 
@@ -1950,25 +1923,20 @@ launchOTSLogFind() {
 				#   run nodejs
 				#   run xdaq
 			
-				#echo ${BASH_REMATCH[1]}
-				#echo ${BASH_REMATCH[2]}
-			
 				port=${BASH_REMATCH[3]}
 				host=${BASH_REMATCH[2]}
 				insideContext=true
-						
-				#out "$host $port ${RstClr}"				
 						
 				if [[ (${BASH_REMATCH[2]} == ${THIS_HOST}) || (${BASH_REMATCH[2]} == ${THIS_HOST}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
 				else
 				    isLocal=false
 				fi
+				# out "$host $port $isLocal ${RstClr}"	
+
 				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
 					contextHostname+=(${BASH_REMATCH[2]})
-					contextPort+=(${BASH_REMATCH[3]})
-					contextUIDArray+=($contextUID)
-					#echo ${BASH_REMATCH[1]}    
+					# out "$contextUID"
 				fi
 			fi
 			#out "------------------------------------------ out"
@@ -1988,6 +1956,9 @@ launchOTSLogFind() {
 
 					    gatewayHostname=${host}
 						gatewayPort=${port}
+						gatewayUID=${contextUID}
+						fn="otsdaq_quiet_run-gateway-${host}-${port}"
+						out "${Red}${Bold}Log file for gateway${RstClr} '${Bold}${contextUID}${RstClr}' on host${RstClr} '${Bold}${host}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 
 					fi
 				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
@@ -1996,6 +1967,9 @@ launchOTSLogFind() {
 					xdaqHost+=($host)	
 					xdaqContextUID+=($contextUID)				
 					haveXDAQContextPort=true
+					# out "$contextUID"
+					fn="otsdaq_quiet_run-${host}-${port}"
+					out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUID}${RstClr}' on host${RstClr} '${Bold}${host}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 				fi
  				
 			  #IF THERE IS AT LEAST ONE NOT ARTDAQ APP THEN I CAN GET OUT OF THIS CONTEXT AND RUN XDAQ ONCE JUST FOR THIS
@@ -2004,48 +1978,31 @@ launchOTSLogFind() {
 			fi
 		fi   
 	done < ${XDAQ_CONFIGURATION_DATA_PATH}/${XDAQ_OTS_XML}.xml
-		
-
-	############################################################################
-	########### 	  logfiles of contexts							############
-	############################################################################	
-	out #blank line
-	i=0	
-	for port in "${contextPort[@]}"
-	do
-		: 		
-		
-		if [[ $gatewayHostname == ${contextHostname[$i]} && $gatewayPort == ${port} ]]; then
-			fn="otsdaq_quiet_run-gateway-${contextHostname[$i]}-${port}"
-		else
-			fn="otsdaq_quiet_run-${contextHostname[$i]}-${port}"
-		fi
-		# out "[$i] == $fn - ${contextHostname[$i]} - ${port} - $gatewayHostname : $gatewayPort"
-
-		out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUIDArray[$i]}${RstClr}' on host${RstClr} '${Bold}${contextHostname[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
-						
-	
-		i=$(( $i + 1 ))
-	done
-	
+			
 
 	out #blank line
 	out "Here are example commands for viewing all potential log files:"
 	out #blank line
+
+	fn="otsdaq_quiet_run-gateway-${gatewayHostname[$i]}-${gatewayPort}"
+	if [[ ${gatewayHostname[$i]} != ${THIS_HOST} ]]; then
+		out "   vless_mu2e.sh ${gatewayHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+	else
+		out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+	fi
+
+	#non-gateway contexts
 	i=0	
-	for port in "${contextPort[@]}"
+	for port in "${xdaqPort[@]}"
 	do
 		: 
 
-		if [[ $gatewayHostname == ${contextHostname[$i]} && $gatewayPort == ${port} ]]; then
-			fn="otsdaq_quiet_run-gateway-${contextHostname[$i]}-${port}"
-		else
-			fn="otsdaq_quiet_run-${contextHostname[$i]}-${port}"
-		fi
-		# out "[$i] == $fn - ${contextHostname[$i]} - ${port} - $gatewayHostname : $gatewayPort"
+		fn="otsdaq_quiet_run-${xdaqHost[$i]}-${port}"
 
-		if [[ ${contextHostname[$i]} != ${THIS_HOST} ]]; then
-			out "   vless_mu2e.sh ${contextHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		# out "[$i] == $fn - ${xdaqHost[$i]} - ${port} - $gatewayHostname : $gatewayPort"
+
+		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
+			out "   vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		else
 			out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		fi
@@ -2053,11 +2010,11 @@ launchOTSLogFind() {
 	done
 	out #blank line
 
-	out #blank line
-	out "These are the${RstClr} ${Bold}hosts${RstClr} configured to run ots Context processes: ${contextHostname[@]}"
-	out "These are the corresponding${RstClr} ${Bold}ports${RstClr} for the Context processes: ${contextPort[@]}"  	 
-	out "These are the corresponding${RstClr} ${Bold}UIDs${RstClr} for the Context processes: ${contextUIDArray[@]}"  	 
-	out #blank line	
+	# out #blank line
+	# out "These are the hosts configured to run ots Context processes: ${gatewayHostname} ${xdaqHost[@]}"
+	# out "These are the corresponding ports for the Context processes: ${gatewayPort} ${xdaqPort[@]}"
+	# out "These are the corresponding UIDs for the Context processes:  ${gatewayUID} ${xdaqContextUID[@]}"
+	# out #blank line	
 	
 }   #end launchOTSLogFind
 export -f launchOTSLogFind

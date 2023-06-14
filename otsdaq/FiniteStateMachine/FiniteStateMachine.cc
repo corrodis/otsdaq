@@ -12,6 +12,8 @@ using namespace ots;
 #define __MF_SUBJECT__ "FSM"
 #define mfSubject_ std::string("FSM-") + getStateMachineName()
 
+const std::string FiniteStateMachine::FAILED_STATE_NAME  = "Failed";
+
 //==============================================================================
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
     : stateEntranceTime_(0), inTransition_(false), provenanceState_('X'), theErrorMessage_(""), stateMachineName_(stateMachineName)
@@ -143,15 +145,20 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 
 	if(transition == "fail")
 	{
-		__GEN_COUT_INFO__ << "Failing now!!" << __E__;
-
 		while(inTransition_)
 		{
-			__GEN_COUT__ << "Currently in a transition executed from current state " << getProvenanceStateName()
+			__GEN_COUT__ << "Currently in transition '" << currentTransition_ << "' executed from current state " << getProvenanceStateName()
 			             << ". Attempting to wait for the transition to complete." << __E__;
 			sleep(1);
 		}
 		sleep(1);
+
+		if(getStateName(getCurrentState()) == FiniteStateMachine::FAILED_STATE_NAME)
+		{
+			__GEN_COUT_INFO__ << "Already failed. Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName() << __E__;
+			return true;
+		}
+		__GEN_COUT_INFO__ << "Failing now!! Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName() << __E__;
 
 		// find any valid transition and take it..
 		//	all transition functions must check for a failure
@@ -161,6 +168,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		for(const auto& transitionPair : transitions)
 		{
 			__GEN_COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
+			__GEN_COUT__ << "Taking fail transition from Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName() << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));
 
 			try

@@ -177,7 +177,19 @@ void GatewaySupervisor::init(void)
 			std::thread([](GatewaySupervisor* s) { GatewaySupervisor::AppStatusWorkLoop(s); }, this).detach();
 		}
 		else
+		{
 			__COUT__ << "App Status checking is disabled." << __E__;
+
+			//set all app status to "Not Monitored" so that FSM changes ignore missing app status
+			for(const auto& it : allSupervisorInfo_.getAllSupervisorInfo())
+			{
+				auto appInfo = it.second;
+				allSupervisorInfo_.setSupervisorStatus(appInfo, 
+					SupervisorInfo::APP_STATUS_NOT_MONITORED, 
+					0 /* progressInteger */, "" /* detail */);
+			}
+		}	
+
 	}  // end checking of Application Status
 
 }  // end init()
@@ -192,7 +204,10 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 	bool        firstError = true;
 	std::string status, progress, detail, appName;
 	int         progressInteger;
-	bool        oneStatusReqHasFailed = false;
+	bool oneStatusReqHasFailed = false;
+
+	std::map<std::string /* appName */, bool /* lastStatusGood */> appLastStatusGood;
+
 	while(1)
 	{
 		sleep(1);
@@ -208,7 +223,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			auto appInfo = it.second;
 			appName      = appInfo.getName();
 			//						__COUT__ << "Getting Status "
-			//						         << " Supervisor instance = '" << appInfo.getName()
+			//						         << " Supervisor instance = '" << appName
 			//						         << "' [LID=" << appInfo.getId() << "] in Context '"
 			//						         << appInfo.getContextName() << "' [URL=" <<
 			//			 					appInfo.getURL()
@@ -277,10 +292,13 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 				{
 					xoap::MessageReference statusMessage = theSupervisor->sendWithSOAPReply(appInfo.getDescriptor(), tempMessage);
 
-					//					__COUT__ << "statusMessage... "
-					//					     <<
-					//						 SOAPUtilities::translate(statusMessage)
-					//						<<  std::endl;
+					// if("ContextARTDAQ" == appInfo.getContextName() )
+					// 		__COUT__ << " Supervisor instance = '" << appName
+					// 				<< "' [LID=" << appInfo.getId() << "] in Context '"
+					// 				<< appInfo.getContextName() << " statusMessage... "
+					// 				<<
+					// 				SOAPUtilities::translate(statusMessage)
+					// 			<<  std::endl;
 
 					SOAPParameters parameters;
 					parameters.addParameter("Status");
@@ -296,7 +314,22 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					if(progress.empty())
 						progress = "100";
 
+					// if("ContextARTDAQ" == appInfo.getContextName() )
+					// 	__COUTV__(progress);
+
 					detail = parameters.getValue("Detail");
+
+					if(!appLastStatusGood[appName])
+					{
+						__COUT__ << "First Good Status from "
+												<< " Supervisor instance = '" << appName
+												<< "' [LID=" << appInfo.getId() << "] in Context '"
+												<< appInfo.getContextName() << "' [URL=" <<
+												appInfo.getURL()
+												<< "].\n\n";
+						__COUTV__(SOAPUtilities::translate(tempMessage));
+					}
+					appLastStatusGood[appName] = true;
 				}
 				catch(const xdaq::exception::Exception& e)
 				{
@@ -309,11 +342,18 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 						firstError = false;
 						break;
 					}
-					__COUT__ << "Getting Status "
-					         << " Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
-					         << "' [URL=" << appInfo.getURL() << "].\n\n";
-					__COUTV__(SOAPUtilities::translate(tempMessage));
-					__COUT_WARN__ << "Failed to send getStatus SOAP Message: " << e.what() << __E__;
+					if(appLastStatusGood[appName])
+					{
+						__COUT__ << "Getting Status "
+												<< " Supervisor instance = '" << appName
+												<< "' [LID=" << appInfo.getId() << "] in Context '"
+												<< appInfo.getContextName() << "' [URL=" <<
+												appInfo.getURL()
+												<< "].\n\n";
+						__COUTV__(SOAPUtilities::translate(tempMessage));
+						__COUT_WARN__ << "Failed to send getStatus SOAP Message - will suppress repeat errors: " << e.what() << __E__;
+					} //else quiet repeat error messages
+					appLastStatusGood[appName] = false;
 				}
 				catch(...)
 				{
@@ -326,11 +366,18 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 						firstError = false;
 						break;
 					}
-					__COUT__ << "Getting Status "
-					         << " Supervisor instance = '" << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
-					         << "' [URL=" << appInfo.getURL() << "].\n\n";
-					__COUTV__(SOAPUtilities::translate(tempMessage));
-					__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error." << __E__;
+					if(appLastStatusGood[appName])
+					{
+						__COUT__ << "Getting Status "
+												<< " Supervisor instance = '" << appName
+												<< "' [LID=" << appInfo.getId() << "] in Context '"
+												<< appInfo.getContextName() << "' [URL=" <<
+												appInfo.getURL()
+												<< "].\n\n";
+						__COUTV__(SOAPUtilities::translate(tempMessage));
+						__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error. Will suppress repeat errors." << __E__;
+					} //else quiet repeat error messages
+					appLastStatusGood[appName] = false;
 				}
 			}  // end with non-gateway status request handling
 
@@ -343,6 +390,9 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			std::istringstream ssProgress(progress);
 			ssProgress >> progressInteger;
 
+			// if("ContextARTDAQ" == appInfo.getContextName() )
+			// 	__COUTV__(progressInteger);
+				
 			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger, detail);
 
 		}  // end of app loop
@@ -1318,13 +1368,13 @@ void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*
 //==============================================================================
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
-	__COUT__ << "Fsm current state: "
-	         << "Failed" <<
-	    // theStateMachine_.getCurrentStateName() //There may be a race condition here
+	__COUT__ << "Error occured - FSM current state: "
+	         << "Failed? = " <<
+	    theStateMachine_.getCurrentStateName() << //There may be a race condition here
 	    //	when async errors occur (e.g. immediately in running)
 	    " from " << theStateMachine_.getProvenanceStateName() << __E__;
 
-	__COUTV__(SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand());
+	__COUT__ << "Error occured on command: " << (SOAPUtilities::translate(theStateMachine_.getCurrentMessage()).getCommand()) << __E__;
 
 	// if coming from Running or Paused, update Run Info w/ERROR
 	if(theStateMachine_.getProvenanceStateName() == RunControlStateMachine::RUNNING_STATE_NAME ||
@@ -1426,10 +1476,10 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	theStateMachine_.setErrorMessage(ss.str());
 
-	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
-		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
-	else 	// move everything else to Error!
-		broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
+	// if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+	// 	__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
+	// else 	// move everything else to Error!
+	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
 }  // end enteringError()
 
 //==============================================================================
@@ -1768,7 +1818,10 @@ catch(...)
 void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
 try
 {
-	__COUT__ << "Fsm current state: " << theStateMachine_.getCurrentStateName() << " message: " << theStateMachine_.getCurrentStateName() << __E__;
+	checkForAsyncError();
+	
+	__COUT__ << "transitionShuttingDown -- Fsm current state: " << theStateMachine_.getCurrentStateName() << 
+		" message: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	RunControlStateMachine::theProgressBar_.step();
 	makeSystemLogEntry("System shutting down.");
@@ -2353,11 +2406,23 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 
 			__COUTV__(appInfo.getStatus());
 			//wait for app to exist in status before sending commands
+			int waitAttempts = 0;
 			while(appInfo.getStatus() == SupervisorInfo::APP_STATUS_UNKNOWN)
 			{
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
 					         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state." << __E__;
+				++waitAttempts;
+				if(waitAttempts == 10)
+				{
+					__SS__ << "Error! Gateway Supervisor failed to send message to app in unknown state "
+				          "Supervisor instance = '"
+				       << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+				       << "].\n\n";
+					__COUT_ERR__ << ss.str();
+					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
+				}
 				sleep(2);
+				
 			}
 
 			// start recursive mutex scope (same thread can lock multiple times, but needs to unlock the same)
