@@ -53,6 +53,7 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual std::string getStatusProgressDetail(void) override
 	{
 		std::lock_guard<std::mutex> lk(thread_mutex_);
+		// __COUTV__(thread_progress_message_);
 		return thread_progress_message_;
 	}
 

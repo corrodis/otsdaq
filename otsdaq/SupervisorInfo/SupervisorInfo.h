@@ -61,6 +61,7 @@ class SupervisorInfo
 
 
 	static const std::string APP_STATUS_UNKNOWN;
+	static const std::string APP_STATUS_NOT_MONITORED;
 
 	// BOOLs	-------------------
 	bool 		isGatewaySupervisor					(void) const { return class_ == XDAQContextTable::GATEWAY_SUPERVISOR_CLASS; }

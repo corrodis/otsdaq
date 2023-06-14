@@ -64,6 +64,7 @@ class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 	void 							setInitialState				(toolbox::fsm::State state);
 	void 							setErrorMessage				(const std::string& errMessage, bool append = true);
 
+	static const std::string 				FAILED_STATE_NAME;
   protected:
 	time_t stateEntranceTime_;
 
@@ -89,6 +90,7 @@ class FiniteStateMachine : public toolbox::fsm::FiniteStateMachine
 	xoap::MessageReference 						theMessage_;
 	std::string            						theErrorMessage_;
 	std::string            						stateMachineName_;
+	
 
   private:
 };

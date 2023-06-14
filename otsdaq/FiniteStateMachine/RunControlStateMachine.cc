@@ -19,7 +19,7 @@
 
 using namespace ots;
 
-const std::string RunControlStateMachine::FAILED_STATE_NAME  = "Failed";
+const std::string RunControlStateMachine::FAILED_STATE_NAME  = FiniteStateMachine::FAILED_STATE_NAME;
 const std::string RunControlStateMachine::HALTED_STATE_NAME  = "Halted";
 const std::string RunControlStateMachine::PAUSED_STATE_NAME  = "Paused";
 const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
@@ -315,8 +315,18 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 		return SOAPUtilities::makeSOAPMessageReference(result);
 	}
 
+	if(command == "Halt" && currentState == RunControlStateMachine::FAILED_STATE_NAME)
+	{
+		__GEN_COUT__ << "Clearing Errors after failure..." << std::endl;
+		theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
+		asyncFailureReceived_        = false;
+	}
+
 	__GEN_COUTV__(command);
 	__GEN_COUTV__(currentState);
+	__GEN_COUTV__(asyncFailureReceived_);
+	__GEN_COUTV__(asyncPauseExceptionReceived_);
+	__GEN_COUTV__(asyncStopExceptionReceived_);
 	__GEN_COUTV__(getErrorMessage());
 	__GEN_COUTV__(retransmittedCommand);
 
