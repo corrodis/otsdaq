@@ -933,7 +933,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 			else
 				break;
 		}
-	__COUT__ << "Low side = " << wildcardBounds.first << " " << haystack[0].substr(0, wildcardBounds.first) << __E__;
+	// __COUT__ << "Low side = " << wildcardBounds.first << " " << haystack[0].substr(0, wildcardBounds.first) << __E__;
 
 	// look for end matching segment
 	for(unsigned int n = 1; n < haystack.size(); ++n)
@@ -951,7 +951,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 				break;
 		}
 
-	__COUT__ << "High side = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
+	// __COUT__ << "High sibbde = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
 
 	// add first common chunk
 	commonChunksToReturn.push_back(haystack[0].substr(0, wildcardBounds.first));
@@ -1024,7 +1024,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 				__SS_THROW__;
 			}
 		}
-		__COUTV__(fixedWildcardLength);
+		// __COUTV__(fixedWildcardLength);
 
 		if(fixedWildcardLength)  // take trailing 0s out of common chunks
 			for(unsigned int c = 0; c < commonChunksToReturn.size(); ++c)
@@ -1059,15 +1059,15 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 				if(wildcard == "")
 				{
 					// set wildcard for first time
-					__COUTV__(i);
-					__COUTV__(k);
-					__COUTV__(k - i);
+					// __COUTV__(i);
+					// __COUTV__(k);
+					// __COUTV__(k - i);
 
 					wildcard = haystack[n].substr(i, k - i);
 					if(fixedWildcardLength && n == 0)
 						fixedWildcardLength += wildcard.size();
 
-					__COUT__ << "name[" << n << "] = " << wildcard << " fixed @ " << fixedWildcardLength << __E__;
+					// __COUT__ << "name[" << n << "] = " << wildcard << " fixed @ " << fixedWildcardLength << __E__;
 
 					break;
 				}
@@ -1087,8 +1087,8 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 
 	}  // end name loop
 
-	__COUTV__(StringMacros::vectorToString(commonChunksToReturn));
-	__COUTV__(StringMacros::vectorToString(wildcardStringsToReturn));
+	// __COUTV__(StringMacros::vectorToString(commonChunksToReturn));
+	// __COUTV__(StringMacros::vectorToString(wildcardStringsToReturn));
 
 	if(wildcardStringsToReturn.size() != haystack.size())
 	{
