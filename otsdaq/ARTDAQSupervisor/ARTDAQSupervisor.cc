@@ -120,8 +120,8 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	init_sighandler(this);
 
 	// Only use system Python
-	unsetenv("PYTHONPATH");
-	unsetenv("PYTHONHOME");
+	//unsetenv("PYTHONPATH");
+	//unsetenv("PYTHONHOME");
 
 	// Write out settings file
 	auto          settings_file = __ENV__("DAQINTERFACE_SETTINGS");
@@ -157,6 +157,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	o << "max_configurations_to_list: " << getSupervisorProperty("max_configurations_to_list", 10) << std::endl;
 	o << "disable_unique_rootfile_labels: " << getSupervisorProperty("disable_unique_rootfile_labels", false) << std::endl;
 	o << "use_messageviewer: " << std::boolalpha << getSupervisorProperty("use_messageviewer", false) << std::endl;
+	o << "use_messagefacility: " << std::boolalpha << getSupervisorProperty("use_messagefacility", true) << std::endl;
 	o << "fake_messagefacility: " << std::boolalpha << getSupervisorProperty("fake_messagefacility", false) << std::endl;
 	o << "kill_existing_processes: " << std::boolalpha << getSupervisorProperty("kill_existing_processes", true) << std::endl;
 	o << "advanced_memory_usage: " << std::boolalpha << getSupervisorProperty("advanced_memory_usage", false) << std::endl;
