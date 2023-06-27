@@ -19,11 +19,11 @@ old_style_config_vars
 
 #
 product             version     optional
-artdaq              v3_12_03
-artdaq_database     v1_07_03
-xdaq                v16_20_0_1a
-artdaq_daqinterface v3_12_03
-cetmodules	    v3_21_01	-	only_for_build
+artdaq              v3_12_04
+artdaq_database     v1_07_04
+xdaq                v16_20_0_1b
+artdaq_daqinterface v3_12_04
+cetmodules	    v3_21_02	-	only_for_build
 end_product_list
 
 # -nq- here means there is no qualifier
@@ -58,7 +58,6 @@ c14:s120a:debug      c14:s120a:debug      c14:s120a:ots:debug      c14:debug   -
 c7:s120a:prof        c7:s120a:prof        c7:s120a:ots:prof        c7:prof    -nq-                 -std=c++17
 c7:s120a:debug       c7:s120a:debug       c7:s120a:ots:debug       c7:debug   -nq-                 -std=c++17
 
-e20:s118:prof       e20:s118:prof       e20:s118:ots:prof       e20:prof   -nq-                 -std=c++17
 e20:s120:prof       e20:s120:prof       e20:s120:ots:prof       e20:prof   -nq-                 -std=c++17
 e20:s120:debug      e20:s120:debug      e20:s120:ots:debug      e20:debug  -nq-                 -std=c++17
 e26:s120:prof       e26:s120:prof       e26:s120:ots:prof       e26:prof   -nq-                 -std=c++17
@@ -67,7 +66,6 @@ c14:s120:prof       c14:s120:prof       c14:s120:ots:prof       c14:prof    -nq-
 c14:s120:debug      c14:s120:debug      c14:s120:ots:debug      c14:debug   -nq-                 -std=c++17
 c7:s120:prof        c7:s120:prof        c7:s120:ots:prof        c7:prof    -nq-                 -std=c++17
 c7:s120:debug       c7:s120:debug       c7:s120:ots:debug       c7:debug   -nq-                 -std=c++17
-
 
 e20:s112:prof       e20:s112:prof       e20:s112:ots:prof       e20:prof   -nq-                 -std=c++17
 e20:s112:debug      e20:s112:debug      e20:s112:ots:debug      e20:debug  -nq-                 -std=c++17
