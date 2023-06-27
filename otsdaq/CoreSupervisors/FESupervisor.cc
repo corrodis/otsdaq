@@ -58,6 +58,15 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 			                     "configuration tree, make sure you specified a valid "
 			                     "fcl file path."
 			                  << __E__;
+			try
+			{
+				throw;
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SUP_COUT_WARN__ << e.what() << __E__;
+				throw;
+			}
 		}
 		throw;
 	}
@@ -83,9 +92,13 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 		try
 		{
 			__SUP_COUT__ << "Configuring all state machine implementations..." << __E__;
+			__SUP_COUTV__(stateMachinesIterationDone_.size());
 			preStateMachineExecutionLoop();
+			__SUP_COUTV__(stateMachinesIterationDone_.size());
 			for(unsigned int i = 0; i < theStateMachineImplementation_.size(); ++i)
 			{
+				__SUP_COUT__ << "Configuring state machine i " << i << __E__;
+				
 				// if one state machine is doing a sub-iteration, then target that one
 				if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 && i != subIterationWorkStateMachineIndex_)
 					continue;  // skip those not in the sub-iteration
@@ -107,13 +120,13 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 		{
 			__SUP_SS__ << "Error was caught while configuring: " << e.what() << __E__;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
-			theStateMachine_.setErrorMessage(ss.str());
+			throw;
 		}
 		catch(...)
 		{
 			__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
-			theStateMachine_.setErrorMessage(ss.str());
+			throw;
 		}
 	}  // end Macro Maker mode initial configure
 }  // end constructor
@@ -680,11 +693,17 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 		else if(request == "GetInterfaceMacros")
 		{
 			if(theFEInterfacesManager_)
+			{
+				__SUP_COUT__ << "Getting FE Macros from FE Interface Manager..." << __E__;
 				retParameters.addParameter("FEMacros",
 				                           theFEInterfacesManager_->getFEMacrosString(CorePropertySupervisorBase::getSupervisorUID(),
 				                                                                      std::to_string(CoreSupervisorBase::getSupervisorLID())));
+			}
 			else
+			{
+				__SUP_COUT__ << "No FE Macros because there is no FE Interface Manager..." << __E__;
 				retParameters.addParameter("FEMacros", "");
+			}
 
 			return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "Response", retParameters);
 		}
@@ -752,6 +771,13 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 				// theFEInterfacesManager_->runFEMacro(interfaceID, feMacroName, inputArgs, outputArgs);
 			}
 			catch(std::runtime_error& e)
+			{
+				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << feMacroName
+				           << "' with target FE '" << interfaceID << "' failed. Here is the error:\n\n"
+				           << e.what() << __E__;
+				__SUP_SS_THROW__;
+			}
+			catch(std::exception& e)
 			{
 				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << feMacroName
 				           << "' with target FE '" << interfaceID << "' failed. Here is the error:\n\n"

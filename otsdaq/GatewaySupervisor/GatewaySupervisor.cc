@@ -1663,8 +1663,6 @@ try
 					    dumpFormat,
 					    requireUserLogInput ? activeStateMachineLogEntry_ : "",
 					    theWebUsers_.getActiveUsersString());
-
-					CorePropertySupervisorBase::theConfigurationManager_->dumpMacroMakerModeFhicl();
 				}
 				else
 					__COUT_INFO__ << "Not dumping the Configuration on the Configuration transition." << __E__;

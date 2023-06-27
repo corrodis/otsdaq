@@ -49,7 +49,6 @@ ulimit -c unlimited
 # Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
 HOSTNAME="$(hostname -f)"
 
-# TODO: Eliminate pointless var
 THIS_HOST="${HOSTNAME}"
 HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
@@ -229,6 +228,8 @@ if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 	#tonMg 0-63
 	#type toffS
 	
+	#tonSg 0-63 #turn on all slow paths
+	
 	# turn on err|warn|dbg|trace
 	#${TRACE_BIN}/trace_cntl lvlset 0 0x1f 0	
 	
@@ -320,8 +321,6 @@ done
 #############################
 
 #############################
-
-# TODO (Iris): Ideally get rid of these, kill -9 is not something that should be needed
 
 function killproc
 {
@@ -703,7 +702,6 @@ if [ ! -d $OTSDAQ_LOG_DIR ]; then
 	fi
 fi
 
-# TODO (Iris): Why do we need a LOG_ROOT that's different from LOG_DIR?
 export OTSDAQ_LOG_ROOT=$OTSDAQ_LOG_DIR
 
 if [ ! -d ${USER_DATA}/MessageFacilityConfigurations ];then
@@ -729,7 +727,6 @@ MPI_RUN_CMD=""
 ################## MacroMaker Mode OTS Launch ######################
 ####################################################################
 ####################################################################
-# TODO: move to it's own script file
 launchOTSMacromaker() {	
 	
 	#kill all things otsdaq, before launching new things	
@@ -739,55 +736,38 @@ launchOTSMacromaker() {
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive* &>/dev/null 2>&1 #hide output #remove alive file
 
 
-
+	out #blank line
 	out "${Blue}${REV}                                                       ${RstClr}"
 	out "${Blue}${REV} ***************************************************** ${RstClr}"
 	out "${Blue}${REV} *******  Launching ots in MacroMaker MODE!  ********* ${RstClr}"	
 	out "${Blue}${REV} ***************************************************** ${RstClr}"
 	out "${Blue}${REV}                                                       ${RstClr}"
-
+	out #blank line
 		
 	
 	export MACROMAKER_MODE=1
+	#parameters are shifted during initial parsing, so the filename input should always be at $1
+	# out "\$1 = ${1}"
 	
-	#assume verbose requires extra -v option
-	if [ $QUIET == 1 ]; then
-	
-		if [[ "x$2" = "x" ]]; then
-			out "Error! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
+	if [[ "x$1" = "x" ]]; then
+		out "Error! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
 
-			out "Example Macro Maker mode usage:"
-			out "\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+		out "Example Macro Maker mode usage:"
+		out "\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
+		out "\tots -mm \$USER_DATA/MacroMakerModeConfigurations/MacroMakerModeFhiclDump.fcl"
 
-			out "To get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
-			
-			exit
-		fi
-	
-		if [[ "$2" = /* ]]; then #absolute path
-			export CONFIGURATION_INIT_FCL=$2
-		else
-			export CONFIGURATION_INIT_FCL="${PWD}/$2"
-		fi
-	else
-	
-		if [[ "x$3" = "x" ]]; then
-			out "Error! Must specify fcl file path parameter for Macro Maker mode!${RstClr}"
-
-			out "Example Macro Maker mode usage:"
-			out "\tots -mm srcs/otsdaq/tools/fcl/MacroMakerModeExample.fcl"
-
-			out "To get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
-			
-			exit
-		fi
-		
-		if [[ "$3" = /* ]]; then #absolute path
-			export CONFIGURATION_INIT_FCL=$3
-		else
-			export CONFIGURATION_INIT_FCL="${PWD}/$3"
-		fi
+		out "To get started, copy the example FHiCL configuration file here: ${OTSDAQ_DIR}/tools/fcl/MacroMakerModeExample.fcl"
+		oout #blank lineut
+		out "Note: your last configure transition FE state is saved to \$USER_DATA/MacroMakerModeConfigurations/MacroMakerModeFhiclDump.fcl"
+		exit
 	fi
+
+	if [[ "$1" = /* ]]; then #absolute path
+		export CONFIGURATION_INIT_FCL=$1
+	else
+		export CONFIGURATION_INIT_FCL="${PWD}/$1"
+	fi
+	
 	out "CONFIGURATION_INIT_FCL = ${CONFIGURATION_INIT_FCL}"
 	
 	#setup wiz mode environment variables
@@ -802,16 +782,17 @@ launchOTSMacromaker() {
 	
 	
 	#check for mm xml file, if missing download it	
-	if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml ]; then
-		out "Downloading MacroMaker mode context configuration..."
-		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/XDAQConfigurations/otsConfiguration_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
-	fi
+	#FIXME after move to github
+	# if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml ]; then
+	# 	out "Downloading MacroMaker mode context configuration..."
+	# 	wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/XDAQConfigurations/otsConfiguration_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
+	# fi
 	
-	#check for message facility file, if missing download it	
-	if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
-		out "Downloading MacroMaker mode context configuration..."
-		wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate	
-	fi
+	# #check for message facility file, if missing download it	
+	# if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
+	# 	out "Downloading MacroMaker mode context configuration..."
+	# 	wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate	
+	# fi
 	
 		
 	#substitute environment variables into template wiz-mode xdaq config xml
@@ -823,6 +804,7 @@ launchOTSMacromaker() {
 
 	out "Starting MacroMaker mode on port ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
 	out "MacroMaker mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml"
+	
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
@@ -835,8 +817,11 @@ launchOTSMacromaker() {
 			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.${DATESTRING}.txt
 		fi		
 
+		out #blank line
 		out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
-		echo "${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &"
+		out #blank line
+
+		# echo "${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &"
 		${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &
 	else
 		${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &
@@ -848,18 +833,38 @@ launchOTSMacromaker() {
 		#test for relaunch
 		# 4 times quietly, then get louder
 		
+		sleep 2
 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 		#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 
-		# Loop 4 times waiting for it to come up
 		for t in {1..4}; do
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
-				sleep 1
+				sleep 2
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-			else
+				out "Checking http://${THIS_HOST}:${port}..."
+			else # found the supervisor!
+				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
+				# so clear alive, if ots script can not connect to port
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+					OTS_IS_ALIVE=
+				fi
 				break
 			fi
 		done
+		unset i
+
+		# # Loop 4 times waiting for it to come up
+		# for t in {1..4}; do
+		# 	if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+		# 		sleep 1
+		# 		OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+		# 	else
+		# 		break
+		# 	fi
+		# done
 		
 		# Alert user to the problem and keep trying
 		while [ "x$OTS_IS_ALIVE" == "x" ]; do
@@ -868,7 +873,9 @@ launchOTSMacromaker() {
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
+				out #blank line
 				out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}MacroMaker Mode${RstClr}' output into ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt ***  "
+				out #blank line
 				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt
 				${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-mm-${THIS_HOST}.txt &
 			else
@@ -876,9 +883,29 @@ launchOTSMacromaker() {
 			fi
 			LAST_OTS_PID=$!
 			
+			# #verify relaunch
+			# sleep 8 #give time before relaunch test
+			# OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+
 			#verify relaunch
-			sleep 8 #give time before relaunch test
+			sleep 2
 			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat)"
+			# Test for start 16 times with short sleep
+			for t in {1..16}; do
+				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
+					sleep 2
+					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+					out "Checking http://${THIS_HOST}:${port}..."
+				else  # found the supervisor!
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
+						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						OTS_IS_ALIVE=
+					fi
+					break
+				fi
+			done
 			
 		done
 		
@@ -900,7 +927,6 @@ export -f launchOTSMacromaker
 ################## Wiz Mode OTS Launch ###########################
 ####################################################################
 ####################################################################
-# TODO: Like the ones above and below this should be a seperate script
 launchOTSWiz() {	
 	
 	#kill all things otsdaq, before launching new things	
@@ -927,8 +953,7 @@ launchOTSWiz() {
 	export OTS_CONFIGURATION_WIZARD_SUPERVISOR_ID=290	
 	MAIN_PORT=2015
 
-    # TODO: This should not be here, this should always be setup prior to running this, we just duplicate (poorly) the work here
-
+   
 	if [ "x$OTS_WIZ_MODE_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_WIZ_MODE_MAIN_PORT}
 	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
@@ -1032,8 +1057,10 @@ launchOTSWiz() {
 			mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.${DATESTRING}.txt
 		fi
 		
-
+		out #blank line
 		out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
+		out #blank line
+
 		${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt &
 	else
 		${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &
@@ -1075,7 +1102,9 @@ launchOTSWiz() {
 			sleep 2
 			
 			if [ $QUIET == 1 ]; then
+				out #blank line
 				out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Wiz Mode${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt${RstClr}"
+				out #blank line
 				echo -e "\n\nAttempting restart\n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt
 				${xdaqPrefix} xdaq.exe -p ${PORT} -h ${THIS_HOST} -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_CMake.xml -c ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-wiz-${THIS_HOST}.txt &
 			else
@@ -1140,9 +1169,6 @@ export -f launchOTSWiz
 ################## Normal Mode OTS Launch ##########################
 ####################################################################
 ####################################################################
-# TODO: This should again be it's own script so that code is more manageable and reusable
-
-
 
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 #ContextPIDArray is context PID array 
@@ -1333,6 +1359,7 @@ launchOTS() {
 
 	unset xdaqPort #reset
 	unset xdaqHost #reset
+	unset xdaqLogFilename #reset
 	unset xdaqContextUID #reset	
 	unset contextHostname #reset (all xdaq context hostnames - maybe with repeats for remote launches, but remote launch loop checks for repeats)
 	unset contextPort #reset
@@ -1538,7 +1565,8 @@ launchOTS() {
 								info "Verified successful ots gateway context ${THIS_HOST}-${port} launch..."
 							fi
 							
-							GATEWAY_PID=$LAST_OTS_PID													
+							GATEWAY_PID=$LAST_OTS_PID		
+							gatewayLogFilename="otsdaq_quiet_run-gateway-${gatewayHostname}-${gatewayPort}.txt"											
 							out "Gateway-PID = ${Blue}${Bold}${GATEWAY_PID}${Rev}${RstClr}"
 							out #empty line
 
@@ -1554,6 +1582,7 @@ launchOTS() {
 									
 					xdaqPort+=($port)
 					xdaqHost+=($host)	
+					xdaqLogFilename+=(otsdaq_quiet_run-${host}-${port}.txt)
 					xdaqContextUID+=($contextUID)				
 					haveXDAQContextPort=true
 				fi
@@ -2021,7 +2050,6 @@ export -f launchOTSLogFind
 
 #########################################################
 #########################################################
-# TODO: this should be moved to a common utility library to get it out of the mess of main flow
 
 #make URL print out a function so that & syntax can be used to run in background (user has immediate terminal access)
 printMainURL() {	
@@ -2061,6 +2089,7 @@ printMainURL() {
 	done
 }  #end printMainURL
 export -f printMainURL
+
 
 #########################################################
 #########################################################
@@ -2112,7 +2141,7 @@ otsActionHandler() {
 				
 		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 				
-		#echo "message loop on ${HOSTNAME}"	
+		echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 
@@ -2219,6 +2248,55 @@ otsActionHandler() {
 		fi
 				
 		sleep 1
+
+		#manage log file rollover
+		if [ "x$OTS_LOG_ROLLOVER" != "x" ]; then
+			i=0
+			for contextPID in "${ContextPIDArray[@]}"
+			do
+				if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
+					i=$(( $i + 1 ))
+					continue
+				fi
+
+				logFileSize=$(stat -c %s "${OTSDAQ_LOG_DIR}/${xdaqLogFilename[$i]}")
+				if [ "x$logFileSize" == "x" ]; then
+					logFileSize=0
+					# out "File empty"
+				fi
+				# out "${Red}${Rev}Found Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${port} > ${xdaqLogFilename[$i]} size=${logFileSize} ${RstClr}"
+
+				# if log file > 100MB
+				if [ $logFileSize -gt 100000000 ]; then 
+					DATESTRING=`date +'%s'`	
+					xdaqLogFilename[$i]="otsdaq_quiet_run-gateway-${gatewayHostname}-${gatewayPort}-${DATESTRING}.txt"
+					
+					#from https://github.com/jerome-pouiller/reredirect/
+					reredirect -m "${OTSDAQ_LOG_DIR}/${xdaqLogFilename[$i]}" ${GATEWAY_PID}
+					out "${Red}${Rev}Doing log rollover of Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${port} > ${xdaqLogFilename[$i]}${RstClr}"
+				fi
+			done
+
+			if [[ -v GATEWAY_PID ]]; then
+				logFileSize=$(stat -c %s "${OTSDAQ_LOG_DIR}/${gatewayLogFilename}")
+				if [ "x$logFileSize" == "x" ]; then
+					logFileSize=0
+					# out "File empty"
+				fi
+				# out "${Red}${Rev}Found Gateway process ID ${GATEWAY_PID} -h ${gatewayHostname} -p ${gatewayPort} > ${gatewayLogFilename} size=${logFileSize} ${RstClr}"
+				
+				# if log file > 100MB
+				if [ $logFileSize -gt 100000000 ]; then 
+					DATESTRING=`date +'%s'`	
+					gatewayLogFilename="otsdaq_quiet_run-gateway-${gatewayHostname}-${gatewayPort}-${DATESTRING}.txt"
+					
+					#from https://github.com/jerome-pouiller/reredirect/
+					reredirect -m "${OTSDAQ_LOG_DIR}/${gatewayLogFilename}" ${GATEWAY_PID}
+					out "${Red}${Rev}Doing log rollover of Gateway process ID ${GATEWAY_PID} -h ${gatewayHostname} -p ${gatewayPort} > ${gatewayLogFilename}${RstClr}"
+				fi
+			fi
+		fi
+
 	done
 
 		

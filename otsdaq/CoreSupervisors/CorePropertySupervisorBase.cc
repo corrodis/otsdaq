@@ -193,6 +193,8 @@ void CorePropertySupervisorBase::indicateOtsAlive(const CorePropertySupervisorBa
 // will be wizard supervisor in wiz mode, otherwise Gateway Supervisor descriptor
 XDAQ_CONST_CALL xdaq::ApplicationDescriptor* CorePropertySupervisorBase::getGatewaySupervisorDescriptor(void)
 {
+	if(allSupervisorInfo_.isMacroMakerMode()) return 0;
+	
 	return allSupervisorInfo_.isWizardMode() ? allSupervisorInfo_.getWizardDescriptor() : allSupervisorInfo_.getGatewayDescriptor();
 }  // end getGatewaySupervisorDescriptor()
 

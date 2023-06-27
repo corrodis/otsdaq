@@ -136,7 +136,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 	volatile bool asyncFailureReceived_, asyncPauseExceptionReceived_, asyncStopExceptionReceived_;
 
-	unsigned int iterationIndex_, subIterationIndex_;
+	unsigned int iterationIndex_ = 0, subIterationIndex_ = 0;
 	bool         iterationWorkFlag_, subIterationWorkFlag_;
 
 	toolbox::fsm::State lastIterationState_;

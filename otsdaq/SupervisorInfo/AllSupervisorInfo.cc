@@ -217,6 +217,13 @@ void AllSupervisorInfo::init(xdaq::ApplicationContext* applicationContext)
 			       << "One was found." << __E__;
 			__SS_THROW__;
 		}
+		if(allMacroMakerTypeSupervisorInfo_.size() != 1)
+		{
+			__SS__ << "Error! For MacroMaker mode, must have one and only one " << *(XDAQContextTable::MacroMakerTypeClassNames_.begin()) << 
+				" as part of the context configuration! "
+			       << allMacroMakerTypeSupervisorInfo_.size() << " were found." << __E__;
+			__SS_THROW__;
+		}
 	}
 	else if((!theWizardInfo_ && !theSupervisorInfo_) || (theWizardInfo_ && theSupervisorInfo_))
 	{
@@ -319,7 +326,8 @@ const SupervisorInfo& AllSupervisorInfo::getGatewayInfo(void) const
 {
 	if(!theSupervisorInfo_)
 	{
-		__SS__ << "AllSupervisorInfo was not initialized or no Application of type " << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " found!" << __E__;
+		__SS__ << "AllSupervisorInfo was not initialized or no Application of type " << XDAQContextTable::GATEWAY_SUPERVISOR_CLASS << " found!" << __E__
+			<< StringMacros::stackTrace() << __E__;
 		__SS_THROW__;
 	}
 	return *theSupervisorInfo_;
