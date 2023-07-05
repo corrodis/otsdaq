@@ -666,7 +666,7 @@ catch(std::runtime_error& e)
 }
 catch(...)
 {
-	__SS__ << "Error saving table group!" <<  __E__;
+	__SS__ << "Error saving table group!" << __E__;
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleCreateTableGroupXML() catch
@@ -1675,18 +1675,15 @@ catch(...)
 	return false;
 }  // end handleAddDesktopIconXML() catch
 
-
 //==============================================================================
-void ConfigurationSupervisorBase::recursiveCopyTreeUIDNode	(
-					HttpXmlDocument&        xmlOut,
-					ConfigurationManagerRW* cfgMgr,
-					std::map<std::string /*modified table*/, TableVersion /* modified version */>& modifiedTablesMap,										
-					const unsigned int 		startingDepth,
-					const unsigned int      depth,
-					const unsigned int		numberOfInstances,
-					TableView*				cfgView,
-					const std::string&		uidToCopy
-					)
+void ConfigurationSupervisorBase::recursiveCopyTreeUIDNode(HttpXmlDocument&                                                               xmlOut,
+                                                           ConfigurationManagerRW*                                                        cfgMgr,
+                                                           std::map<std::string /*modified table*/, TableVersion /* modified version */>& modifiedTablesMap,
+                                                           const unsigned int                                                             startingDepth,
+                                                           const unsigned int                                                             depth,
+                                                           const unsigned int                                                             numberOfInstances,
+                                                           TableView*                                                                     cfgView,
+                                                           const std::string&                                                             uidToCopy)
 try
 {
 	__COUTV__(startingDepth);
@@ -1695,7 +1692,7 @@ try
 
 	// throw std::runtime_error("hello");
 
-	//Steps:
+	// Steps:
 	//	Assume temporary table version already created correctly for recursive level
 	//	Assume already decided it is correct to copy record at row parameter
 	//	Assume after modifications the version saving is handled above this function call
@@ -1704,44 +1701,38 @@ try
 	//		2. - check source row, for secondary copies through links
 	//		- if a link is found, check that there is not unanimous pointing by siblings
 	//			-- if unanimous pointing by siblings, do not do secondary copy, just point
-	//			3. -- if not unanimous, 
+	//			3. -- if not unanimous,
 	//				* use/create temporary version of child table
 	//				* for each instance
 	//					- recursive secondary copy (depth-1)
 	//				* save child table
-	//				
-
-
+	//
 
 	// Step 1. copy the target row
 	unsigned int col = cfgView->getColUID();
 	unsigned int row = cfgView->findRow(col, uidToCopy);
-			
-	__COUT__ << "Copying " << cfgView->getTableName() << " v" << cfgView->getVersion() <<
-		" row=" << row << " record=" << uidToCopy << " instances=" << numberOfInstances << __E__;
+
+	__COUT__ << "Copying " << cfgView->getTableName() << " v" << cfgView->getVersion() << " row=" << row << " record=" << uidToCopy
+	         << " instances=" << numberOfInstances << __E__;
 
 	cfgView->print();
 	// for(unsigned int i = 0; i < numberOfInstances; ++i)
-		cfgView->copyRows(
-			cfgMgr->getUsername(),
-			*cfgView /*source table*/,
-			row,
-			1 /*srcRowsToCopy*/,
-			-1 /*destOffsetRow*/,
-			true /*generateUniqueDataColumns*/,
-			uidToCopy /*baseNameAutoUID*/);  // make the name similar
-		     
+	cfgView->copyRows(cfgMgr->getUsername(),
+	                  *cfgView /*source table*/,
+	                  row,
+	                  1 /*srcRowsToCopy*/,
+	                  -1 /*destOffsetRow*/,
+	                  true /*generateUniqueDataColumns*/,
+	                  uidToCopy /*baseNameAutoUID*/);  // make the name similar
 
-	//if no secondary copies, done now
-	//check for secondary copies
+	// if no secondary copies, done now
+	// check for secondary copies
 	return;
 
-	//secondary table copies	
-	std::string tableName = "secondary";
+	// secondary table copies
+	std::string  tableName = "secondary";
 	TableVersion version(modifiedTablesMap.at(tableName));
 
-
-	
 	TableBase* table = cfgMgr->getTableByName(tableName);
 	try
 	{
@@ -1753,8 +1744,8 @@ try
 			throw;  // if temporary, there is no hope to find lost version
 
 		__COUT__ << "Failed to find stored version, so attempting to "
-						"load version: " <<
-						tableName << " v" << version << __E__;
+		            "load version: "
+		         << tableName << " v" << version << __E__;
 		cfgMgr->getVersionedTableByName(tableName, version);
 	}
 
@@ -1762,9 +1753,8 @@ try
 
 	if(version != table->getViewVersion())
 	{
-		__SS__ << "Target table version (" << version
-		           << ") is not the currently active version (" << table->getViewVersion()
-		           << "). Try refreshing the tree." << __E__;
+		__SS__ << "Target table version (" << version << ") is not the currently active version (" << table->getViewVersion() << "). Try refreshing the tree."
+		       << __E__;
 		__SS_THROW__;
 	}
 
@@ -1784,11 +1774,10 @@ try
 	cfgView = table->getTemporaryView(temporaryVersion);
 	cfgView->init();  // prepare maps
 
-	try //while editing
+	try  // while editing
 	{
-		//edit...
+		// edit...
 
-	
 		cfgView->init();  // verify new table (throws runtime_errors)
 	}
 	catch(...)  // erase temporary view before re-throwing error
@@ -1799,30 +1788,21 @@ try
 	}
 
 	ConfigurationSupervisorBase::saveModifiedVersionXML(
-	    xmlOut,
-	    cfgMgr,
-	    tableName,
-	    version,
-	    true /*make temporary*/,
-	    table,
-	    temporaryVersion,
-	    true /*ignoreDuplicates*/);  // save temporary version properly
+	    xmlOut, cfgMgr, tableName, version, true /*make temporary*/, table, temporaryVersion, true /*ignoreDuplicates*/);  // save temporary version properly
 }
 catch(std::runtime_error& e)
 {
-	__SS__ << ("Error copying tree target '" + uidToCopy +
-		"' at depth " + std::to_string(startingDepth-depth) + " in table '" +
-		cfgView->getTableName() +
-		".' " + std::string(e.what())) << __E__;
+	__SS__ << ("Error copying tree target '" + uidToCopy + "' at depth " + std::to_string(startingDepth - depth) + " in table '" + cfgView->getTableName() +
+	           ".' " + std::string(e.what()))
+	       << __E__;
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
-	__SS__ << ("Error copying tree target '" + uidToCopy +
-		"' at depth " + std::to_string(startingDepth-depth) + " in table '" +
-		cfgView->getTableName() +
-		".' ") << __E__;
+	__SS__ << ("Error copying tree target '" + uidToCopy + "' at depth " + std::to_string(startingDepth - depth) + " in table '" + cfgView->getTableName() +
+	           ".' ")
+	       << __E__;
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
-} //end recursiveCopyTreeUIDNode
+}  // end recursiveCopyTreeUIDNode

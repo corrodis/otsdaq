@@ -933,11 +933,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 		__SS_THROW__;
 	}
 
-	__COUT__ << "Current unique data entry is data[" << row
-		<< "][" << col << "] = '" << theDataView_[row][col]
-		<< "' baseValueAsString = " << baseValueAsString 
-		<< " doMathAppendStrategy = " << doMathAppendStrategy		
-		<< __E__;
+	__COUT__ << "Current unique data entry is data[" << row << "][" << col << "] = '" << theDataView_[row][col] << "' baseValueAsString = " << baseValueAsString
+	         << " doMathAppendStrategy = " << doMathAppendStrategy << __E__;
 
 	bool         firstConflict = true;
 	int          maxUniqueData = -1;
@@ -1606,11 +1603,8 @@ unsigned int TableView::getLinkGroupIDColumn(const std::string& childLinkIndex) 
 	// otherwise search (perhaps init() was not called)
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
 	{
-		//only check columns with link index associated...
-		if(columnsInfo_[col].isChildLink() || 
-			columnsInfo_[col].isChildLinkUID() ||
-			columnsInfo_[col].isChildLinkGroupID() || 
-			columnsInfo_[col].isGroupID())
+		// only check columns with link index associated...
+		if(columnsInfo_[col].isChildLink() || columnsInfo_[col].isChildLinkUID() || columnsInfo_[col].isChildLinkGroupID() || columnsInfo_[col].isGroupID())
 		{
 			if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
 				return col;
@@ -1917,7 +1911,7 @@ void TableView::reset(void)
 {
 	version_ = -1;
 	comment_ = "";
-	author_ = "";
+	author_  = "";
 	columnsInfo_.clear();
 	theDataView_.clear();
 }  // end reset()

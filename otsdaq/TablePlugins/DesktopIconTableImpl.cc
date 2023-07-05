@@ -36,23 +36,23 @@ const std::string DesktopIconTable::COL_PARAMETER_VALUE = "windowParameterValue"
 const std::string DesktopIconTable::ICON_TABLE      = "DesktopIconTable";
 const std::string DesktopIconTable::PARAMETER_TABLE = "DesktopWindowParameterTable";
 
-//#define COL_NAME "IconName"
-//#define COL_STATUS TableViewColumnInfo::COL_NAME_STATUS
-//#define COL_CAPTION "Caption"
-//#define COL_ALTERNATE_TEXT "AlternateText"
-//#define COL_FORCE_ONLY_ONE_INSTANCE "ForceOnlyOneInstance"
-//#define COL_REQUIRED_PERMISSION_LEVEL "RequiredPermissionLevel"
-//#define COL_IMAGE_URL "ImageURL"
-//#define COL_WINDOW_CONTENT_URL "WindowContentURL"
-//#define COL_APP_LINK "LinkToApplicationTable"
-//#define COL_PARAMETER_LINK "LinkToParameterTable"
-//#define COL_PARAMETER_KEY "windowParameterKey"
-//#define COL_PARAMETER_VALUE "windowParameterValue"
-//#define COL_FOLDER_PATH "FolderPath"
+// #define COL_NAME "IconName"
+// #define COL_STATUS TableViewColumnInfo::COL_NAME_STATUS
+// #define COL_CAPTION "Caption"
+// #define COL_ALTERNATE_TEXT "AlternateText"
+// #define COL_FORCE_ONLY_ONE_INSTANCE "ForceOnlyOneInstance"
+// #define COL_REQUIRED_PERMISSION_LEVEL "RequiredPermissionLevel"
+// #define COL_IMAGE_URL "ImageURL"
+// #define COL_WINDOW_CONTENT_URL "WindowContentURL"
+// #define COL_APP_LINK "LinkToApplicationTable"
+// #define COL_PARAMETER_LINK "LinkToParameterTable"
+// #define COL_PARAMETER_KEY "windowParameterKey"
+// #define COL_PARAMETER_VALUE "windowParameterValue"
+// #define COL_FOLDER_PATH "FolderPath"
 
 // XDAQ App Column names
 const std::string DesktopIconTable::COL_APP_ID = "Id";
-//#define COL_APP_ID "Id"
+// #define COL_APP_ID "Id"
 
 //==============================================================================
 DesktopIconTable::DesktopIconTable(void) : TableBase(DesktopIconTable::ICON_TABLE)

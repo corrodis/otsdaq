@@ -3,7 +3,7 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 
-//#include "ConfigurationInterface.h"
+// #include "ConfigurationInterface.h"
 
 #include <list>
 #include <map>

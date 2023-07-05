@@ -545,7 +545,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isContext = false;
 			if(inContext)  // there was a member in context!
 			{
-				__SS__ << "This group is an incomplete match to a Context group.\n";				
+				__SS__ << "This group is an incomplete match to a Context group.\n";
 				ss << "\nTo be a Context group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -574,7 +574,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isBackbone = false;
 			if(inBackbone)  // there was a member in backbone!
 			{
-				__SS__ << "This group is an incomplete match to a Backbone group.\n";				
+				__SS__ << "This group is an incomplete match to a Backbone group.\n";
 				ss << "\nTo be a Backbone group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -2187,8 +2187,7 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 
 	if(pset.get_names().size() == 0)
 	{
-		__GEN_SS__ << "Empty fcl configuration parameter set found! File: " <<
-			 fhiclPath << __E__;
+		__GEN_SS__ << "Empty fcl configuration parameter set found! File: " << fhiclPath << __E__;
 		__SS_THROW__;
 	}
 
@@ -2277,7 +2276,7 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		view->setValue("FESupervisorTable", 0, colMap["LinkToSupervisorTable"]);
 		view->setValue("MacroMakerFESupervisor", 0, colMap["LinkToSupervisorUID"]);
 		view->setValue("1", 0, colMap["Status"]);
-		view->setValue(__ENV__("FE_SUPERVISOR_ID"), 0, colMap["Id"]); // XDAQ LID
+		view->setValue(__ENV__("FE_SUPERVISOR_ID"), 0, colMap["Id"]);  // XDAQ LID
 
 		__GEN_COUT__ << "Done adding application record..." << __E__;
 		view->print();
@@ -2478,7 +2477,7 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 					ss << __E__;
 					__SS_THROW__;
 				}
-				//skip overwriting group ID - already setup by parent group link
+				// skip overwriting group ID - already setup by parent group link
 				if(view->getColumnInfo(colIt->second).isGroupID())
 					continue;
 
@@ -2564,8 +2563,6 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 					                           linkPset.get<fhicl::ParameterSet>(linkRecords[0]) /*fhicl parameter set*/,
 					                           linkRecords[0] /*uid*/,
 					                           "" /*groupID*/);
-
-				
 				}
 				else
 				{
@@ -2583,7 +2580,6 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 						                           groupRecord /*uid*/,
 						                           groupName /*groupID*/,
 						                           childLinkIndex /*groupLinkIndex*/);
-					
 					}
 				}
 
@@ -2604,8 +2600,6 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 				                           groupName /*groupID*/,
 				                           groupLinkIndex /*groupLinkIndex*/);
 			}
-
-			
 		}
 		else
 		{
@@ -2615,8 +2609,6 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 		__GEN_COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
 		view->print();
 	}
-
-	
 
 }  // end recursiveInitFromFhiclPSet()
 
