@@ -134,7 +134,7 @@ FESupervisor::~FESupervisor(void)
 xoap::MessageReference FESupervisor::frontEndCommunicationRequest(xoap::MessageReference message)
 try
 {
-	//LORE__SUP_COUT__ << "FE Request received: " << SOAPUtilities::translate(message) << __E__;
+	// LORE__SUP_COUT__ << "FE Request received: " << SOAPUtilities::translate(message) << __E__;
 
 	if(!theFEInterfacesManager_)
 	{
@@ -344,7 +344,7 @@ try
 	else if(type == "feMacroMultiDimensionalCheck" ||  // from iterator
 	        type == "macroMultiDimensionalCheck")
 	{
-		//LORE__SUP_COUTV__(type);
+		// LORE__SUP_COUTV__(type);
 		if(type[0] == 'm')
 			rxParameters.addParameter("macroName");
 		else
@@ -360,8 +360,8 @@ try
 		else
 			macroName = rxParameters.getValue("feMacroName");
 
-		//LORE__SUP_COUTV__(targetInterfaceID);
-		//LORE__SUP_COUTV__(macroName);
+		// LORE__SUP_COUTV__(targetInterfaceID);
+		// LORE__SUP_COUTV__(macroName);
 
 		bool done = false;
 		try
@@ -389,7 +389,7 @@ try
 		txParameters.addParameter("Done", done ? "1" : "0");
 		SOAPUtilities::addParameters(replyMessage, txParameters);
 
-		//LORE__SUP_COUT__ << "Sending FE macro result: " << SOAPUtilities::translate(replyMessage) << __E__;
+		// LORE__SUP_COUT__ << "Sending FE macro result: " << SOAPUtilities::translate(replyMessage) << __E__;
 
 		return replyMessage;
 	}  // end type (fe)MacroMultiDimensionalCheck

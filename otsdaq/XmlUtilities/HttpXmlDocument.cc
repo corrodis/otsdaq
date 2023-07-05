@@ -4,7 +4,7 @@
 #include "otsdaq/MessageFacility/MessageFacility.h"
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/ConvertToXML.h"
-//#include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
+// #include "otsdaq_cmsoutertracker/otsdaq-cmsoutertracker/Ph2_ACF/Utils/MessageTools.h"
 
 #include <stdexcept>
 #include <xercesc/dom/DOM.hpp>
@@ -14,8 +14,8 @@
 #include <xercesc/dom/DOMImplementation.hpp>
 #include <xercesc/dom/DOMImplementationLS.hpp>
 #include <xercesc/dom/DOMImplementationRegistry.hpp>
-//#include <xercesc/dom/DOMLSSerializer.hpp>
-//#include <xercesc/dom/DOMLSOutput.hpp>
+// #include <xercesc/dom/DOMLSSerializer.hpp>
+// #include <xercesc/dom/DOMLSOutput.hpp>
 #include <xercesc/dom/DOMNodeIterator.hpp>
 #include <xercesc/dom/DOMNodeList.hpp>
 #include <xercesc/dom/DOMText.hpp>

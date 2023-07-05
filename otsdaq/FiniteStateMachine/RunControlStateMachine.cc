@@ -319,7 +319,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	{
 		__GEN_COUT__ << "Clearing Errors after failure..." << std::endl;
 		theStateMachine_.setErrorMessage("", false /*append*/);  // clear error message
-		asyncFailureReceived_        = false;
+		asyncFailureReceived_ = false;
 	}
 
 	__GEN_COUTV__(command);

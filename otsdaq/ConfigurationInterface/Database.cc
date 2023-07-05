@@ -5,7 +5,7 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 
-//#include "ConfigurationInterface.h"
+// #include "ConfigurationInterface.h"
 #include "artdaq-database/ConfigurationDB/configurationdbifc.h"
 
 #include "artdaq-database/BasicTypes/basictypes.h"

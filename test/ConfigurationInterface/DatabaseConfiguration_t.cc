@@ -8,14 +8,14 @@
 #include <iostream>
 #include <memory>
 #include <string>
-//#include <otsdaq_demo/otsdaq-demo/FEInterfaces/FEWROtsUDPFSSRInterface.h>
-//#include
+// #include <otsdaq_demo/otsdaq-demo/FEInterfaces/FEWROtsUDPFSSRInterface.h>
+// #include
 //<otsdaq_demo/otsdaq-demo/UserConfigurationDataFormats/FEWROtsUDPFSSRInterfaceConfiguration.h>
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
-//#include "otsdaq/TablePlugins/Configurations.h"
-//#include "otsdaq/TablePlugins/ConfigurationAliases.h"
-//#include "otsdaq/TablePlugins/FETable.h"
+// #include "otsdaq/TablePlugins/Configurations.h"
+// #include "otsdaq/TablePlugins/ConfigurationAliases.h"
+// #include "otsdaq/TablePlugins/FETable.h"
 #include "artdaq-database/JsonDocument/JSONDocument.h"
 #include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
 #include "otsdaq/PluginMakers/MakeInterface.h"

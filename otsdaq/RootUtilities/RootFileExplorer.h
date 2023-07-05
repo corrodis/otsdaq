@@ -22,10 +22,10 @@
 #include <TList.h>
 #include <TRegexp.h>
 
-//#include "otsdaq/Macros/CoutMacros.h"
+// #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/MessageFacility/MessageFacility.h"
-//#include "otsdaq/XmlUtilities/ConvertFromXML.h"
-//#include "otsdaq/XmlUtilities/ConvertToXML.h"
+// #include "otsdaq/XmlUtilities/ConvertFromXML.h"
+// #include "otsdaq/XmlUtilities/ConvertToXML.h"
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/framework/LocalFileFormatTarget.hpp>
@@ -52,11 +52,11 @@
 #include <xercesc/util/XMLUni.hpp>
 #include <xercesc/util/XercesDefs.hpp>
 #include <xercesc/validators/common/Grammar.hpp>
-//#include <xercesc/dom/DOMLSSerializer.hpp>
-//#include <xercesc/dom/DOMLSOutput.hpp>
+// #include <xercesc/dom/DOMLSSerializer.hpp>
+// #include <xercesc/dom/DOMLSOutput.hpp>
 
 #include "otsdaq/Macros/BinaryStringMacros.h"
-//#include "otsdaq/XmlUtilities/HttpXmlDocument.h"
+// #include "otsdaq/XmlUtilities/HttpXmlDocument.h"
 
 #if defined(XERCES_NEW_IOSTREAMS)
 #include <iostream>

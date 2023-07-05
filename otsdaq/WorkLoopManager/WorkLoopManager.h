@@ -44,9 +44,9 @@ class WorkLoopManager
 	xoap::MessageReference getMessage(toolbox::task::WorkLoop* workLoop);
 
   private:
-	const std::string cWorkLoopType_;
-	static constexpr int maxWorkLoops = 5;
-	static constexpr int     timeOutInSeconds = 20;
+	const std::string    cWorkLoopType_;
+	static constexpr int maxWorkLoops     = 5;
+	static constexpr int timeOutInSeconds = 20;
 	struct WorkLoopStruct
 	{
 		toolbox::task::WorkLoop* workLoop;

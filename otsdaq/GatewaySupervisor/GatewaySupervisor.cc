@@ -180,15 +180,13 @@ void GatewaySupervisor::init(void)
 		{
 			__COUT__ << "App Status checking is disabled." << __E__;
 
-			//set all app status to "Not Monitored" so that FSM changes ignore missing app status
+			// set all app status to "Not Monitored" so that FSM changes ignore missing app status
 			for(const auto& it : allSupervisorInfo_.getAllSupervisorInfo())
 			{
 				auto appInfo = it.second;
-				allSupervisorInfo_.setSupervisorStatus(appInfo, 
-					SupervisorInfo::APP_STATUS_NOT_MONITORED, 
-					0 /* progressInteger */, "" /* detail */);
+				allSupervisorInfo_.setSupervisorStatus(appInfo, SupervisorInfo::APP_STATUS_NOT_MONITORED, 0 /* progressInteger */, "" /* detail */);
 			}
-		}	
+		}
 
 	}  // end checking of Application Status
 
@@ -204,7 +202,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 	bool        firstError = true;
 	std::string status, progress, detail, appName;
 	int         progressInteger;
-	bool oneStatusReqHasFailed = false;
+	bool        oneStatusReqHasFailed = false;
 
 	std::map<std::string /* appName */, bool /* lastStatusGood */> appLastStatusGood;
 
@@ -266,9 +264,10 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					detail = (theSupervisor->theStateMachine_.isInTransition()
 					              ? theSupervisor->theStateMachine_.getCurrentTransitionName(theSupervisor->stateMachineLastCommandInput_)
 					              : "");
-					//make sure broadcast message status is not being updated
+					// make sure broadcast message status is not being updated
 					std::lock_guard<std::mutex> lock(theSupervisor->broadcastCommandStatusUpdateMutex_);
-					if(detail != "" && theSupervisor->broadcastCommandStatus_ != "") detail += " - " + theSupervisor->broadcastCommandStatus_;
+					if(detail != "" && theSupervisor->broadcastCommandStatus_ != "")
+						detail += " - " + theSupervisor->broadcastCommandStatus_;
 				}
 				catch(...)
 				{
@@ -277,7 +276,6 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 			}
 			else  // get non-gateway status
 			{
-
 				// pass the application as a parameter to tempMessage
 				SOAPParameters appPointer;
 				appPointer.addParameter("ApplicationPointer");
@@ -322,11 +320,8 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					if(!appLastStatusGood[appName])
 					{
 						__COUT__ << "First Good Status from "
-												<< " Supervisor instance = '" << appName
-												<< "' [LID=" << appInfo.getId() << "] in Context '"
-												<< appInfo.getContextName() << "' [URL=" <<
-												appInfo.getURL()
-												<< "].\n\n";
+						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
+						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
 					}
 					appLastStatusGood[appName] = true;
@@ -345,14 +340,11 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					if(appLastStatusGood[appName])
 					{
 						__COUT__ << "Getting Status "
-												<< " Supervisor instance = '" << appName
-												<< "' [LID=" << appInfo.getId() << "] in Context '"
-												<< appInfo.getContextName() << "' [URL=" <<
-												appInfo.getURL()
-												<< "].\n\n";
+						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
+						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
 						__COUT_WARN__ << "Failed to send getStatus SOAP Message - will suppress repeat errors: " << e.what() << __E__;
-					} //else quiet repeat error messages
+					}  // else quiet repeat error messages
 					appLastStatusGood[appName] = false;
 				}
 				catch(...)
@@ -369,14 +361,11 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					if(appLastStatusGood[appName])
 					{
 						__COUT__ << "Getting Status "
-												<< " Supervisor instance = '" << appName
-												<< "' [LID=" << appInfo.getId() << "] in Context '"
-												<< appInfo.getContextName() << "' [URL=" <<
-												appInfo.getURL()
-												<< "].\n\n";
+						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
+						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
 						__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error. Will suppress repeat errors." << __E__;
-					} //else quiet repeat error messages
+					}  // else quiet repeat error messages
 					appLastStatusGood[appName] = false;
 				}
 			}  // end with non-gateway status request handling
@@ -392,7 +381,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 
 			// if("ContextARTDAQ" == appInfo.getContextName() )
 			// 	__COUTV__(progressInteger);
-				
+
 			theSupervisor->allSupervisorInfo_.setSupervisorStatus(appInfo, status, progressInteger, detail);
 
 		}  // end of app loop
@@ -1369,8 +1358,7 @@ void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*
 void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 {
 	__COUT__ << "Error occured - FSM current state: "
-	         << "Failed? = " <<
-	    theStateMachine_.getCurrentStateName() << //There may be a race condition here
+	         << "Failed? = " << theStateMachine_.getCurrentStateName() <<  // There may be a race condition here
 	    //	when async errors occur (e.g. immediately in running)
 	    " from " << theStateMachine_.getProvenanceStateName() << __E__;
 
@@ -1472,7 +1460,6 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	}
 
 	__COUT_ERR__ << "\n" << ss.str();
-
 
 	theStateMachine_.setErrorMessage(ss.str());
 
@@ -1819,9 +1806,9 @@ void GatewaySupervisor::transitionShuttingDown(toolbox::Event::Reference /*e*/)
 try
 {
 	checkForAsyncError();
-	
-	__COUT__ << "transitionShuttingDown -- Fsm current state: " << theStateMachine_.getCurrentStateName() << 
-		" message: " << theStateMachine_.getCurrentStateName() << __E__;
+
+	__COUT__ << "transitionShuttingDown -- Fsm current state: " << theStateMachine_.getCurrentStateName()
+	         << " message: " << theStateMachine_.getCurrentStateName() << __E__;
 
 	RunControlStateMachine::theProgressBar_.step();
 	makeSystemLogEntry("System shutting down.");
@@ -2405,24 +2392,23 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			__COUTV__(givenAppStatus);
 
 			__COUTV__(appInfo.getStatus());
-			//wait for app to exist in status before sending commands
+			// wait for app to exist in status before sending commands
 			int waitAttempts = 0;
 			while(appInfo.getStatus() == SupervisorInfo::APP_STATUS_UNKNOWN)
 			{
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-					         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state." << __E__;
+				         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state." << __E__;
 				++waitAttempts;
 				if(waitAttempts == 10)
 				{
 					__SS__ << "Error! Gateway Supervisor failed to send message to app in unknown state "
-				          "Supervisor instance = '"
-				       << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
-				       << "].\n\n";
+					          "Supervisor instance = '"
+					       << appInfo.getName() << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName() << "' [URL=" << appInfo.getURL()
+					       << "].\n\n";
 					__COUT_ERR__ << ss.str();
 					XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				}
 				sleep(2);
-				
 			}
 
 			// start recursive mutex scope (same thread can lock multiple times, but needs to unlock the same)
@@ -2481,11 +2467,9 @@ bool GatewaySupervisor::handleBroadcastMessageTarget(const SupervisorInfo&  appI
 			__COUT__ << "Broadcast thread " << threadIndex << "\t"
 			         << "2nd try passed.." << __E__;
 		}  // end send catch
-	
 
 		__COUT__ << "Broadcast thread " << threadIndex << "\t"
-		         << "Reply received from " << appInfo.getName() << " [LID=" << appInfo.getId() << 
-				 "]: " << reply << __E__;
+		         << "Reply received from " << appInfo.getName() << " [LID=" << appInfo.getId() << "]: " << reply << __E__;
 
 		if((reply != command + "Done") && (reply != command + "Response") && (reply != command + "Iterate") && (reply != command + "SubIterate"))
 		{
@@ -2657,7 +2641,7 @@ void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr,
 //	Update Supervisor Info based on result of transition.
 void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 {
-	{ //create lock scope and clear status
+	{  // create lock scope and clear status
 		std::lock_guard<std::mutex> lock(broadcastCommandStatusUpdateMutex_);
 		broadcastCommandStatus_ = "";
 	}
@@ -2846,7 +2830,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 					bool done;
 					do
 					{
-						done = true;
+						done                              = true;
 						unsigned int numOfThreadsWithWork = 0;
 						unsigned int lastUnfinishedThread = -1;
 
@@ -2855,7 +2839,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 							{
 								done = false;
 								++numOfThreadsWithWork;
-								lastUnfinishedThread = i;								
+								lastUnfinishedThread = i;
 							}
 							else if(broadcastThreadStructs[i].error_)
 							{
@@ -2864,22 +2848,20 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 								         << broadcastThreadStructs[i].getReply() << __E__;
 								XCEPT_RAISE(toolbox::fsm::exception::Exception, broadcastThreadStructs[i].getReply());
 							}
-						
-						if(!done) //update status and sleep
+
+						if(!done)  // update status and sleep
 						{
 							std::stringstream waitSs;
-							waitSs << "Waiting on " << numOfThreadsWithWork << " of " <<
-								numberOfThreads << " threads.";
+							waitSs << "Waiting on " << numOfThreadsWithWork << " of " << numberOfThreads << " threads.";
 							if(numOfThreadsWithWork == 1)
-							{		
-								waitSs << ".. " <<					
-									broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getName() << ":" << 
-									broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getId();
+							{
+								waitSs << ".. " << broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getName() << ":"
+								       << broadcastThreadStructs[lastUnfinishedThread].getAppInfo().getId();
 							}
 							waitSs << __E__;
 							__COUT__ << waitSs.str();
-							
-							{ //create lock scope that does not include sleep
+
+							{  // create lock scope that does not include sleep
 								std::lock_guard<std::mutex> lock(broadcastCommandStatusUpdateMutex_);
 								broadcastCommandStatus_ = waitSs.str();
 							}

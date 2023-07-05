@@ -7,8 +7,8 @@
 #include "otsdaq/GatewaySupervisor/Iterator.h"
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq/SupervisorInfo/AllSupervisorInfo.h"
-//#include "otsdaq/SystemMessenger/SystemMessenger.h"
-//#include "otsdaq/TableCore/TableGroupKey.h"
+// #include "otsdaq/SystemMessenger/SystemMessenger.h"
+// #include "otsdaq/TableCore/TableGroupKey.h"
 #include "otsdaq/WebUsersUtilities/WebUsers.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"
 
@@ -20,7 +20,7 @@
 #include <xdaq/Application.h>
 #pragma GCC diagnostic pop
 #include "otsdaq/Macros/XDAQApplicationMacros.h"
-//#include <toolbox/fsm/FiniteStateMachine.h>
+// #include <toolbox/fsm/FiniteStateMachine.h>
 #include <toolbox/task/WorkLoop.h>
 #include <xdata/String.h>
 #include <xgi/Method.h>
