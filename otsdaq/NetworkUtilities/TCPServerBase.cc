@@ -1,11 +1,11 @@
-//#ifndef BEAGLEBONE
-//#include "otsdaq_cmsburninbox/BeagleBone/BeagleBoneUtils/TCPServerBase.h"
-//#else
+// #ifndef BEAGLEBONE
+// #include "otsdaq_cmsburninbox/BeagleBone/BeagleBoneUtils/TCPServerBase.h"
+// #else
 #include "otsdaq/NetworkUtilities/TCPServerBase.h"
 #include "otsdaq/Macros/CoutMacros.h"
 #include "otsdaq/NetworkUtilities/TCPTransmitterSocket.h"
 
-//#endif
+// #endif
 
 #include <arpa/inet.h>
 #include <errno.h>   // errno
@@ -24,8 +24,8 @@ using namespace ots;
 TCPServerBase::TCPServerBase(unsigned int serverPort, unsigned int maxNumberOfClients)
     : fMaxNumberOfClients(maxNumberOfClients), fServerPort(serverPort), fAccept(true)
 {
-	//0 or -1 means no restrictions on the number of clients
-	if(fMaxNumberOfClients == 0) 
+	// 0 or -1 means no restrictions on the number of clients
+	if(fMaxNumberOfClients == 0)
 		fMaxNumberOfClients = (unsigned)-1;
 	// CANNOT GO IN THE CONSTRUCTOR OR IT MIGHT START BEFORE THE CHILD CLASS CONSTRUCTOR IS FULLY CONSTRUCTED
 	// THIS MIGHT RESULT IN THE CALL OF THE VIRTUAL TCPServerBase::acceptConnections

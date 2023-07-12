@@ -28,7 +28,7 @@ void TCPServer::connectClient(TCPTransceiverSocket* socket)
 {
 	while(true)
 	{
-		//std::cout << __PRETTY_FUNCTION__ << "Waiting for message for socket  #: " << socket->getSocketId() << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << "Waiting for message for socket  #: " << socket->getSocketId() << std::endl;
 		std::string message;
 		try
 		{

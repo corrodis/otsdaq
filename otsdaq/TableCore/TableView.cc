@@ -933,11 +933,8 @@ const std::string& TableView::setUniqueColumnValue(unsigned int row,
 		__SS_THROW__;
 	}
 
-	__COUT__ << "Current unique data entry is data[" << row
-		<< "][" << col << "] = '" << theDataView_[row][col]
-		<< "' baseValueAsString = " << baseValueAsString 
-		<< " doMathAppendStrategy = " << doMathAppendStrategy		
-		<< __E__;
+	__COUT__ << "Current unique data entry is data[" << row << "][" << col << "] = '" << theDataView_[row][col] << "' baseValueAsString = " << baseValueAsString
+	         << " doMathAppendStrategy = " << doMathAppendStrategy << __E__;
 
 	bool         firstConflict = true;
 	int          maxUniqueData = -1;
@@ -1908,7 +1905,7 @@ void TableView::reset(void)
 {
 	version_ = -1;
 	comment_ = "";
-	author_ = "";
+	author_  = "";
 	columnsInfo_.clear();
 	theDataView_.clear();
 }  // end reset()

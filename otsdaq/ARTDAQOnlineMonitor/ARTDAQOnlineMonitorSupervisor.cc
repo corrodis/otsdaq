@@ -389,7 +389,7 @@ void ots::ARTDAQOnlineMonitorSupervisor::StartArtProcess(const std::string& conf
 	auto startTime = std::chrono::steady_clock::now();
 
 	art_pid_ = std::shared_ptr<std::atomic<pid_t>>(new std::atomic<pid_t>(-1));
-	boost::thread thread([this,config_file] { RunArt(config_file, art_pid_); });
+	boost::thread thread([this, config_file] { RunArt(config_file, art_pid_); });
 	thread.detach();
 
 	while((*art_pid_ <= 0) && (artdaq::TimeUtils::GetElapsedTime(startTime) < 5))

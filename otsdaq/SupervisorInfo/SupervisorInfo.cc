@@ -2,8 +2,8 @@
 
 using namespace ots;
 
-const std::string SupervisorInfo::APP_STATUS_UNKNOWN 		= "Unknown";
-const std::string SupervisorInfo::APP_STATUS_NOT_MONITORED 	= "Not Monitored";
+const std::string SupervisorInfo::APP_STATUS_UNKNOWN       = "Unknown";
+const std::string SupervisorInfo::APP_STATUS_NOT_MONITORED = "Not Monitored";
 
 //=====================================================================================
 void SupervisorInfo::setStatus(const std::string& status, const unsigned int progress, const std::string& detail)

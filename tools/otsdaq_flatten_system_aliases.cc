@@ -8,8 +8,8 @@
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
-//#include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
-//#include "artdaq-database/JsonDocument/JSONDocument.h"
+// #include "artdaq-database/StorageProviders/FileSystemDB/provider_filedb_index.h"
+// #include "artdaq-database/JsonDocument/JSONDocument.h"
 
 // usage:
 // otsdaq_flatten_system_aliases <baseFlatVersion> <pathToSwapIn (optional)>

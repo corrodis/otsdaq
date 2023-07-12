@@ -12,7 +12,7 @@ using namespace ots;
 #define __MF_SUBJECT__ "FSM"
 #define mfSubject_ std::string("FSM-") + getStateMachineName()
 
-const std::string FiniteStateMachine::FAILED_STATE_NAME  = "Failed";
+const std::string FiniteStateMachine::FAILED_STATE_NAME = "Failed";
 
 //==============================================================================
 FiniteStateMachine::FiniteStateMachine(const std::string& stateMachineName)
@@ -168,7 +168,8 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		for(const auto& transitionPair : transitions)
 		{
 			__GEN_COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
-			__GEN_COUT__ << "Taking fail transition from Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName() << __E__;
+			__GEN_COUT__ << "Taking fail transition from Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName()
+			             << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));
 
 			try

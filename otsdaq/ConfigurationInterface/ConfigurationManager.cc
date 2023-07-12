@@ -545,7 +545,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isContext = false;
 			if(inContext)  // there was a member in context!
 			{
-				__SS__ << "This group is an incomplete match to a Context group.\n";				
+				__SS__ << "This group is an incomplete match to a Context group.\n";
 				ss << "\nTo be a Context group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
@@ -574,7 +574,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			isBackbone = false;
 			if(inBackbone)  // there was a member in backbone!
 			{
-				__SS__ << "This group is an incomplete match to a Backbone group.\n";				
+				__SS__ << "This group is an incomplete match to a Backbone group.\n";
 				ss << "\nTo be a Backbone group, the members must exactly match "
 				   << "the following members:\n";
 				int i = 0;
