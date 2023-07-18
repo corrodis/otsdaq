@@ -2164,7 +2164,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						// check for alpha-based similarity groupings (ignore numbers and special characters)
 						unsigned int              maxScore = 0;
 						unsigned int              score;
-						unsigned int              minScore         = -1;
+						unsigned int              minScore = -1;
 						std::vector<unsigned int> scoreVector;
 						scoreVector.push_back(-1);  // for 0 index (it's perfect)
 						for(unsigned int i = 1; i < multiNodeNames.size(); ++i)
@@ -2225,12 +2225,12 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 							if(score > maxScore)
 							{
-								maxScore         = score;
+								maxScore = score;
 							}
 
 							if(score < minScore)
 							{
-								minScore         = score;
+								minScore = score;
 							}
 
 						}  // end multi-node member scoring loop

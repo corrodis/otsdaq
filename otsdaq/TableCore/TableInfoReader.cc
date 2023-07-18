@@ -4,7 +4,7 @@
 #include "otsdaq/XmlUtilities/ConvertFromXML.h"
 #include "otsdaq/XmlUtilities/DOMTreeErrorReporter.h"
 
-//#include "TimeFormatter.h"
+// #include "TimeFormatter.h"
 
 #include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMImplementation.hpp>
@@ -12,7 +12,7 @@
 #include <xercesc/dom/DOMNodeList.hpp>
 #include <xercesc/dom/DOMText.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
-//#include <xercesc/dom/DOMWriter.hpp>
+// #include <xercesc/dom/DOMWriter.hpp>
 
 #include <xercesc/framework/LocalFileFormatTarget.hpp>
 #include <xercesc/util/OutOfMemoryException.hpp>

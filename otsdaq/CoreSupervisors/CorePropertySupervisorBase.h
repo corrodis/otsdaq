@@ -11,10 +11,10 @@
 
 #include "otsdaq/WebUsersUtilities/WebUsers.h"  //for WebUsers::RequestUserInfo
 
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-//#include <xdaq/Application.h>
-//#pragma GCC diagnostic pop
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// #include <xdaq/Application.h>
+// #pragma GCC diagnostic pop
 
 #include "otsdaq/SOAPUtilities/SOAPMessenger.h"
 #include "otsdaq/WorkLoopManager/WorkLoopManager.h"

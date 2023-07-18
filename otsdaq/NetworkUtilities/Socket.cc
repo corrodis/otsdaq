@@ -8,18 +8,18 @@
 
 #include <arpa/inet.h>
 #include <unistd.h>
-//#include <sys/socket.h>
+// #include <sys/socket.h>
 #include <netdb.h>
-//#include <ifaddrs.h>
-//#include <sys/ioctl.h>
-//#if defined(SIOCGIFHWADDR)
-//#include <net/if.h>
-//#else
-//#include <net/if_dl.h>
-//#endif
-//#include <cstdlib>
+// #include <ifaddrs.h>
+// #include <sys/ioctl.h>
+// #if defined(SIOCGIFHWADDR)
+// #include <net/if.h>
+// #else
+// #include <net/if_dl.h>
+// #endif
+// #include <cstdlib>
 #include <cstring>
-//#include <cstdio>
+// #include <cstdio>
 
 using namespace ots;
 

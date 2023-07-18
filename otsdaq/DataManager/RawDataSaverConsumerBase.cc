@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <cassert>
 #include <iostream>
-//#include <string.h> //memcpy
+// #include <string.h> //memcpy
 #include <fstream>
 #include <sstream>
 
