@@ -53,6 +53,13 @@ void ARTDAQBoardReaderTable::init(ConfigurationManager* configManager)
 	if(!isFirstAppInContext_)
 		return;
 
+	//if artdaq supervisor is disabled, skip fcl handling
+	if(!ARTDAQTableBase::isARTDAQEnabled(configManager))
+	{
+		__COUT_INFO__ << "ARTDAQ Supervisor is disabled, so skipping fcl handling." << __E__;
+		return;
+	}
+
 	// make directory just in case
 	mkdir((ARTDAQTableBase::ARTDAQ_FCL_PATH).c_str(), 0755);
 

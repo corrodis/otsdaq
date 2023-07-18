@@ -404,7 +404,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, s
 //	adds to txBuffer if sample should be sent to monitor server
 void FESlowControlsChannel::handleSample(const std::string& universalReadValue, std::string& txBuffer, FILE* fpAggregate, bool aggregateIsBinaryFormat)
 {
-	__GEN_COUT__ << "txBuffer size=" << txBuffer.size() << __E__;
+	// __GEN_COUT__ << "txBuffer size=" << txBuffer.size() << __E__;
 
 	// extract sample from universalReadValue
 	//	considering bit size and offset
@@ -765,7 +765,7 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 			ss << std::hex << (int)((universalReadValue[i] >> 4) & 0xF) << (int)((universalReadValue[i]) & 0xF) << " " << std::dec;
 		ss << __E__;
 		__GEN_COUT__ << "\n" << ss.str();
-		__GEN_COUT__ << "Universal Read: " << BinaryStringMacros::binaryNumberToHexString(universalReadValue, "0x", " ") << __E__;
+		__GEN_COUT__ << "Universal Read: " << BinaryStringMacros::binaryNumberToHexString(universalReadValue, "0x", " ") << " at t=" << time(0) << __E__;
 	}
 
 	sample_.resize(0);  // clear a la sample_ = "";

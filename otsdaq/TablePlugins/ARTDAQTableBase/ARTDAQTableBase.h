@@ -117,8 +117,9 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	            							                        	 size_t                   routingTimeoutMs  = DEFAULT_ROUTING_TIMEOUT_MS,
 	            							                        	 size_t                   routingRetryCount = DEFAULT_ROUTING_RETRY_COUNT);
 
-	static void                              outputOnlineMonitorFHICL ( const ConfigurationTree& onlineMonitorNode);
+	static void                             outputOnlineMonitorFHICL 	(const ConfigurationTree& onlineMonitorNode);
 
+	static bool               				isARTDAQEnabled				(const ConfigurationManager* cfgMgr);
 	static const ARTDAQInfo& 				extractARTDAQInfo			(ConfigurationTree artdaqSupervisorNode,
 			 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 bool			   getStatusFalseNodes  = false,
 	                  						                 			 bool              doWriteFHiCL         = false,

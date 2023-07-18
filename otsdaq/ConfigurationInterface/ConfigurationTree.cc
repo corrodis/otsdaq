@@ -1228,6 +1228,7 @@ std::string ConfigurationTree::nodeDump(void) const
 
 	ss << "Row=" << (int)row_ << ", Col=" << (int)col_ << ", TablePointer=" << table_ << __E__;
 
+	// stack trace can seg fault on demangle call!... ?
 	try
 	{
 		ss << "\n\n" << StringMacros::stackTrace() << __E__ << __E__;
@@ -1257,17 +1258,22 @@ std::string ConfigurationTree::nodeDump(void) const
 	catch(...)
 	{
 	}  // ignore errors
+	
 	try
-	{
-		auto children = getChildrenNames();
-		ss << "\t"
-		   << "Here is the list of possible children (count = " << children.size() << "):" << __E__;
-		for(auto& child : children)
-			ss << "\t\t" << child << __E__;
-		if(tableView_)
+	{		
+		//try to avoid recursive throwing of getChildrenNames() until death spiral
+		if(isTableNode() || isGroupLinkNode())
 		{
-			ss << "\n\nHere is the culprit table printout:\n\n";
-			tableView_->print(ss);
+			auto children = getChildrenNames();
+			ss << "\t"
+			<< "Here is the list of possible children (count = " << children.size() << "):" << __E__;
+			for(auto& child : children)
+				ss << "\t\t" << child << __E__;
+			if(tableView_)
+			{
+				ss << "\n\nHere is the culprit table printout:\n\n";
+				tableView_->print(ss);
+			}
 		}
 	}
 	catch(...)

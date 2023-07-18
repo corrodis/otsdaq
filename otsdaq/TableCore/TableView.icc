@@ -98,27 +98,34 @@ T TableView::validateValueForColumn(const std::string& value, unsigned int col, 
 		{
 			// this case is for if fixed choice type but int is requested
 			//	then return index in fixed choice list
-			//	(always consider DEFAULT as index 0)
+			//	(always consider DEFAULT as index 0, so first non-default is index 1 and so on)
 			// throw error if no match
 
-			if(value == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
+			if(value == columnsInfo_[col].getDefaultValue()) // allow custom default value, not necessarily TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 				retValue = 0;
 			else
 			{
 				std::vector<std::string> choices = columnsInfo_[col].getDataChoices();
 
-				//				for(const auto& choice: choices)
-				//					__COUT__ << "choice " << choice << __E__;
+				// for(const auto& choice: choices)
+				// 	__COUT__ << "choice " << choice << __E__;
 
 				// consider arbitrary bool
 				bool   skipOne = (choices.size() && choices[0].find("arbitraryBool=") == 0);
 				size_t index   = 0;
 
-				for(index = 1 + (skipOne ? 1 : 0); index - 1 < choices.size(); ++index)
-					if(value == choices[index - 1])
-						return static_cast<T>(index - (skipOne ? 1 : 0));  // value has been set to
+				// return index of choices that are not the DEFAULT value starting at index 1
+				for(index = 0 + (skipOne ? 1 : 0); index < choices.size(); ++index)
+				{
+					// __COUT__ << value << " vs " << choices[index] << " " << (skipOne?1:0) << __E__;
+					if(value == choices[index])
+					{
+						// __COUT__ << value << " == " << choices[index] << __E__;
+						return static_cast<T>(1 + index - (skipOne ? 1 : 0));  // value has been set to
 						                                                   // selected choice index, so
 						                                                   // return
+					}
+				}
 
 				__SS__ << "\tInvalid value for column data type: " << columnsInfo_[col].getDataType() << " in configuration " << tableName_
 				       << " at column=" << columnsInfo_[col].getName() << " for getValue with type '" << StringMacros::demangleTypeName(typeid(retValue).name())

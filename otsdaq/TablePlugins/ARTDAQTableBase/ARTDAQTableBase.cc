@@ -24,7 +24,6 @@ using namespace ots;
 
 const std::string 	ARTDAQTableBase::ARTDAQ_FCL_PATH = std::string(__ENV__("USER_DATA")) + "/" + "ARTDAQConfigurations/";
 
-
 const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_CLASS = "ots::ARTDAQSupervisor";
 const std::string 	ARTDAQTableBase::ARTDAQ_SUPERVISOR_TABLE = "ARTDAQSupervisorTable";
 
@@ -1946,6 +1945,29 @@ void ARTDAQTableBase::extractDispatchersInfo(ConfigurationTree artdaqSupervisorN
 		__COUT_WARN__ << "There were no Dispatchers found!";
 	}
 }  // end extractDispatchersInfo()
+
+//==============================================================================
+//	isARTDAQEnabled
+bool ARTDAQTableBase::isARTDAQEnabled(const ConfigurationManager* cfgMgr)
+{
+	auto contexts = cfgMgr->getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME).getChildren();
+	for(auto context : contexts)
+	{
+		if(!context.second.isEnabled())
+			continue;
+
+		auto apps = context.second.getNode(XDAQContextTable::colContext_.colLinkToApplicationTable_).getChildren();		
+		for(auto app : apps)
+		{
+			// __COUTV__(app.second.getNode(XDAQContextTable::colApplication_.colClass_).getValue());
+			if(app.second.getNode(XDAQContextTable::colApplication_.colClass_).getValue() == ARTDAQ_SUPERVISOR_CLASS &&
+				app.second.isEnabled())
+				return true;
+		}
+	}
+	return false;
+
+}  // end isARTDAQEnabled()
 
 //==============================================================================
 //	getARTDAQSystem
