@@ -2,6 +2,7 @@
 #include "artdaq/Application/LoadParameterSet.hh"
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"  //All configurable objects are included here
 #include "otsdaq/ProgressBar/ProgressBar.h"
+#include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 #include <fstream>  // std::ofstream
 
@@ -22,6 +23,7 @@ const std::string ConfigurationManager::LAST_ACTIVATED_BACKBONE_GROUP_FILE = "CF
 const std::string ConfigurationManager::LAST_ACTIVATED_ITERATOR_GROUP_FILE = "CFGLastActivatedIteratorGroup.hist";
 
 const std::string ConfigurationManager::READONLY_USER = "READONLY_USER";
+
 
 const std::string ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME      = "XDAQContextTable";
 const std::string ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME  = "XDAQApplicationTable";
@@ -1936,7 +1938,7 @@ const TableBase* ConfigurationManager::getTableByName(const std::string& tableNa
 		//	__GEN_COUT_WARN__ << "\n" << ss.str();
 		__SS_ONLY_THROW__;
 	}
-	TLOG_DEBUG(30) << "Table " << tableName << " is at " << static_cast<void*>(it->second);
+	// TLOG_DEBUG(30) << "Table " << tableName << " is at " << static_cast<void*>(it->second);
 	return it->second;
 }  // end getTableByName()
 
@@ -2622,13 +2624,20 @@ bool ConfigurationManager::isOwnerFirstAppInContext()
 	//__GEN_COUTV__(ownerContextUID_);
 	//__GEN_COUTV__(ownerAppUID_);
 
-	auto contextChildren = getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" + ownerContextUID_).getChildrenNames();
+	try
+	{
+		auto contextChildren = getNode(ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME + "/" + ownerContextUID_).getChildrenNames();
 
-	bool isFirstAppInContext = contextChildren.size() == 0 || contextChildren[0] == ownerAppUID_;
+		bool isFirstAppInContext = contextChildren.size() == 0 || contextChildren[0] == ownerAppUID_;
 
-	//__GEN_COUTV__(isFirstAppInContext);
+		//__GEN_COUTV__(isFirstAppInContext);
 
-	return isFirstAppInContext;
+		return isFirstAppInContext;
+	}
+	catch(...)
+	{
+		return true; // default to 'yes' if XDAQ Context doesn't exist
+	}
 }  // end isOwnerFirstAppInContext()
 
 //==============================================================================

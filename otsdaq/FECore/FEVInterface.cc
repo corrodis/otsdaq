@@ -245,7 +245,7 @@ try
 
 	while(slowControlsWorkLoop_.getContinueWorkLoop())
 	{
-		__FE_COUT__ << "..." << __E__;
+		// __FE_COUT__ << "..." << __E__;
 
 		sleep(1);  // seconds
 		++timeCounter;
@@ -272,7 +272,7 @@ try
 			if(timeCounter % channel->delayBetweenSamples_)
 				continue;
 
-			__FE_COUT__ << "Reading Channel:" << channel->fullChannelName_ << __E__;
+			__FE_COUT__ << "Reading Channel:" << channel->fullChannelName_ << " at t=" << time(0) << __E__;
 
 			getSlowControlsValue(*channel, readVal);
 

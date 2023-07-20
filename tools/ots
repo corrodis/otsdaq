@@ -25,7 +25,10 @@ function setupTrace()
 	export TRACE_NAME=OTSDAQ_TRACE
 	export TRACE_LIMIT_MS="0,50,50" #unlimited trace messages
 	#tinfo #show trace info
-	export TRACE_FILE=/tmp/trace_buffer_${USER}
+	export TRACE_FILE=/tmp/trace_buffer_${USER} #by default it is /proc/trace/buffer
+	export TRACE_PRINT_FD=2 #reroute everything to std:err (overriding > dev/null hiding)
+	export TRACE_PRINT="|%L:%N:%f [%u] %m" #to mimic ots line number output
+
 }
 
 
@@ -242,7 +245,23 @@ if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
 	${TRACE_BIN}/trace_cntl lvlmskg 0xfff 0x1ff 0  # <memory> <slow> <trigger>, tonSg 0-8 (debug is 8 := TLVL_{FATAL,ALERT,CRIT,ERROR,WARNING,NOTICE,INFO,LOG,DEBUG})
 	${TRACE_BIN}/trace_cntl mode 3   # ton*
 	
-	# Disable some very verbose trace outputs I think?
+	if [ "$OTS_DEBUG_MODE" == "1" ]; then 
+		# tonSg DEBUG+7 #to enable targeted bitmask
+		
+		tonSg 0-63 #enable all slow
+
+		#enable kernel trace to memory buffer:
+		#+test -f /proc/trace/buffer && { export TRACE_FILE=/proc/trace/buffer; tlvls | grep 'KERNEL 0xffffffff00ffffff' >/dev/null || { tonMg 0-63; toffM 24-31 -nKERNEL; }; }
+		
+		#tlvls #to see what is enabled by name
+		#tonS -N DTC* 0-63 #to enable by name
+		#tshow | grep DTC #to see memory printouts by name
+		
+		#end Trace helpful info
+		#============================
+	fi
+
+	# Disable some very verbose trace outputs (e.g. from artdaq_database)
 #	toffS 0-63 -n CONF:OpBase_C
 #	toffS 0-63 -n CONF:OpLdStr_C
 #	toffS 0-63 -n CONF:CrtCfD_C
@@ -265,20 +284,23 @@ JSNU:Document_C  0x1ff 0 0
 CONF:OpLdStr_C   0x1ff 0 0
 PRVDR:FileDB_C   0x1ff 0 0
 CONF:OpBase_C    0x1ff 0 0
+JSONDocument.cpp 0x1ff 0 0
+json_writer.cpp  0x1ff 0 0
+json_reader.cpp  0x1ff 0 0
+provider_filedb_readwrite.cpp 0x1ff 0 0
+provider_filedb_index.cpp 0x1ff 0 0
+provider_filedb.cpp 0x1ff 0 0
+dispatch_filedb.cpp 0x1ff 0 0
+detail_manageconfigs.cpp 0x1ff 0 0
+detail_managedocument.cpp 0x1ff 0 0
+filesystem_functions.cpp 0x1ff 0 0
+options_operation_base.cpp 0x1ff 0 0
+JSONDocument_utils.cpp  0x1ff 0 0
+options_operation_managedocument.cpp  0x1ff 0 0
 " ${TRACE_BIN}/trace_cntl namlvlset
 	
 	
-	# tonSg DEBUG+7 #to enable targeted bitmask
-
-	#enable kernel trace to memory buffer:
-	#+test -f /proc/trace/buffer && { export TRACE_FILE=/proc/trace/buffer; tlvls | grep 'KERNEL 0xffffffff00ffffff' >/dev/null || { tonMg 0-63; toffM 24-31 -nKERNEL; }; }
 	
-	#tlvls #to see what is enabled by name
-	#tonS -N DTC* 0-63 #to enable by name
-	#tshow | grep DTC #to see memory printouts by name
-	
-	#end Trace helpful info
-	#============================
 fi
 
 
@@ -2141,7 +2163,7 @@ otsActionHandler() {
 				
 		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 				
-		echo "message loop on ${HOSTNAME}"	
+		#echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 
