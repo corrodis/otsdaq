@@ -788,7 +788,7 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 			return;
 		}
 
-		OUT << node.getFieldName() << "_" << node.getValueAsString(true /* returnLinkTableValue */) << " \t{" << __E__;
+		OUT << node.getFieldName() << "_" << node.getValueAsString(true /* returnLinkTableValue */) << ": \t{" << __E__;
 		PUSHTAB;
 	}  // end link preamble decoration
 
@@ -799,6 +799,8 @@ void ConfigurationManager::recursiveTreeToFhicl(ConfigurationTree node,
 		for(auto& child : children)
 			recursiveTreeToFhicl(child.second, out, tabStr, commentStr, depth - 1);
 
+		POPTAB;
+		OUT << "} //end " << node.getValueAsString(true /* returnLinkTableValue */) << " group link record" << __E__;
 		return;
 	}  // end group link handling
 
@@ -2183,6 +2185,12 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 	// LoadParameterSet() ... from  $ARTDAQ_INC/artdaq/Application/LoadParameterSet.hh
 	fhicl::ParameterSet pset = LoadParameterSet(fhiclPath);
 
+	if(pset.get_names().size() == 0)
+	{
+		__GEN_SS__ << "Empty fcl configuration parameter set found! File: " << fhiclPath << __E__;
+		__SS_THROW__;
+	}
+
 	//===========================
 	// fcl should be FE record(s):
 	//	interface0: {
@@ -2232,7 +2240,7 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 
 		view->setValue("MacroMakerFEContext", 0, colMap["ContextUID"]);
 		view->setValue("XDAQApplicationTable", 0, colMap["LinkToApplicationTable"]);
-		view->setValue("MacroMakerFEContextApps", 0, colMap["ApplicationGroupID"]);
+		view->setValue("MacroMakerFEContextApps", 0, colMap["LinkToApplicationGroupID"]);
 		view->setValue("1", 0, colMap["Status"]);
 
 		__GEN_COUT__ << "Done adding context record..." << __E__;
@@ -2268,6 +2276,7 @@ void ConfigurationManager::initializeFromFhicl(const std::string& fhiclPath)
 		view->setValue("FESupervisorTable", 0, colMap["LinkToSupervisorTable"]);
 		view->setValue("MacroMakerFESupervisor", 0, colMap["LinkToSupervisorUID"]);
 		view->setValue("1", 0, colMap["Status"]);
+		view->setValue(__ENV__("FE_SUPERVISOR_ID"), 0, colMap["Id"]);  // XDAQ LID
 
 		__GEN_COUT__ << "Done adding application record..." << __E__;
 		view->print();
@@ -2391,7 +2400,7 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 		table = 0;
 		if(nameToTableMap_.find(tableName) == nameToTableMap_.end())
 		{
-			__GEN_COUT__ << "Table not found, so making '" << tableName << "'instance..." << __E__;
+			__GEN_COUT__ << "Table not found, so making '" << tableName << "' instance..." << __E__;
 			theInterface_->get(table,      // configurationPtr
 			                   tableName,  // tableName
 			                   0,          // groupKey
@@ -2441,8 +2450,10 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 
 			if(groupName != "")  // then set groupID for this record
 			{
+				__GEN_COUT__ << "Setting group ID for group link index '" << groupLinkIndex << "'" << __E__;
+
 				int groupIDCol = view->getLinkGroupIDColumn(groupLinkIndex);
-				__GEN_COUT__ << "Setting group ID for group link ID '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'"
+				__GEN_COUT__ << "Setting group ID for group link index '" << groupLinkIndex << "' at column " << groupIDCol << " to '" << groupName << ".'"
 				             << __E__;
 
 				view->setValue(groupName, r, groupIDCol);
@@ -2466,6 +2477,10 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 					ss << __E__;
 					__SS_THROW__;
 				}
+				// skip overwriting group ID - already setup by parent group link
+				if(view->getColumnInfo(colIt->second).isGroupID())
+					continue;
+
 				const std::string value = pset.get<std::string>(colName);
 				__GEN_COUT__ << "Setting '" << recordName << "' parameter at column " << colIt->second << ", '" << colName << "'\t = " << value << __E__;
 				view->setValueAsString(value, r, colIt->second);
@@ -2548,8 +2563,6 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 					                           linkPset.get<fhicl::ParameterSet>(linkRecords[0]) /*fhicl parameter set*/,
 					                           linkRecords[0] /*uid*/,
 					                           "" /*groupID*/);
-
-					view->print();
 				}
 				else
 				{
@@ -2587,17 +2600,15 @@ void ConfigurationManager::recursiveInitFromFhiclPSet(const std::string&        
 				                           groupName /*groupID*/,
 				                           groupLinkIndex /*groupLinkIndex*/);
 			}
-
-			view->print();
 		}
 		else
 		{
 			__SS__ << "Illegal recursive parameters!" << __E__;
 			__SS_THROW__;
 		}
+		__GEN_COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
+		view->print();
 	}
-
-	__GEN_COUT__ << __COUT_HDR_P__ << "Done adding table '" << tableName << "' record(s)..." << __E__;
 
 }  // end recursiveInitFromFhiclPSet()
 

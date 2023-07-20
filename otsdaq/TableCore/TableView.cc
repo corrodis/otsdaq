@@ -1602,8 +1602,14 @@ unsigned int TableView::getLinkGroupIDColumn(const std::string& childLinkIndex) 
 
 	// otherwise search (perhaps init() was not called)
 	for(unsigned int col = 0; col < columnsInfo_.size(); ++col)
-		if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
-			return col;
+	{
+		// only check columns with link index associated...
+		if(columnsInfo_[col].isChildLink() || columnsInfo_[col].isChildLinkUID() || columnsInfo_[col].isChildLinkGroupID() || columnsInfo_[col].isGroupID())
+		{
+			if(needleChildLinkIndex == columnsInfo_[col].getChildLinkIndex())
+				return col;
+		}
+	}
 
 	__SS__ << "Error! Incompatible table for this group link! Table '" << tableName_ << "' is missing a GroupID column with data type '"
 	       << TableViewColumnInfo::TYPE_START_GROUP_ID << "-" << needleChildLinkIndex << "'.\n\n"
