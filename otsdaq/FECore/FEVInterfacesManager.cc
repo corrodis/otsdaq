@@ -2033,7 +2033,7 @@ std::string FEVInterfacesManager::getFEMacrosString(const std::string& superviso
 	std::string retList = "";
 
 	__CFG_COUTV__(theFEInterfaces_.size());
-	
+
 	for(const auto& it : theFEInterfaces_)
 	{
 		__CFG_COUT__ << "FE interface UID = " << it.first << __E__;

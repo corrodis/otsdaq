@@ -98,7 +98,7 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 			for(unsigned int i = 0; i < theStateMachineImplementation_.size(); ++i)
 			{
 				__SUP_COUT__ << "Configuring state machine i " << i << __E__;
-				
+
 				// if one state machine is doing a sub-iteration, then target that one
 				if(subIterationWorkStateMachineIndex_ != (unsigned int)-1 && i != subIterationWorkStateMachineIndex_)
 					continue;  // skip those not in the sub-iteration
