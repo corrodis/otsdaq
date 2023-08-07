@@ -41,7 +41,7 @@ class SlowControlsVInterface : public Configurable, public VStateMachine
 	virtual std::vector<std::string /*Name*/>           getChannelList(void)                = 0;
 	virtual std::string                                	getList(const std::string& format)       	= 0;
 	virtual std::array<std::string, 4>                 	getCurrentValue(const std::string& Name) 	= 0;
-	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(const std::string& Name)	= 0;
+	virtual std::vector<std::vector<std::string>> 	   	getChannelHistory(const std::string& Name, int startTime, int endTime)	= 0;
 	virtual std::vector<std::vector<std::string>>		getLastAlarms(const std::string& pvName)	= 0;
 	virtual std::vector<std::vector<std::string>>		getAlarmsLog(const std::string& pvName)		= 0;
 	virtual std::vector<std::vector<std::string>>		checkAlarmNotifications	(void)				= 0;
