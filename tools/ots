@@ -376,7 +376,8 @@ function killprocs
 		out "Killing processes $1..."
 	fi
 	
-	if [[ "x$1" == "x" ]]; then #kill all ots processes
+	if [[ "x$1" == "x" ]]; then #kill all ots processes that share $USER_DATA
+
 		pids=`ps aux|grep [o]ts.exe|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid &
@@ -394,8 +395,9 @@ function killprocs
 			killproc $pid &
 		done
 		
-		usershort=`echo $USER|cut -c 1-10`
-		for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
+		# for now (Aug-2023), stop killing artdaq and trust artdaq cleanup (this will also allowed share user accounts)
+		# usershort=`echo $USER|cut -c 1-10`
+		# for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
 		
 		sleep 1 #give time for cleanup to occur
 		
@@ -427,19 +429,20 @@ function killprocs
 		sleep 1 #give time for cleanup to occur
 	fi		
 	
-	#now hard kill any processes that may be stuck and detached:
-	killall -9 art &>/dev/null 2>&1 #hide output
-	killall -9 boardreader &>/dev/null 2>&1 #hide output
-	killall -9 eventbuilder &>/dev/null 2>&1 #hide output
-	killall -9 datalogger &>/dev/null 2>&1 #hide output
-	killall -9 dispatcher &>/dev/null 2>&1 #hide output
-	killall -9 routing_manager &>/dev/null 2>&1 #hide output
-	ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
+	# for now (Aug-2023), stop killing artdaq and trust artdaq cleanup (this will also allowed share user accounts)
+	# #now hard kill any processes that may be stuck and detached:
+	# killall -9 art &>/dev/null 2>&1 #hide output
+	# killall -9 boardreader &>/dev/null 2>&1 #hide output
+	# killall -9 eventbuilder &>/dev/null 2>&1 #hide output
+	# killall -9 datalogger &>/dev/null 2>&1 #hide output
+	# killall -9 dispatcher &>/dev/null 2>&1 #hide output
+	# killall -9 routing_manager &>/dev/null 2>&1 #hide output
+	# ipcrm -a &>/dev/null 2>&1 #hide output #clean-up shared memory
 	
-	if [[ "x$1" == "x" ]]; then #kill all ots processes, not in background or it kills the new launch sometimes!
-		killall -9 xdaq.exe  >/dev/null 2>&1 #hide output
-		killall -9 otsConsoleFwd  >/dev/null 2>&1 #hide output
-	fi
+	# if [[ "x$1" == "x" ]]; then #kill all ots processes, not in background or it kills the new launch sometimes!
+	# 	killall -9 xdaq.exe  >/dev/null 2>&1 #hide output
+	# 	killall -9 otsConsoleFwd  >/dev/null 2>&1 #hide output
+	# fi
    
 	if [ $ISREMOTE == 0 ]; then
 		out "Done killing processes $1 ${RstClr}"

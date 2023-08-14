@@ -102,6 +102,9 @@ class ConfigurationManager
 	//==============================================================================
 	// Getters
 
+	clock_t									startClockTime_;
+	double									runTimeSeconds() {return ((double)(clock()-startClockTime_))/CLOCKS_PER_SEC;};
+	
 	void 								loadTableGroup				(
 	    const std::string&                                     configGroupName,
 	    TableGroupKey                                          tableGroupKey,
