@@ -430,12 +430,13 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 	try
 	{
 		//__COUTV__(accumulatedTreeErrors);
-		loadTableGroup(tableGroupName,
-		               tableGroupKey,
-		               true,                    // loads and activates
-		               0,                       // no members needed
-		               0,                       // no progress bar
-		               accumulatedTreeErrors);  // accumulate warnings or not
+		loadTableGroup(
+				tableGroupName,
+				tableGroupKey,
+				true,                    // loads and activates
+				0,                       // no members needed
+				0,                       // no progress bar
+				accumulatedTreeErrors);  // accumulate warnings or not
 	}
 	catch(...)
 	{
@@ -452,16 +453,7 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 
 	__GEN_COUT_INFO__ << "Updating persistent active groups to " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..." << __E__;
 
-	std::string fn = ConfigurationManager::ACTIVE_GROUPS_FILENAME;
-	FILE*       fp = fopen(fn.c_str(), "w");
-	if(!fp)
-	{
-		__SS__ << "Fatal Error! Unable to open the file " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " for editing! Is there a permissions problem?"
-		       << __E__;
-		__GEN_COUT_ERR__ << ss.str();
-		__SS_THROW__;
-		return;
-	}
+	
 
 	__MCOUT_INFO__("Active Context table group: " << theContextTableGroup_ << "("
 	                                              << (theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1") << ")" << __E__);
@@ -473,6 +465,16 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 	                                                    << (theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1") << ")"
 	                                                    << __E__);
 
+	std::string fn = ConfigurationManager::ACTIVE_GROUPS_FILENAME;
+	FILE*       fp = fopen(fn.c_str(), "w");
+	if(!fp)
+	{
+		__SS__ << "Fatal Error! Unable to open the file " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " for editing! Is there a permissions problem?"
+		       << __E__;
+		__GEN_COUT_ERR__ << ss.str();
+		__SS_THROW__;
+		return;
+	}
 	fprintf(fp, "%s\n", theContextTableGroup_.c_str());
 	fprintf(fp, "%s\n", theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
 	fprintf(fp, "%s\n", theBackboneTableGroup_.c_str());
