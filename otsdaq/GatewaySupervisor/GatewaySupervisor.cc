@@ -4232,7 +4232,7 @@ xoap::MessageReference GatewaySupervisor::supervisorLastTableGroupRequest(xoap::
 xoap::MessageReference GatewaySupervisor::lastTableGroupRequestHandler(const SOAPParameters& parameters)
 {
 	std::string action = parameters.getValue("ActionOfLastGroup");
-	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 10) << __E__;
+	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 30) << __E__;
 
 	std::string fileName = "";
 	if(action == "Configured")

@@ -45,6 +45,7 @@ class ConfigurationManagerRW : public ConfigurationManager
   public:
 	ConfigurationManagerRW(const std::string& username);
 
+
 	//==============================================================================
 	// Getters
 	const std::string&      					getUsername						(void) const { return username_; }
@@ -180,6 +181,7 @@ public:
 private:
 	ConfigurationManagerRW* 				cfgMgr_;
 	const std::string 						mfSubject_;
+				
 public:
 	/////
 	GroupEditStruct()

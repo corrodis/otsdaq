@@ -79,7 +79,9 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"Itera
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
-    : mfSubject_(ConfigurationManager::READONLY_USER)
+    : 
+	startClockTime_(clock())
+	, mfSubject_(ConfigurationManager::READONLY_USER)
     , username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
@@ -90,7 +92,11 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theBackboneTableGroup_("")
     , groupMetadataTable_(true /*special table*/, ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
+
+	__GEN_COUTV__(runTimeSeconds());
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
+
+	__GEN_COUTV__(runTimeSeconds());
 
 	// initialize special group metadata table
 	{
@@ -162,7 +168,11 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		return;
 	}
 	// else do normal init
-	init(0 /*accumulatedErrors*/, initForWriteAccess);
+
+	__GEN_COUTV__(runTimeSeconds());	
+	if(!initForWriteAccess) //ConfigurationManagerRW can do manual init later when it calls getAllTableInfo(true)
+		init(0 /*accumulatedErrors*/, initForWriteAccess);
+	__GEN_COUTV__(runTimeSeconds());
 
 }  // end constructor()
 
@@ -205,7 +215,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 			if(username_ == ConfigurationManager::READONLY_USER && !initForWriteAccess)
 				onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES;
 
-			// clang-format off
+			// clang-format off			
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
 				 "" /*pathToActiveGroupsFile*/,
 				onlyLoadIfBackboneOrContext,
@@ -2714,7 +2724,7 @@ std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadG
 	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
 	fclose(groupFile);
 
-	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
+	__COUT__ << "theGroup.first=" << theGroup.first << " theGroup.second=" << theGroup.second << __E__;
 
 	return theGroup;
 }  // end loadGroupNameAndKey()

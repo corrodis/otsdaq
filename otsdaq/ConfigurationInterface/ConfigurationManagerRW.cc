@@ -18,6 +18,8 @@ using namespace ots;
 // ConfigurationManagerRW
 ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : ConfigurationManager(username)  // for use as author of new views
 {
+	__GEN_COUTV__(time(0));
+	__GEN_COUTV__(runTimeSeconds());
 	__GEN_COUT__ << "Instantiating Config Manager with Write Access! (for " << username << ")" << __E__;
 
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
@@ -156,6 +158,8 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 			}
 		}
 	}  // end dump names of core tables
+
+	__GEN_COUTV__(runTimeSeconds());
 }  // end constructor
 
 //==============================================================================
@@ -182,9 +186,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	// existing configurations are defined by which infos are in TABLE_INFO_PATH
 	// can test that the class exists based on this
 	// and then which versions
-	__GEN_COUT__ << "======================================================== "
-	                "getAllTableInfo start"
-	             << __E__;
+	__GEN_COUT__ << "======================================================== getAllTableInfo start runtime=" << runTimeSeconds() << __E__;
 	__GEN_COUT__ << "Refreshing all! Extracting list of tables..." << __E__;
 	DIR*                pDIR;
 	struct dirent*      entry;
@@ -316,10 +318,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		}
 		closedir(pDIR);
 	}
-	__GEN_COUT__ << "Extracting list of tables complete. Now initializing..." << __E__;
+	__GEN_COUT__ << "Extracting list of tables complete." << __E__;
 
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
-	{
+	{ 
+		__GEN_COUT__ << "Now initializing..." << __E__;
 		// if there is a filter name, do not include init warnings (it just scares people in the table editor)
 		std::string tmpAccumulateWarnings;
 		init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, accumulatedWarnings ? &tmpAccumulateWarnings : nullptr);
@@ -327,7 +330,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		if(accumulatedWarnings && errorFilterName == "")
 			*accumulatedWarnings += tmpAccumulateWarnings;
 	}
-	__GEN_COUT__ << "======================================================== getAllTableInfo end" << __E__;
+	__GEN_COUT__ << "======================================================== getAllTableInfo end runtime=" << runTimeSeconds() << __E__;
 
 	// get Group Info too!
 	try
@@ -391,6 +394,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		else
 			throw;
 	}
+	__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
 
 	return allTableInfo_;
 }  // end getAllTableInfo
