@@ -1564,9 +1564,9 @@ try
 
 		__COUT__ << "Done loading Configuration Alias." << __E__;
 
-		// When configured, set the translated System Alias to be persistently active
-		ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
-		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first, theConfigurationTableGroup_.second);
+		// mark the translated group as the last activated group
+		std::pair<std::string /*group name*/, TableGroupKey> activatedGroup(std::string(theConfigurationTableGroup_.first), theConfigurationTableGroup_.second);
+		ConfigurationManager::saveGroupNameAndKey(activatedGroup, ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE);
 
 		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}

@@ -18,9 +18,7 @@ using namespace ots;
 // ConfigurationManagerRW
 ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : ConfigurationManager(username)  // for use as author of new views
 {
-	__GEN_COUTV__(time(0));
-	__GEN_COUTV__(runTimeSeconds());
-	__GEN_COUT__ << "Instantiating Config Manager with Write Access! (for " << username << ")" << __E__;
+	__GEN_COUT__ << "Instantiating Config Manager with Write Access! (for " << username << ") time=" << time(0) << " runTimeSeconds()=" << runTimeSeconds() << __E__;
 
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
@@ -36,8 +34,6 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 		const std::set<std::string>& iterateMemberNames  = getIterateMemberNames();
 
 		FILE* fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "r");
-
-		//__GEN_COUT__ << "Updating core tables file..." << __E__;
 
 		if(fp)  // check for all core table names in file, and force their presence
 		{
@@ -55,7 +51,6 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 					if(strcmp(line, ("ContextGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
-						//__COUTV__(name);
 						break;
 					}
 				}
@@ -73,7 +68,6 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 					if(strcmp(line, ("BackboneGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
-						//__COUTV__(name);
 						break;
 					}
 				}
@@ -91,16 +85,12 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 					if(strcmp(line, ("IterateGroup/" + name).c_str()) == 0)  // is match?
 					{
 						foundVector.back() = true;
-						//__COUTV__(name);
 						break;
 					}
 				}
 			}
 
 			fclose(fp);
-
-			// for(const auto &found:foundVector)
-			//	__COUTV__(found);
 
 			// open file for appending the missing names
 			fp = fopen((CORE_TABLE_INFO_FILENAME).c_str(), "a");
@@ -207,8 +197,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 			entry->d_name[strlen(entry->d_name) - strlen(fileExt)] = '\0';  // remove file extension to get table name
 
-			//__GEN_COUT__ << entry->d_name << __E__;
-
 			// 0 will force the creation of new instance (and reload from Info)
 			table = 0;
 
@@ -254,8 +242,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					std::string returnedAccumulatedErrors;
 					try
 					{
-						// table = new TableBase(entry->d_name,
-						// &returnedAccumulatedErrors);
 						table = new TableBase(entry->d_name, &returnedAccumulatedErrors);
 					}
 					catch(...)
@@ -272,8 +258,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					continue;
 			}
 
-			//__GEN_COUT__ << "Instance created: " << entry->d_name << "\n"; //found!
-
 			if(nameToTableMap_[entry->d_name])  // handle if instance existed
 			{
 				// copy the temporary versions! (or else all is lost)
@@ -281,8 +265,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				for(auto& version : versions)
 					if(version.isTemporaryVersion())
 					{
-						//__GEN_COUT__ << "copying tmp = " << version << __E__;
-
 						try  // do NOT let TableView::init() throw here
 						{
 							nameToTableMap_[entry->d_name]->setActiveView(version);
@@ -296,7 +278,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 						{
 						}  // just trust configurationBase throws out the failed version
 					}
-				//__GEN_COUT__ << "deleting: " << entry->d_name << "\n"; //found!
+
 				delete nameToTableMap_[entry->d_name];
 				nameToTableMap_[entry->d_name] = 0;
 			}
@@ -312,7 +294,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			for(auto& version : versions)
 				if(version.isTemporaryVersion())
 				{
-					//__GEN_COUT__ << "surviving tmp = " << version << __E__;
 					allTableInfo_[entry->d_name].versions_.emplace(version);
 				}
 		}
@@ -406,7 +387,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 std::map<std::string /*table name*/, std::map<std::string /*version alias*/, TableVersion /*aliased version*/>> ConfigurationManagerRW::getVersionAliases(
     void) const
 {
-	//__GEN_COUT__ << "getVersionAliases()" << __E__;
 	std::map<std::string /*table name*/, std::map<std::string /*version alias*/, TableVersion /*aliased version*/>> retMap =
 	    ConfigurationManager::getVersionAliases();
 
@@ -429,13 +409,13 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 {
 	try
 	{
-		//__COUTV__(accumulatedTreeErrors);
-		loadTableGroup(tableGroupName,
-		               tableGroupKey,
-		               true,                    // loads and activates
-		               0,                       // no members needed
-		               0,                       // no progress bar
-		               accumulatedTreeErrors);  // accumulate warnings or not
+		loadTableGroup(
+				tableGroupName,
+				tableGroupKey,
+				true,                    // loads and activates
+				0,                       // no members needed
+				0,                       // no progress bar
+				accumulatedTreeErrors);  // accumulate warnings or not
 	}
 	catch(...)
 	{
@@ -452,16 +432,7 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 
 	__GEN_COUT_INFO__ << "Updating persistent active groups to " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " ..." << __E__;
 
-	std::string fn = ConfigurationManager::ACTIVE_GROUPS_FILENAME;
-	FILE*       fp = fopen(fn.c_str(), "w");
-	if(!fp)
-	{
-		__SS__ << "Fatal Error! Unable to open the file " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " for editing! Is there a permissions problem?"
-		       << __E__;
-		__GEN_COUT_ERR__ << ss.str();
-		__SS_THROW__;
-		return;
-	}
+	
 
 	__MCOUT_INFO__("Active Context table group: " << theContextTableGroup_ << "("
 	                                              << (theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1") << ")" << __E__);
@@ -473,6 +444,16 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 	                                                    << (theConfigurationTableGroupKey_ ? theConfigurationTableGroupKey_->toString().c_str() : "-1") << ")"
 	                                                    << __E__);
 
+	std::string fn = ConfigurationManager::ACTIVE_GROUPS_FILENAME;
+	FILE*       fp = fopen(fn.c_str(), "w");
+	if(!fp)
+	{
+		__SS__ << "Fatal Error! Unable to open the file " << ConfigurationManager::ACTIVE_GROUPS_FILENAME << " for editing! Is there a permissions problem?"
+		       << __E__;
+		__GEN_COUT_ERR__ << ss.str();
+		__SS_THROW__;
+		return;
+	}
 	fprintf(fp, "%s\n", theContextTableGroup_.c_str());
 	fprintf(fp, "%s\n", theContextTableGroupKey_ ? theContextTableGroupKey_->toString().c_str() : "-1");
 	fprintf(fp, "%s\n", theBackboneTableGroup_.c_str());
@@ -671,8 +652,6 @@ TableVersion ConfigurationManagerRW::saveNewTable(const std::string& tableName, 
 	// update allTableInfo_ with the new version
 	allTableInfo_[tableName].versions_.insert(newVersion);
 
-	//__GEN_COUT__ << "New '" << tableName << "' version added to info " << newVersion << __E__;
-
 	// table->getView().print();
 	return newVersion;
 }  // end saveNewTable()
@@ -718,8 +697,6 @@ void ConfigurationManagerRW::eraseTemporaryVersion(const std::string& tableName,
 			return;
 		}
 		allTableInfo_[tableName].versions_.erase(allTableInfo_[tableName].versions_.find(targetVersion));
-		//__GEN_COUT__ << "Target '" << tableName << "' version v" <<
-		//			targetVersion << " was erased from info." << __E__;
 	}
 }  // end eraseTemporaryVersion()
 
@@ -847,17 +824,8 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 	// std::string fullName;
 	for(const auto& key : groupInfo.keys_)
 	{
-		// TableGroupKey::getGroupNameAndKey(fullName,name,key);
-
 		if(key.key() < keyMinToCheck)
 			continue;  // skip keys that are too old
-
-		//		fullName = TableGroupKey::getFullGroupString(groupName,key);
-		//
-		//		__GEN_COUT__ << "checking group... " << fullName << __E__;
-		//
-		//		compareToMemberMap =
-		// theInterface_->getTableGroupMembers(fullName);
 
 		loadTableGroup(groupName,
 		               key,
@@ -875,15 +843,12 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 		isDifferent = false;
 		for(auto& memberPair : groupMemberMap)
 		{
-			//__GEN_COUT__ << memberPair.first << " - " << memberPair.second << __E__;
-
 			if(groupAliases.find(memberPair.first) != groupAliases.end())
 			{
 				// handle this table as alias, not version
 				if(compareToGroupAliases.find(memberPair.first) == compareToGroupAliases.end() ||  // alias is missing
 				   groupAliases.at(memberPair.first) != compareToGroupAliases.at(memberPair.first))
 				{  // then different
-					//__GEN_COUT__ << "alias mismatch found!" << __E__;
 					isDifferent = true;
 					break;
 				}
@@ -893,15 +858,14 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 			else if(compareToGroupAliases.find(memberPair.first) != compareToGroupAliases.end())
 			{
 				// then different
-				//__GEN_COUT__ << "alias mismatch found!" << __E__;
 				isDifferent = true;
 				break;
 
 			}                                                                                 // else handle as table version comparison
 			else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
 			        memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
-			{                                                                                 // then different
-				//__GEN_COUT__ << "mismatch found!" << __E__;
+			{                                                                                
+				// then different
 				isDifferent = true;
 				break;
 			}
@@ -1140,10 +1104,6 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 				catch(const std::runtime_error& e)
 				{
 					// ignore error
-
-					//__GEN_COUT__ << "Error loading historical '" << tableName <<
-					//		"' version, but ignoring: "
-					//         << e.what() << __E__;
 				}
 			}
 		}
@@ -1184,11 +1144,6 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 				if(foundEquivalent)
 					*foundEquivalent = true;
 
-				//				xmlOut.addTextElementToData("savedName", tableName);
-				//				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
-				//				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
-				//				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
-
 				__GEN_COUT__ << "\t\t Equivalent '" << tableName << "' assigned version: " << duplicateVersion << __E__;
 
 				return duplicateVersion;
@@ -1218,9 +1173,6 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 
 	if(needToEraseTemporarySource)
 		eraseTemporaryVersion(tableName, originalVersion);
-
-	//	xmlOut.addTextElementToData("savedName", tableName);
-	//	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
 
 	__GEN_COUT__ << "\t\t '" << tableName << "' new assigned version: " << newAssignedVersion << __E__;
 	return newAssignedVersion;
@@ -1256,9 +1208,7 @@ GroupEditStruct::GroupEditStruct(const ConfigurationManager::GroupType& groupTyp
 	for(auto& memberName : memberNames)
 		try
 		{
-			//__GEN_COUT__ << memberName << " v" << activeTables.at(memberName) << __E__;
 			groupMembers_.emplace(std::make_pair(memberName, activeTables.at(memberName)));
-
 			groupTables_.emplace(std::make_pair(memberName, TableEditStruct(memberName, cfgMgr)));  // Table ready for editing!
 		}
 		catch(...)
@@ -1321,8 +1271,6 @@ void GroupEditStruct::dropChanges()
 	for(auto& groupTable : groupTables_)
 		if(groupTable.second.createdTemporaryVersion_)  // if temporary version created here
 		{
-			//__GEN_COUT__ << "Erasing temporary version " << groupTable.second.tableName_ << "-v"
-			//         << groupTable.second.temporaryVersion_ << __E__;
 			// erase with proper version management
 			cfgMgr->eraseTemporaryVersion(groupTable.second.tableName_, groupTable.second.temporaryVersion_);
 			groupTable.second.createdTemporaryVersion_ = false;
@@ -1578,6 +1526,7 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 }  // end GroupEditStruct::saveChanges()
 
 //==============================================================================
+//Used for debugging Configuration calls during development
 void ConfigurationManagerRW::testXDAQContext()
 {
 	try
