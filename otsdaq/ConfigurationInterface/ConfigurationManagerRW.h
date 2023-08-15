@@ -111,6 +111,8 @@ class ConfigurationManagerRW : public ConfigurationManager
 	// private members
 	std::map<std::string, TableInfo> 								allTableInfo_;
 	std::map<std::string, GroupInfo> 								allGroupInfo_;
+
+	static volatile bool 											firstTimeConstructed_;
 };
 
 //==============================================================================

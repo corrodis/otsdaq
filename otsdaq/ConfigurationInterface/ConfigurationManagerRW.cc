@@ -14,6 +14,8 @@ using namespace ots;
 	((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + \
 	    "/CoreTableInfoNames.dat"
 
+volatile bool 				ConfigurationManagerRW::firstTimeConstructed_ = true;
+
 //==============================================================================
 // ConfigurationManagerRW
 ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : ConfigurationManager(username)  // for use as author of new views
@@ -22,13 +24,16 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
-	// make table group history directory here and at Gateway Supervisor (just in case)
-	mkdir((ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH).c_str(), 0755);
-
 	//=========================
 	// dump names of core tables (so UpdateOTS.sh can copy core tables for user)
 	// only if table does not exist
+	if(firstTimeConstructed_)
 	{
+		firstTimeConstructed_ = false;
+			
+		// make table group history directory here and at Gateway Supervisor (just in case)
+		mkdir((ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH).c_str(), 0755);
+
 		const std::set<std::string>& contextMemberNames  = getContextMemberNames();
 		const std::set<std::string>& backboneMemberNames = getBackboneMemberNames();
 		const std::set<std::string>& iterateMemberNames  = getIterateMemberNames();
