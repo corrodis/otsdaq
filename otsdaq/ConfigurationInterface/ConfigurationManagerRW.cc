@@ -14,7 +14,7 @@ using namespace ots;
 	((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + \
 	    "/CoreTableInfoNames.dat"
 
-volatile bool 				ConfigurationManagerRW::firstTimeConstructed_ = true;
+std::atomic<bool>			ConfigurationManagerRW::firstTimeConstructed_ = true;
 
 //==============================================================================
 // ConfigurationManagerRW

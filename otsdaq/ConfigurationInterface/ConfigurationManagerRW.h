@@ -112,7 +112,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	std::map<std::string, TableInfo> 								allTableInfo_;
 	std::map<std::string, GroupInfo> 								allGroupInfo_;
 
-	static volatile bool 											firstTimeConstructed_;
+	static std::atomic<bool>										firstTimeConstructed_;
 };
 
 //==============================================================================
