@@ -3897,8 +3897,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//	to get updated icons every time...
 			//(so icon changes do no require an ots restart)
 
-			ConfigurationManagerRW                            tmpCfgMgr(theWebUsers_.getUsersUsername(
-                userInfo.uid_));  // constructor will activate latest context, note: not CorePropertySupervisorBase::theConfigurationManager_
+			ConfigurationManager							  tmpCfgMgr; // Creating new temporary instance so that constructor will activate latest context, note: not using member CorePropertySupervisorBase::theConfigurationManager_
 			const DesktopIconTable*                           iconTable = tmpCfgMgr.__GET_CONFIG__(DesktopIconTable);
 			const std::vector<DesktopIconTable::DesktopIcon>& icons     = iconTable->getAllDesktopIcons();
 

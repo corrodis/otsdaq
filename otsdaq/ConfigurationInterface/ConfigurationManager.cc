@@ -92,7 +92,6 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theBackboneTableGroup_("")
     , groupMetadataTable_(true /*special table*/, ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
-
 	__GEN_COUTV__(runTimeSeconds());
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
 
@@ -252,6 +251,7 @@ void ConfigurationManager::restoreActiveTableGroups(
 
 	std::string fn = pathToActiveGroupsFile == "" ? ACTIVE_GROUPS_FILENAME : pathToActiveGroupsFile;
 	FILE*       fp = fopen(fn.c_str(), "r");
+
 
 	__GEN_COUT__ << "ACTIVE_GROUPS_FILENAME = " << fn << __E__;
 	__GEN_COUT__ << "ARTDAQ_DATABASE_URI = " << std::string(__ENV__("ARTDAQ_DATABASE_URI")) << __E__;
@@ -2688,7 +2688,7 @@ void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*gro
 //
 //	Note: this is static so the GatewaySupervisor and WizardSupervisor can call it
 std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
-{
+{	
 	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" + fileName;
 
 	FILE* groupFile = fopen(fullPath.c_str(), "r");
