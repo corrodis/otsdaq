@@ -1559,6 +1559,28 @@ try
 	// load and activate
 	try
 	{
+		//first get group type - it must be Configuration type!
+		std::string groupTypeString;
+		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
+		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second,
+			false /*doActivate*/,
+			0 /*groupMembers      */,
+			0 /*progressBar       */,
+			0 /*accumulateWarnings*/,
+			0 /*groupComment      */,
+			0 /*groupAuthor       */,
+			0 /*groupCreateTime   */,
+			true /*doNotLoadMember */,
+			&groupTypeString
+			);
+		if(groupTypeString != ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		{
+			__SS__ << "Illegal attempted configuration group type. The table group '" <<
+				theConfigurationTableGroup_.first << "(" << theConfigurationTableGroup_.second << ")' is of type " <<
+				groupTypeString << ". It must be " << ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION << "." << __E__;
+			__SS_THROW__;
+		}
+
 		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
 		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true /*doActivate*/);
 
