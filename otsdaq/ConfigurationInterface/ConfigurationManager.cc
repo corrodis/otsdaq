@@ -1715,7 +1715,7 @@ ConfigurationTree ConfigurationManager::getSupervisorTableNode(const std::string
 //==============================================================================
 ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks) const
 {
-	//__GEN_COUT__ << "nodeString=" << nodeString << " " << nodeString.length() << __E__;
+	__GEN_COUT__ << "nodeString=" << nodeString << " " << nodeString.length() << __E__;
 
 	// get nodeName (in case of / syntax)
 	if(nodeString.length() < 1)
@@ -1731,7 +1731,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 		++startingIndex;
 
 	std::string nodeName = nodeString.substr(startingIndex, nodeString.find('/', startingIndex) - startingIndex);
-	//__GEN_COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << __E__;
+	__GEN_COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << __E__;
 	if(nodeName.length() < 1)
 	{
 		// return root node
@@ -1744,7 +1744,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 
 	std::string childPath = nodeString.substr(nodeName.length() + startingIndex);
 
-	//__GEN_COUT__ << "childPath=" << childPath << " " << childPath.length() << __E__;
+	__GEN_COUT__ << "childPath=" << childPath << " " << childPath.length() << __E__;
 
 	ConfigurationTree configTree(this, getTableByName(nodeName));
 
@@ -1753,6 +1753,28 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 	else
 		return configTree;
 }  // end getNode()
+
+//==============================================================================
+// TODO: get a map of childrens
+std::map<std::string, ConfigurationTree> ConfigurationManager::getNodes(const std::string& nodeString) const
+{
+	// root case
+	if(nodeString.length() < 1)
+	{
+		std::map<std::string, ConfigurationTree> retMap;
+		for(auto& configPair : nameToTableMap_)
+		{
+			if(configPair.second->isActive())  // only consider if active
+			{
+				ConfigurationTree newNode(this, configPair.second);
+				retMap.insert(std::pair<std::string, ConfigurationTree>(configPair.first, newNode));
+			}
+		}
+		return retMap;
+	}
+
+	return getNode(nodeString).getChildrenMap();
+}
 
 //==============================================================================
 // getFirstPathToNode
