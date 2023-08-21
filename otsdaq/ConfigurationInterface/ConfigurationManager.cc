@@ -1755,7 +1755,6 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 }  // end getNode()
 
 //==============================================================================
-// TODO: get a map of childrens
 std::map<std::string, ConfigurationTree> ConfigurationManager::getNodes(const std::string& nodeString) const
 {
 	return getNode(nodeString).getChildrenMap();
