@@ -1778,7 +1778,7 @@ std::string ConfigurationManager::getFirstPathToNode(const ConfigurationTree& /*
 //		check is 2 levels deep which should get to the links starting at tables.
 std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationManager::getChildren(std::map<std::string, TableVersion>* memberMap,
                                                                                          std::string*                         accumulatedTreeErrors) const
-{qecvt
+{
 	std::vector<std::pair<std::string, ConfigurationTree>> retMap;
 
 	// if(accumulatedTreeErrors)

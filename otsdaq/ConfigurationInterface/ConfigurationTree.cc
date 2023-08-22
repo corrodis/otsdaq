@@ -1220,6 +1220,17 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 }  // end recursiveGetNode()
 
 //==============================================================================
+// getNodes
+std::map<std::string, ConfigurationTree> ConfigurationTree::getNodes(const std::string& nodeString) const
+{
+	if (nodeString.length() < 1)
+	{
+		return getChildrenMap();
+	}
+
+	return getNode(nodeString).getChildrenMap();
+}
+//==============================================================================
 // nodeDump
 //	Useful for debugging a node failure, like when throwing an exception
 std::string ConfigurationTree::nodeDump(void) const
