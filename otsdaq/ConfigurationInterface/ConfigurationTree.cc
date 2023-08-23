@@ -1220,6 +1220,17 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 }  // end recursiveGetNode()
 
 //==============================================================================
+// getNodes
+std::map<std::string, ConfigurationTree> ConfigurationTree::getNodes(const std::string& nodeString) const
+{
+	if (nodeString.length() < 1)
+	{
+		return getChildrenMap();
+	}
+
+	return getNode(nodeString).getChildrenMap();
+}
+//==============================================================================
 // nodeDump
 //	Useful for debugging a node failure, like when throwing an exception
 std::string ConfigurationTree::nodeDump(void) const
@@ -2273,7 +2284,6 @@ std::map<std::string, ConfigurationTree> ConfigurationTree::getChildrenMap(void)
 	std::map<std::string, ConfigurationTree> retMap;
 
 	//__COUT__ << "Children of node: " << getValueAsString() << __E__;
-
 	std::vector<std::string> childrenNames = getChildrenNames();
 	for(auto& childName : childrenNames)
 	{
@@ -2321,6 +2331,7 @@ bool ConfigurationTree::isStatusNode(void) const
 std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPriority(bool onlyStatusTrue) const
 {
 	std::vector<std::vector<std::string /*child name*/>> retVector;
+
 
 	if(!tableView_)
 	{
@@ -2397,6 +2408,17 @@ std::vector<std::vector<std::string>> ConfigurationTree::getChildrenNamesByPrior
 std::vector<std::string> ConfigurationTree::getChildrenNames(bool byPriority, bool onlyStatusTrue) const
 {
 	std::vector<std::string /*child name*/> retVector;
+
+	if (isRootNode())
+	{
+		for(auto& configPair : configMgr_->getActiveVersions())
+		{
+			//__GEN_COUT__ << configPair.first <<  " " << (int)(configPair.second?1:0) <<
+			// __E__;			
+			retVector.push_back(configPair.first);
+		}
+		return retVector;
+	}
 
 	if(!tableView_)
 	{

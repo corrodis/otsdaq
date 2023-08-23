@@ -187,6 +187,7 @@ class ConfigurationTree
   public:
 	// navigating between nodes
 	ConfigurationTree 							getNode						(const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks = false) const;
+	std::map<std::string, ConfigurationTree>	getNodes					(const std::string& nodeString) const;
 	ConfigurationTree 							getBackNode					(std::string nodeName, unsigned int backSteps = 1) const;
 	ConfigurationTree 							getForwardNode				(std::string  nodeName, unsigned int forwardSteps = 1) const;
 
