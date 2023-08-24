@@ -45,6 +45,7 @@ class ConfigurationManagerRW : public ConfigurationManager
   public:
 	ConfigurationManagerRW(const std::string& username);
 
+
 	//==============================================================================
 	// Getters
 	const std::string&      					getUsername						(void) const { return username_; }
@@ -110,6 +111,8 @@ class ConfigurationManagerRW : public ConfigurationManager
 	// private members
 	std::map<std::string, TableInfo> 								allTableInfo_;
 	std::map<std::string, GroupInfo> 								allGroupInfo_;
+
+	static std::atomic<bool>										firstTimeConstructed_;
 };
 
 //==============================================================================
@@ -180,6 +183,7 @@ public:
 private:
 	ConfigurationManagerRW* 				cfgMgr_;
 	const std::string 						mfSubject_;
+				
 public:
 	/////
 	GroupEditStruct()

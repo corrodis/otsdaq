@@ -79,7 +79,9 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"Itera
 
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
-    : mfSubject_(ConfigurationManager::READONLY_USER)
+    : 
+	startClockTime_(clock())
+	, mfSubject_(ConfigurationManager::READONLY_USER)
     , username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
     , theConfigurationTableGroupKey_(0)
@@ -90,7 +92,10 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
     , theBackboneTableGroup_("")
     , groupMetadataTable_(true /*special table*/, ConfigurationInterface::GROUP_METADATA_TABLE_NAME)
 {
+	__GEN_COUTV__(runTimeSeconds());
 	theInterface_ = ConfigurationInterface::getInstance(false);  // false to use artdaq DB
+
+	__GEN_COUTV__(runTimeSeconds());
 
 	// initialize special group metadata table
 	{
@@ -162,7 +167,11 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		return;
 	}
 	// else do normal init
-	init(0 /*accumulatedErrors*/, initForWriteAccess);
+
+	__GEN_COUTV__(runTimeSeconds());	
+	if(!initForWriteAccess) //ConfigurationManagerRW can do manual init later when it calls getAllTableInfo(true)
+		init(0 /*accumulatedErrors*/, initForWriteAccess);
+	__GEN_COUTV__(runTimeSeconds());
 
 }  // end constructor()
 
@@ -205,7 +214,7 @@ void ConfigurationManager::init(std::string* accumulatedErrors /*=0*/, bool init
 			if(username_ == ConfigurationManager::READONLY_USER && !initForWriteAccess)
 				onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES;
 
-			// clang-format off
+			// clang-format off			
 			restoreActiveTableGroups(accumulatedErrors ? true : false /*throwErrors*/,
 				 "" /*pathToActiveGroupsFile*/,
 				onlyLoadIfBackboneOrContext,
@@ -242,6 +251,7 @@ void ConfigurationManager::restoreActiveTableGroups(
 
 	std::string fn = pathToActiveGroupsFile == "" ? ACTIVE_GROUPS_FILENAME : pathToActiveGroupsFile;
 	FILE*       fp = fopen(fn.c_str(), "r");
+
 
 	__GEN_COUT__ << "ACTIVE_GROUPS_FILENAME = " << fn << __E__;
 	__GEN_COUT__ << "ARTDAQ_DATABASE_URI = " << std::string(__ENV__("ARTDAQ_DATABASE_URI")) << __E__;
@@ -1705,7 +1715,7 @@ ConfigurationTree ConfigurationManager::getSupervisorTableNode(const std::string
 //==============================================================================
 ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, bool doNotThrowOnBrokenUIDLinks) const
 {
-	//__GEN_COUT__ << "nodeString=" << nodeString << " " << nodeString.length() << __E__;
+	// __GEN_COUT__ << "nodeString=" << nodeString << " " << nodeString.length() << __E__;
 
 	// get nodeName (in case of / syntax)
 	if(nodeString.length() < 1)
@@ -1721,7 +1731,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 		++startingIndex;
 
 	std::string nodeName = nodeString.substr(startingIndex, nodeString.find('/', startingIndex) - startingIndex);
-	//__GEN_COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << __E__;
+	// __GEN_COUT__ << "nodeName=" << nodeName << " " << nodeName.length() << __E__;
 	if(nodeName.length() < 1)
 	{
 		// return root node
@@ -1734,7 +1744,7 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 
 	std::string childPath = nodeString.substr(nodeName.length() + startingIndex);
 
-	//__GEN_COUT__ << "childPath=" << childPath << " " << childPath.length() << __E__;
+	// __GEN_COUT__ << "childPath=" << childPath << " " << childPath.length() << __E__;
 
 	ConfigurationTree configTree(this, getTableByName(nodeName));
 
@@ -1743,6 +1753,12 @@ ConfigurationTree ConfigurationManager::getNode(const std::string& nodeString, b
 	else
 		return configTree;
 }  // end getNode()
+
+//==============================================================================
+std::map<std::string, ConfigurationTree> ConfigurationManager::getNodes(const std::string& nodeString) const
+{
+	return getNode(nodeString).getChildrenMap();
+}
 
 //==============================================================================
 // getFirstPathToNode
@@ -2678,7 +2694,7 @@ void ConfigurationManager::saveGroupNameAndKey(const std::pair<std::string /*gro
 //
 //	Note: this is static so the GatewaySupervisor and WizardSupervisor can call it
 std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadGroupNameAndKey(const std::string& fileName, std::string& returnedTimeString)
-{
+{	
 	std::string fullPath = ConfigurationManager::LAST_TABLE_GROUP_SAVE_PATH + "/" + fileName;
 
 	FILE* groupFile = fopen(fullPath.c_str(), "r");
@@ -2714,7 +2730,7 @@ std::pair<std::string /*group name*/, TableGroupKey> ConfigurationManager::loadG
 	returnedTimeString = StringMacros::getTimestampString(timestamp);  // line;
 	fclose(groupFile);
 
-	__COUT__ << "theGroup.first= " << theGroup.first << " theGroup.second= " << theGroup.second << __E__;
+	__COUT__ << "theGroup.first=" << theGroup.first << " theGroup.second=" << theGroup.second << __E__;
 
 	return theGroup;
 }  // end loadGroupNameAndKey()

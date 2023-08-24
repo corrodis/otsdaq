@@ -1559,14 +1559,36 @@ try
 	// load and activate
 	try
 	{
+		//first get group type - it must be Configuration type!
+		std::string groupTypeString;
+		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
+		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second,
+			false /*doActivate*/,
+			0 /*groupMembers      */,
+			0 /*progressBar       */,
+			0 /*accumulateWarnings*/,
+			0 /*groupComment      */,
+			0 /*groupAuthor       */,
+			0 /*groupCreateTime   */,
+			true /*doNotLoadMember */,
+			&groupTypeString
+			);
+		if(groupTypeString != ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		{
+			__SS__ << "Illegal attempted configuration group type. The table group '" <<
+				theConfigurationTableGroup_.first << "(" << theConfigurationTableGroup_.second << ")' is of type " <<
+				groupTypeString << ". It must be " << ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION << "." << __E__;
+			__SS_THROW__;
+		}
+
 		CorePropertySupervisorBase::theConfigurationManager_->loadTableGroup(
 		    theConfigurationTableGroup_.first, theConfigurationTableGroup_.second, true /*doActivate*/);
 
 		__COUT__ << "Done loading Configuration Alias." << __E__;
 
-		// When configured, set the translated System Alias to be persistently active
-		ConfigurationManagerRW tmpCfgMgr("TheGatewaySupervisor");
-		tmpCfgMgr.activateTableGroup(theConfigurationTableGroup_.first, theConfigurationTableGroup_.second);
+		// mark the translated group as the last activated group
+		std::pair<std::string /*group name*/, TableGroupKey> activatedGroup(std::string(theConfigurationTableGroup_.first), theConfigurationTableGroup_.second);
+		ConfigurationManager::saveGroupNameAndKey(activatedGroup, ConfigurationManager::LAST_ACTIVATED_CONFIG_GROUP_FILE);
 
 		__COUT__ << "Done activating Configuration Alias." << __E__;
 	}
@@ -3897,8 +3919,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			//	to get updated icons every time...
 			//(so icon changes do no require an ots restart)
 
-			ConfigurationManagerRW                            tmpCfgMgr(theWebUsers_.getUsersUsername(
-                userInfo.uid_));  // constructor will activate latest context, note: not CorePropertySupervisorBase::theConfigurationManager_
+			ConfigurationManager							  tmpCfgMgr; // Creating new temporary instance so that constructor will activate latest context, note: not using member CorePropertySupervisorBase::theConfigurationManager_
 			const DesktopIconTable*                           iconTable = tmpCfgMgr.__GET_CONFIG__(DesktopIconTable);
 			const std::vector<DesktopIconTable::DesktopIcon>& icons     = iconTable->getAllDesktopIcons();
 
@@ -4232,7 +4253,7 @@ xoap::MessageReference GatewaySupervisor::supervisorLastTableGroupRequest(xoap::
 xoap::MessageReference GatewaySupervisor::lastTableGroupRequestHandler(const SOAPParameters& parameters)
 {
 	std::string action = parameters.getValue("ActionOfLastGroup");
-	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 10) << __E__;
+	__COUT__ << "ActionOfLastGroup: " << action.substr(0, 30) << __E__;
 
 	std::string fileName = "";
 	if(action == "Configured")
