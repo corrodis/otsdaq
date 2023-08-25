@@ -30,6 +30,7 @@
 #include <memory>
 #include <string> /*string and to_string*/
 #include <vector>
+#include <time.h>
 
 namespace ots
 {
@@ -54,7 +55,8 @@ class CoreSupervisorBase : public xdaq::Application,
 
 	void destroy(void);
 
-	 unsigned int 					getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
+	unsigned int 					getSupervisorLID				(void) const { return getApplicationDescriptor()->getLocalId(); }
+	time_t		 					getSupervisorUptime				(void) const { return time(0) - constructedTime_;}				
 
 	// Here are the common web request handlers:
 	//	defaultPage returns the public html page
@@ -131,6 +133,9 @@ class CoreSupervisorBase : public xdaq::Application,
 	void              postStateMachineExecutionLoop(void);
 
 	RemoteWebUsers 				theRemoteWebUsers_;
+
+private:	
+	const time_t				constructedTime_ = time(0);
 };
 // clang-format on
 }  // namespace ots
