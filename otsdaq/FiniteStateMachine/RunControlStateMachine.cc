@@ -20,6 +20,7 @@
 using namespace ots;
 
 const std::string RunControlStateMachine::FAILED_STATE_NAME  = FiniteStateMachine::FAILED_STATE_NAME;
+const std::string RunControlStateMachine::INITIAL_STATE_NAME = "Initial";
 const std::string RunControlStateMachine::HALTED_STATE_NAME  = "Halted";
 const std::string RunControlStateMachine::PAUSED_STATE_NAME  = "Paused";
 const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
@@ -33,7 +34,7 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
-	theStateMachine_.addState('I', "Initial", this, &RunControlStateMachine::stateInitial);
+	theStateMachine_.addState('I', RunControlStateMachine::INITIAL_STATE_NAME, this, &RunControlStateMachine::stateInitial);
 	theStateMachine_.addState('H', RunControlStateMachine::HALTED_STATE_NAME, this, &RunControlStateMachine::stateHalted);
 	theStateMachine_.addState('C', "Configured", this, &RunControlStateMachine::stateConfigured);
 	theStateMachine_.addState('R', RunControlStateMachine::RUNNING_STATE_NAME, this, &RunControlStateMachine::stateRunning);
@@ -330,7 +331,7 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	__GEN_COUTV__(getErrorMessage());
 	__GEN_COUTV__(retransmittedCommand);
 
-	if(command == "Halt" && currentState == "Initial")
+	if(command == "Halt" && currentState == RunControlStateMachine::INITIAL_STATE_NAME)
 	{
 		__GEN_COUT__ << "Converting Halt command to Initialize, since currently in "
 		                "Initialized state."
