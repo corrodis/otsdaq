@@ -933,7 +933,38 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 
 			__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << __E__;
 
-			theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
+			try
+			{
+				//disable version tracking to accept untracked versions to be selected by the FSM transition source
+				theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/,
+					0,0,0,0,0,0,false,0,0,ConfigurationManager::LoadGroupType::ALL_TYPES,
+					true /*ignoreVersionTracking*/);
+			}
+			catch(const std::runtime_error& e)
+			{
+				__SS__ << "Error loading table group '" << theGroup.first << "(" << theGroup.second << ")! \n" << e.what() << __E__;
+				__SUP_COUT_ERR__ << ss.str();
+				// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+				//__SS_THROW_ONLY__;
+				theStateMachine_.setErrorMessage(ss.str());
+				throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/, ss.str() /* message*/, "FESupervisor::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
+				);
+			}
+			catch(...)
+			{
+				__SS__ << "Unknown error loading table group '" << theGroup.first << "(" << theGroup.second << ")!" << __E__;
+				__SUP_COUT_ERR__ << ss.str();
+				// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+				//__SS_THROW_ONLY__;
+				theStateMachine_.setErrorMessage(ss.str());
+				throw toolbox::fsm::exception::Exception(
+					"Transition Error" /*name*/, ss.str() /* message*/, "FESupervisor::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
+				);
+			}
+			
 		}
 	}  // end start like CoreSupervisorBase::transitionConfiguring
 
@@ -966,14 +997,14 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 			metricMan = std::make_unique<artdaq::MetricManager>();
 		}
 		std::string metricNamePreamble = feSupervisorNode.getNode("/SlowControlsMetricManagerChannelNamePreamble").getValue<std::string>();
-		__COUTV__(metricNamePreamble);
+		__SUP_COUTV__(metricNamePreamble);
 		if(metricNamePreamble == TableViewColumnInfo::DATATYPE_STRING_DEFAULT)
 			metricNamePreamble = "";
 
 		// std::string         metric_string = "epics: {metricPluginType:epics level:3 channel_name_prefix:Mu2e}";
 		fhicl::ParameterSet metric_pset = fhicl::ParameterSet::make(metric_string);
 
-		__COUTV__(metricNamePreamble);
+		__SUP_COUTV__(metricNamePreamble);
 		try
 		{
 			metricMan->initialize(metric_pset.get<fhicl::ParameterSet>("metrics"), metricNamePreamble);
@@ -990,7 +1021,7 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 	catch(const std::runtime_error& e)
 	{
 		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring(): " << e.what() << __E__;
-		__COUT_ERR__ << ss.str();
+		__SUP_COUT_ERR__ << ss.str();
 		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
 		//__SS_THROW_ONLY__;
@@ -1002,7 +1033,7 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring()" << __E__;
-		__COUT_ERR__ << ss.str();
+		__SUP_COUT_ERR__ << ss.str();
 		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
 		//__SS_THROW_ONLY__;
@@ -1042,7 +1073,7 @@ void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 	catch(...)
 	{
 		__SS__ << "Error shutting down metrics in FESupervisor::transitionHalting()" << __E__;
-		__COUT_ERR__ << ss.str();
+		__SUP_COUT_ERR__ << ss.str();
 		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
 		//__SS_THROW_ONLY__;
