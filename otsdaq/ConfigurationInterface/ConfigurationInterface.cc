@@ -39,7 +39,7 @@ ConfigurationInterface* ConfigurationInterface::getInstance(bool mode)
 
 	theMode_ = mode;
 	return theInstance_;
-}
+} //end getInstance()
 
 //==============================================================================
 bool ConfigurationInterface::isVersionTrackingEnabled() { return ConfigurationInterface::theVersionTrackingEnabled_; }

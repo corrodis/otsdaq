@@ -6,6 +6,14 @@ SCRIPT_DIR="$(
  pwd -P 
 )"
 
+
+# Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
+HOSTNAME="$(hostname -f)"
+
+if [ "x$THIS_HOST" == "x" ]; then
+	THIS_HOST="${HOSTNAME}"
+fi
+
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
@@ -49,11 +57,6 @@ trap 'handler' HUP
 # enables coredumps for any process run from this point onward in this script
 ulimit -c unlimited
 
-# Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
-HOSTNAME="$(hostname -f)"
-
-THIS_HOST="${HOSTNAME}"
-HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
 STARTTIME=`date +"%d%h%y.%T"` #to fully ID one StartOTS from another
 
@@ -460,7 +463,6 @@ if [[ $KILLALL != 0 ]]; then
 	
 	#try to force kill other StartOTS scripts
 	echo "KILL_ALL" > $OTSDAQ_STARTOTS_QUIT_FILE
-	#echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	echo "KILL_ALL ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
     echo  -e "${IBRed}"
@@ -870,7 +872,7 @@ launchOTSMacromaker() {
 			else # found the supervisor!
 				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
 				# so clear alive, if ots script can not connect to port
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -922,7 +924,7 @@ launchOTSMacromaker() {
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 					out "Checking http://${THIS_HOST}:${port}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1108,7 +1110,7 @@ launchOTSWiz() {
 			else # found the supervisor!
 				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
 				# so clear alive, if ots script can not connect to port
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1147,7 +1149,7 @@ launchOTSWiz() {
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 					out "Checking http://${THIS_HOST}:${port}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1516,7 +1518,7 @@ launchOTS() {
 									else # found the supervisor!
 										# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
 										# so clear alive, if ots script can not connect to port
-										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 										# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 										if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 											out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1556,7 +1558,7 @@ launchOTS() {
 											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 											out "Checking http://${THIS_HOST}:${port}..."
 										else  # found the supervisor!
-											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 											# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 											if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 												out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1637,13 +1639,25 @@ launchOTS() {
 	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
+			#out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
 			i=$(( $i + 1 ))
 			continue
 		fi
 
 		#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
+		OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+		# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+		if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+			#sometimes the port takes extra time to close
+			out "Retrying... Context '${Bold}${xdaqContextUID[$i]}${RstClr}' http port is already in use! http://${THIS_HOST}:${port}"
+			sleep 4
+			OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+			# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+			if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+				die "Context http port is already in use! http://${THIS_HOST}:${port}"
+			fi
+		fi
 		
 		if [ $QUIET == 1 ]; then		  
 
@@ -1721,7 +1735,7 @@ launchOTS() {
 				else   # found the supervisor!
 					# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
 					# so clear alive, if ots script can not connect to port
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1760,7 +1774,7 @@ launchOTS() {
 						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
 						out "Checking http://${THIS_HOST}:${port}..."
 					else   # found the supervisor!
-						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 						# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 						if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 							out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
@@ -1844,7 +1858,7 @@ launchOTS() {
 				out "\t\tssh ${host} ${SCRIPT_DIR}/ots_remote_start" 
 				
 				# launch ssh remote start (attempt twice)
-				ssh ${host} ${SCRIPT_DIR}/ots_remote_start || ssh ${host} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				ssh ${host} ${SCRIPT_DIR}/ots_remote_start ${host} || ssh ${host} ${SCRIPT_DIR}/ots_remote_start ${host} || out "${Red}${REV} ***************** {${host}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
@@ -2164,9 +2178,8 @@ otsActionHandler() {
 		
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
-		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
+		#out "message loop command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 				
-		#echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 

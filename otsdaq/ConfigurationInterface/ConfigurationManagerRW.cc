@@ -165,7 +165,8 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 //	this implies allowing column errors and accumulating such errors in given string
 const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
                                                                                 std::string*       accumulatedWarnings /*=0*/,
-                                                                                const std::string& errorFilterName /*=""*/)
+                                                                                const std::string& errorFilterName /*=""*/,
+																				bool			   getGroupInfo /* = true */)
 {
 	// allTableInfo_ is container to be returned
 
@@ -319,68 +320,71 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__GEN_COUT__ << "======================================================== getAllTableInfo end runtime=" << runTimeSeconds() << __E__;
 
 	// get Group Info too!
-	try
+	if(getGroupInfo)
 	{
-		// build allGroupInfo_ for the ConfigurationManagerRW
-
-		std::set<std::string /*name*/> tableGroups = theInterface_->getAllTableGroupNames();
-		__GEN_COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
-
-		TableGroupKey key;
-		std::string   name;
-		for(const auto& fullName : tableGroups)
+		try
 		{
-			TableGroupKey::getGroupNameAndKey(fullName, name, key);
-			cacheGroupKey(name, key);
+			// build allGroupInfo_ for the ConfigurationManagerRW
+
+			std::set<std::string /*name*/> tableGroups = theInterface_->getAllTableGroupNames();
+			__GEN_COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
+
+			TableGroupKey key;
+			std::string   name;
+			for(const auto& fullName : tableGroups)
+			{
+				TableGroupKey::getGroupNameAndKey(fullName, name, key);
+				cacheGroupKey(name, key);
+			}
+
+			// for each group get member map & comment, author, time, and type for latest key
+			for(auto& groupInfo : allGroupInfo_)
+			{
+				try
+				{
+					loadTableGroup(groupInfo.first /*groupName*/,
+								groupInfo.second.getLatestKey(),
+								false /*doActivate*/,
+								&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+								0 /*progressBar*/,
+								0 /*accumulateErrors*/,
+								&groupInfo.second.latestKeyGroupComment_,
+								&groupInfo.second.latestKeyGroupAuthor_,
+								&groupInfo.second.latestKeyGroupCreationTime_,
+								true /*doNotLoadMember*/,
+								&groupInfo.second.latestKeyGroupTypeString_);
+				}
+				catch(...)
+				{
+					__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+									<< "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
+					groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
+					groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
+					groupInfo.second.latestKeyGroupCreationTime_ = "0";
+					groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
+				}
+			}  // end group info loop
+		}      // end get group info
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "A fatal error occurred reading the info for all table groups. Error: " << e.what() << __E__;
+			__GEN_COUT_ERR__ << "\n" << ss.str();
+			if(accumulatedWarnings)
+				*accumulatedWarnings += ss.str();
+			else
+				throw;
 		}
-
-		// for each group get member map & comment, author, time, and type for latest key
-		for(auto& groupInfo : allGroupInfo_)
+		catch(...)
 		{
-			try
-			{
-				loadTableGroup(groupInfo.first /*groupName*/,
-				               groupInfo.second.getLatestKey(),
-				               false /*doActivate*/,
-				               &groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
-				               0 /*progressBar*/,
-				               0 /*accumulateErrors*/,
-				               &groupInfo.second.latestKeyGroupComment_,
-				               &groupInfo.second.latestKeyGroupAuthor_,
-				               &groupInfo.second.latestKeyGroupCreationTime_,
-				               true /*doNotLoadMember*/,
-				               &groupInfo.second.latestKeyGroupTypeString_);
-			}
-			catch(...)
-			{
-				__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
-				                  << "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
-				groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
-				groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
-				groupInfo.second.latestKeyGroupCreationTime_ = "0";
-				groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
-			}
-		}  // end group info loop
-	}      // end get group info
-	catch(const std::runtime_error& e)
-	{
-		__SS__ << "A fatal error occurred reading the info for all table groups. Error: " << e.what() << __E__;
-		__GEN_COUT_ERR__ << "\n" << ss.str();
-		if(accumulatedWarnings)
-			*accumulatedWarnings += ss.str();
-		else
-			throw;
-	}
-	catch(...)
-	{
-		__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
-		__GEN_COUT_ERR__ << "\n" << ss.str();
-		if(accumulatedWarnings)
-			*accumulatedWarnings += ss.str();
-		else
-			throw;
-	}
-	__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
+			__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
+			__GEN_COUT_ERR__ << "\n" << ss.str();
+			if(accumulatedWarnings)
+				*accumulatedWarnings += ss.str();
+			else
+				throw;
+		}
+		__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
+	} //end getGroupInfo
 
 	return allTableInfo_;
 }  // end getAllTableInfo

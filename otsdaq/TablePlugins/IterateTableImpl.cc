@@ -13,6 +13,8 @@ const std::string IterateTable::COMMAND_CHOOSE_FSM             = "CHOOSE_FSM";
 const std::string IterateTable::COMMAND_CONFIGURE_ACTIVE_GROUP = "CONFIGURE_ACTIVE_GROUP";
 const std::string IterateTable::COMMAND_CONFIGURE_ALIAS        = "CONFIGURE_ALIAS";
 const std::string IterateTable::COMMAND_CONFIGURE_GROUP        = "CONFIGURE_GROUP";
+const std::string IterateTable::COMMAND_ACTIVATE_ALIAS         = "ACTIVATE_ALIAS";
+const std::string IterateTable::COMMAND_ACTIVATE_GROUP         = "ACTIVATE_GROUP";
 const std::string IterateTable::COMMAND_EXECUTE_FE_MACRO       = "EXECUTE_FE_MACRO";
 const std::string IterateTable::COMMAND_EXECUTE_MACRO          = "EXECUTE_MACRO";
 const std::string IterateTable::COMMAND_MODIFY_ACTIVE_GROUP    = "MODIFY_ACTIVE_GROUP";
@@ -37,6 +39,8 @@ IterateTable::CommandBeginLabelParams      IterateTable::commandBeginLabelParams
 IterateTable::CommandConfigureActiveParams IterateTable::commandConfigureActiveParams_;
 IterateTable::CommandConfigureAliasParams  IterateTable::commandConfigureAliasParams_;
 IterateTable::CommandConfigureGroupParams  IterateTable::commandConfigureGroupParams_;
+IterateTable::CommandActivateAliasParams   IterateTable::commandActivateAliasParams_;
+IterateTable::CommandActivateGroupParams   IterateTable::commandActivateGroupParams_;
 IterateTable::CommandExecuteMacroParams    IterateTable::commandExecuteMacroParams_;
 IterateTable::CommandModifyActiveParams    IterateTable::commandModifyActiveParams_;
 IterateTable::CommandRepeatLabelParams     IterateTable::commandRepeatLabelParams_;
