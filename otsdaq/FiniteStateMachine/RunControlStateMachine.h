@@ -120,6 +120,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 	static const std::string SHUTDOWN_TRANSITION_NAME;
 	static const std::string STARTUP_TRANSITION_NAME;
+	static const std::string ERROR_TRANSITION_NAME;
 
 	unsigned int       getIterationIndex(void) { return iterationIndex_; }
 	unsigned int       getSubIterationIndex(void) { return subIterationIndex_; }

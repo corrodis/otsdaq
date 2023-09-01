@@ -80,6 +80,8 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	__GEN_COUT__ << "universalAddressSize = " << universalAddressSize << __E__;
 	__GEN_COUT__ << "universalAddress = " << universalAddress << __E__;
 
+	sizeOfReadBytes_ = 0;
+
 	// check for valid types:
 	//	if(dataType_ != "char" &&
 	//				dataType_ != "short" &&
@@ -90,8 +92,22 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 	//				dataType_ != "float" &&
 	//				dataType_ != "double")
 	//		{
-	if(dataType_[dataType_.size() - 1] == 'b')  // if ends in 'b' then take that many bits
-		sscanf(&dataType_[0], "%u", &sizeOfDataTypeBits_);
+	if(dataType_.size() > 1 && dataType_[dataType_.size() - 1] == 'b')  // if ends in 'b' then take that many bits
+	{
+		//if dataType_ leads with xB then yb, the use x as the number of read bytes (e.g. for a block read) 
+
+		//search for 'B'
+		for(unsigned int i = 0; i<dataType_.size()-1; ++i)
+			if(dataType_[i] == 'B') //then treat as number of read bytes
+			{
+				sscanf(&dataType_[0], "%uB", &sizeOfReadBytes_);
+				++i; //to get past 'B'
+				sscanf(&dataType_[i], "%u", &sizeOfDataTypeBits_);
+				break;
+			}
+			else if(i == dataType_.size()-2) //else no 'B'
+				sscanf(&dataType_[0], "%u", &sizeOfDataTypeBits_);
+	}
 	else if(dataType_ == "char" || dataType_ == "unsigned char")
 		sizeOfDataTypeBits_ = sizeof(char) * 8;
 	else if(dataType_ == "short" || dataType_ == "unsigned short")
@@ -117,20 +133,34 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		__GEN_SS_THROW__;
 	}
 
-	if(sizeOfDataTypeBits_ > 64)
+	//calculate number of bytes to read
+	if(!sizeOfReadBytes_)
+		sizeOfReadBytes_ = (
+			(universalDataBitOffset_ + sizeOfDataTypeBits_) / 8 + 
+			(((universalDataBitOffset_ + sizeOfDataTypeBits_) % 8) ? 1 : 0));
+	sizeOfDataTypeBytes_ = (
+		(sizeOfDataTypeBits_) / 8 + 
+		(((sizeOfDataTypeBits_) % 8) ? 1 : 0));
+
+	if(sizeOfReadBytes_ > 8)
 	{
-		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_
-		           << "-bits)"
-		              ". Size in bits must be less than or equal to 64-bits."
+		//TODO: check if FE supports Block Reads
+		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (offset:" <<
+					universalDataBitOffset_ << " + " << sizeOfDataTypeBits_
+		           << "-bits) = " << sizeOfReadBytes_ <<
+		              "-bytes. Size in bytes must be less than or equal to 8-bytes."
 		           << __E__;
 		__GEN_COUT_ERR__ << "\n" << ss.str();
 		__GEN_SS_THROW__;
 	}
 
-	if(universalDataSize * 8 < sizeOfDataTypeBits_)
+	if(universalDataSize < sizeOfReadBytes_)
 	{
-		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (" << sizeOfDataTypeBits_ << "-bits) or Universal Data Size of " << universalDataSize * 8
-		           << "-bits. Data Type size must be less than or equal to Universal Data Size." << __E__;
+		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (offset:" <<
+					universalDataBitOffset_ << " + " << sizeOfDataTypeBits_
+		           << "-bits) = " << sizeOfReadBytes_ <<
+		              "-bytes. Data Type size must be less than or equal to Universal Data Size = " << 
+					  universalDataSize << "-bytes." << __E__;
 		__GEN_COUT_ERR__ << "\n" << ss.str();
 		__GEN_SS_THROW__;
 	}
@@ -147,8 +177,7 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		__GEN_SS_THROW__;
 	}
 
-	sizeOfDataTypeBytes_ = (sizeOfDataTypeBits_ / 8 + ((universalDataBitOffset_ % 8) ? 1 : 0));
-
+	
 	lolo_.resize(sizeOfDataTypeBytes_);
 	lo_.resize(sizeOfDataTypeBytes_);
 	hi_.resize(sizeOfDataTypeBytes_);
@@ -220,9 +249,13 @@ void FESlowControlsChannel::print(std::ostream& out) const
 	out << "\t"
 	    << "sizeOfDataTypeBits_: " << sizeOfDataTypeBits_ << __E__;
 	out << "\t"
-	    << "universalAddress_: " << BinaryStringMacros::binaryNumberToHexString(universalAddress_, "0x", " ") << __E__;
+	    << "sizeOfDataTypeBytes_: " << sizeOfDataTypeBytes_ << __E__;
 	out << "\t"
 	    << "universalDataBitOffset_: " << universalDataBitOffset_ << __E__;
+	out << "\t"
+	    << "sizeOfReadBytes_: " << sizeOfReadBytes_ << __E__;
+	out << "\t"
+	    << "universalAddress_: " << BinaryStringMacros::binaryNumberToHexString(universalAddress_, "0x", " ") << __E__;	
 	out << "\t"
 	    << "readAccess_: " << readAccess_ << __E__;
 	out << "\t"
@@ -274,10 +307,6 @@ std::string FESlowControlsChannel::underscoreString(const std::string& str)
 // 	Note: buffer is expected to sized properly in advance, e.g. buffer.resize(#)
 void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, std::string& buffer, bool useDataType /*  = false */)
 {
-	__GEN_COUT__ << "Input Str Sz= \t" << inString.size() << __E__;
-	__GEN_COUT__ << "Input Str Val= \t'" << inString << "'" << __E__;
-	__GEN_COUT__ << "Output buffer Sz= \t" << buffer.size() << __E__;
-
 	if(useDataType && (dataType_ == "float" || dataType_ == "double"))
 	{
 		__GEN_COUT__ << "Floating point spec'd" << __E__;
@@ -327,76 +356,7 @@ void FESlowControlsChannel::convertStringToBuffer(const std::string& inString, s
 	for(; i < buffer.size(); ++i)
 		buffer[i] = 0;
 
-	__GEN_COUT__ << "Resulting Number Buffer: " << BinaryStringMacros::binaryNumberToHexString(buffer, "0x", " ") << __E__;
-	return;
-
-	// clear buffer
-	for(unsigned int i = 0; i < buffer.size(); ++i)
-		buffer[i] = 0;
-
-	//	{ //print
-	//		__GEN_SS__ << "0x ";
-	//		for(int i=(int)buffer.size()-1;i>=0;--i)
-	//			ss << std::hex << (int)((buffer[i]>>4)&0xF) <<
-	//			(int)((buffer[i])&0xF) << " " << std::dec;
-	//		ss << __E__;
-	//		__GEN_COUT__ << "\n" << ss.str();
-	//	}
-
-	if(inString.size())
-	{
-		if(inString.size() > 2 && inString[0] == '0' && inString[1] == 'x')
-		{
-			// hex value
-
-			__GEN_COUT__ << "Hex." << __E__;
-
-			unsigned int  j;
-			unsigned char val;
-			for(unsigned int i = 0; i < inString.size(); ++i)
-			{
-				j = (inString.size() - 1 - i);
-				if(inString[i] >= '0' && inString[i] <= '9')
-					val = inString[i] - 48;
-				else if(inString[i] >= 'A' && inString[i] <= 'F')
-					val = inString[i] - 55;
-				else if(inString[i] >= 'a' && inString[i] <= 'f')
-					val = inString[i] - 87;
-				else
-					val = 0;
-
-				buffer[j / 2] |= val << ((j % 2) * 4);
-			}
-		}
-		else  // treat as decimal value
-		{
-			// assume not bigger than 64 bits if decimal
-
-			__GEN_COUT__ << "Decimal." << __E__;
-			unsigned long long val;
-
-			if(!useDataType || dataType_[0] == 'u')  // then use unsigned long long
-			{
-				sscanf(&inString[0], "%llu", &val);
-			}
-			else  // use long long
-			{
-				sscanf(&inString[0], "%lld", (long long*)&val);
-			}
-			// transfer the long long to the universal address
-			for(unsigned int i = 0; i < sizeof(long long) && i < buffer.size(); ++i)
-				buffer[i] = ((char*)&val)[i];
-			// assume rest of buffer bytes are 0, since decimal value was given
-		}
-	}
-
-	{  // print
-		__GEN_SS__ << "0x ";
-		for(int i = (int)buffer.size() - 1; i >= 0; --i)
-			ss << std::hex << (int)((buffer[i] >> 4) & 0xF) << (int)((buffer[i]) & 0xF) << " " << std::dec;
-		ss << __E__;
-		__GEN_COUT__ << "\n" << ss.str();
-	}
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Resulting Number Buffer: " << BinaryStringMacros::binaryNumberToHexString(buffer, "0x", " ") << __E__;
 }  // end convertStringToBuffer()
 
 //==============================================================================
@@ -406,9 +366,10 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue, 
 {
 	// __GEN_COUT__ << "txBuffer size=" << txBuffer.size() << __E__;
 
-	// extract sample from universalReadValue
+	// first copy the read value to the channel, then extract sample from universalReadValue_
+	universalReadValue_ = universalReadValue;
 	//	considering bit size and offset
-	extractSample(universalReadValue);  // sample_ = universalReadValue
+	extractSample();  // sample_ = universalReadValue_
 
 	// behavior:
 	//	if recordChangesOnly
@@ -425,6 +386,8 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue, 
 
 	//////////////////////////////////////////////////
 
+	lastSampleTime_ = time(0);
+	
 	if(recordChangesOnly_)
 	{
 		if(lastSampleTime_ && lastSample_ == sample_)
@@ -437,7 +400,6 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue, 
 	__GEN_COUT__ << "new value!" << __E__;
 
 	// else we have an interesting value!
-	lastSampleTime_ = time(0);
 	lastSample_     = sample_;
 
 	char alarmMask = 0;
@@ -755,9 +717,9 @@ void FESlowControlsChannel::handleSample(const std::string& universalReadValue, 
 // extractSample
 //	extract sample from universalReadValue
 //		considering bit size and offset
-void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
+void FESlowControlsChannel::extractSample()
 {
-	// procedure:
+	const std::string& universalReadValue = universalReadValue_; //do not modify
 
 	{  // print
 		__GEN_SS__ << "Universal Read: ";
@@ -769,12 +731,16 @@ void FESlowControlsChannel::extractSample(const std::string& universalReadValue)
 	}
 
 	sample_.resize(0);  // clear a la sample_ = "";
-	BinaryStringMacros::extractValueFromBinaryString(universalReadValue, sample_, sizeOfDataTypeBits_);
+	BinaryStringMacros::extractValueFromBinaryString(universalReadValue, sample_, 
+		sizeOfDataTypeBits_, universalDataBitOffset_);
 
-	__GEN_COUT__ << "Sample size in bytes: " << sample_.size() << "\t in bits: " << sizeOfDataTypeBits_ << __E__;
-
-	__GEN_COUT__ << "sample: " << BinaryStringMacros::binaryNumberToHexString(sample_, "0x", " ") << __E__;
-
+	__GEN_COUT__ << "Sample: " << BinaryStringMacros::binaryNumberToHexString(sample_, "0x", " ") << 
+		", from address: " << 
+		BinaryStringMacros::binaryNumberToHexString(universalAddress_, "0x", " ") << 
+		", sample size in bytes: " << sample_.size() << 
+		", in bits: " << sizeOfDataTypeBits_ << 
+		", at bit-offset: " << universalDataBitOffset_ << __E__;
+	
 }  // end extractSample()
 
 //==============================================================================
