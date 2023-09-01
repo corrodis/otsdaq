@@ -366,6 +366,22 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 		ss << std::setw(2) << std::setfill('0') << (t/60/60) << ":" <<
 			std::setw(2) << std::setfill('0') << ((t % (60*60))/60) << ":" << 
 			std::setw(2) << std::setfill('0') << (t % 60);
+
+		//return time-in-state detail
+		t = theStateMachine_.getTimeInState();
+		ss << ", Time-in-state: ";
+		days = t/60/60/24;
+		if(days > 0)
+		{
+			ss << days << " day" << (days>1?"s":"") << ", ";
+			t -= days * 60*60*24;
+		}
+
+		//HH:MM:SS
+		ss << std::setw(2) << std::setfill('0') << (t/60/60) << ":" <<
+			std::setw(2) << std::setfill('0') << ((t % (60*60))/60) << ":" << 
+			std::setw(2) << std::setfill('0') << (t % 60);
+
 		detail = ss.str();
 		return detail;
 	}

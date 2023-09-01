@@ -27,6 +27,7 @@ const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
 
 const std::string RunControlStateMachine::SHUTDOWN_TRANSITION_NAME = "Shutdown";
 const std::string RunControlStateMachine::STARTUP_TRANSITION_NAME  = "Startup";
+const std::string RunControlStateMachine::ERROR_TRANSITION_NAME  = "Error";
 
 //==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)

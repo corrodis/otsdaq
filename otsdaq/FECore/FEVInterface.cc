@@ -2,6 +2,7 @@
 #include "otsdaq/CoreSupervisors/CoreSupervisorBase.h"
 #include "otsdaq/FECore/FEVInterfacesManager.h"
 #include "otsdaq/NetworkUtilities/UDPDataStreamerBase.h"
+#include "otsdaq/Macros/BinaryStringMacros.h"
 
 #define TRACE_NAME "FEVInterface"
 #include <iostream>
@@ -18,10 +19,6 @@ FEVInterface::FEVInterface(const std::string& interfaceUID, const ConfigurationT
     , slowControlsWorkLoop_(interfaceUID + "-SlowControls", this)
     , interfaceUID_(interfaceUID)
     , mfSubject_(interfaceUID)
-//, interfaceType_
-//(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("FEInterfacePluginName").getValue<std::string>())
-//, daqHardwareType_            	("NOT SET")
-//, firmwareType_               	("NOT SET")
 {
 	// NOTE!! be careful to not decorate with __FE_COUT__ because in the constructor the
 	// base class versions of function (e.g. getInterfaceType) are called because the
@@ -139,7 +136,7 @@ FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
 void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::string& readValue)
 {
 	readValue.resize(universalDataSize_);
-	universalRead(channel.getUniversalAddress(), &readValue[0]);
+	universalRead(&channel.universalAddress_[0], &readValue[0]);
 }  // end getNextSlowControlsChannel()
 
 //==============================================================================
@@ -157,7 +154,8 @@ try
 		__FE_COUT__ << "No slow controls channels to monitor, exiting slow controls workloop." << __E__;
 		return false;
 	}
-	std::string readVal;
+	std::string readValInst;
+	std::string& readVal = readValInst;
 	readVal.resize(universalDataSize_);  // size to data in advance
 
 	FESlowControlsChannel* channel;
@@ -274,21 +272,45 @@ try
 
 			__FE_COUT__ << "Reading Channel:" << channel->fullChannelName_ << " at t=" << time(0) << __E__;
 
-			getSlowControlsValue(*channel, readVal);
+			//check if can use buffered value
+			resetSlowControlsChannelIterator();
+			FESlowControlsChannel* channelToCopy;
+			bool usingBufferedValue = false;
+			while((channelToCopy = getNextSlowControlsChannel()) != channel)
+			{
+				__FE_COUT__ << "Looking for buffered value at " << 					
+					BinaryStringMacros::binaryNumberToHexString(channelToCopy->universalAddress_,  "0x", " ") << " "  << 
+					channelToCopy->getReadSizeBytes() << " " <<
+					time(0) - channelToCopy->getLastSampleTime() << __E__;
 
-			//			{ //print
-			//				__FE_SS__ << "0x ";
-			//				for(int i=(int)universalAddressSize_-1;i>=0;--i)
-			//					ss << std::hex << (int)((readVal[i]>>4)&0xF) <<
-			//					(int)((readVal[i])&0xF) << " " << std::dec;
-			//				ss << __E__;
-			//				__FE_COUT__ << "Sampled.\n" << ss.str();
-			//			}
+				if(BinaryStringMacros::binaryNumberToHexString(channelToCopy->universalAddress_,  "0x", " ") == 
+					BinaryStringMacros::binaryNumberToHexString(channel->universalAddress_,  "0x", " ") && 
+					channelToCopy->getReadSizeBytes() == channel->getReadSizeBytes() && 
+					time(0) - channelToCopy->getLastSampleTime() < 2 /* within 2 seconds, then re-use buffer */)
+				{
+					usingBufferedValue = true;
+					//can NOT break;... must take iterator back to channel
+					__FE_COUT__ << "Using buffered " << channelToCopy->getReadSizeBytes() << 
+						"-byte value at address:" << 
+						BinaryStringMacros::binaryNumberToHexString(channelToCopy->universalAddress_,  "0x", " ") << __E__;
+
+					__FE_COUT__ << "Copying: " << BinaryStringMacros::binaryNumberToHexString(channelToCopy->universalReadValue_, "0x", " ") << 
+						" at t=" << time(0) << __E__;
+					readVal = channelToCopy->universalReadValue_; //copy by reference
+					__FE_COUT__ << "Copied: " << BinaryStringMacros::binaryNumberToHexString(readVal, "0x", " ") << " at t=" << time(0) << __E__;
+				}
+			}
+
+			if(!usingBufferedValue)
+				getSlowControlsValue(*channel, readVal);
 
 			// have sample
 			channel->handleSample(readVal, txBuffer, fp, aggregateFileIsBinaryFormat);
+			__FE_COUT__ << "Have: " << BinaryStringMacros::binaryNumberToHexString(channel->universalReadValue_, "0x", " ") << " at t=" << time(0) << __E__;					
+
 			if(txBuffer.size())
 				__FE_COUT__ << "txBuffer sz=" << txBuffer.size() << __E__;
+
 
 			// Use artdaq Metric Manager if available,
 			if(channel->monitoringEnabled_ && metricMan && metricMan->Running() && universalAddressSize_ <= 8)
@@ -338,11 +360,11 @@ try
 		{
 			if(numOfReadAccessChannels == 0)
 			{
-				__MCOUT_WARN__("There are no slow controls channels with read access!" << __E__);
+				__FE_COUT_WARN__ << "There are no slow controls channels with read access!" << __E__;
 				break;
 			}
 			else
-				__COUT__ << "There are " << getSlowControlsChannelCount() << " slow controls channels total. " << numOfReadAccessChannels
+				__FE_COUT__ << "There are " << getSlowControlsChannelCount() << " slow controls channels total. " << numOfReadAccessChannels
 				         << " with read access enabled." << __E__;
 		}
 		firstTime = false;

@@ -49,7 +49,7 @@ using namespace ots;
 XDAQ_INSTANTIATOR_IMPL(GatewaySupervisor)
 
 WebUsers GatewaySupervisor::theWebUsers_ = WebUsers();
-std::vector<GatewaySupervisor::BroadcastThreadStruct> GatewaySupervisor::broadcastThreadStructs_;
+std::vector<std::shared_ptr<GatewaySupervisor::BroadcastThreadStruct>> GatewaySupervisor::broadcastThreadStructs_;
 
 //==============================================================================
 GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
@@ -327,7 +327,7 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 
 					if(!appLastStatusGood[appName])
 					{
-						__COUT__ << "First Good Status from "
+						__COUT__ << "First good status from "
 						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
 						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
@@ -347,12 +347,38 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					}
 					if(appLastStatusGood[appName])
 					{
-						__COUT__ << "Getting Status "
+						__COUT__ << "Failed getting status from "
 						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
 						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
 						__COUT_WARN__ << "Failed to send getStatus SOAP Message - will suppress repeat errors: " << e.what() << __E__;
 					}  // else quiet repeat error messages
+					else  //check if should throw state machine error
+					{						
+						std::lock_guard<std::mutex> lock(theSupervisor->stateMachineAccessMutex_);
+
+						std::string currentState  = theSupervisor->theStateMachine_.getCurrentStateName();
+						if(currentState != RunControlStateMachine::FAILED_STATE_NAME && 
+							currentState != RunControlStateMachine::HALTED_STATE_NAME && 
+							currentState != RunControlStateMachine::INITIAL_STATE_NAME)
+						{							
+							__SS__ << "\nDid a supervisor crash? Failed getting status from "
+						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
+						         << "' [URL=" << appInfo.getURL() << "]."
+								<< __E__;
+							__COUT_ERR__ << "\n" << ss.str();
+
+							theSupervisor->theStateMachine_.setErrorMessage(ss.str());
+							try
+							{
+								theSupervisor->runControlMessageHandler(SOAPUtilities::makeSOAPMessageReference(
+									RunControlStateMachine::ERROR_TRANSITION_NAME));
+							}
+							catch(...) {} //ignore any errors
+							
+							break; //only send one Error, then restart status loop
+						}
+					}
 					appLastStatusGood[appName] = false;
 				}
 				catch(...)
@@ -368,12 +394,38 @@ void GatewaySupervisor::AppStatusWorkLoop(GatewaySupervisor* theSupervisor)
 					}
 					if(appLastStatusGood[appName])
 					{
-						__COUT__ << "Getting Status "
+						__COUT__ << "Failed getting status from "
 						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
 						         << "' [URL=" << appInfo.getURL() << "].\n\n";
 						__COUTV__(SOAPUtilities::translate(tempMessage));
 						__COUT_WARN__ << "Failed to send getStatus SOAP Message due to unknown error. Will suppress repeat errors." << __E__;
 					}  // else quiet repeat error messages
+					else  //check if should throw state machine error
+					{						
+						std::lock_guard<std::mutex> lock(theSupervisor->stateMachineAccessMutex_);
+
+						std::string currentState  = theSupervisor->theStateMachine_.getCurrentStateName();
+						if(currentState != RunControlStateMachine::FAILED_STATE_NAME && 
+							currentState != RunControlStateMachine::HALTED_STATE_NAME && 
+							currentState != RunControlStateMachine::INITIAL_STATE_NAME)
+						{							
+							__SS__ << "\nDid a supervisor crash? Failed getting Status "
+						         << " Supervisor instance = '" << appName << "' [LID=" << appInfo.getId() << "] in Context '" << appInfo.getContextName()
+						         << "' [URL=" << appInfo.getURL() << "]."
+								<< __E__;
+							__COUT_ERR__ << "\n" << ss.str();
+
+							theSupervisor->theStateMachine_.setErrorMessage(ss.str());
+							try
+							{
+								theSupervisor->runControlMessageHandler(SOAPUtilities::makeSOAPMessageReference(
+									RunControlStateMachine::ERROR_TRANSITION_NAME));
+							}
+							catch(...) {} //ignore any errors
+
+							break; //only send one Error, then restart status loop
+						}
+					}
 					appLastStatusGood[appName] = false;
 				}
 			}  // end with non-gateway status request handling
@@ -771,7 +823,7 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 	if(activeStateMachineName_ != "" && activeStateMachineName_ != fsmName)
 	{
 		__COUT__ << "currentState = " << currentState << __E__;
-		if(currentState != "Halted" && currentState != "Initial")
+		if(currentState != RunControlStateMachine::HALTED_STATE_NAME && currentState != RunControlStateMachine::INITIAL_STATE_NAME)
 		{
 			// illegal for this FSM name to attempt transition
 
@@ -782,7 +834,8 @@ void GatewaySupervisor::stateMachineXgiHandler(xgi::Input* in, xgi::Output* out)
 			       << "in control of State Machine progress. ";
 			ss << "\n\nIn order for this State Machine with window name '" << fsmWindowName << "' (UID: " << fsmName
 			   << ") "
-			      "to control progress, please transition to Halted using the active "
+			      "to control progress, please transition to " << 
+				  RunControlStateMachine::HALTED_STATE_NAME << " using the active "
 			   << "State Machine '" << activeStateMachineWindowName_ << ".'" << __E__;
 			__COUT_ERR__ << "\n" << ss.str();
 
@@ -1442,14 +1495,6 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
 	__SS__;
-
-	// if already in Failed state, just append new error message
-	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
-	{
-		__COUT__ << "Appending new error to already existing error." << __E__;
-		ss << "\n" << theStateMachine_.getErrorMessage();
-	}
-
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
 	{
@@ -1471,10 +1516,10 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	theStateMachine_.setErrorMessage(ss.str());
 
-	// if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
-	// 	__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
-	// else 	// move everything else to Error!
-	broadcastMessage(SOAPUtilities::makeSOAPMessageReference("Error"));
+	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
+	else 	// move everything else to Error!
+		broadcastMessage(SOAPUtilities::makeSOAPMessageReference(RunControlStateMachine::ERROR_TRANSITION_NAME));
 }  // end enteringError()
 
 //==============================================================================
@@ -2432,7 +2477,7 @@ try
 			while(appInfo.getStatus() == SupervisorInfo::APP_STATUS_UNKNOWN)
 			{
 				__COUT__ << "Broadcast thread " << threadIndex << "\t"
-				         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state." << __E__;
+				         << "Waiting for Supervisor " << appInfo.getName() << " [LID=" << appInfo.getId() << "] in unknown state. waitAttempts of 10 = " << waitAttempts << __E__;
 				++waitAttempts;
 				if(waitAttempts == 10)
 				{
@@ -2453,6 +2498,7 @@ try
 
 			// for transition attempt, set status for app, in case the request occupies the target app			
 			std::string tmpReply = send(appInfo.getDescriptor(), message);
+			__COUTV__(tmpReply);
 			//using the intermediate temporary string seems to possibly help when there are multiple crashes of FSM entities			
 			reply = tmpReply;
 			
@@ -2541,7 +2587,7 @@ try
 
 				__COUT_ERR__ << ss.str() << __E__;
 
-				if(command == "Error")
+				if(command == RunControlStateMachine::ERROR_TRANSITION_NAME)
 					return true;  // do not throw exception and exit loop if informing all
 					              // apps about error
 				// else throw exception and go into Error
@@ -2621,7 +2667,7 @@ catch(...)
 // broadcastMessageThread
 //	Sends transition command message and gets reply
 //		if failure, THROW
-void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr, GatewaySupervisor::BroadcastThreadStruct* threadStruct)
+void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr, std::shared_ptr<GatewaySupervisor::BroadcastThreadStruct> threadStruct)
 {
 	__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t"
 	         << "established..." << __E__;
@@ -2768,18 +2814,19 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 
 	// std::vector<GatewaySupervisor::BroadcastThreadStruct> broadcastThreadStructs_(numberOfThreads);
 	broadcastThreadStructs_.clear();
-	broadcastThreadStructs_.resize(numberOfThreads);
 
 	// only launch threads if more than 1
 	//	if 1, just use main thread
 	for(unsigned int i = 0; i < numberOfThreads; ++i)
 	{
-		broadcastThreadStructs_[i].threadIndex_ = i;
+		broadcastThreadStructs_.push_back(std::make_shared<GatewaySupervisor::BroadcastThreadStruct>());
+		broadcastThreadStructs_[i]->threadIndex_ = i;
 
 		std::thread([](GatewaySupervisor*                        supervisorPtr,
-		               GatewaySupervisor::BroadcastThreadStruct* threadStruct) { GatewaySupervisor::broadcastMessageThread(supervisorPtr, threadStruct); },
+		               std::shared_ptr<GatewaySupervisor::BroadcastThreadStruct> threadStruct) { 
+						GatewaySupervisor::broadcastMessageThread(supervisorPtr, threadStruct); },
 		            this,
-		            &broadcastThreadStructs_[i])
+		            broadcastThreadStructs_[i])
 		    .detach();
 	}  // end broadcast thread creation loop
 
@@ -2842,14 +2889,14 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						{
 							for(unsigned int k = 0; k < numberOfThreads; ++k)
 							{
-								if(!broadcastThreadStructs_[k].workToDo_)
+								if(!broadcastThreadStructs_[k]->workToDo_)
 								{
 									// found our thread!
 									assignedJob = true;
 									__COUT__ << "Giving work to thread " << k << ", command = " << command << __E__;
 
-									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k].threadMutex);
-									broadcastThreadStructs_[k].setMessage(appInfo, message, command, iteration, supervisorIterationsDone[i][j]);
+									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k]->threadMutex);
+									broadcastThreadStructs_[k]->setMessage(appInfo, message, command, iteration, supervisorIterationsDone[i][j]);
 
 									break;
 								}
@@ -2886,18 +2933,18 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						unsigned int lastUnfinishedThread = -1;
 
 						for(unsigned int i = 0; i < numberOfThreads; ++i)
-							if(broadcastThreadStructs_[i].workToDo_)
+							if(broadcastThreadStructs_[i]->workToDo_)
 							{
 								done = false;
 								++numOfThreadsWithWork;
 								lastUnfinishedThread = i;
 							}
-							else if(broadcastThreadStructs_[i].error_)
+							else if(broadcastThreadStructs_[i]->error_)
 							{
 								__COUT__ << "Found thread in error! Throwing state "
 								            "machine error: "
-								         << broadcastThreadStructs_[i].getReply() << __E__;
-								XCEPT_RAISE(toolbox::fsm::exception::Exception, broadcastThreadStructs_[i].getReply());
+								         << broadcastThreadStructs_[i]->getReply() << __E__;
+								XCEPT_RAISE(toolbox::fsm::exception::Exception, broadcastThreadStructs_[i]->getReply());
 							}
 
 						if(!done)  // update status and sleep
@@ -2906,8 +2953,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 							waitSs << "Waiting on " << numOfThreadsWithWork << " of " << numberOfThreads << " threads to finish. Command = " << command;
 							if(numOfThreadsWithWork == 1)
 							{
-								waitSs << ".. " << broadcastThreadStructs_[lastUnfinishedThread].getAppInfo().getName() << ":"
-								       << broadcastThreadStructs_[lastUnfinishedThread].getAppInfo().getId();
+								waitSs << ".. " << broadcastThreadStructs_[lastUnfinishedThread]->getAppInfo().getName() << ":"
+								       << broadcastThreadStructs_[lastUnfinishedThread]->getAppInfo().getId();
 							}
 							waitSs << __E__;
 							__COUT__ << waitSs.str();
@@ -2949,7 +2996,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		//	thread struct will be destructed, and the thread will
 		//	crash on next access attempt (though we probably do not care).
 		for(unsigned int i = 0; i < numberOfThreads; ++i)
-			broadcastThreadStructs_[i].exitThread_ = true;
+			broadcastThreadStructs_[i]->exitThread_ = true;
 		usleep(100 * 1000 /*100ms*/);  // sleep for exit time
 
 		throw;  // re-throw
@@ -2966,7 +3013,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 		//	crash on next access attempt (when the thread crashes, the whole context
 		// crashes).
 		for(unsigned int i = 0; i < numberOfThreads; ++i)
-			broadcastThreadStructs_[i].exitThread_ = true;
+			broadcastThreadStructs_[i]->exitThread_ = true;
 		usleep(100 * 1000 /*100ms*/);  // sleep for exit time
 	}
 
