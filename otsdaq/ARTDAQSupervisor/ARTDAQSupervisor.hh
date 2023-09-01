@@ -52,6 +52,11 @@ class ARTDAQSupervisor : public CoreSupervisorBase
 	virtual void        enteringError(toolbox::Event::Reference event) override;
 	virtual std::string getStatusProgressDetail(void) override
 	{
+		if(!theStateMachine_.isInTransition() && 
+			(theStateMachine_.getCurrentStateName() == RunControlStateMachine::HALTED_STATE_NAME || 
+			theStateMachine_.getCurrentStateName() == RunControlStateMachine::INITIAL_STATE_NAME))
+			return CoreSupervisorBase::getStatusProgressDetail();
+
 		std::lock_guard<std::mutex> lk(thread_mutex_);
 		// __COUTV__(thread_progress_message_);
 		return thread_progress_message_;

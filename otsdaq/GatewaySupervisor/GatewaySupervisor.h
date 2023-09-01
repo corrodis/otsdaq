@@ -192,6 +192,17 @@ class WorkLoopManager;
 			{
 			}  // end BroadcastThreadStruct constructor()
 
+			//===================
+			BroadcastThreadStruct(BroadcastThreadStruct &&b)
+				: threadIndex_(b.threadIndex_)
+				, exitThread_(b.exitThread_)
+				, working_(b.working_)
+				, workToDo_(b.workToDo_)
+				, error_(b.error_)
+			{
+			}  // end BroadcastThreadStruct move constructor()
+
+
 			struct BroadcastMessageStruct
 			{
 				//===================
@@ -210,8 +221,8 @@ class WorkLoopManager;
 
 				const SupervisorInfo& appInfo_;
 				xoap::MessageReference message_;
-				const std::string& command_;
-				const unsigned int& iteration_;
+				const std::string command_;
+				const unsigned int iteration_;
 				bool& iterationsDone_;
 
 				std::string reply_;
@@ -247,7 +258,7 @@ class WorkLoopManager;
 		};  // end BroadcastThreadStruct declaration
 		static void broadcastMessageThread(
 			GatewaySupervisor* supervisorPtr,
-			GatewaySupervisor::BroadcastThreadStruct* threadStruct);
+			std::shared_ptr<GatewaySupervisor::BroadcastThreadStruct> threadStruct);
 		bool handleBroadcastMessageTarget(const SupervisorInfo& appInfo,
 			xoap::MessageReference message,
 			const std::string& command,
@@ -296,6 +307,7 @@ class WorkLoopManager;
 													 // matches breakpoint index
 		std::mutex			broadcastCommandStatusUpdateMutex_;
 		std::string			broadcastCommandStatus_;
+		static std::vector<std::shared_ptr<GatewaySupervisor::BroadcastThreadStruct>> broadcastThreadStructs_; //moving to static, instead of a local instance inside broadcastMessage() seems to avoid crashing when multiple error stack up and threads get stuck waiting for app replies
 
 		// temporary member variable to avoid redeclaration in repetitive functions
 		char 				tmpStringForConversions_[100];

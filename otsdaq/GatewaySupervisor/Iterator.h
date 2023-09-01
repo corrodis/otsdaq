@@ -97,7 +97,8 @@ class Iterator
 	static bool checkCommandFSMTransition(IteratorWorkLoopStruct* iteratorStruct, const std::string& finalState);
 
 	static bool haltIterator(Iterator*               iterator,
-	                         IteratorWorkLoopStruct* iteratorStruct = 0);  //(GatewaySupervisor* theSupervisor, const std::string& fsmName);
+	                         IteratorWorkLoopStruct* iteratorStruct = 0,
+							 bool 					  doNotHaltFSM = false);
 
 	std::mutex    accessMutex_;
 	volatile bool workloopRunning_;

@@ -190,8 +190,5 @@ void BinaryStringMacros::extractValueFromBinaryString(const std::string& binaryB
                                                       unsigned int       bitIndex /* = 0 */)
 {
 	value.resize((valueNumberOfBits / 8) + ((valueNumberOfBits % 8) ? 1 : 0));
-
-	__COUTV__(value.size());
-
 	extractValueFromBinaryString(&binaryBuffer[0], binaryBuffer.size(), &value[0], valueNumberOfBits, bitIndex);
 }  // end extractValueFromBinaryString()

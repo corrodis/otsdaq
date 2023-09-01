@@ -38,15 +38,15 @@ class FESlowControlsChannel
 
 	void					print						(std::ostream& out = std::cout) const;
 
-
-	char* 					getUniversalAddress			() { return &universalAddress_[0]; }
+	unsigned int			getReadSizeBytes 			() const { return sizeOfReadBytes_; }
+	time_t					getLastSampleTime 			() const { return lastSampleTime_; }
 	void  					handleSample				(const std::string& universalReadValue, std::string& txBuffer, FILE* fpAggregate = 0, bool aggregateIsBinaryFormat = false);
 	void  					clearAlarms					(int targetAlarm = -1);  // default to all
 
 	static std::string 		underscoreString			(const std::string& str);
 
   private:
-	void 					extractSample				(const std::string& universalReadValue);
+	void 					extractSample				();
 	char 					checkAlarms					(std::string& txBuffer);
 	void 					convertStringToBuffer		(const std::string& inString, std::string& buffer, bool useDataType = false);
 
@@ -57,10 +57,9 @@ class FESlowControlsChannel
 	const std::string 		dataType_;
 
   private:
-	std::string  			universalAddress_;    // get size from parent FE interface
 	unsigned int 			sizeOfDataTypeBits_;  // defines the size of all data string buffers,
 	                                   // must be less than or equal to universalDataSize
-	unsigned int  			sizeOfDataTypeBytes_;
+	unsigned int  			sizeOfDataTypeBytes_, sizeOfReadBytes_;
 	unsigned int  			universalDataBitOffset_;
 	unsigned char 			txPacketSequenceNumber_;
 
@@ -75,6 +74,8 @@ class FESlowControlsChannel
 	const bool        		saveBinaryFormat_;
 
 	const bool 				alarmsEnabled_, latchAlarms_;
+	std::string 			universalReadValue_;
+	std::string  			universalAddress_;    // get size from parent FE interface
 
   private:
 	std::string 			sample_, lastSample_;

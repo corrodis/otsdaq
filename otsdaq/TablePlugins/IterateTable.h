@@ -37,6 +37,8 @@ class IterateTable : public TableBase
 	static const std::string COMMAND_CONFIGURE_ACTIVE_GROUP;
 	static const std::string COMMAND_CONFIGURE_ALIAS;
 	static const std::string COMMAND_CONFIGURE_GROUP;
+	static const std::string COMMAND_ACTIVATE_ALIAS;
+	static const std::string COMMAND_ACTIVATE_GROUP;
 	static const std::string COMMAND_EXECUTE_FE_MACRO;
 	static const std::string COMMAND_EXECUTE_MACRO;
 	static const std::string COMMAND_MODIFY_ACTIVE_GROUP;
@@ -61,6 +63,8 @@ class IterateTable : public TableBase
 		m[COMMAND_CONFIGURE_ACTIVE_GROUP] = "";  // no parameters
 		m[COMMAND_CONFIGURE_ALIAS]        = "IterationCommandConfigureAliasTable";
 		m[COMMAND_CONFIGURE_GROUP]        = "IterationCommandConfigureGroupTable";
+		m[COMMAND_ACTIVATE_ALIAS]         = "IterationCommandConfigureAliasTable";
+		m[COMMAND_ACTIVATE_GROUP]         = "IterationCommandConfigureGroupTable";
 		m[COMMAND_EXECUTE_FE_MACRO]       = "IterationCommandExecuteFEMacroTable";
 		m[COMMAND_EXECUTE_MACRO]          = "IterationCommandExecuteMacroTable";
 		m[COMMAND_MODIFY_ACTIVE_GROUP]    = "IterationCommandModifyGroupTable";
@@ -95,6 +99,15 @@ class IterateTable : public TableBase
 		const std::string GroupName_ = "GroupName";
 		const std::string GroupKey_  = "GroupKey";
 	} commandConfigureGroupParams_;
+	static struct CommandActivateAliasParams
+	{
+		const std::string SystemAlias_ = "SystemAlias";
+	} commandActivateAliasParams_;
+	static struct CommandActivateGroupParams
+	{
+		const std::string GroupName_ = "GroupName";
+		const std::string GroupKey_  = "GroupKey";
+	} commandActivateGroupParams_;
 	static struct CommandExecuteMacroParams  // treat FE and Macro the same
 	{
 		// targets

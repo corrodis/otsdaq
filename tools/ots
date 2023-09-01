@@ -6,6 +6,14 @@ SCRIPT_DIR="$(
  pwd -P 
 )"
 
+
+# Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
+HOSTNAME="$(hostname -f)"
+
+if [ "x$THIS_HOST" == "x" ]; then
+	THIS_HOST="${HOSTNAME}"
+fi
+
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
@@ -49,11 +57,6 @@ trap 'handler' HUP
 # enables coredumps for any process run from this point onward in this script
 ulimit -c unlimited
 
-# Bash defines HOSTNAME but it's possible that it might not be a FQDN, this specifically enforces that it will be
-HOSTNAME="$(hostname -f)"
-
-THIS_HOST="${HOSTNAME}"
-HOSTNAME_ARR=($(echo "${THIS_HOST}" | tr '.' " "))
 
 STARTTIME=`date +"%d%h%y.%T"` #to fully ID one StartOTS from another
 
@@ -460,7 +463,6 @@ if [[ $KILLALL != 0 ]]; then
 	
 	#try to force kill other StartOTS scripts
 	echo "KILL_ALL" > $OTSDAQ_STARTOTS_QUIT_FILE
-	#echo "EXIT_LOOP ${STARTTIME}-${LINENO}-${HOSTNAME_ARR[0]}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	echo "KILL_ALL ${THIS_HOST}" > $OTSDAQ_STARTOTS_LOCAL_QUIT_FILE
 	
     echo  -e "${IBRed}"
@@ -803,7 +805,7 @@ launchOTSMacromaker() {
 	if [ "x$OTS_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_MAIN_PORT}
 	fi
-	export PORT=${MAIN_PORT}	
+	export PORT=${MAIN_PORT} #must be exported for xml env var conversion	
 	
 	
 	#check for mm xml file, if missing download it	
@@ -827,7 +829,7 @@ launchOTSMacromaker() {
 	export OTSDAQ_LOG_FHICL=${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl
 	
 
-	out "Starting MacroMaker mode on port ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
+	out "Starting MacroMaker mode on PORT ${PORT}; to change, please setup environment variable OTS_MAIN_PORT."
 	out "MacroMaker mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake_Run.xml"
 	
 
@@ -866,14 +868,14 @@ launchOTSMacromaker() {
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 2
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-				out "Checking http://${THIS_HOST}:${port}..."
+				out "Checking http://${THIS_HOST}:${PORT}..."
 			else # found the supervisor!
-				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-				# so clear alive, if ots script can not connect to port
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
+				# so clear alive, if ots script can not connect to PORT
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+					out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 					OTS_IS_ALIVE=
 				fi
 				break
@@ -920,12 +922,12 @@ launchOTSMacromaker() {
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 					sleep 2
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-					out "Checking http://${THIS_HOST}:${port}..."
+					out "Checking http://${THIS_HOST}:${PORT}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 						OTS_IS_ALIVE=
 					fi
 					break
@@ -984,7 +986,7 @@ launchOTSWiz() {
 	elif [ "x$OTS_MAIN_PORT" != "x" ]; then
 	  MAIN_PORT=${OTS_MAIN_PORT}
 	fi
-	export PORT=${MAIN_PORT}
+	export PORT=${MAIN_PORT} #must be exported for xml env var conversion
 	
 	
 	
@@ -996,7 +998,7 @@ launchOTSWiz() {
 
 	#use safe Message Facility fcl in wiz mode
 	
-	#modify the port to avoid wiz mode conflicts
+	#modify the PORT to avoid wiz mode conflicts
 	cp ${USER_DATA}/MessageFacilityConfigurations/MessageFacility.fcl ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
 	PORTMFOFF=$((30000 + $PORT))
 	sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWiz.fcl 
@@ -1012,11 +1014,11 @@ launchOTSWiz() {
 	if [[ $USE_WEB_VIEWER == "1" ]]; then
 		#out "CONSOLE: Using web console viewer"
 		
-		#start quiet forwarder with wiz receiving port and destination port parameter file
+		#start quiet forwarder with wiz receiving PORT and destination PORT parameter file
 		cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderWiz.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		
-		#modify the port to avoid wiz mode conflicts
-		PORTMFOFF1=$((30001 + $PORT)) #make port + 1
+		#modify the PORT to avoid wiz mode conflicts
+		PORTMFOFF1=$((30001 + $PORT)) #make PORT + 1
 		sed -i s/30001/${PORTMFOFF1}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		sed -i s/30000/${PORTMFOFF}/g ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 		
@@ -1067,7 +1069,7 @@ launchOTSWiz() {
 	
 	
 
-	out "Starting wiz mode on port ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
+	out "Starting wiz mode on PORT ${PORT}; to change, please setup environment variable OTS_WIZ_MODE_MAIN_PORT."
 	out "Wiz mode ots context is defined by ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_Wizard_CMake_Run.xml"
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
@@ -1104,14 +1106,14 @@ launchOTSWiz() {
 			if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 				sleep 2
 				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-				out "Checking http://${THIS_HOST}:${port}..."
+				out "Checking http://${THIS_HOST}:${PORT}..."
 			else # found the supervisor!
-				# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-				# so clear alive, if ots script can not connect to port
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+				# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
+				# so clear alive, if ots script can not connect to PORT
+				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-					out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+					out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 					OTS_IS_ALIVE=
 				fi
 				break
@@ -1145,12 +1147,12 @@ launchOTSWiz() {
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 					sleep 2
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-					out "Checking http://${THIS_HOST}:${port}..."
+					out "Checking http://${THIS_HOST}:${PORT}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 						OTS_IS_ALIVE=
 					fi
 					break
@@ -1281,7 +1283,7 @@ launchOTS() {
 				info "Launching message facility web console assistant...${RstClr}"
 			fi
 			
-			#start quiet forwarder with receiving port and destination port parameter file
+			#start quiet forwarder with receiving PORT and destination PORT parameter file
 			cp ${USER_DATA}/MessageFacilityConfigurations/QuietForwarderGen.cfg ${USER_DATA}/MessageFacilityConfigurations/QuietForwarder.cfg
 			
 			#RAR nov 2019 -- always send forwarder to file (with new trace, verbose mode is handled by trace, no need to printout twice)
@@ -1420,16 +1422,16 @@ launchOTS() {
 			if [[ ($line =~ $re) ]]; then
 				#if https && hostname matches
 				#   convert hostname to localhost
-				#   create node config files with https:port forwarding to localhost:madeupport
+				#   create node config files with https:PORT forwarding to localhost:madeupport
 				#   run nodejs
 				#   run xdaq
 			
 			
-				port=${BASH_REMATCH[3]}
+				PORT=${BASH_REMATCH[3]}
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
-				#out "$host $port ${RstClr}"				
+				#out "$host $PORT ${RstClr}"				
 						
 				if [[ (${BASH_REMATCH[2]} == ${THIS_HOST}) || (${BASH_REMATCH[2]} == ${THIS_HOST}"."*) || (${BASH_REMATCH[2]} == "localhost") ]]; then
 				    isLocal=true
@@ -1438,7 +1440,7 @@ launchOTS() {
 				fi
 
 				contextHostname+=(${host})
-				contextPort+=(${port})
+				contextPort+=(${PORT})
 				contextUIDArray+=(${contextUID})
 			fi
 			#out "------------------------------------------ out"
@@ -1456,11 +1458,11 @@ launchOTS() {
 				if [[ ($line == *"ots::GatewaySupervisor"*) ]]; then #IT's the SUPER supervisor, record LID 
 					if [[ ($line =~ $superRe) ]]; then
 					    gatewayHostname=${host}
-						gatewayPort=${port}
+						gatewayPort=${PORT}
 						gatewayUID=${contextUID}
 						
 						#echo ${BASH_REMATCH[1]}	#should be supervisor LID
-						MAIN_URL="http://${host}:${port}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
+						MAIN_URL="http://${host}:${PORT}/urn:xdaq-application:lid=${BASH_REMATCH[1]}/"
 								
 						#if gateway launch, do it
 						if [[ $ISGATEWAYLAUNCH == 1 && ${host} == ${THIS_HOST} ]]; then						
@@ -1477,22 +1479,22 @@ launchOTS() {
 
 
 							#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
-							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
+							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat >/dev/null 2>&1 #hide output #remove alive file
 
 							if [ $QUIET == 1 ]; then
 								info "Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								
 
 								if [ $BACKUPLOGS == 1 ]; then
 									DATESTRING=`date +'%s'`
-									out "Backing up logfile into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"
-									mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.${DATESTRING}.txt
+									out "Backing up logfile into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.${DATESTRING}.txt${RstClr}"
+									mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.${DATESTRING}.txt
 								fi
 								
 
-								out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
-								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+								out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt${RstClr}"
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt &
 							else
-								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
+								${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &
 							fi
 							
 							LAST_OTS_PID=$!
@@ -1503,7 +1505,7 @@ launchOTS() {
 								# 4 times quietly, then get louder
 								
 								sleep 2
-								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+								OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 								#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 								# sleep 10
 								
@@ -1511,15 +1513,15 @@ launchOTS() {
 								for t in {1..8}; do
 									if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 										sleep 2
-										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-										out "Checking http://${THIS_HOST}:${port}..."
+										OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+										out "Checking http://${THIS_HOST}:${PORT}..."
 									else # found the supervisor!
-										# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-										# so clear alive, if ots script can not connect to port
-										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+										# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
+										# so clear alive, if ots script can not connect to PORT
+										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 										# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 										if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-											out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+											out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 											OTS_IS_ALIVE=
 										fi
 										break
@@ -1535,31 +1537,31 @@ launchOTS() {
 									sleep 2
 									
 									if [ $QUIET == 1 ]; then
-										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt${RstClr}"
+										out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}Gateway${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt${RstClr}"
 										
-										echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
-										echo -e "\n\nAttempting restart on extracted host ${THIS_HOST} port ${port} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt
+										echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt
+										echo -e "\n\nAttempting restart on extracted host ${THIS_HOST} PORT ${PORT} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt
 										
-										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${port}.txt &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-gateway-${THIS_HOST}-${PORT}.txt &
 									else
-										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
+										${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &
 									fi
 									LAST_OTS_PID=$!
 									
 									#verify relaunch
 									sleep 2
-									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"
+									OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)"
 									# Test for start 16 times with short sleep
 									for t in {1..16}; do
 										if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 											sleep 2
-											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
-											out "Checking http://${THIS_HOST}:${port}..."
+											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+											out "Checking http://${THIS_HOST}:${PORT}..."
 										else  # found the supervisor!
-											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 											# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 											if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-												out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+												out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 												OTS_IS_ALIVE=
 											fi
 											break
@@ -1587,7 +1589,7 @@ launchOTS() {
 									
 								done
 								
-								info "Verified successful ots gateway context ${THIS_HOST}-${port} launch..."
+								info "Verified successful ots gateway context ${THIS_HOST}-${PORT} launch..."
 							fi
 							
 							GATEWAY_PID=$LAST_OTS_PID		
@@ -1600,14 +1602,14 @@ launchOTS() {
 							########### 		end launch Gateway context	 		############
 							####################################################################
 						else 
-							out "${Orange}${Bold}The gateway context is ${host}-${port}, which is not an exact match to this host ${THIS_HOST}!...${RstClr}"
+							out "${Orange}${Bold}The gateway context is ${host}-${PORT}, which is not an exact match to this host ${THIS_HOST}!...${RstClr}"
 						fi
 					fi
-				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
+				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $PORT) ]]; then 
 									
-					xdaqPort+=($port)
+					xdaqPort+=($PORT)
 					xdaqHost+=($host)	
-					xdaqLogFilename+=(otsdaq_quiet_run-${host}-${port}.txt)
+					xdaqLogFilename+=(otsdaq_quiet_run-${host}-${PORT}.txt)
 					xdaqContextUID+=($contextUID)				
 					haveXDAQContextPort=true
 				fi
@@ -1631,33 +1633,45 @@ launchOTS() {
 	fi
 	
 	i=0	
-	for port in "${xdaqPort[@]}"
+	for PORT in "${xdaqPort[@]}"
 	do
 	  : 
-	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+	  	#out "${i} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &"
 		  
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-			#out "skipping context on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"			
+			#out "skipping context not on this host -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &"			
 			i=$(( $i + 1 ))
 			continue
 		fi
 
 		#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
-		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat >/dev/null 2>&1 #hide output #remove alive file
+		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat >/dev/null 2>&1 #hide output #remove alive file
+		OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+		# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+		if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+			#sometimes the PORT takes extra time to close
+			out "Retrying... Context '${Bold}${xdaqContextUID[$i]}${RstClr}' http PORT is already in use! http://${THIS_HOST}:${PORT}"
+			sleep 4
+			OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+			# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+			if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+				die "Context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+			fi
+		fi
 		
 		if [ $QUIET == 1 ]; then		  
 
 			if [ $BACKUPLOGS == 1 ]; then
 				DATESTRING=`date +'%s'`				
 				
-				out "Backing up logfile to ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.${DATESTRING}.txt${RstClr}"				
-				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.${DATESTRING}.txt
+				out "Backing up logfile to ${Yellow}${Bold}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.${DATESTRING}.txt${RstClr}"				
+				mv ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.${DATESTRING}.txt
 			fi
 		  			
-			out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"			
-			${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
+			out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt${RstClr}"			
+			${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt &
 		else
-			${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &
+			${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &
 		fi
 		
 		LAST_OTS_PID=$!
@@ -1681,9 +1695,9 @@ launchOTS() {
 		
 
 		# i=0	
-		# for port in "${xdaqPort[@]}"
+		# for PORT in "${xdaqPort[@]}"
 		# do
-		# 	out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} INTER -h ${xdaqHost[$i]} -p ${port} -pp ${xdaqPort[$i]} &"
+		# 	out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} INTER -h ${xdaqHost[$i]} -p ${PORT} -pp ${xdaqPort[$i]} &"
 		# 	i=$(( $i + 1 ))
 		# done
 
@@ -1692,14 +1706,14 @@ launchOTS() {
 		unset ContextPIDArray #reset  
 		i=0
 		j=0
-		for port in "${xdaqPort[@]}"
+		for PORT in "${xdaqPort[@]}"
 		do
 		  : 
-			#out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+			#out "${i} ${xdaqContextUID[$i]} ${xdaqPrefix} xdaq.exe -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &"
 
 				  
 			if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-				# out "skipping context not on this host -h ${xdaqHost[$i]} -p ${port} -e ${XDAQ_ARGS} &"
+				# out "skipping context not on this host -h ${xdaqHost[$i]} -p ${PORT} -e ${XDAQ_ARGS} &"
 				i=$(( $i + 1 ))
 				continue
 			fi
@@ -1710,21 +1724,21 @@ launchOTS() {
 			# 4 times quietly, then get louder		
 			
 			sleep 2
-			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
+			OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 			#out "OTS_IS_ALIVE=${OTS_IS_ALIVE}"
 			
 			for t in {1..8}; do
 				if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 					sleep 2
-					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
-					out "Checking http://${THIS_HOST}:${port}..."
+					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
+					out "Checking http://${THIS_HOST}:${PORT}..."
 				else   # found the supervisor!
-					# have seen instances where http peer transport xdaq port is not established, but xdaq context still is constructed
-					# so clear alive, if ots script can not connect to port
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+					# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
+					# so clear alive, if ots script can not connect to PORT
+					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-						out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 						OTS_IS_ALIVE=
 					fi
 					break
@@ -1738,12 +1752,12 @@ launchOTS() {
 				sleep 2
 				
 				if [ $QUIET == 1 ]; then					
-					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt${RstClr}"
-					echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					echo -e "\n\nAttempting restart on extracted host '${THIS_HOST}' port ${port} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt
-					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${port}.txt &
+					out "${Red}${Bold}Quiet mode${RstClr}. '${Bold}${xdaqContextUID[$i]}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt${RstClr}"
+					echo -e "\n\nXDAQ xml:\n\n ${value} \n\n" >> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt
+					echo -e "\n\nAttempting restart on extracted host '${THIS_HOST}' PORT ${PORT} \n\n" >>  ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &>> ${OTSDAQ_LOG_DIR}/otsdaq_quiet_run-${THIS_HOST}-${PORT}.txt &
 				else
-					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${port} -e ${XDAQ_ARGS} &
+					${xdaqPrefix} xdaq.exe -h ${THIS_HOST} -p ${PORT} -e ${XDAQ_ARGS} &
 				fi
 				LAST_OTS_PID=$!
 				
@@ -1753,17 +1767,17 @@ launchOTS() {
 				
 				#test for relaunch
 				sleep 2
-				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)"
+				OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)"
 				for t in {1..16}; do
 					if [ "x$OTS_IS_ALIVE" == "x" ]; then		
 						sleep 2
-						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${port}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
-						out "Checking http://${THIS_HOST}:${port}..."
+						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
+						out "Checking http://${THIS_HOST}:${PORT}..."
 					else   # found the supervisor!
-						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${port} >/dev/null 2>&1 || echo \"bad\")" #detect if http server has gone up
+						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 						# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 						if [ "$OTS_CONTEXT_UP" == "bad" ]; then
-							out "Context http port could not be verified at curl http://${THIS_HOST}:${port} >/dev/null 2>&1"
+							out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
 							OTS_IS_ALIVE=
 						fi
 						break
@@ -1791,7 +1805,7 @@ launchOTS() {
 				fi
 			done 		
 			
-			info "Verified successful ots non-gateway context ${THIS_HOST}-${port} launch."
+			info "Verified successful ots non-gateway context ${THIS_HOST}-${PORT} launch."
 			#add successful launch to Context PID array	
 			ContextPIDArray+=($LAST_OTS_PID)
 			#ContextPIDArray+=(${TempContextPIDArray[$j]})
@@ -1844,7 +1858,7 @@ launchOTS() {
 				out "\t\tssh ${host} ${SCRIPT_DIR}/ots_remote_start" 
 				
 				# launch ssh remote start (attempt twice)
-				ssh ${host} ${SCRIPT_DIR}/ots_remote_start || ssh ${host} ${SCRIPT_DIR}/ots_remote_start || out "${Red}${REV} ***************** {${contextHostname[$i]}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
+				ssh ${host} ${SCRIPT_DIR}/ots_remote_start ${host} || ssh ${host} ${SCRIPT_DIR}/ots_remote_start ${host} || out "${Red}${REV} ***************** {${host}} Remote start failed (check local permissions and remote installation)! ********************* ${RstClr}" &
 				
 				
 				#add host to remote launch host list
@@ -1973,11 +1987,11 @@ launchOTSLogFind() {
 			if [[ ($line =~ $re) ]]; then
 				#if https && hostname matches
 				#   convert hostname to localhost
-				#   create node config files with https:port forwarding to localhost:madeupport
+				#   create node config files with https:PORT forwarding to localhost:madeupport
 				#   run nodejs
 				#   run xdaq
 			
-				port=${BASH_REMATCH[3]}
+				PORT=${BASH_REMATCH[3]}
 				host=${BASH_REMATCH[2]}
 				insideContext=true
 						
@@ -1986,7 +2000,7 @@ launchOTSLogFind() {
 				else
 				    isLocal=false
 				fi
-				# out "$host $port $isLocal ${RstClr}"	
+				# out "$host $PORT $isLocal ${RstClr}"	
 
 				if [[ ${contextHostname[*]} != ${BASH_REMATCH[2]} ]]; then
 					contextHostname+=(${BASH_REMATCH[2]})
@@ -2009,20 +2023,20 @@ launchOTSLogFind() {
 					if [[ ($line =~ $superRe) ]]; then
 
 					    gatewayHostname=${host}
-						gatewayPort=${port}
+						gatewayPort=${PORT}
 						gatewayUID=${contextUID}
-						fn="otsdaq_quiet_run-gateway-${host}-${port}"
+						fn="otsdaq_quiet_run-gateway-${host}-${PORT}"
 						out "${Red}${Bold}Log file for gateway${RstClr} '${Bold}${contextUID}${RstClr}' on host${RstClr} '${Bold}${host}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 
 					fi
-				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $port) ]]; then 
+				elif [[ ($haveXDAQContextPort == false) && ($gatewayHostname != $host || $gatewayPort != $PORT) ]]; then 
 									
-					xdaqPort+=($port)
+					xdaqPort+=($PORT)
 					xdaqHost+=($host)	
 					xdaqContextUID+=($contextUID)				
 					haveXDAQContextPort=true
 					# out "$contextUID"
-					fn="otsdaq_quiet_run-${host}-${port}"
+					fn="otsdaq_quiet_run-${host}-${PORT}"
 					out "${Red}${Bold}Log file for${RstClr} '${Bold}${contextUID}${RstClr}' on host${RstClr} '${Bold}${host}${RstClr}' output into ${Yellow}${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 				fi
  				
@@ -2047,13 +2061,13 @@ launchOTSLogFind() {
 
 	#non-gateway contexts
 	i=0	
-	for port in "${xdaqPort[@]}"
+	for PORT in "${xdaqPort[@]}"
 	do
 		: 
 
-		fn="otsdaq_quiet_run-${xdaqHost[$i]}-${port}"
+		fn="otsdaq_quiet_run-${xdaqHost[$i]}-${PORT}"
 
-		# out "[$i] == $fn - ${xdaqHost[$i]} - ${port} - $gatewayHostname : $gatewayPort"
+		# out "[$i] == $fn - ${xdaqHost[$i]} - ${PORT} - $gatewayHostname : $gatewayPort"
 
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
 			out "   vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
@@ -2164,9 +2178,8 @@ otsActionHandler() {
 		
 		echo "0" > $OTSDAQ_STARTOTS_ACTION_FILE #clear the command in the file; it has been responded to
 				
-		#out "message loop on ${HOSTNAME} command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
+		#out "message loop command ${OTSDAQ_STARTOTS_ACTION} ${OTSDAQ_STARTOTS_QUIT} ${OTSDAQ_STARTOTS_LOCAL_QUIT} "
 				
-		#echo "message loop on ${HOSTNAME}"	
 		if [ "$OTSDAQ_STARTOTS_ACTION" == "REBUILD_OTS" ]; then
 		
 
@@ -2289,7 +2302,7 @@ otsActionHandler() {
 					logFileSize=0
 					# out "File empty"
 				fi
-				# out "${Red}${Rev}Found Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${port} > ${xdaqLogFilename[$i]} size=${logFileSize} ${RstClr}"
+				# out "${Red}${Rev}Found Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${PORT} > ${xdaqLogFilename[$i]} size=${logFileSize} ${RstClr}"
 
 				# if log file > 100MB
 				if [ $logFileSize -gt 100000000 ]; then 
@@ -2298,7 +2311,7 @@ otsActionHandler() {
 					
 					#from https://github.com/jerome-pouiller/reredirect/
 					reredirect -m "${OTSDAQ_LOG_DIR}/${xdaqLogFilename[$i]}" ${GATEWAY_PID}
-					out "${Red}${Rev}Doing log rollover of Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${port} > ${xdaqLogFilename[$i]}${RstClr}"
+					out "${Red}${Rev}Doing log rollover of Non-gateway process ID ${contextPID} -h ${xdaqHost[$i]} -p ${PORT} > ${xdaqLogFilename[$i]}${RstClr}"
 				fi
 			done
 

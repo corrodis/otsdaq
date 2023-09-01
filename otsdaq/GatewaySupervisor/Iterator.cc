@@ -13,6 +13,11 @@
 
 using namespace ots;
 
+
+#define ITERATOR_PLAN_HISTORY_FILENAME                                                                                                                   \
+	((getenv("SERVICE_DATA_PATH") == NULL) ? (std::string(__ENV__("USER_DATA")) + "/ServiceData") : (std::string(__ENV__("SERVICE_DATA_PATH")))) + \
+	    "/IteratorPlanHistory.hist"
+
 //==============================================================================
 Iterator::Iterator(GatewaySupervisor* supervisor)
     : workloopRunning_(false)
@@ -26,9 +31,35 @@ Iterator::Iterator(GatewaySupervisor* supervisor)
     , activeCommandStartTime_(0)
     , theSupervisor_(supervisor)
 {
-	__MOUT__ << "Iterator constructed." << __E__;
 	__COUT__ << "Iterator constructed." << __E__;
-}
+
+	//restore lastStartedPlanName_ and lastFinishedPlanName_ from file
+	__COUT__ << "Filename for iterator history: " << ITERATOR_PLAN_HISTORY_FILENAME << __E__;
+	FILE* fp = fopen((ITERATOR_PLAN_HISTORY_FILENAME).c_str(), "r");
+	if(fp)  // check for all core table names in file, and force their presence
+	{
+		char                      line[100];
+		int i = 0;
+		while(fgets(line, 100, fp))
+		{
+			if(strlen(line) < 3)
+				continue;
+			line[strlen(line) - 1] = '\0';                           // remove endline
+			__COUTV__(line);
+			if(i == 0)
+				lastStartedPlanName_ = line;
+			else if(i == 1)
+			{
+				lastFinishedPlanName_ = line;	
+				break; //only 2 lines in file (for now)
+			}
+			++i;
+		}
+		fclose(fp);
+		__COUTV__(lastStartedPlanName_);
+		__COUTV__(lastFinishedPlanName_);
+	} //end get iterator plan history
+} //end constructor()
 
 //==============================================================================
 Iterator::~Iterator(void) {}
@@ -37,7 +68,6 @@ Iterator::~Iterator(void) {}
 void Iterator::IteratorWorkLoop(Iterator* iterator)
 try
 {
-	__MOUT__ << "Iterator work loop starting..." << __E__;
 	__COUT__ << "Iterator work loop starting..." << __E__;
 
 	// mutex init scope
@@ -108,7 +138,16 @@ try
 
 					theIteratorStruct.activePlan_  = iterator->activePlanName_;
 					iterator->lastStartedPlanName_ = iterator->activePlanName_;
-
+					FILE* fp = fopen((ITERATOR_PLAN_HISTORY_FILENAME).c_str(), "w");
+					if(fp)
+					{
+						fprintf(fp, "%s\n", iterator->lastStartedPlanName_.c_str());
+						fprintf(fp, "%s\n", iterator->lastFinishedPlanName_.c_str());
+						fclose(fp);
+					}
+					else
+						__COUT_WARN__ << "Could not open Iterator history file: " << ITERATOR_PLAN_HISTORY_FILENAME << __E__;
+					
 					if(theIteratorStruct.commandIndex_ == (unsigned int)-1)
 					{
 						__COUT__ << "Starting plan '" << theIteratorStruct.activePlan_ << ".'" << __E__;
@@ -165,7 +204,7 @@ try
 
 		if(theIteratorStruct.doPauseAction_)
 		{
-			// valid PAUSE command!
+			// valid PAUSE-iterator command!
 
 			// safely pause plan!
 			//	i.e. check that command is complete
@@ -195,7 +234,7 @@ try
 		}
 		else if(theIteratorStruct.doHaltAction_)
 		{
-			// valid HALT command!
+			// valid HALT-iterator command!
 
 			// safely end plan!
 			//	i.e. check that command is complete
@@ -308,6 +347,7 @@ try
 					__COUT__ << "Reverting track changes." << __E__;
 					ConfigurationInterface::setVersionTrackingEnabled(theIteratorStruct.originalTrackChanges_);
 
+					//l
 					__COUT__ << "Activating original group..." << __E__;
 					try
 					{
@@ -319,37 +359,9 @@ try
 					}
 
 					// leave FSM halted
-					__COUT__ << "Completing halt..." << __E__;
+					__COUT__ << "Completing Iteration Plan and cleaning up..." << __E__;
 
-					iterator->haltIterator(iterator, &theIteratorStruct);
-
-					//
-					//			    	//leave FSM halted
-					//			    	iterator->haltIterator(
-					//			    			iterator->theSupervisor_,
-					//							theIteratorStruct.fsmName_);
-					//
-					//					//lockout the messages array for the remainder of
-					// the  scope
-					//					//this guarantees the reading thread can safely
-					// access  the  messages
-					//					if(iterator->theSupervisor_->VERBOSE_MUTEX)
-					//__COUT__
-					//<< "Waiting for iterator access" << __E__;
-					//					std::lock_guard<std::mutex>
-					// lock(iterator->accessMutex_);
-					//					if(iterator->theSupervisor_->VERBOSE_MUTEX)
-					//__COUT__
-					//<< "Have iterator access" << __E__;
-					//
-					//					//similar to halt
-					//					iterator->activePlanIsRunning_ = false;
-					//					iterator->iteratorBusy_ = false;
-					//
-					//					iterator->lastStartedPlanName_ =
-					// theIteratorStruct.activePlan_;
-					//					theIteratorStruct.activePlan_ = ""; //clear
-					//					theIteratorStruct.commandIndex_ = -1; //clear
+					iterator->haltIterator(iterator, &theIteratorStruct, true /* doNotHaltFSM */);
 				}
 			}
 			else if(theIteratorStruct.commandBusy_)
@@ -473,6 +485,21 @@ try
 	{
 		return startCommandConfigureGroup(iteratorStruct);
 	}
+	else if(type == IterateTable::COMMAND_ACTIVATE_ALIAS)
+	{
+		ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
+		std::pair<std::string, TableGroupKey> newActiveGroup = cfgMgr->getTableGroupFromAlias(
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateTable::commandActivateAliasParams_.SystemAlias_]);
+		cfgMgr->loadTableGroup(newActiveGroup.first, newActiveGroup.second, true /*activate*/);
+	}
+	else if(type == IterateTable::COMMAND_ACTIVATE_GROUP)
+	{
+		ConfigurationManagerRW* cfgMgr = iteratorStruct->cfgMgr_;
+		cfgMgr->loadTableGroup( 
+			iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateTable::commandActivateGroupParams_.GroupName_],
+			TableGroupKey(iteratorStruct->commands_[iteratorStruct->commandIndex_].params_[IterateTable::commandActivateGroupParams_.GroupKey_]), 
+			true /*activate*/);
+	}
 	else if(type == IterateTable::COMMAND_EXECUTE_FE_MACRO)
 	{
 		return startCommandMacro(iteratorStruct, true /*isFEMacro*/);
@@ -566,6 +593,11 @@ try
 	        type == IterateTable::COMMAND_CONFIGURE_GROUP)
 	{
 		return checkCommandConfigure(iteratorStruct);
+	}
+	else if(type == IterateTable::COMMAND_ACTIVATE_ALIAS || type == IterateTable::COMMAND_ACTIVATE_GROUP)
+	{
+		// do nothing
+		return true;
 	}
 	else if(type == IterateTable::COMMAND_EXECUTE_FE_MACRO)
 	{
@@ -695,8 +727,9 @@ void Iterator::startCommandChooseFSM(IteratorWorkLoopStruct* iteratorStruct, con
 
 //==============================================================================
 // return true if an action was attempted
-bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iteratorStruct)
-//(GatewaySupervisor* theSupervisor, const std::string& fsmName)
+bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iteratorStruct /* = 0 */,
+	bool doNotHaltFSM /* = false */)
+
 {
 	GatewaySupervisor* theSupervisor = iterator->theSupervisor_;
 	const std::string& fsmName       = iterator->lastFsmName_;
@@ -705,8 +738,14 @@ bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iterator
 	std::string              errorStr     = "";
 	std::string              currentState = theSupervisor->theStateMachine_.getCurrentStateName();
 
-	bool haltAttempted = true;
-	if(currentState == "Initialized" || currentState == "Halted")
+	bool haltAttempted = true;	
+	if(doNotHaltFSM)
+	{
+		__COUT_INFO__ << "Iterator is leaving FSM in current state: " << currentState << 
+			". If this is undesireable, add a Halt command, for example, to the end of your Iteration plan." << __E__;
+		haltAttempted = false;
+	}
+	else if(currentState == "Initialized" || currentState == "Halted")
 	{
 		__COUT__ << "Do nothing. Already halted." << __E__;
 		haltAttempted = false;
@@ -731,22 +770,25 @@ bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iterator
 		__COUT__ << "halting state machine launched." << __E__;
 	}
 
-	// finish up halting the iterator
-	__COUT__ << "Conducting Iterator halt." << __E__;
+	// finish up cleanup of the iterator
+	__COUT__ << "Conducting Iterator cleanup." << __E__;
 
 	if(iteratorStruct)
 	{
 		__COUT__ << "Reverting track changes." << __E__;
 		ConfigurationInterface::setVersionTrackingEnabled(iteratorStruct->originalTrackChanges_);
 
-		__COUT__ << "Activating original group..." << __E__;
-		try
+		if(!doNotHaltFSM)
 		{
-			iteratorStruct->cfgMgr_->activateTableGroup(iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
-		}
-		catch(...)
-		{
-			__COUT_WARN__ << "Original group could not be activated." << __E__;
+			__COUT__ << "Activating original group..." << __E__;
+			try
+			{
+				iteratorStruct->cfgMgr_->activateTableGroup(iteratorStruct->originalConfigGroup_, iteratorStruct->originalConfigKey_);
+			}
+			catch(...)
+			{
+				__COUT_WARN__ << "Original group could not be activated." << __E__;
+			}
 		}
 	}
 
@@ -767,10 +809,19 @@ bool Iterator::haltIterator(Iterator* iterator, IteratorWorkLoopStruct* iterator
 
 	if(iteratorStruct)
 	{
-		__COUT__ << "Halted plan '" << iteratorStruct->activePlan_ << "' at command index " << iteratorStruct->commandIndex_ << ". " << __E__;
-		__MOUT__ << "Halted plan '" << iteratorStruct->activePlan_ << "' at command index " << iteratorStruct->commandIndex_ << ". " << __E__;
+		__COUT__ << "Iterator cleanup complete of plan '" << iteratorStruct->activePlan_ << "' at command index " << iteratorStruct->commandIndex_ << ". " << __E__;
+		
+		iterator->lastFinishedPlanName_ = iteratorStruct->activePlan_;
+		FILE* fp = fopen((ITERATOR_PLAN_HISTORY_FILENAME).c_str(), "w");
+		if(fp)
+		{
+			fprintf(fp, "%s\n", iterator->lastStartedPlanName_.c_str());
+			fprintf(fp, "%s\n", iterator->lastFinishedPlanName_.c_str());
+			fclose(fp);
+		}
+		else
+			__COUT_WARN__ << "Could not open Iterator history file: " << ITERATOR_PLAN_HISTORY_FILENAME << __E__;
 
-		iterator->lastStartedPlanName_ = iteratorStruct->activePlan_;
 		iteratorStruct->activePlan_    = "";  // clear
 		iteratorStruct->commandIndex_  = -1;  // clear
 	}
@@ -1215,25 +1266,6 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 		StringMacros::getNumber(startValueStr, startValue);
 		StringMacros::getNumber(startValueStr, stepSize);
 
-		//		long int startValue;
-		//
-		//		if(startValueStr.size() > 2 && startValueStr[1] == 'x') //assume hex value
-		//			startValue = strtol(startValueStr.c_str(),0,16);
-		//		else if(startValueStr.size() > 1 && startValueStr[0] == 'b') //assume
-		// binary  value 			startValue =
-		// strtol(startValueStr.substr(1).c_str(),0,2);
-		////skip first 'b' character 		else 			startValue =
-		// strtol(startValueStr.c_str(),0,10);
-		//
-		//		long int stepSize;
-		//
-		//		if(stepSizeStr.size() > 2 && stepSizeStr[1] == 'x') //assume hex value
-		//			stepSize = strtol(stepSizeStr.c_str(),0,16);
-		//		else if(stepSizeStr.size() > 1 && stepSizeStr[0] == 'b') //assume binary
-		// value 			stepSize = strtol(stepSizeStr.substr(1).c_str(),0,2); //skip
-		// first 'b' character 		else 			stepSize =
-		// strtol(stepSizeStr.c_str(),0,10);
-
 		__COUT__ << "startValue " << startValue << std::endl;
 		__COUT__ << "stepSize " << stepSize << std::endl;
 		__COUT__ << "currentValue " << startValue + stepSize * stepIndex << std::endl;
@@ -1643,6 +1675,11 @@ bool Iterator::handleCommandRequest(HttpXmlDocument& xmldoc, const std::string& 
 	}
 	else if(command == "getIterationPlanStatus")
 	{
+		if(activePlanName_ == "" && parameter != "") //take parameter to set active plan name from GUI manipulations
+		{
+			activePlanName_ = parameter;
+			__COUTV__(activePlanName_);		
+		}
 		getIterationPlanStatus(xmldoc);
 		return true;
 	}
@@ -1781,37 +1818,6 @@ void Iterator::haltIterationPlan(HttpXmlDocument& /*xmldoc*/)
 	{
 		__COUT__ << "No thread, so conducting halt." << __E__;
 		Iterator::haltIterator(this);
-		//
-		//		activePlanIsRunning_ = false;
-		//		iteratorBusy_ = false;
-		//
-		//		bool haltAttempted = false;
-		//		try
-		//		{
-		//			haltAttempted = Iterator::haltIterator(theSupervisor_, lastFsmName_);
-		//		}
-		//		catch(const std::runtime_error& e)
-		//		{
-		//			haltAttempted = false;
-		//			__COUT__ << "Halt error: " << e.what() << __E__;
-		//		}
-		//
-		//		if(!haltAttempted) //then show error
-		//		{
-		//			__SS__ << "Invalid halt command attempted. Can only halt when there is
-		// an  active iteration plan." << __E__;
-		//			__MOUT_ERR__ << ss.str();
-		//
-		//			xmldoc.addTextElementToData("error_message", ss.str());
-		//
-		//			__COUT__ << "Invalid halt command attempted. " <<
-		//					workloopRunning_ << " " <<
-		//					activePlanIsRunning_ << " " <<
-		//					commandHalt_ << " " <<
-		//					activePlanName_ << __E__;
-		//		}
-		//		else
-		//			__COUT__ << "Halt was attempted." << __E__;
 	}
 }
 

@@ -1190,17 +1190,18 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 // 	if accumulatedTreeErrors, then "ignore warnings"
 void ConfigurationManager::loadTableGroup(const std::string&                                     groupName,
                                           TableGroupKey                                          groupKey,
-                                          bool                                                   doActivate /*=false*/,
-                                          std::map<std::string /*table name*/, TableVersion>*    groupMembers,
-                                          ProgressBar*                                           progressBar,
-                                          std::string*                                           accumulatedWarnings,
-                                          std::string*                                           groupComment,
-                                          std::string*                                           groupAuthor,
-                                          std::string*                                           groupCreateTime,
-                                          bool                                                   doNotLoadMembers /*=false*/,
-                                          std::string*                                           groupTypeString,
-                                          std::map<std::string /*name*/, std::string /*alias*/>* groupAliases,
-                                          ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /* = ConfigurationManager::LoadGroupType::ALL_TYPES*/)
+                                          bool                                                   doActivate 		/*=false*/,
+                                          std::map<std::string /*table name*/, TableVersion>*    groupMembers 		/*=0*/,
+                                          ProgressBar*                                           progressBar  		/*=0*/,
+                                          std::string*                                           accumulatedWarnings  /*=0*/,
+                                          std::string*                                           groupComment  		/*=0*/,
+                                          std::string*                                           groupAuthor  		/*=0*/,
+                                          std::string*                                           groupCreateTime  	/*=0*/,
+                                          bool                                                   doNotLoadMembers 	/*=false*/,
+                                          std::string*                                           groupTypeString  	/*=0*/,
+                                          std::map<std::string /*name*/, std::string /*alias*/>* groupAliases  		/*=0*/,
+                                          ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /*=ConfigurationManager::LoadGroupType::ALL_TYPES*/,
+										  bool													 ignoreVersionTracking /*=false*/)
 try
 {
 	// clear to defaults
@@ -1481,7 +1482,7 @@ try
 			for(auto& memberPair : memberMap)
 			{
 				// do NOT allow activating Scratch versions if tracking is ON!
-				if(ConfigurationInterface::isVersionTrackingEnabled() && memberPair.second.isScratchVersion())
+				if(!ignoreVersionTracking && ConfigurationInterface::isVersionTrackingEnabled() && memberPair.second.isScratchVersion())
 				{
 					__SS__ << "Error while activating member Table '" << nameToTableMap_[memberPair.first]->getTableName() << "-v" << memberPair.second
 					       << " for Table Group '" << groupName << "(" << groupKey << ")'. When version tracking is enabled, Scratch views"

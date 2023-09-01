@@ -347,8 +347,44 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 	}
 	*/
 
-	if(theStateMachine_.getCurrentStateName() == "Halted")
+	if(!theStateMachine_.isInTransition() && 
+		(theStateMachine_.getCurrentStateName() == RunControlStateMachine::HALTED_STATE_NAME || 
+		theStateMachine_.getCurrentStateName() == RunControlStateMachine::INITIAL_STATE_NAME))
+	{
+		//return uptime detail
+		std::stringstream ss;
+		time_t t = getSupervisorUptime();
+		ss << "Uptime: ";
+		int days = t/60/60/24;
+		if(days > 0)
+		{
+			ss << days << " day" << (days>1?"s":"") << ", ";
+			t -= days * 60*60*24;
+		}
+
+		//HH:MM:SS
+		ss << std::setw(2) << std::setfill('0') << (t/60/60) << ":" <<
+			std::setw(2) << std::setfill('0') << ((t % (60*60))/60) << ":" << 
+			std::setw(2) << std::setfill('0') << (t % 60);
+
+		//return time-in-state detail
+		t = theStateMachine_.getTimeInState();
+		ss << ", Time-in-state: ";
+		days = t/60/60/24;
+		if(days > 0)
+		{
+			ss << days << " day" << (days>1?"s":"") << ", ";
+			t -= days * 60*60*24;
+		}
+
+		//HH:MM:SS
+		ss << std::setw(2) << std::setfill('0') << (t/60/60) << ":" <<
+			std::setw(2) << std::setfill('0') << ((t % (60*60))/60) << ":" << 
+			std::setw(2) << std::setfill('0') << (t % 60);
+
+		detail = ss.str();
 		return detail;
+	}
 
 	for(const auto& fsm : CoreSupervisorBase::theStateMachineImplementation_)
 	{
@@ -538,7 +574,37 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event
 
 		__SUP_COUT__ << "Configuration table group name: " << theGroup.first << " key: " << theGroup.second << __E__;
 
-		theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/);
+		try
+		{
+			//disable version tracking to accept untracked versions to be selected by the FSM transition source
+			theConfigurationManager_->loadTableGroup(theGroup.first, theGroup.second, true /*doActivate*/,
+				0,0,0,0,0,0,false,0,0,ConfigurationManager::LoadGroupType::ALL_TYPES,
+				true /*ignoreVersionTracking*/);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Error loading table group '" << theGroup.first << "(" << theGroup.second << ")! \n" << e.what() << __E__;
+			__SUP_COUT_ERR__ << ss.str();
+			// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+			//__SS_THROW_ONLY__;
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/, ss.str() /* message*/, "CoreSupervisorBase::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
+			);
+		}
+		catch(...)
+		{
+			__SS__ << "Unknown error loading table group '" << theGroup.first << "(" << theGroup.second << ")!" << __E__;
+			__SUP_COUT_ERR__ << ss.str();
+			// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
+
+			//__SS_THROW_ONLY__;
+			theStateMachine_.setErrorMessage(ss.str());
+			throw toolbox::fsm::exception::Exception(
+				"Transition Error" /*name*/, ss.str() /* message*/, "CoreSupervisorBase::transitionConfiguring" /*module*/, __LINE__ /*line*/, __FUNCTION__ /*function*/
+			);
+		}
 	}
 
 	CoreSupervisorBase::transitionConfiguringFSMs();

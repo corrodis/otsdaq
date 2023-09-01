@@ -26,21 +26,15 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 	if(!isFirstAppInContext)
 		return;
 
-	// check for valid data types
-	__COUT__ << "*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*" << std::endl;
-	__COUT__ << configManager->__SELF_NODE__ << std::endl;
-
-	//	__COUT__ << configManager->getNode(this->getTableName()).getValueAsString()
-	//		  											  << std::endl;
 
 	std::string                                            childType;
 	std::vector<std::pair<std::string, ConfigurationTree>> childrenMap = configManager->__SELF_NODE__.getChildren();
 	for(auto& childPair : childrenMap)
 	{
 		// check each row in table
-		__COUT__ << childPair.first << std::endl;
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << childPair.first << std::endl;
 		childPair.second.getNode(colNames_.colDataType_).getValue(childType);
-		__COUT__ << "childType=" << childType << std::endl;
+		__COUT_TYPE__(TLVL_DEBUG+12) << "childType=" << childType << std::endl;
 
 		if(childType[childType.size() - 1] == 'b')  // if ends in 'b' then take that many bits
 		{
