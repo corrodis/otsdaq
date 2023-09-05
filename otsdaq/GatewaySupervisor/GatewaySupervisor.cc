@@ -3522,7 +3522,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			else
 				__COUT_INFO__ << "FSM Link disconnected." << __E__;
 
-			__COUT__ << "stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
+			__COUT__ << "For FSM '" << fsmName << ",' stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
 
 			// filter list of aliases based on stateMachineAliasFilter
 			//  ! as first character means choose those that do NOT match filter
