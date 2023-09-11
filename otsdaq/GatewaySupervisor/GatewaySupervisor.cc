@@ -2678,7 +2678,7 @@ void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr,
 		usleep(1000 /* 1ms */);
 
 		// take lock for remainder of scope
-		std::lock_guard<std::mutex> lock(threadStruct->threadMutex);
+		std::lock_guard<std::mutex> lock(threadStruct->threadMutex_);
 		if(threadStruct->workToDo_)
 		{
 			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t"
@@ -2895,7 +2895,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 									assignedJob = true;
 									__COUT__ << "Giving work to thread " << k << ", command = " << command << __E__;
 
-									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k]->threadMutex);
+									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k]->threadMutex_);
 									broadcastThreadStructs_[k]->setMessage(appInfo, message, command, iteration, supervisorIterationsDone[i][j]);
 
 									break;

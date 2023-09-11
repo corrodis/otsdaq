@@ -85,7 +85,12 @@ try
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME);  // this is a restricted username
 	// theConfigurationManager.init();
-	theConfigurationManager.getAllTableInfo(true);  // to prep all info
+	theConfigurationManager.getAllTableInfo(true /* refresh */,  // to prep all info
+			0 /* accumulatedWarnings */,
+			"" /* errorFilterName */,
+			false /* getGroupKeys */,
+			false /* getGroupInfo */,
+			true /* initializeActiveGroups */);
 
 	IteratorWorkLoopStruct theIteratorStruct(iterator, &theConfigurationManager);
 

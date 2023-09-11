@@ -132,12 +132,12 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 {
 	auto versions = getVersions(table);
 
-	__COUT__ << "Table Name: " << table->getTableName() << __E__;
-	__SS__ << "All Versions: ";
-	for(auto& v : versions)
-		ss << v << " ";
-	ss << __E__;
-	__COUT__ << ss.str();
+	// __COUT__ << "Table Name: " << table->getTableName() << __E__;
+	// __SS__ << "All Versions: ";
+	// for(auto& v : versions)
+	// 	ss << v << " ";
+	// ss << __E__;
+	// __COUT__ << ss.str();
 
 	if(!versions.size())
 		return TableVersion();  // return INVALID

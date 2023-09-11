@@ -1,6 +1,10 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 
 #include <dirent.h>
+#include <thread>
+
+//may return 0 when not able to detect
+const auto PROCESSOR_COUNT = std::thread::hardware_concurrency();
 
 using namespace ots;
 
@@ -158,15 +162,18 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 }  // end constructor
 
 //==============================================================================
-// getAllTableInfo()
-//	Used by ConfigurationGUISupervisor to get all the info for the existing configurations
+// getAllTableInfo
+//	Used by ConfigurationGUISupervisor to get all the info for the existing tables.
+//	Can also be used to get and cache group info.
 //
 // if(accumulatedWarnings)
 //	this implies allowing column errors and accumulating such errors in given string
 const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
-                                                                                std::string*       accumulatedWarnings /*=0*/,
-                                                                                const std::string& errorFilterName /*=""*/,
-																				bool			   getGroupInfo /* = true */)
+                                                                                std::string*       accumulatedWarnings /* = 0 */,
+                                                                                const std::string& errorFilterName /* = "" */,
+																				bool			   getGroupKeys /* = false */,
+																				bool			   getGroupInfo /* = false */,
+																				bool			   initializeActiveGroups /* = false */)
 {
 	// allTableInfo_ is container to be returned
 
@@ -175,7 +182,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 	// else refresh!
 	allTableInfo_.clear();
-	allGroupInfo_.clear();
 
 	TableBase* table;
 
@@ -307,7 +313,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	}
 	__GEN_COUT__ << "Extracting list of tables complete." << __E__;
 
+
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
+	if(initializeActiveGroups)
 	{ 
 		__GEN_COUT__ << "Now initializing..." << __E__;
 		// if there is a filter name, do not include init warnings (it just scares people in the table editor)
@@ -320,8 +328,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__GEN_COUT__ << "======================================================== getAllTableInfo end runtime=" << runTimeSeconds() << __E__;
 
 	// get Group Info too!
-	if(getGroupInfo)
+	if(getGroupKeys || getGroupInfo)
 	{
+		allGroupInfo_.clear();
 		try
 		{
 			// build allGroupInfo_ for the ConfigurationManagerRW
@@ -329,6 +338,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			std::set<std::string /*name*/> tableGroups = theInterface_->getAllTableGroupNames();
 			__GEN_COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
 
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Info start runtime=" << runTimeSeconds() << __E__;
+		
 			TableGroupKey key;
 			std::string   name;
 			for(const auto& fullName : tableGroups)
@@ -337,33 +348,109 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				cacheGroupKey(name, key);
 			}
 
-			// for each group get member map & comment, author, time, and type for latest key
-			for(auto& groupInfo : allGroupInfo_)
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Keys end runtime=" << runTimeSeconds() << __E__;
+
+			// for each group get member map & comment, author, time, and type for latest key			
+			if(getGroupInfo)
 			{
-				try
+				__GEN_COUTV__(PROCESSOR_COUNT);
+				const int numOfThreads = PROCESSOR_COUNT/2;
+				if(numOfThreads < 2) // no multi-threading
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						try
+						{
+							loadTableGroup(groupInfo.first /*groupName*/,
+										groupInfo.second.getLatestKey(),
+										false /*doActivate*/,
+										&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+										0 /*progressBar*/,
+										0 /*accumulateErrors*/,
+										&groupInfo.second.latestKeyGroupComment_,
+										&groupInfo.second.latestKeyGroupAuthor_,
+										&groupInfo.second.latestKeyGroupCreationTime_,
+										true /*doNotLoadMember*/,
+										&groupInfo.second.latestKeyGroupTypeString_);
+						}
+						catch(...)
+						{
+							__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+											<< groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
+							groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
+							groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
+							groupInfo.second.latestKeyGroupCreationTime_ = "0";
+							groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
+						}
+					}  // end group info loop
+				else //multi-threading
 				{
-					loadTableGroup(groupInfo.first /*groupName*/,
-								groupInfo.second.getLatestKey(),
-								false /*doActivate*/,
-								&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
-								0 /*progressBar*/,
-								0 /*accumulateErrors*/,
-								&groupInfo.second.latestKeyGroupComment_,
-								&groupInfo.second.latestKeyGroupAuthor_,
-								&groupInfo.second.latestKeyGroupCreationTime_,
-								true /*doNotLoadMember*/,
-								&groupInfo.second.latestKeyGroupTypeString_);
-				}
-				catch(...)
-				{
-					__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
-									<< "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
-					groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
-					groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
-					groupInfo.second.latestKeyGroupCreationTime_ = "0";
-					groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
-				}
-			}  // end group info loop
+					int threadsLaunched = 0;
+					int foundThreadIndex = 0;
+
+					std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
+					for(int i=0;i<numOfThreads;++i)
+						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
+
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						if(threadsLaunched >= numOfThreads)
+						{
+							//find availableThreadIndex
+							foundThreadIndex = -1;
+							while(foundThreadIndex == -1)
+							{
+								for(int i=0;i<numOfThreads;++i)
+									if(*(threadDone[i]))
+									{
+										foundThreadIndex = i;
+										break;
+									}
+								if(foundThreadIndex == -1)
+								{
+									__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
+									usleep(10000);
+								}
+							} //end thread search loop
+							threadsLaunched = numOfThreads - 1;
+						}					
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+						*(threadDone[foundThreadIndex]) = false;
+
+						std::thread([](
+							ConfigurationManagerRW* 				cfgMgr, 
+							std::string 							groupName, 
+							ots::GroupInfo*                       	theGroupInfo,
+		               		std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
+						ConfigurationManagerRW::loadTableGroupThread(cfgMgr, groupName, theGroupInfo, theThreadDone); },
+							this,
+							groupInfo.first,
+							&(groupInfo.second),
+							threadDone[foundThreadIndex])
+		    			.detach();
+
+						++threadsLaunched;
+						++foundThreadIndex;
+					} //end groupInfo thread loop
+
+					//check for all threads done					
+					do
+					{
+						foundThreadIndex = -1;
+						for(int i=0;i<numOfThreads;++i)
+							if(!*(threadDone[i]))
+							{
+								foundThreadIndex = i;
+								break;
+							}
+						if(foundThreadIndex != -1)
+						{
+							__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
+							usleep(10000);
+						}
+					} while(foundThreadIndex != -1); //end thread done search loop
+
+				} //end multi-thread handling
+			}
 		}      // end get group info
 		catch(const std::runtime_error& e)
 		{
@@ -383,11 +470,41 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			else
 				throw;
 		}
-		__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
 	} //end getGroupInfo
+	else
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Table Info end runtime=" << runTimeSeconds() << __E__;
 
 	return allTableInfo_;
-}  // end getAllTableInfo
+}  // end getAllTableInfo()
+	
+void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  groupInfo, std::shared_ptr<std::atomic<bool>> threadDone)
+try
+{
+	cfgMgr->loadTableGroup(groupName/*groupName*/,
+		groupInfo->getLatestKey(),
+		false /*doActivate*/,
+		&groupInfo->latestKeyMemberMap_ /*groupMembers*/,
+		0 /*progressBar*/,
+		0 /*accumulateErrors*/,
+		&groupInfo->latestKeyGroupComment_,
+		&groupInfo->latestKeyGroupAuthor_,
+		&groupInfo->latestKeyGroupCreationTime_,
+		true /*doNotLoadMember*/,
+		&groupInfo->latestKeyGroupTypeString_);
+
+	*(threadDone) = true;
+} // end loadTableGroupThread
+catch(...)
+{
+	__COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+		<< groupName << "(" << groupInfo->getLatestKey() << ")'..." << __E__;
+	groupInfo->latestKeyGroupComment_      = "UNKNOWN";
+	groupInfo->latestKeyGroupAuthor_       = "UNKNOWN";
+	groupInfo->latestKeyGroupCreationTime_ = "0";
+	groupInfo->latestKeyGroupTypeString_   = "UNKNOWN";
+	*(threadDone) = true;
+} // end loadTableGroupThread catch
 
 //==============================================================================
 // getVersionAliases()
@@ -920,8 +1037,12 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 		__SS_THROW__;
 	}
 
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
+
 	// determine new group key
 	TableGroupKey newKey = TableGroupKey::getNextKey(theInterface_->findLatestGroupKey(groupName));
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	__GEN_COUT__ << "New Key for group: " << groupName << " found as " << newKey << __E__;
 
@@ -957,6 +1078,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 			__SS_THROW__;
 		}
 	}  // end verify members
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	// verify group aliases
 	if(groupAliases)
@@ -1003,6 +1126,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 
 		theInterface_->saveActiveVersion(&groupMetadataTable_);
 
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
+
 		// force groupMetadataTable_ to be a member for the group
 		groupMembers[groupMetadataTable_.getTableName()] = groupMetadataTable_.getViewVersion();
 
@@ -1020,6 +1145,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 		__GEN_COUT_ERR__ << "Failed to create table group: " << groupName << ":" << newKey << __E__;
 		throw;
 	}
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	// store cache of recent groups
 	cacheGroupKey(groupName, newKey);
@@ -1105,7 +1232,7 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE && versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
 			    ++versionReverseIterator)
 			{
-				__GEN_COUT__ << "'" << tableName << "' versions in reverse order " << *versionReverseIterator << __E__;
+				__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "'" << tableName << "' versions in reverse order " << *versionReverseIterator << __E__;
 				try
 				{
 					getVersionedTableByName(tableName, *versionReverseIterator);  // load to cache
