@@ -51,7 +51,12 @@ class ConfigurationManagerRW : public ConfigurationManager
 	const std::string&      					getUsername						(void) const { return username_; }
 	ConfigurationInterface* 					getConfigurationInterface		(void) const { return theInterface_; }
 
-	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedWarnings = 0, const std::string& errorFilterName = "", bool getGroupInfo = true);
+	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, 
+																				std::string* accumulatedWarnings = 0, 
+																				const std::string& errorFilterName = "", 
+																				bool getGroupKeys = false,
+																				bool getGroupInfo = false,
+																				bool initializeActiveGroups = false);
 	std::map<std::string /*tableName*/,
 	         std::map<std::string /*aliasName*/, 
 	         TableVersion /*version*/> >		getVersionAliases				(void) const;
@@ -103,6 +108,8 @@ class ConfigurationManagerRW : public ConfigurationManager
 	void 										testXDAQContext					(void);  // for debugging
 
   private:
+	static void 								loadTableGroupThread			(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  theGroupInfo, std::shared_ptr<std::atomic<bool>> 		theThreadDone);
+
 	//==============================================================================
 	// group cache handling
 	void 										cacheGroupKey					(const std::string& groupName, TableGroupKey key);

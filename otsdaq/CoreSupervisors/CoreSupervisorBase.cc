@@ -132,6 +132,8 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	}
 	// else xml request type
 
+	clock_t requestStart = clock();
+	std::stringstream				 xmlDataSs;
 	try
 	{
 		// call derived class' request()
@@ -150,8 +152,18 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
-
+	__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
+	
 	// report any errors encountered
+	// but only if there are a reasonable number of children
+	size_t numberOfChildren = xmlOut.getRootDataElement()->getChildNodes()->getLength();
+	if(numberOfChildren && 
+		xmlOut.getRootDataElement()->getChildNodes()->item(0)->getNodeType() != xercesc::DOMNode::TEXT_NODE) 
+		numberOfChildren += xmlOut.getRootDataElement()->getChildNodes()->item(0)->getChildNodes()->getLength();
+
+	__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__  << "Number of children: " << numberOfChildren << __E__;
+
+	if(numberOfChildren < 1000)
 	{
 		unsigned int occurance = 0;
 		std::string  err       = xmlOut.getMatchingValue("Error", occurance++);
@@ -160,10 +172,16 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << __E__;
 			err = xmlOut.getMatchingValue("Error", occurance++);
 		}
+		__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Error check time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
 	}
+
+	// __SUP_COUTV__(xmlDataSs.str());
+	
 
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
+
+	__SUP_COUT__ << "Total xml request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
 }  // end requestWrapper()
 
 //==============================================================================

@@ -305,7 +305,7 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 			continue;  // col mismatch
 
 		++potentialMatchCount;
-		__COUT__ << "Checking version... " << viewPairReverseIterator->first << __E__;
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Checking version... " << viewPairReverseIterator->first << __E__;
 
 		// viewPairReverseIterator->second.print();
 

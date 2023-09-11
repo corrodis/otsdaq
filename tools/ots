@@ -14,12 +14,21 @@ if [ "x$THIS_HOST" == "x" ]; then
 	THIS_HOST="${HOSTNAME}"
 fi
 
+
+if [ "x$OTS_USER_STUB" == "x" ]; then
+	OTS_USER_STUB="${USER}"
+fi
+
 # Get color code variables and other common utility portions of the code
 source "${SCRIPT_DIR}"/common.sh ots
 
 function setupTrace() 
-{
-	
+{	
+
+	if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
+		rm /tmp/trace_buffer_${OTS_USER_STUB}
+	fi
+
 	# trace helper functions
 	source "${TRACE_BIN}"/trace_functions.sh
 	
@@ -28,21 +37,20 @@ function setupTrace()
 	#ups active
 	#which trace_cntl
 	#type toffS
+
 	
 	#for muting trace
 	export TRACE_NAME=OTSDAQ_TRACE
 	export TRACE_LIMIT_MS="0,50,50" #unlimited trace messages
 	#tinfo #show trace info
-	export TRACE_FILE=/tmp/trace_buffer_${USER} #by default it is /proc/trace/buffer
+
+	if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
+		export TRACE_FILE=/tmp/trace_buffer_${OTS_USER_STUB} #by default it is /proc/trace/buffer		
+	fi
+
 	export TRACE_PRINT_FD=2 #reroute everything to std:err (overriding > dev/null hiding)
 	export TRACE_PRINT="|%L:%N:%f [%u] %m" #to mimic ots line number output
-
 }
-
-
-if [ "x$OTS_DISABLE_TRACE_DEFAULT" == "x" ]; then
-	rm /tmp/trace_buffer_${USER}
-fi
 
 setupTrace
 
@@ -89,6 +97,7 @@ if [ "$1" != "-x" ]; then
 	if [ "x$OTS_OWNER" == "x" ]; then
 		out "Consider setting the OTS_ONWER enviroment variable to your project name..."
 		out "${Green}=========================== ots ============================="
+		OTS_OWNER=${USER}
 	else
 		out "${Green}=========================== ${OTS_OWNER} ots ============================="
 	fi

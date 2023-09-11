@@ -34,6 +34,7 @@ class HttpXmlDocument : public XmlDocument
 	unsigned int 	      		getChildrenCount                (      xercesc::DOMElement  * parent         = 0   );
 	void 		      			removeDataElement               (  	   unsigned int           dataChildIndex = 0   );  // default to first child
 
+	std::stringstream			dataSs_		   ; /* use for large xml response construction */
   private:
 	void 		      			recursiveAddElementToParent     (      xercesc::DOMElement  * child           		, 	xercesc::DOMElement               		* parent         	,     	  bool                                html = false          );
 	void 		      			recursiveFindAllElements        (      xercesc::DOMElement  * currEl          		, 	const std::string                       & field          	, 		  std::vector<std::string>          * retVec                );

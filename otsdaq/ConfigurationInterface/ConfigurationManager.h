@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <mutex>
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationTree.h"
@@ -211,6 +212,8 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 
 	std::string 										ownerContextUID_;  // optional, often there is a context that owns this configuration manager
 	std::string 										ownerAppUID_;  // optional, often there is a supervisor that owns this configuration manager
+
+	std::mutex    										metaDataTableMutex_;
 
 	// clang-format on
 };

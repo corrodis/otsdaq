@@ -249,7 +249,7 @@ class WorkLoopManager;
 			bool& getIterationsDone() { return messages_[0].iterationsDone_; }
 
 			// each thread accesses these members
-			std::mutex    threadMutex;
+			std::mutex    threadMutex_;
 			unsigned int  threadIndex_;
 			volatile bool exitThread_, working_, workToDo_, error_;
 			// always just 1 message (for now)
