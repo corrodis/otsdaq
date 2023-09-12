@@ -22,7 +22,6 @@ void FESlowControlsTable::init(ConfigurationManager* configManager)
 	//	generating files on local disk multiple times.
 	bool isFirstAppInContext = configManager->isOwnerFirstAppInContext();
 
-	__COUTV__(isFirstAppInContext);
 	if(!isFirstAppInContext)
 		return;
 

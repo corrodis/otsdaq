@@ -121,10 +121,8 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		                                       0 /*Min*/,
 		                                       0 /*Max*/,
 		                                       0));
-		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(
 		    TableViewColumnInfo::TYPE_DATA, "GroupAliases", "GROUP_ALIASES", TableViewColumnInfo::DATATYPE_STRING, 0 /*Default*/, "", 0 /*Min*/, 0 /*Max*/, 0));
-		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_COMMENT,  // just to make init() happy
 		                                       TableViewColumnInfo::COL_NAME_COMMENT,
 		                                       "COMMENT_DESCRIPTION",
@@ -134,7 +132,6 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		                                       0 /*Min*/,
 		                                       0 /*Max*/,
 		                                       0));
-		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_AUTHOR,  // just to make init() happy
 		                                       "GroupAuthor",
 		                                       "AUTHOR",
@@ -144,7 +141,6 @@ ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, b
 		                                       0 /*Min*/,
 		                                       0 /*Max*/,
 		                                       0));
-		// TODO add min/max
 		colInfo->push_back(TableViewColumnInfo(TableViewColumnInfo::TYPE_TIMESTAMP,
 		                                       "GroupCreationTime",
 		                                       "GROUP_CREATION_TIME",
@@ -1257,9 +1253,11 @@ try
 
 		memberMap.erase(metaTablePair);  // remove from member map that is returned
 
+		std::lock_guard<std::mutex> lock(metaDataTableMutex_);
+			
 		// clear table
 		while(groupMetadataTable_.getView().getNumberOfRows())
-			groupMetadataTable_.getViewP()->deleteRow(0);
+			groupMetadataTable_.getViewP()->deleteRow(0);		
 
 		// retrieve metadata from database
 		try
@@ -1318,40 +1316,42 @@ try
 			*groupAuthor = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_AUTHOR);
 		if(groupCreateTime)
 			*groupCreateTime = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_TIMESTAMP);
+		
+	}  // end metadata handling
 
-		// modify members based on aliases
+	// modify members based on aliases
+	{
+		std::map<std::string /*table*/, std::map<std::string /*alias*/, TableVersion>> versionAliases;
+		if(aliasMap.size())  // load version aliases
 		{
-			std::map<std::string /*table*/, std::map<std::string /*alias*/, TableVersion>> versionAliases;
-			if(aliasMap.size())  // load version aliases
-			{
-				__GEN_COUTV__(StringMacros::mapToString(aliasMap));
-				versionAliases = ConfigurationManager::getVersionAliases();
-				__GEN_COUTV__(StringMacros::mapToString(versionAliases));
-			}
+			__GEN_COUTV__(StringMacros::mapToString(aliasMap));
+			versionAliases = ConfigurationManager::getVersionAliases();
+			__GEN_COUTV__(StringMacros::mapToString(versionAliases));
+		}
 
-			// convert alias to version
-			for(auto& aliasPair : aliasMap)
+		// convert alias to version
+		for(auto& aliasPair : aliasMap)
+		{
+			// check for alias table in member names
+			if(memberMap.find(aliasPair.first) != memberMap.end())
 			{
-				// check for alias table in member names
-				if(memberMap.find(aliasPair.first) != memberMap.end())
+				__GEN_COUT__ << "Group member '" << aliasPair.first << "' was found in group member map!" << __E__;
+				__GEN_COUT__ << "Looking for alias '" << aliasPair.second << "' in active version aliases..." << __E__;
+
+				if(versionAliases.find(aliasPair.first) == versionAliases.end() ||
+					versionAliases[aliasPair.first].find(aliasPair.second) == versionAliases[aliasPair.first].end())
 				{
-					__GEN_COUT__ << "Group member '" << aliasPair.first << "' was found in group member map!" << __E__;
-					__GEN_COUT__ << "Looking for alias '" << aliasPair.second << "' in active version aliases..." << __E__;
-
-					if(versionAliases.find(aliasPair.first) == versionAliases.end() ||
-					   versionAliases[aliasPair.first].find(aliasPair.second) == versionAliases[aliasPair.first].end())
-					{
-						__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
-						       << ",' which was not found in the active Backbone!" << __E__;
-						__SS_ONLY_THROW__;
-					}
-
-					memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
-					__GEN_COUT__ << "Version alias translated to " << aliasPair.first << __E__;
+					__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
+							<< ",' which was not found in the active Backbone!" << __E__;
+					__SS_ONLY_THROW__;
 				}
+
+				memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
+				__GEN_COUT__ << "Version alias translated to " << aliasPair.first << __E__;
 			}
 		}
-	}  // end metadata handling
+	} // end modify members based on aliases
+	
 
 	if(groupMembers)
 		*groupMembers = memberMap;  // copy map for return

@@ -256,135 +256,12 @@ TableVersion ConfigurationSupervisorBase::saveModifiedVersionXML(HttpXmlDocument
 	xmlOut.addTextElementToData("savedName", tableName);
 	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
 
-	// xmlOut.addTextElementToData("savedName", tableName);
-	// xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
 	if(foundEquivalent)
 	{
 		xmlOut.addTextElementToData("foundEquivalentVersion", "1");
 		xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
 	}
 	return newAssignedVersion;
-	//
-	//	bool needToEraseTemporarySource =
-	//	    (originalVersion.isTemporaryVersion() && !makeTemporary);
-	//
-	//	// check for duplicate tables already in cache
-	//	if(!ignoreDuplicates)
-	//	{
-	//		__COUT__ << "Checking for duplicate tables..." << __E__;
-	//
-	//		TableVersion duplicateVersion;
-	//
-	//		{
-	//			//"DEEP" checking
-	//			//	load into cache 'recent' versions for this table
-	//			//		'recent' := those already in cache, plus highest version numbers not
-	//			// in  cache
-	//			const std::map<std::string, TableInfo>& allTableInfo =
-	//			    cfgMgr->getAllTableInfo();  // do not refresh
-	//
-	//			auto versionReverseIterator =
-	//			    allTableInfo.at(tableName).versions_.rbegin();  // get reverse iterator
-	//			__COUT__ << "Filling up cached from " << table->getNumberOfStoredViews()
-	//			         << " to max count of " << table->MAX_VIEWS_IN_CACHE << __E__;
-	//			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE &&
-	//			      versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
-	//			    ++versionReverseIterator)
-	//			{
-	//				__COUT__ << "Versions in reverse order " << *versionReverseIterator
-	//				         << __E__;
-	//				try
-	//				{
-	//					cfgMgr->getVersionedTableByName(
-	//					    tableName, *versionReverseIterator);  // load to cache
-	//				}
-	//				catch(const std::runtime_error& e)
-	//				{
-	//					__COUT__ << "Error loadiing historical version, but ignoring: "
-	//					         << e.what() << __E__;
-	//				}
-	//			}
-	//		}
-	//
-	//		__COUT__ << "Checking duplicate..." << __E__;
-	//
-	//		duplicateVersion = table->checkForDuplicate(
-	//		    temporaryModifiedVersion,
-	//		    (!originalVersion.isTemporaryVersion() && !makeTemporary)
-	//		        ? TableVersion()
-	//		        :  // if from persistent to persistent, then include original version in
-	//		           // search
-	//		        originalVersion);
-	//
-	//		if(lookForEquivalent && !duplicateVersion.isInvalid())
-	//		{
-	//			// found an equivalent!
-	//			__COUT__ << "Equivalent table found in version v" << duplicateVersion
-	//			         << __E__;
-	//
-	//			// if duplicate version was temporary, do not use
-	//			if(duplicateVersion.isTemporaryVersion() && !makeTemporary)
-	//			{
-	//				__COUT__ << "Need persistent. Duplicate version was temporary. "
-	//				            "Abandoning duplicate."
-	//				         << __E__;
-	//				duplicateVersion = TableVersion();  // set invalid
-	//			}
-	//			else
-	//			{
-	//				// erase and return equivalent version
-	//
-	//				// erase modified equivalent version
-	//				cfgMgr->eraseTemporaryVersion(tableName, temporaryModifiedVersion);
-	//
-	//				// erase original if needed
-	//				if(needToEraseTemporarySource)
-	//					cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
-	//
-	//				xmlOut.addTextElementToData("savedName", tableName);
-	//				xmlOut.addTextElementToData("savedVersion", duplicateVersion.toString());
-	//				xmlOut.addTextElementToData("foundEquivalentVersion", "1");
-	//				xmlOut.addTextElementToData(tableName + "_foundEquivalentVersion", "1");
-	//
-	//				__COUT__ << "\t\t equivalent AssignedVersion: " << duplicateVersion
-	//				         << __E__;
-	//
-	//				return duplicateVersion;
-	//			}
-	//		}
-	//
-	//		if(!duplicateVersion.isInvalid())
-	//		{
-	//			__SS__ << "This version of table '" << tableName
-	//			       << "' is identical to another version currently cached v"
-	//			       << duplicateVersion << ". No reason to save a duplicate." << __E__;
-	//			__COUT_ERR__ << "\n" << ss.str();
-	//
-	//			// delete temporaryModifiedVersion
-	//			table->eraseView(temporaryModifiedVersion);
-	//			__SS_THROW__;
-	//		}
-	//
-	//		__COUT__ << "Check for duplicate tables complete." << __E__;
-	//	}
-	//
-	//	if(makeTemporary)
-	//		__COUT__ << "\t\t**************************** Save as temporary table version"
-	//		         << __E__;
-	//	else
-	//		__COUT__ << "\t\t**************************** Save as new table version" << __E__;
-	//
-	//	TableVersion newAssignedVersion =
-	//	    cfgMgr->saveNewTable(tableName, temporaryModifiedVersion, makeTemporary);
-	//
-	//	if(needToEraseTemporarySource)
-	//		cfgMgr->eraseTemporaryVersion(tableName, originalVersion);
-	//
-	//	xmlOut.addTextElementToData("savedName", tableName);
-	//	xmlOut.addTextElementToData("savedVersion", newAssignedVersion.toString());
-	//
-	//	__COUT__ << "\t\t newAssignedVersion: " << newAssignedVersion << __E__;
-	//	return newAssignedVersion;
 }  // end saveModifiedVersionXML()
 
 //==============================================================================
@@ -416,16 +293,23 @@ void ConfigurationSupervisorBase::handleCreateTableGroupXML(HttpXmlDocument&    
                                                             bool                    lookForEquivalent)
 try
 {
-	__COUT__ << "handleCreateTableGroupXML \n";
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML start runtime=" << cfgMgr->runTimeSeconds() << __E__;
 
 	xmlOut.addTextElementToData("AttemptedNewGroupName", groupName);
 
 	// make sure not using partial tables or anything weird when creating the group
 	//	so start from scratch and load backbone, but allow errors
 	std::string                             accumulatedWarnings;
-	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+	const std::map<std::string, TableInfo>& allTableInfo = cfgMgr->getAllTableInfo(true /* refresh */, 
+		&accumulatedWarnings, 
+		"" /* errorFilterName */, 
+		true /* getGroupKeys*/,
+		false /* getGroupInfo */,
+		true /* initializeActiveGroups */);
 	__COUT_WARN__ << "Ignoring these errors: " << accumulatedWarnings << __E__;
-	cfgMgr->loadConfigurationBackbone();
+	// cfgMgr->loadConfigurationBackbone(); //already loaded by initializeActiveGroups of getAllTableInfo
+
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML loaded runtime=" << cfgMgr->runTimeSeconds() << __E__;
 
 	std::map<std::string /*tableName*/, std::map<std::string /*aliasName*/, TableVersion /*version*/>> versionAliases = cfgMgr->getVersionAliases();
 	//	for(const auto& aliases : versionAliases)
@@ -539,6 +423,8 @@ try
 		groupMembers[name] = version;
 	}  // end member verification loop
 
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML tables saved runtime=" << cfgMgr->runTimeSeconds() << __E__;
+
 	__COUTV__(StringMacros::mapToString(groupAliases));
 
 	if(!allowDuplicates)
@@ -580,6 +466,8 @@ try
 		{
 			__COUT_WARN__ << "Ignoring errors looking for duplicate groups! Proceeding with new group creation." << __E__;
 		}
+
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML group duplicates checked runtime=" << cfgMgr->runTimeSeconds() << __E__;
 	}
 
 	// check the group for errors before creating group
@@ -620,6 +508,8 @@ try
 		return;
 	}
 
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML group members init checked runtime=" << cfgMgr->runTimeSeconds() << __E__;
+
 	// check the tree for warnings before creating group
 	std::string accumulateTreeErrs;
 	cfgMgr->getChildren(&groupMembers, &accumulateTreeErrs);
@@ -632,6 +522,8 @@ try
 			return;
 		}
 	}
+
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML tree checked runtime=" << cfgMgr->runTimeSeconds() << __E__;
 
 	TableGroupKey newKey;
 	try
@@ -653,9 +545,14 @@ try
 		return;
 	}
 
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML group saved runtime=" << cfgMgr->runTimeSeconds() << __E__;
+
 	// insert get table info
 	__COUT__ << "Loading new table group..." << __E__;
 	handleGetTableGroupXML(xmlOut, cfgMgr, groupName, newKey, ignoreWarnings);
+
+
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML end runtime=" << cfgMgr->runTimeSeconds() << __E__;
 
 }  // end handleCreateTableGroupXML()
 catch(std::runtime_error& e)
@@ -734,7 +631,8 @@ try
 			{
 				// attempt to reload all group info and power through
 				std::string accumulatedWarnings;
-				/*const std::map<std::string, TableInfo>& allTableInfo = */ cfgMgr->getAllTableInfo(true, &accumulatedWarnings);
+				/*const std::map<std::string, TableInfo>& allTableInfo = */ cfgMgr->getAllTableInfo(true /* refresh */, 
+					&accumulatedWarnings, "" /* errorFilterName */, true /* getGroupKeys*/);
 				__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
 
 				// xmlOut.addTextElementToData("Error", ss.str());
@@ -941,7 +839,7 @@ bool ConfigurationSupervisorBase::handleAddDesktopIconXML(HttpXmlDocument&      
                                                           const std::string&      windowParameters /*= ""*/)
 try
 {
-	cfgMgr->getAllTableInfo(true /*refresh*/);
+	cfgMgr->getAllTableInfo(true /* refresh */);
 
 	const std::string& author = cfgMgr->getUsername();
 

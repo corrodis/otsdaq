@@ -1966,7 +1966,6 @@ bool ARTDAQTableBase::isARTDAQEnabled(const ConfigurationManager* cfgMgr)
 		}
 	}
 	return false;
-
 }  // end isARTDAQEnabled()
 
 //==============================================================================
