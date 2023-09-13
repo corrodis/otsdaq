@@ -72,11 +72,12 @@ jobs:
         
         echo "Calling buildtool 2>&1 | tee /scratch/\$buildname.log"
         CETPKG_J=4 buildtool 2>&1 | tee /scratch/\$buildname.log
+        exit $?
         EOT
         chmod +x build_pkg.sh
 
         docker run --rm -v /cvmfs:/cvmfs:shared -v $GITHUB_WORKSPACE/scratch:/scratch eflumerf/sl7-minimal:latest /scratch/build_pkg.sh
-
+    
     - name: upload build log file
       uses: actions/upload-artifact@v3
       with:

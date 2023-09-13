@@ -68,6 +68,7 @@ jobs:
         echo "Starting build"
         mrb b 2>&1 | tee /scratch/art-daq/build.log
         
+        exit $?
         EOT
         chmod +x build_pkg.sh
 
