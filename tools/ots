@@ -406,8 +406,9 @@ function killprocs
 		pids=`ps aux|grep [m]f_rcv_n_fwd|grep ${USER_DATA}|awk '{print $2}'`
 		for pid in $pids;do
 			killproc $pid &
-		done
-		
+		done		
+	
+
 		# for now (Aug-2023), stop killing artdaq and trust artdaq cleanup (this will also allowed share user accounts)
 		# usershort=`echo $USER|cut -c 1-10`
 		# for key in `ipcs|grep $usershort|grep ' 0 '|awk '{print $1}'`;do ipcrm -M $key;done
@@ -442,6 +443,16 @@ function killprocs
 		sleep 1 #give time for cleanup to occur
 	fi		
 	
+	#kill lingering artdaq processes by partition number
+	pids=`ps aux|grep "partition_number: ${ARTDAQ_PARTITION}"|awk '{print $2}'`
+	for pid in $pids;do
+		killproc $pid &
+	done
+	pids=`ps aux|grep "partition_${ARTDAQ_PARTITION}"|awk '{print $2}'`
+	for pid in $pids;do
+		killproc $pid &
+	done
+
 	# for now (Aug-2023), stop killing artdaq and trust artdaq cleanup (this will also allowed share user accounts)
 	# #now hard kill any processes that may be stuck and detached:
 	# killall -9 art &>/dev/null 2>&1 #hide output

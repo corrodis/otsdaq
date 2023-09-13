@@ -358,6 +358,9 @@ bool StringMacros::isNumber(const std::string& s)
 	std::vector<std::string> numbers;
 	std::vector<char>        ops;
 
+	if(!s.size())
+		return false;
+
 	StringMacros::getVectorFromString(s,
 	                                  numbers,
 	                                  /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
