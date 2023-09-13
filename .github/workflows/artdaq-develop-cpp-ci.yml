@@ -78,7 +78,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: build_log
-        path: ${{ github.workspace }}/scratch/build.log
+        path: ${{ github.workspace }}/scratch/art-daq/build.log
 
     - name: change dir permission again
       run: |
