@@ -56,14 +56,13 @@ class TableVersion
 	static TableVersion getNextVersion(const TableVersion& version = TableVersion());
 	static TableVersion getNextTemporaryVersion(const TableVersion& version = TableVersion());
 
-  private:
+  protected:
 	enum
 	{
 		NUM_OF_TEMP_VERSIONS = 10000
 	};
 
 	unsigned int version_;
-	std::string  versionString_;
 };
 }  // namespace ots
 #endif

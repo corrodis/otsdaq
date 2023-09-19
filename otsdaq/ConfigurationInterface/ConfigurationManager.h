@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <mutex>
+#include <thread>
 
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationTree.h"
@@ -26,6 +27,8 @@ class ConfigurationManager
   public:
 	//==============================================================================
 	// Static members
+	static const unsigned int PROCESSOR_COUNT;
+
 	static const std::string READONLY_USER;
 	static const std::string ACTIVE_GROUPS_FILENAME;
 	static const std::string ALIAS_VERSION_PREAMBLE;
@@ -193,7 +196,19 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 	void 								initializeFromFhicl			(const std::string& fhiclPath);
 	void 								recursiveInitFromFhiclPSet	(const std::string& tableName, const fhicl::ParameterSet& pset, const std::string& recordName = "", const std::string& groupName = "", const std::string& groupLinkIndex = "");
 	void 								recursiveTreeToFhicl		(ConfigurationTree node, std::ostream& out, std::string& tabStr, std::string& commentStr, unsigned int depth = -1);
-
+	static void 						initTableThread				(ConfigurationManager* 					cfgMgr, 
+																	ots::TableBase*							table,
+																	std::string*		 					accumulatedWarnings,			
+																	std::mutex* 							threadMutex,	
+																	std::shared_ptr<std::atomic<bool>> 		threadDone);
+	static void 						fillTableThread				(ConfigurationInterface* 				theInterface,  
+																	std::map<std::string, ots::TableBase *>*nameToTableMap,
+																	ots::TableBase*							table,
+																	std::string								tableName,
+																	ots::TableVersion						version,
+																	std::string*		 					accumulatedWarnings,			
+																	std::mutex* 							threadMutex,	
+																	std::shared_ptr<std::atomic<bool>> 		threadDone);
 
   protected: 
 	std::string 										mfSubject_;

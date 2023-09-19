@@ -84,7 +84,6 @@ void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion
 
 	auto versionstring = version.toString();
 
-	//__COUTV__(versionstring);
 	// configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
 
 	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);

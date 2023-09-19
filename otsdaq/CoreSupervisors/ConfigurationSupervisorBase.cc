@@ -1,5 +1,4 @@
 #include "otsdaq/CoreSupervisors/ConfigurationSupervisorBase.h"
-
 #include "otsdaq/TablePlugins/XDAQContextTable/XDAQContextTable.h"
 
 using namespace ots;
@@ -318,7 +317,7 @@ try
 	//			             << __E__;
 
 	std::map<std::string /*name*/, TableVersion /*version*/> groupMembers;
-	std::map<std::string /*name*/, std::string /*alias*/>    groupAliases;
+	std::map<std::string /*name*/, std::string /*alias*/>    memberTableAliases;
 
 	std::string  name, versionStr, alias;
 	TableVersion version;
@@ -357,9 +356,9 @@ try
 			if(versionAliases.find(name) != versionAliases.end() && versionAliases[name].find(alias) != versionAliases[name].end())
 			{
 				version = versionAliases[name][alias];
-				__COUT__ << "version alias '" << alias << "'translated to: " << version << __E__;
+				__COUT__ << name << " version alias '" << alias << "'translated to: " << version << __E__;
 
-				groupAliases[name] = alias;
+				memberTableAliases[name] = alias;
 			}
 			else
 			{
@@ -425,15 +424,15 @@ try
 
 	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML tables saved runtime=" << cfgMgr->runTimeSeconds() << __E__;
 
-	__COUTV__(StringMacros::mapToString(groupAliases));
+	__COUTV__(StringMacros::mapToString(memberTableAliases));
 
 	if(!allowDuplicates)
 	{
 		__COUT__ << "Checking for duplicate groups..." << __E__;
 		try
 		{
-			TableGroupKey foundKey = cfgMgr->findTableGroup(groupName, groupMembers, groupAliases);
-
+			TableGroupKey foundKey = cfgMgr->findTableGroup(groupName, groupMembers, memberTableAliases);
+			__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML group duplicates checked runtime=" << cfgMgr->runTimeSeconds() << __E__;
 			if(!foundKey.isInvalid())
 			{
 				// return found equivalent key
@@ -465,9 +464,7 @@ try
 		catch(...)
 		{
 			__COUT_WARN__ << "Ignoring errors looking for duplicate groups! Proceeding with new group creation." << __E__;
-		}
-
-		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "handleCreateTableGroupXML group duplicates checked runtime=" << cfgMgr->runTimeSeconds() << __E__;
+		}		
 	}
 
 	// check the group for errors before creating group
@@ -529,7 +526,7 @@ try
 	try
 	{
 		__COUT__ << "Saving new group..." << __E__;
-		newKey = cfgMgr->saveNewTableGroup(groupName, groupMembers, groupComment, &groupAliases);
+		newKey = cfgMgr->saveNewTableGroup(groupName, groupMembers, groupComment, &memberTableAliases);
 	}
 	catch(std::runtime_error& e)
 	{
@@ -633,27 +630,30 @@ try
 				std::string accumulatedWarnings;
 				/*const std::map<std::string, TableInfo>& allTableInfo = */ cfgMgr->getAllTableInfo(true /* refresh */, 
 					&accumulatedWarnings, "" /* errorFilterName */, true /* getGroupKeys*/);
-				__COUT_WARN__ << "Attempting info refresh. Ignoring these errors: " << accumulatedWarnings << __E__;
+				__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Attempting full table refresh. Assuming cache not yet established so ignoring these errors: " << accumulatedWarnings << __E__;
 
 				// xmlOut.addTextElementToData("Error", ss.str());
 
 				const GroupInfo&               groupInfo2  = cfgMgr->getGroupInfo(groupName);
 				const std::set<TableGroupKey>& sortedKeys2 = groupInfo2.keys_;  // rename
 
-				__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
-				ss << "Her are the found " << sortedKeys2.size() << " '" << groupName << "' keys: " << __E__;
-				for(auto& keyInOrder : sortedKeys2)
+				if(sortedKeys2.find(groupKey) == sortedKeys2.end())
 				{
-					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
-					ss << "\t" << keyInOrder << __E__;
+					__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
+					ss << "Her are the found " << sortedKeys2.size() << " '" << groupName << "' keys: " << __E__;
+					for(auto& keyInOrder : sortedKeys2)
+					{
+						xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
+						ss << "\t" << keyInOrder << __E__;
+					}
+					__COUT_WARN__ << "\n" << ss.str() << __E__;
 				}
-				__COUT__ << ss.str() << __E__;
 			}
 			else
 			{
 				if(sortedKeys.size())
 					groupKey = *sortedKeys.rbegin();
-				__COUT__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
+				__COUT_WARN__ << "Group key requested was invalid or not found, going with latest " << groupKey << __E__;
 
 				// add all other sorted keys for this groupName
 				for(auto& keyInOrder : sortedKeys)

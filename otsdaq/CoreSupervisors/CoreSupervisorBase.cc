@@ -133,6 +133,8 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	// else xml request type
 
 	clock_t requestStart = clock();
+	time_t requestStartTime = time(0);
+	
 	std::stringstream				 xmlDataSs;
 	try
 	{
@@ -181,7 +183,8 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
 
-	__SUP_COUT__ << "Total xml request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
+	__SUP_COUT__ << "Total xml request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << 
+		" = " <<  time(0) - requestStartTime << __E__;
 }  // end requestWrapper()
 
 //==============================================================================

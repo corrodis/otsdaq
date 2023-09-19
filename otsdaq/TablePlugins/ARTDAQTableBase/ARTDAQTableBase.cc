@@ -162,6 +162,7 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQAppType type, const std:
 //==============================================================================
 void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 {
+	clock_t startClock = clock();
 	//__COUT__ << "flattenFHICL()" << __ENV__("FHICL_FILE_PATH") << __E__;
 
 	std::string inFile  = getFHICLFilename(type, name);
@@ -171,21 +172,20 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 	//__COUTV__(outFile);
 
 	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
-
 	fhicl::ParameterSet pset;
 
 	try
 	{
-		TLOG(TLVL_INFO) << "parsing document:" << inFile;
+		TLOG(TLVL_INFO) << "parsing document: " << inFile;
 		// tbl = fhicl::parse_document(inFile, policy);
 		// pset = fhicl::ParameterSet::make(tbl);
 		pset = fhicl::ParameterSet::make(inFile, policy);
-		TLOG(TLVL_TRACE) << "document:" << inFile << " parsed";
-
+		TLOG(TLVL_TRACE) << "document: " << inFile << " parsed";
 		TLOG(TLVL_TRACE) << "got pset from table:";
 
 		std::ofstream ofs{outFile};
 		ofs << pset.to_indented_string(0);  // , fhicl::detail::print_mode::annotated); // Only really useful for debugging
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << name << " Flatten Clock time = " << ((double)(clock()-startClock))/CLOCKS_PER_SEC << __E__; 
 	}
 	catch(cet::exception const& e)
 	{

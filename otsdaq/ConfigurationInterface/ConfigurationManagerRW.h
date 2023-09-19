@@ -109,6 +109,16 @@ class ConfigurationManagerRW : public ConfigurationManager
 
   private:
 	static void 								loadTableGroupThread			(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  theGroupInfo, std::shared_ptr<std::atomic<bool>> 		theThreadDone);
+	static void 								compareTableGroupThread			(ConfigurationManagerRW* 			cfgMgr, 
+																				std::string 						groupName, 
+																				ots::TableGroupKey 					groupKeyToCompare, 
+																				const std::map<std::string, TableVersion>& groupMemberMap, 
+																				const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,			
+																				std::atomic<bool>* 					theFoundIdentical,
+																				ots::TableGroupKey* 				theIdenticalKey,			
+																				std::mutex* 						theThreadMutex,	
+																				std::shared_ptr<std::atomic<bool>> 	theThreadDone);
+
 
 	//==============================================================================
 	// group cache handling

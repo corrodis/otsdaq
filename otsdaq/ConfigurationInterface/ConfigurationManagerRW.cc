@@ -1,10 +1,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationManagerRW.h"
 
 #include <dirent.h>
-#include <thread>
 
-//may return 0 when not able to detect
-const auto PROCESSOR_COUNT = std::thread::hardware_concurrency();
 
 using namespace ots;
 
@@ -352,9 +349,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 			// for each group get member map & comment, author, time, and type for latest key			
 			if(getGroupInfo)
-			{
-				__GEN_COUTV__(PROCESSOR_COUNT);
+			{				
 				const int numOfThreads = PROCESSOR_COUNT/2;
+				__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads." << __E__;
 				if(numOfThreads < 2) // no multi-threading
 					for(auto& groupInfo : allGroupInfo_)
 					{
@@ -478,7 +475,12 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	return allTableInfo_;
 }  // end getAllTableInfo()
 	
-void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  groupInfo, std::shared_ptr<std::atomic<bool>> threadDone)
+//==============================================================================
+// loadTableGroupThread()
+void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
+													std::string 						groupName, 
+													ots::GroupInfo*  					groupInfo, 
+													std::shared_ptr<std::atomic<bool>> 	threadDone)
 try
 {
 	cfgMgr->loadTableGroup(groupName/*groupName*/,
@@ -505,6 +507,94 @@ catch(...)
 	groupInfo->latestKeyGroupTypeString_   = "UNKNOWN";
 	*(threadDone) = true;
 } // end loadTableGroupThread catch
+
+
+//==============================================================================
+// compareTableGroupThread()
+void ConfigurationManagerRW::compareTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
+													std::string 							groupName, 
+													ots::TableGroupKey 						groupKeyToCompare, 
+													const std::map<std::string, TableVersion>& groupMemberMap, 
+													const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,			
+													std::atomic<bool>* 						foundIdentical,
+													ots::TableGroupKey* 					identicalKey,			
+													std::mutex* 							threadMutex,	
+													std::shared_ptr<std::atomic<bool>> 		threadDone)
+try
+{
+	std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
+	std::map<std::string /*name*/, std::string /*alias*/>    compareToMemberTableAliases;
+	std::map<std::string /*name*/, std::string /*alias*/>* 	 compareToMemberTableAliasesPtr = nullptr;
+	if(memberTableAliases.size()) //only give pointer if necessary, without will load group faster
+		compareToMemberTableAliasesPtr = &compareToMemberTableAliases;
+
+	cfgMgr->loadTableGroup(
+		groupName,
+		groupKeyToCompare,
+		false /*doActivate*/,
+		&compareToMemberMap /*memberMap*/,
+		0, /*progressBar*/
+		0, /*accumulatedWarnings*/
+		0, /*groupComment*/
+		0,
+		0, /*null pointers*/
+		true /*doNotLoadMember*/,
+		0 /*groupTypeString*/,
+		compareToMemberTableAliasesPtr);
+	
+	bool isDifferent = false;
+	for(auto& memberPair : groupMemberMap)
+	{
+		if(memberTableAliases.find(memberPair.first) != memberTableAliases.end())
+		{
+			// handle this table as alias, not version
+			if(compareToMemberTableAliases.find(memberPair.first) == compareToMemberTableAliases.end() ||  // alias is missing
+			memberTableAliases.at(memberPair.first) != compareToMemberTableAliases.at(memberPair.first))
+			{  // then different
+				isDifferent = true;
+				break;
+			}
+			else
+				continue;
+		}  // else check if compareTo group is using an alias for table
+		else if(compareToMemberTableAliases.find(memberPair.first) != compareToMemberTableAliases.end())
+		{
+			// then different
+			isDifferent = true;
+			break;
+
+		}                                                                                 // else handle as table version comparison
+		else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
+				memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
+		{                                                                                
+			// then different
+			isDifferent = true;
+			break;
+		}
+	}
+
+	// check member size for exact match
+	if(!isDifferent && groupMemberMap.size() != compareToMemberMap.size())
+		isDifferent = true;  // different size, so not same (groupMemberMap is a subset of memberPairs)
+
+	if(!isDifferent) //found an exact match!
+	{
+		*foundIdentical = true;
+		__COUT__ << "=====> Found exact match with key: " << groupKeyToCompare << __E__;	
+		
+		std::lock_guard<std::mutex> lock(*threadMutex);	
+		*identicalKey = groupKeyToCompare;
+	}
+	
+	*(threadDone) = true;
+} // end compareTableGroupThread
+catch(...)
+{
+	__COUT_WARN__ << "Error occurred comparing group '"
+		<< groupName << "(" << groupKeyToCompare << ")'..." << __E__;
+	
+	*(threadDone) = true;
+} // end compareTableGroupThread catch
 
 //==============================================================================
 // getVersionAliases()
@@ -916,7 +1006,7 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string& groupNa
 // the 	most recent to check. )
 TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&                                           groupName,
                                                      const std::map<std::string, TableVersion>&                   groupMemberMap,
-                                                     const std::map<std::string /*name*/, std::string /*alias*/>& groupAliases)
+                                                     const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases)
 {
 	//	//NOTE: seems like this filter is taking the long amount of time
 	//	std::set<std::string /*name*/> fullGroupNames =
@@ -926,9 +1016,6 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 
 	// std::string name;
 	// TableGroupKey key;
-	std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
-	std::map<std::string /*name*/, std::string /*alias*/>    compareToGroupAliases;
-	bool                                                     isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
 	unsigned int       keyMinToCheck      = 0;
@@ -947,71 +1034,182 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 	}
 
 	// have min key to check, now loop through and check groups
-	// std::string fullName;
-	for(const auto& key : groupInfo.keys_)
+	
+	const int numOfThreads = PROCESSOR_COUNT/2;
+	__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads." << __E__;
+	if(numOfThreads < 2) // no multi-threading
 	{
-		if(key.key() < keyMinToCheck)
-			continue;  // skip keys that are too old
+		std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
+		std::map<std::string /*name*/, std::string /*alias*/>    compareToMemberTableAliases;
+		std::map<std::string /*name*/, std::string /*alias*/>* 	 compareToMemberTableAliasesPtr = nullptr;
+		if(memberTableAliases.size())
+			compareToMemberTableAliasesPtr = &compareToMemberTableAliases;
 
-		loadTableGroup(groupName,
-		               key,
-		               false /*doActivate*/,
-		               &compareToMemberMap /*memberMap*/,
-		               0, /*progressBar*/
-		               0, /*accumulatedWarnings*/
-		               0, /*groupComment*/
-		               0,
-		               0, /*null pointers*/
-		               true /*doNotLoadMember*/,
-		               0 /*groupTypeString*/,
-		               &compareToGroupAliases);
-
-		isDifferent = false;
-		for(auto& memberPair : groupMemberMap)
+		bool isDifferent;
+		for(const auto& key : groupInfo.keys_)
 		{
-			if(groupAliases.find(memberPair.first) != groupAliases.end())
+			if(key.key() < keyMinToCheck)
+				continue;  // skip keys that are too old
+
+			loadTableGroup(groupName,
+						key,
+						false /*doActivate*/,
+						&compareToMemberMap /*memberMap*/,
+						0, /*progressBar*/
+						0, /*accumulatedWarnings*/
+						0, /*groupComment*/
+						0, /*groupAuthor*/
+						0, /*groupCreateTime*/
+						true /*doNotLoadMember*/,
+						0 /*groupTypeString*/,
+						compareToMemberTableAliasesPtr);
+
+			isDifferent = false;
+			for(auto& memberPair : groupMemberMap)
 			{
-				// handle this table as alias, not version
-				if(compareToGroupAliases.find(memberPair.first) == compareToGroupAliases.end() ||  // alias is missing
-				   groupAliases.at(memberPair.first) != compareToGroupAliases.at(memberPair.first))
-				{  // then different
+				if(memberTableAliases.find(memberPair.first) != memberTableAliases.end())
+				{
+					// handle this table as alias, not version
+					if(compareToMemberTableAliases.find(memberPair.first) == compareToMemberTableAliases.end() ||  // alias is missing
+					memberTableAliases.at(memberPair.first) != compareToMemberTableAliases.at(memberPair.first))
+					{  // then different
+						isDifferent = true;
+						break;
+					}
+					else
+						continue;
+				}  // else check if compareTo group is using an alias for table
+				else if(compareToMemberTableAliases.find(memberPair.first) != compareToMemberTableAliases.end())
+				{
+					// then different
+					isDifferent = true;
+					break;
+
+				}                                                                                 // else handle as table version comparison
+				else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
+						memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
+				{                                                                                
+					// then different
 					isDifferent = true;
 					break;
 				}
-				else
-					continue;
-			}  // else check if compareTo group is using an alias for table
-			else if(compareToGroupAliases.find(memberPair.first) != compareToGroupAliases.end())
-			{
-				// then different
-				isDifferent = true;
-				break;
-
-			}                                                                                 // else handle as table version comparison
-			else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
-			        memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
-			{                                                                                
-				// then different
-				isDifferent = true;
-				break;
 			}
+			if(isDifferent)
+				continue;
+
+			// check member size for exact match
+			if(groupMemberMap.size() != compareToMemberMap.size())
+				continue;  // different size, so not same (groupMemberMap is a subset of
+						// memberPairs)
+
+			__GEN_COUT__ << "Found exact match with key: " << key << __E__;
+			// else found an exact match!
+			return key;
 		}
-		if(isDifferent)
-			continue;
-
-		// check member size for exact match
-		if(groupMemberMap.size() != compareToMemberMap.size())
-			continue;  // different size, so not same (groupMemberMap is a subset of
-			           // memberPairs)
-
-		__GEN_COUT__ << "Found exact match with key: " << key << __E__;
-		// else found an exact match!
-		return key;
+		__GEN_COUT__ << "No match found - this group is new!" << __E__;
+		// if here, then no match found
+		return TableGroupKey();  // return invalid key
 	}
-	__GEN_COUT__ << "No match found - this group is new!" << __E__;
-	// if here, then no match found
-	return TableGroupKey();  // return invalid key
-}
+	else //multi-threading
+	{
+		int threadsLaunched = 0;
+		int foundThreadIndex = 0;
+		std::atomic<bool> foundIdentical = false;
+		ots::TableGroupKey identicalKey;
+		std::mutex threadMutex;
+
+		std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
+		for(int i=0;i<numOfThreads;++i)
+			threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
+		
+		for(const auto& key : groupInfo.keys_)
+		{
+			if(foundIdentical) break;
+			if(key.key() < keyMinToCheck)
+				continue;  // skip keys that are too old
+				
+			if(threadsLaunched >= numOfThreads)
+			{
+				//find availableThreadIndex
+				foundThreadIndex = -1;
+				while(foundThreadIndex == -1)
+				{
+					if(foundIdentical) break;
+
+					for(int i=0;i<numOfThreads;++i)
+						if(*(threadDone[i]))
+						{
+							foundThreadIndex = i;
+							break;
+						}
+					if(foundThreadIndex == -1)
+					{
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
+						usleep(10000);
+					}
+				} //end thread search loop
+				threadsLaunched = numOfThreads - 1;
+			}					
+			if(foundIdentical) break;
+
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+			*(threadDone[foundThreadIndex]) = false;
+
+			std::thread([](
+				ConfigurationManagerRW* 				cfgMgr, 
+				std::string 							theGroupName, 
+				ots::TableGroupKey						groupKeyToCompare,
+				const std::map<std::string, TableVersion>&                   groupMemberMap,
+				const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,
+				std::atomic<bool>* 						theFoundIdentical,
+				ots::TableGroupKey* 					theIdenticalKey,	
+				std::mutex* 							theThreadMutex,							
+				std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
+			ConfigurationManagerRW::compareTableGroupThread(cfgMgr, theGroupName, groupKeyToCompare, groupMemberMap, memberTableAliases, 
+				theFoundIdentical, theIdenticalKey, theThreadMutex, 
+							theThreadDone); },
+				this,
+				groupName,
+				key,
+				groupMemberMap,
+				memberTableAliases,
+				&foundIdentical,
+				&identicalKey,
+				&threadMutex,
+				threadDone[foundThreadIndex])
+			.detach();
+
+			++threadsLaunched;
+			++foundThreadIndex;
+		} //end groupInfo thread loop
+
+		//check for all threads done					
+		do
+		{
+			foundThreadIndex = -1;
+			for(int i=0;i<numOfThreads;++i)
+				if(!*(threadDone[i]))
+				{
+					foundThreadIndex = i;
+					break;
+				}
+			if(foundThreadIndex != -1)
+			{
+				__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
+				usleep(10000);
+			}
+		} while(foundThreadIndex != -1); //end thread done search loop
+
+		if(foundIdentical)
+		{
+			__GEN_COUT__ << "Found exact match with key: " << identicalKey << __E__;
+			return identicalKey;
+		}
+		__GEN_COUT__ << "No match found - this group is new!" << __E__;
+		// if here, then no match found
+		return TableGroupKey();  // return invalid key
+	} //end multi-thread handling
+} // end findTableGroup()
 
 //==============================================================================
 // saveNewTableGroup
