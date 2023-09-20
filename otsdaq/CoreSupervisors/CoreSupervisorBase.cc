@@ -132,7 +132,9 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	}
 	// else xml request type
 
-	clock_t requestStart = clock();
+	std::chrono::steady_clock::time_point requestStart = std::chrono::steady_clock::now();
+	time_t requestStartTime = time(0);
+	
 	std::stringstream				 xmlDataSs;
 	try
 	{
@@ -152,7 +154,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
-	__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
+	__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Request time: " << artdaq::TimeUtils::GetElapsedTime(requestStart) << __E__;
 	
 	// report any errors encountered
 	// but only if there are a reasonable number of children
@@ -172,7 +174,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 			__SUP_COUT_ERR__ << "'" << requestType << "' ERROR encountered: " << err << __E__;
 			err = xmlOut.getMatchingValue("Error", occurance++);
 		}
-		__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Error check time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
+		__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Error check time: " << artdaq::TimeUtils::GetElapsedTime(requestStart) << __E__;
 	}
 
 	// __SUP_COUTV__(xmlDataSs.str());
@@ -181,7 +183,8 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
 
-	__SUP_COUT__ << "Total xml request time: " << ((double)(clock()-requestStart))/CLOCKS_PER_SEC << __E__;
+	__SUP_COUT__ << "Total xml request time: " << artdaq::TimeUtils::GetElapsedTime(requestStart) << 
+		" = " <<  time(0) - requestStartTime << __E__;
 }  // end requestWrapper()
 
 //==============================================================================

@@ -3027,9 +3027,10 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 //      System logbook messages are generated for login and logout
 void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 {
+	std::chrono::steady_clock::time_point startClock = std::chrono::steady_clock::now();
 	cgicc::Cgicc cgi(in);
 	std::string  Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "*** Login RequestType = " << Command << " clock=" << clock() << __E__;
+	__COUT__ << "*** Login RequestType = " << Command << " time=" << time(0) << __E__;
 
 	// RequestType Commands:
 	// login
@@ -3267,7 +3268,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		xmldoc.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 	}
 
-	__COUT__ << "Done clock=" << clock() << __E__;
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Login end clock=" << artdaq::TimeUtils::GetElapsedTime(startClock) << __E__;
 }  // end loginRequest()
 
 //==============================================================================

@@ -452,6 +452,10 @@ function killprocs
 	for pid in $pids;do
 		killproc $pid &
 	done
+	pids=`ps aux|grep "art -c ${USER_DATA}"|awk '{print $2}'`
+	for pid in $pids;do
+		killproc $pid &
+	done
 
 	# for now (Aug-2023), stop killing artdaq and trust artdaq cleanup (this will also allowed share user accounts)
 	# #now hard kill any processes that may be stuck and detached:
@@ -893,7 +897,7 @@ launchOTSMacromaker() {
 			else # found the supervisor!
 				# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
 				# so clear alive, if ots script can not connect to PORT
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+				OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 					out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -945,7 +949,7 @@ launchOTSMacromaker() {
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 					out "Checking http://${THIS_HOST}:${PORT}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1131,7 +1135,7 @@ launchOTSWiz() {
 			else # found the supervisor!
 				# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
 				# so clear alive, if ots script can not connect to PORT
-				OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+				OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 				# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 				if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 					out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1170,7 +1174,7 @@ launchOTSWiz() {
 					OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 					out "Checking http://${THIS_HOST}:${PORT}..."
 				else  # found the supervisor!
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1539,7 +1543,7 @@ launchOTS() {
 									else # found the supervisor!
 										# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
 										# so clear alive, if ots script can not connect to PORT
-										OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+										OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 										# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 										if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 											out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1579,7 +1583,7 @@ launchOTS() {
 											OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)
 											out "Checking http://${THIS_HOST}:${PORT}..."
 										else  # found the supervisor!
-											OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+											OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 											# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 											if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 												out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1667,13 +1671,13 @@ launchOTS() {
 
 		#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 		rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat >/dev/null 2>&1 #hide output #remove alive file
-		OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+		OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 		# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 		if [ "$OTS_CONTEXT_UP" != "bad" ]; then
 			#sometimes the PORT takes extra time to close
 			out "Retrying... Context '${Bold}${xdaqContextUID[$i]}${RstClr}' http PORT is already in use! http://${THIS_HOST}:${PORT}"
 			sleep 4
-			OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+			OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 			# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 			if [ "$OTS_CONTEXT_UP" != "bad" ]; then
 				die "Context http PORT is already in use! http://${THIS_HOST}:${PORT}"
@@ -1756,7 +1760,7 @@ launchOTS() {
 				else   # found the supervisor!
 					# have seen instances where http peer transport xdaq PORT is not established, but xdaq context still is constructed
 					# so clear alive, if ots script can not connect to PORT
-					OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+					OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 					# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 					if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 						out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"
@@ -1795,7 +1799,7 @@ launchOTS() {
 						OTS_IS_ALIVE="$(cat ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat 2>/dev/null)" #hide error messages, but not std out (std out is needed!)					
 						out "Checking http://${THIS_HOST}:${PORT}..."
 					else   # found the supervisor!
-						OTS_CONTEXT_UP="$(curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+						OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
 						# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
 						if [ "$OTS_CONTEXT_UP" == "bad" ]; then
 							out "Context http PORT could not be verified at curl http://${THIS_HOST}:${PORT} >/dev/null 2>&1"

@@ -79,7 +79,7 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::DataLogger, datalogger.second.getValue());
 	}
-}
+} // end init()
 
 //==============================================================================
 unsigned int ARTDAQDataLoggerTable::slowControlsHandlerConfig(std::stringstream&                                                             out,
