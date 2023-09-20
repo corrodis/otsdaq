@@ -29,8 +29,6 @@ ARTDAQEventBuilderTable::~ARTDAQEventBuilderTable(void) {}
 //==============================================================================
 void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 {
-	clock_t startClock = clock();
-
 	lastConfigManager_ = configManager;
 
 	// use isFirstAppInContext to only run once per context, for example to avoid
@@ -67,8 +65,6 @@ void ARTDAQEventBuilderTable::init(ConfigurationManager* configManager)
 		ARTDAQTableBase::outputDataReceiverFHICL(builder.second, ARTDAQTableBase::ARTDAQAppType::EventBuilder);
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::EventBuilder, builder.second.getValue());
 	}
-
-	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "EventBuilder init end Clock time = " << ((double)(clock()-startClock))/CLOCKS_PER_SEC << __E__; 
 }  // end init()
 
 //==============================================================================

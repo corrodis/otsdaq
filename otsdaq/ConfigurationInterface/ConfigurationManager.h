@@ -10,6 +10,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationInterface.h"
 #include "otsdaq/ConfigurationInterface/ConfigurationTree.h"
 #include "otsdaq/TableCore/TableVersion.h"
+#include "artdaq-core/Utilities/TimeUtils.hh"
 
 namespace ots
 {
@@ -106,8 +107,8 @@ class ConfigurationManager
 	//==============================================================================
 	// Getters
 
-	clock_t									startClockTime_;
-	double									runTimeSeconds() {return ((double)(clock()-startClockTime_))/CLOCKS_PER_SEC;};
+	std::chrono::steady_clock::time_point						startClockTime_;
+	double								runTimeSeconds() {return artdaq::TimeUtils::GetElapsedTime(startClockTime_);}; //((double)(clock()-startClockTime_))/CLOCKS_PER_SEC;};
 	
 	void 								loadTableGroup				(
 	    const std::string&                                     configGroupName,

@@ -43,8 +43,6 @@ ARTDAQDataLoggerTable::~ARTDAQDataLoggerTable(void) {}
 //==============================================================================
 void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 {
-	clock_t startClock = clock();
-
 	lastConfigManager_ = configManager;
 
 	// use isFirstAppInContext to only run once per context, for example to avoid
@@ -81,8 +79,6 @@ void ARTDAQDataLoggerTable::init(ConfigurationManager* configManager)
 
 		ARTDAQTableBase::flattenFHICL(ARTDAQAppType::DataLogger, datalogger.second.getValue());
 	}
-
-	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "DataLogger init end Clock time = " << ((double)(clock()-startClock))/CLOCKS_PER_SEC << __E__; 
 } // end init()
 
 //==============================================================================

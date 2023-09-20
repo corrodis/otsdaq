@@ -84,7 +84,7 @@ const std::set<std::string> ConfigurationManager::iterateMemberNames_  = {"Itera
 //==============================================================================
 ConfigurationManager::ConfigurationManager(bool initForWriteAccess /*=false*/, bool doInitializeFromFhicl /*=false*/)
     : 
-	startClockTime_(clock())
+	startClockTime_(std::chrono::steady_clock::now())
 	, mfSubject_(ConfigurationManager::READONLY_USER)
     , username_(ConfigurationManager::READONLY_USER)
     , theInterface_(0)
@@ -1070,7 +1070,6 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "runTimeSeconds: " << runTimeSeconds() << __E__;
 
 	TableBase* tmpTableBasePtr;
-	clock_t startClock = clock();
 
 	//detect if using cache, and decide if multi-threading
 	bool usingCache = false;
@@ -1291,7 +1290,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 	} //end multi-thread handling
 
 	if(accumulatedWarnings)
-		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "loadMemberMap end Clock time = " << ((double)(clock()-startClock))/CLOCKS_PER_SEC << " " << runTimeSeconds() <<__E__;
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "loadMemberMap end Clock time = " << runTimeSeconds() <<__E__;
 
 }  // end loadMemberMap()
 
