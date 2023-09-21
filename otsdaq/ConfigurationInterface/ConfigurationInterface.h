@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 #include <sstream>
+#include <mutex>
 #include "otsdaq/Macros/CoutMacros.h"
 
 #include "otsdaq/TableCore/MakeTable.h"
@@ -70,6 +71,8 @@ private:
 	static ConfigurationInterface* 			theInstance_;
 	static bool                    			theMode_;  						// 1 is FILE, 0 is artdaq-DB
 	static bool								theVersionTrackingEnabled_;  	// tracking versions 1 is enabled, 0 is disabled
+
+	std::mutex								tableReaderMutex_;
 
 };
 

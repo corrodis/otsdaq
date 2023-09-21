@@ -59,6 +59,7 @@ void get(TableBase*&                          table,
 			//	if it fails, then probably something wrong with Info file
 			try
 			{
+				std::unique_lock<std::mutex> lock(tableReaderMutex_);
 				table = new TableBase(tableName);
 			}
 			catch(...)  // failure so cleanup any halfway complete table work
