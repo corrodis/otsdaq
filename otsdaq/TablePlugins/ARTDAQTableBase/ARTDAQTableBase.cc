@@ -2271,11 +2271,14 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 						bool wildcardsNeeded = StringMacros::extractCommonChunks(multiNodeNames, commonChunks, wildcards, nodeFixedWildcardLength);
 
-						if(!wildcardsNeeded)
+						if(!wildcardsNeeded || wildcards.size() != multiNodeNames.size())
 						{
 							__SS__ << "Impossible extractCommonChunks result! Please notify admins or try to simplify record naming convention." << __E__;
 							__SS_THROW__;
 						}
+
+
+						__COUTV__(StringMacros::vectorToString(commonChunks));
 
 						nodeName   = "";
 						bool first = true;
@@ -2315,15 +2318,15 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						__COUTV__(allIntegers);
 						if(allIntegers)
 						{
-							std::set<unsigned int> intSortWildcards;
-							// unsigned int           tmpInt;
-							for(auto& wildcard : wildcards)
-								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
+							__COUTV__(StringMacros::vectorToString(wildcards));
+
+							//can not change the order of wildcards! or the names will not keep pairing with host
+														
 							// need ints in vector for random access to for hyphenating
 							std::vector<unsigned int> intWildcards;
-							for(auto& wildcard : intSortWildcards)
-								intWildcards.push_back(wildcard);
+							for(auto& wildcard : wildcards)
+								intWildcards.push_back(strtol(wildcard.c_str(), 0, 10));
 
 							__COUTV__(StringMacros::vectorToString(intWildcards));
 
@@ -2370,6 +2373,9 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 						bool wildcardsNeeded = StringMacros::extractCommonChunks(hostnameArray, commonChunks, wildcards, hostFixedWildcardLength);
 
+						__COUTV__(wildcardsNeeded);
+						__COUTV__(StringMacros::vectorToString(commonChunks));
+
 						hostname   = "";
 						bool first = true;
 						for(auto& commonChunk : commonChunks)
@@ -2404,6 +2410,8 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 							if(allIntegers)
 							{
+								__COUTV__(StringMacros::vectorToString(wildcards));
+
 								std::set<unsigned int> intSortWildcards;
 								// unsigned int           tmpInt;
 								for(auto& wildcard : wildcards)

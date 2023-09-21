@@ -860,6 +860,18 @@ launchOTSMacromaker() {
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
+	OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+	# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+	if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+		#sometimes the PORT takes extra time to close
+		out "Retrying... MacroMaker mode context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+		sleep 4
+		OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+		# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+		if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+			die "MacroMaker mode context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+		fi
+	fi
 		
 	if [ $QUIET == 1 ]; then
 
@@ -1099,6 +1111,18 @@ launchOTSWiz() {
 
 	#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 	rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-wiz-0.dat >/dev/null 2>&1 #hide output #remove alive file
+	OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+	# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+	if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+		#sometimes the PORT takes extra time to close
+		out "Retrying... Wiz context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+		sleep 4
+		OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+		# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+		if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+			die "Wiz context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+		fi
+	fi
 		
 	if [ $QUIET == 1 ]; then
 
@@ -1505,6 +1529,18 @@ launchOTS() {
 
 							#attempt to avoid false starts by xdaq by detecting constructor, and relaunching
 							rm ${OTSDAQ_LOG_DIR}/otsdaq_is_alive-${THIS_HOST}-${PORT}.dat >/dev/null 2>&1 #hide output #remove alive file
+							OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+							# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+							if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+								#sometimes the PORT takes extra time to close
+								out "Retrying... Gateway context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+								sleep 4
+								OTS_CONTEXT_UP="$(curl -m 3 http://${THIS_HOST}:${PORT} >/dev/null 2>&1 || echo 'bad')" #detect if http server has gone up
+								# out "OTS_CONTEXT_UP=${OTS_CONTEXT_UP}"
+								if [ "$OTS_CONTEXT_UP" != "bad" ]; then
+									die "Gateway context http PORT is already in use! http://${THIS_HOST}:${PORT}"
+								fi
+							fi
 
 							if [ $QUIET == 1 ]; then
 								info "Launching the Gateway context process on host {${THIS_HOST}}...${RstClr}"								

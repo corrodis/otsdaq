@@ -183,7 +183,7 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	// return xml doc holding server response
 	xmlOut.outputXmlDocument((std::ostringstream*)out, false /*print to cout*/, !userInfo.NoXmlWhiteSpace_ /*allow whitespace*/);
 
-	__SUP_COUT__ << "Total xml request time: " << artdaq::TimeUtils::GetElapsedTime(requestStart) << 
+	__SUP_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Total xml request time: " << artdaq::TimeUtils::GetElapsedTime(requestStart) << 
 		" = " <<  time(0) - requestStartTime << __E__;
 }  // end requestWrapper()
 
