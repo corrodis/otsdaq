@@ -28,6 +28,7 @@
 	    [[maybe_unused]] FEVInterface::frontEndMacroArgs_t argsOut
 
 #define __GET_ARG_IN__(X, Y) getFEMacroConstArgumentValue<Y>(argsIn, X)
+#define __GET_ARG_IN_DEFAULT__(X, Y, D) getFEMacroConstArgumentValueWithDefault<Y>(argsIn, X, D)
 #define __GET_ARG_OUT__(X, Y) getFEMacroArgumentValue<Y>(argsOut, X)
 
 #define __SET_ARG_IN__(X, Y) FEVInterface::emplaceFEMacroArgumentValue(argsIn, X, Y)
@@ -301,18 +302,25 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 };  // end FEVInterface class
 
 template<class T>
-T 				getFEMacroConstArgumentValue					(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
+T 				getFEMacroConstArgumentValue							(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
 
 // specialized template version of getFEMacroConstArgumentValue for string
 template<>
-std::string 	getFEMacroConstArgumentValue<std::string>		(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
+std::string 	getFEMacroConstArgumentValue<std::string>				(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName);
 
 template<class T>
-T 				getFEMacroArgumentValue							(FEVInterface::frontEndMacroArgs_t args, const std::string& argName);
+T 				getFEMacroConstArgumentValueWithDefault					(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName, const T& defaultValue = T());
+
+// specialized template version of getFEMacroConstArgumentValue for string
+template<>
+std::string 	getFEMacroConstArgumentValueWithDefault<std::string>	(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName, const std::string& defaultValue);
+
+template<class T>
+T 				getFEMacroArgumentValue									(FEVInterface::frontEndMacroArgs_t args, const std::string& argName);
 
 // specialized template version of getFEMacroArgumentValue for string
 template<>
-std::string 	getFEMacroArgumentValue<std::string>			(FEVInterface::frontEndMacroArgs_t argsIn, const std::string& argName);
+std::string 	getFEMacroArgumentValue<std::string>					(FEVInterface::frontEndMacroArgs_t argsIn, const std::string& argName);
 
 // include template definitions required at include level for compiler
 #include "otsdaq/FECore/FEVInterface.icc"

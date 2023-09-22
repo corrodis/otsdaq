@@ -104,7 +104,7 @@ template<class T>
 T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args, const std::string& argName)
 {
 	// stolen from TableView
-	//	only handles number types (strings are handled in non-template function override
+	//	only handles number types strings are handled in non-template function override
 
 	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
@@ -120,6 +120,31 @@ T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args, cons
 
 	return retValue;
 }  // end getFEMacroConstArgumentValue()
+
+
+//========================================================================================================================
+// Note: not a member of FEVInterface
+template<class T>
+T getFEMacroConstArgumentValueWithDefault(FEVInterface::frontEndMacroConstArgs_t args, 
+							   const std::string& argName,
+							   const T& defaultValue)
+{
+	// stolen from TableView
+	//	only handles number types strings are handled in non-template function override
+
+	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
+
+	T retValue;
+
+	__COUT__ << StringMacros::demangleTypeName(typeid(retValue).name()) << __E__;
+
+	if(!StringMacros::getNumber(data, retValue))
+	{
+		return defaultValue;
+	}
+
+	return retValue;
+}  // end getFEMacroConstArgumentValueWithDefault()
 
 //========================================================================================================================
 // Note: not a member of FEVInterface
