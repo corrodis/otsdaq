@@ -106,7 +106,7 @@ T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args,
 							   const T& defaultValue)
 {
 	// stolen from TableView
-	//	only handles number types strings are handled in non-template function override
+	// only handles number types (strings are handled in non-template function override)
 
 	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
