@@ -626,11 +626,18 @@ const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_
 // getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEndMacroConstArgs_t& args, const std::string& argName)
+std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEndMacroConstArgs_t& args, 
+														   const std::string& argName,
+														   const std::string& defaultValue)
 {
-	return FEVInterface::getFEMacroConstArgument(args, argName);
-}
+	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
+	// default value is used only if the user leave "Default"
+	if (data == "Default")
+		return defaultValue;
+	
+	return data;
+}
 //==============================================================================
 // getFEMacroArgumentValue
 //	helper function for getting the copy of the value of an argument
