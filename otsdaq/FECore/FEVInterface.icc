@@ -110,13 +110,18 @@ T getFEMacroConstArgumentValue(FEVInterface::frontEndMacroConstArgs_t args,
 
 	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
+	// default value is used only if the user leave "Default"
+	if (data == "Default")
+		return defaultValue;
+
 	T retValue;
 
 	__COUT__ << StringMacros::demangleTypeName(typeid(retValue).name()) << __E__;
 
 	if(!StringMacros::getNumber(data, retValue))
 	{
-		return defaultValue;
+		__SS__ << "Error extracting value for input argument named '" << argName << ".' The value '" << data << "' is not a number!" << std::endl;
+		__SS_THROW__;
 	}
 
 	return retValue;

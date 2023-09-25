@@ -631,7 +631,9 @@ std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEn
 														   const std::string& defaultValue)
 {
 	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
-	if (data.compare("") == 0)
+
+	// default value is used only if the user leave "Default"
+	if (data == "Default")
 		return defaultValue;
 	
 	return data;
