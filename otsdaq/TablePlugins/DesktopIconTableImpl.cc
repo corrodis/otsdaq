@@ -145,29 +145,30 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 				//	appLink context's origin (to avoid cross-origin issues communicating
 				//	with app/supervisor)
 
-				std::string contextUID = contextTable->getContextOfApplication(configManager, appLink.getValueAsString());
-
-				// only prepend address if not same as gateway
-				if(contextUID != gatewayContextUID)
+				try
 				{
-					try
-					{
-						//__COUTV__(contextUID);
-						ConfigurationTree contextNode = contextTableNode.getNode(contextUID);
+					std::string contextUID = contextTable->getContextOfApplication(configManager, appLink.getValueAsString());
 
-						std::string  contextAddress = contextNode.getNode(XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
-						unsigned int contextPort    = contextNode.getNode(XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
-
-						//__COUTV__(contextAddress);
-						icon->windowContentURL_ = contextAddress + ":" + std::to_string(contextPort) + icon->windowContentURL_;
-						//__COUTV__(icon->windowContentURL_);
-					}
-					catch(const std::runtime_error& e)
+					// only prepend address if not same as gateway
+					if(contextUID != gatewayContextUID)
 					{
-						__SS__ << "Error finding App origin which was linked to Desktop Icon '" << child.first << "': " << e.what() << __E__;
-						ss << "\n\nPlease fix by disabling the Icon, enabling the App or fixing the link in the Configurate Tree." << __E__;
-						__SS_THROW__;
+							//__COUTV__(contextUID);
+							ConfigurationTree contextNode = contextTableNode.getNode(contextUID);
+
+							std::string  contextAddress = contextNode.getNode(XDAQContextTable::colContext_.colAddress_).getValue<std::string>();
+							unsigned int contextPort    = contextNode.getNode(XDAQContextTable::colContext_.colPort_).getValue<unsigned int>();
+
+							//__COUTV__(contextAddress);
+							icon->windowContentURL_ = contextAddress + ":" + std::to_string(contextPort) + icon->windowContentURL_;
+							//__COUTV__(icon->windowContentURL_);
+						
 					}
+				}
+				catch(const std::runtime_error& e)
+				{
+					__SS__ << "Error finding App origin which was linked to Desktop Icon '" << child.first << "': " << e.what() << __E__;
+					ss << "\n\nPlease fix by disabling the Icon, enabling the App, or fixing the link in the Configurate Tree." << __E__;
+					__SS_THROW__;
 				}
 			}  // end app origin check
 

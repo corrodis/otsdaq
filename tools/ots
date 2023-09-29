@@ -2115,9 +2115,9 @@ launchOTSLogFind() {
 
 	fn="otsdaq_quiet_run-gateway-${gatewayHostname[$i]}-${gatewayPort}"
 	if [[ ${gatewayHostname[$i]} != ${THIS_HOST} ]]; then
-		out "   vless_mu2e.sh ${gatewayHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		out " '${Bold}${gatewayUID}${RstClr}'\t vless_mu2e.sh ${gatewayHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 	else
-		out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		out " '${Bold}${gatewayUID}${RstClr}'\t less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 	fi
 
 	#non-gateway contexts
@@ -2131,9 +2131,9 @@ launchOTSLogFind() {
 		# out "[$i] == $fn - ${xdaqHost[$i]} - ${PORT} - $gatewayHostname : $gatewayPort"
 
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-			out "   vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out " '${Bold}${xdaqContextUID[$i]}${RstClr}'\t vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		else
-			out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out " '${Bold}${xdaqContextUID[$i]}${RstClr}'\t less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		fi
 		i=$(( $i + 1 ))
 	done

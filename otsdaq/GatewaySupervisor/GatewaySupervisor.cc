@@ -1494,6 +1494,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	//__COUT__ << "Failed Message: " << failedException.message() << __E__;
 	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
+	bool asyncFailureIdentified = false;
 	__SS__;
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
@@ -1503,6 +1504,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 		   << failedException.message() << __E__;  // rbegin()->at("message") << __E__;
 		//<< failedEvent.getException().what() << __E__;
 		RunControlStateMachine::asyncFailureReceived_ = false;  // clear async error
+		asyncFailureIdentified = true;
 	}
 	else
 	{
@@ -1516,7 +1518,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	theStateMachine_.setErrorMessage(ss.str());
 
-	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+	if(!asyncFailureIdentified && theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
 	else 	// move everything else to Error!
 		broadcastMessage(SOAPUtilities::makeSOAPMessageReference(RunControlStateMachine::ERROR_TRANSITION_NAME));
@@ -2951,6 +2953,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						{
 							std::stringstream waitSs;
 							waitSs << "Waiting on " << numOfThreadsWithWork << " of " << numberOfThreads << " threads to finish. Command = " << command;
+							if(command == RunControlStateMachine::CONFIGURE_TRANSITION_NAME)
+								waitSs << " w/" + RunControlStateMachine::getLastAttemptedConfigureGroup();
 							if(numOfThreadsWithWork == 1)
 							{
 								waitSs << ".. " << broadcastThreadStructs_[lastUnfinishedThread]->getAppInfo().getName() << ":"
@@ -3866,6 +3870,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "getCurrentState")
 		{
 			xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
+			const std::string& gatewayStatus = allSupervisorInfo_.getGatewayInfo().getStatus();
+			if(gatewayStatus.size() > std::string(RunControlStateMachine::FAILED_STATE_NAME).length() && 
+				(gatewayStatus[0] == 'F' || gatewayStatus[0] == 'E')) //assume it is Failed or Error and send to state machine
+				xmlOut.addTextElementToData("current_error", gatewayStatus);
+
 			xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
 			if(theStateMachine_.isInTransition())
 				xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
