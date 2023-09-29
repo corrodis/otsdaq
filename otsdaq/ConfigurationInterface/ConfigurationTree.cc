@@ -1,6 +1,7 @@
 #include "otsdaq/ConfigurationInterface/ConfigurationTree.h"
 
 #include <typeinfo>
+#include <regex>
 
 #include "otsdaq/ConfigurationInterface/ConfigurationManager.h"
 #include "otsdaq/Macros/StringMacros.h"
@@ -145,7 +146,7 @@ void ConfigurationTree::recursivePrint(const ConfigurationTree& t, unsigned int 
 			}
 			out << " (" << (t.isGroupLinkNode() ? "Group" : "U") << "ID=" << t.getValueAsString() << ") : " << __E__;
 		}
-		else
+		else 
 			out << space << t.getValueAsString() << " : " << __E__;
 
 		// if depth>=1 print all children
@@ -162,6 +163,107 @@ void ConfigurationTree::recursivePrint(const ConfigurationTree& t, unsigned int 
 		}
 	}
 }  // end recursivePrint()
+
+void ConfigurationTree::json(const unsigned int& depth, std::ostream& out, bool addKey) const { 
+	out << "{" << __E__;
+	recursiveJson(*this, depth, out, "\t", false, addKey); 
+	out << "}" << __E__;
+}  // end json()
+
+//==============================================================================
+//	print out tree from this node for desired depth in json format
+//	depth of 0 means print out only this node's value
+//	depth of 1 means include this node's children's values, etc..
+//	depth of -1 means print full tree
+//  if addKey is ture (false by default) additional node/key data is written following the protocol used in Midas  
+void ConfigurationTree::recursiveJson(const ConfigurationTree& t, unsigned int depth, std::ostream& out, std::string space, bool trailingComma, bool addKey)
+{
+	if(t.isValueNode()) {
+		if(addKey) {
+			out << space << "\"" << t.getValueName() << "/key \" : {" <<
+				"\"type\" : \"" << t.getValueType()         << "\", " <<
+				"\"dataType\" : \"" << t.getValueDataType() << "\", " <<
+				"\"isDefault\" : " << (t.isDefaultValue() ? "true" : "false")  << " " <<
+			"}," << __E__; 
+		}
+		out << space << "\"" << t.getValueName() << "\" : 	";
+		if(t.getValueDataType() == TableViewColumnInfo::DATATYPE_STRING)
+			if(!t.isDefaultValue())
+				out << "\"" << t.getEscapedValue() << "\"";
+			else
+				out << "\"" << t.getDefaultValue() << "\"";
+		else {
+			auto value_str =  t.getValueAsString();
+			if(t.isDefaultValue()) // resolve DEFAULT
+				value_str = t.getDefaultValue();
+			if(t.isValueBoolType()) 
+				transform(value_str.begin(), value_str.end(), value_str.begin(), ::tolower); // for True and False
+			
+			// decode environment variables in the form ${VAR}
+			std::regex re(R"(\$\{([^\}]+)\})");
+			std::smatch match;
+			while (std::regex_search(value_str, match, re)) {
+				std::string envVarName = match[1].str();
+				const char* envVarValue = std::getenv(envVarName.c_str());
+				if (envVarValue != nullptr) {
+					value_str.replace(match.position(), match.length(), envVarValue);
+				}
+			}
+			// evaluate integer expressions, only if no decimal point, also strips leading 0s
+			std::regex onlyIntegers("^[0-9+\\-*/()\\s]*$");
+			if (std::regex_match(value_str, onlyIntegers)) {
+				std::stringstream ss(value_str);
+				int res = 0; ss >> res;
+				value_str = std::to_string(res);
+			}
+			if(value_str=="DEFAULT") // catch broken configurations
+				value_str="null";
+			out << value_str;
+		}
+		out << (trailingComma ? "," : "") << __E__;
+    }
+	else
+	{
+		if(t.isLinkNode())
+		{
+			if(addKey) {
+			out << space << "\"" << t.getValueName() << "/key \" : {" <<
+				"\"type\" : \"" << t.getValueType()         << "\", " <<
+				"\"dataType\" : \"" << t.getValueDataType() << "\", " <<
+				"\"" << (t.isGroupLinkNode() ? "Group" : "U") << "ID \" : \"" << t.getValueAsString() << "\"" <<
+			"}," << __E__; 
+		}
+			out << space << "\"" <<  t.getValueName();
+			if(t.isDisconnected())
+			{
+			//out << "\" :\t \"" << t.getValueAsString() << "\"" << (comma ? "," : "") << __E__;
+			out << "\" :\t  null" << (trailingComma ? "," : "") << __E__;
+				return;
+			}
+			out << "\" : " << __E__;
+			//out << "-" << t.getValueAsString() << "\" : " << __E__;
+		}
+		else {
+			out << space << "\"" << t.getValueAsString() << "\" : " << __E__;
+		}
+
+		// if depth>=1 print all children
+		//	child.print(depth-1)
+		if(depth >= 1)
+		{
+			auto C = t.getChildren();
+			if(!C.empty())
+				out << space << (t.isGroupLinkNode() ? "{" : "{") << __E__;
+			for(auto& c : C)
+				recursiveJson(c.second, depth - 1, out, space + "   ", &c != &C.back(), addKey);
+			if(!C.empty())
+				out << space << (t.isGroupLinkNode() ? "}" : "}") << (trailingComma ? "," : "") << __E__;
+			if(C.empty())
+				out << space << "{}" << (trailingComma ? "," : "") << __E__;
+		}
+	}
+
+}  // end recursiveJson()
 
 //==============================================================================
 std::string ConfigurationTree::handleValidateValueForColumn(const TableView* configView, std::string value, unsigned int col, ots::identity<std::string>) const

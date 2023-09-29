@@ -244,6 +244,7 @@ class ConfigurationTree
 	inline bool									status						(void) const { return isEnabled(); } //same as isEnabled()
 
 	void 										print						(const unsigned int& depth = -1, std::ostream& out = std::cout) const;
+	void              							json						(const unsigned int& depth = -1, std::ostream& out = std::cout, bool addKey=false) const;
 	std::string 								nodeDump					(void) const;  // used for debugging (when throwing exception)
 
 	// make stream output easy
@@ -311,6 +312,7 @@ class ConfigurationTree
 	static ConfigurationTree 					recurse						(const ConfigurationTree& t, const std::string& childPath, bool doNotThrowOnBrokenUIDLinks, const std::string& originalNodeString);
 	ConfigurationTree        					recursiveGetNode			(const std::string& nodeName, bool doNotThrowOnBrokenUIDLinks, const std::string& originalNodeString) const;
 	static void              					recursivePrint				(const ConfigurationTree& t, unsigned int depth, std::ostream& out, std::string space);
+	static void              					recursiveJson				(const ConfigurationTree& t, unsigned int depth, std::ostream& out, std::string space, bool trailingComma=false, bool addKey=false);
 
 	void 										recursiveGetCommonFields	(
 																			    std::vector<ConfigurationTree::RecordField>&      fieldCandidateList,
