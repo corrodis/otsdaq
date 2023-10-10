@@ -621,7 +621,8 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 // setActiveGlobalConfiguration
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
-void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors)
+void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, 
+	std::string* accumulatedTreeErrors, std::string* groupTypeString)
 {
 	try
 	{
@@ -631,7 +632,12 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 				true,                    // loads and activates
 				0,                       // no members needed
 				0,                       // no progress bar
-				accumulatedTreeErrors);  // accumulate warnings or not
+				accumulatedTreeErrors,  // accumulate warnings or not
+				0 /* groupComment */,
+				0 /* groupAuthor */,
+				0 /* groupCreateTime */,
+				false /* doNotLoadMember */,
+				groupTypeString);
 	}
 	catch(...)
 	{

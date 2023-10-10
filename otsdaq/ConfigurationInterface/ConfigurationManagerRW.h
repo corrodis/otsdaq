@@ -89,7 +89,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 
 	//==============================================================================
 	// modifiers of table groups
-	void 										activateTableGroup				(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors = 0);
+	void 										activateTableGroup				(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors = 0, std::string* groupTypeString = 0);
 
 	TableVersion 								createTemporaryBackboneView		(TableVersion sourceViewVersion = TableVersion());  //-1, from MockUp, else from valid backbone view version
 	TableVersion 								saveNewBackbone					(TableVersion temporaryVersion 	= TableVersion());
