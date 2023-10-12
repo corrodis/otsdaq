@@ -1492,8 +1492,6 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		if(progressBar)
 			progressBar->step();
 
-		//__GEN_COUT__ << "memberMap loaded size = " << memberMap.size() << __E__;
-
 		ConfigurationManager::GroupType groupType = ConfigurationManager::GroupType::CONFIGURATION_TYPE;
 		try
 		{
@@ -1503,22 +1501,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 				*groupTypeString = convertGroupTypeToName(groupType);
 			}
 
-			//	if(groupName == "defaultConfig")
-			//		{ //debug active versions
-			//			std::map<std::string, TableVersion> allActivePairs =
-			// getActiveVersions(); 			for(auto& activePair: allActivePairs)
-			//			{
-			//				__GEN_COUT__ << "Active table = " <<
-			//						activePair.first << "-v" <<
-			//						getTableByName(activePair.first)->getView().getVersion()
-			//<<  __E__;
-			//			}
-			//		}
-
-			//__GEN_COUTV__(doNotLoadMembers);
-			//__GEN_COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
 			if(doNotLoadMembers)
-				return;  // memberMap; //this is useful if just getting group metadata
+				return;  //this is useful if just getting group metadata
 
 			// if not already done, determine the type configuration group
 			if(!groupTypeString)
@@ -1569,26 +1553,11 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 				//			//	- this group may have only been partially loaded before?
 				//		}
 			}
-			//	if(groupName == "defaultConfig")
-			//		{ //debug active versions
-			//			std::map<std::string, TableVersion> allActivePairs =
-			// getActiveVersions(); 			for(auto& activePair: allActivePairs)
-			//			{
-			//				__GEN_COUT__ << "Active table = " <<
-			//						activePair.first << "-v" <<
-			//						getTableByName(activePair.first)->getView().getVersion()
-			//<<  __E__;
-			//			}
-			//		}
 
 			if(progressBar)
 				progressBar->step();
 
-			//__GEN_COUT__ << "Loading member map..." << __E__;
-
 			loadMemberMap(memberMap, accumulatedWarnings);
-
-			//__GEN_COUT__ << "Member map loaded..." << __E__;
 
 			if(progressBar)
 				progressBar->step();
@@ -1848,7 +1817,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
+			__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
 
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
@@ -1857,7 +1826,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		}
 		catch(...)
 		{
-			__SS__ << "An unknown error occurred while loading table group." << __E__;
+			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
 
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
