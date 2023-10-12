@@ -1332,7 +1332,6 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
                                           std::map<std::string /*name*/, std::string /*alias*/>* groupAliases  		/*=0*/,
                                           ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /*=ConfigurationManager::LoadGroupType::ALL_TYPES*/,
 										  bool													 ignoreVersionTracking /*=false*/)
-try
 {
 	// clear to defaults
 	if(groupComment)
@@ -1372,306 +1371,256 @@ try
 	//	__GEN_COUT_INFO__ << "Loading Table Group: " << groupName <<
 	//			"(" << groupKey << ")" << __E__;
 
+	//failing member map load should be an exception!
+
 	std::map<std::string /*name*/, TableVersion /*version*/> memberMap =
 	    theInterface_->getTableGroupMembers(TableGroupKey::getFullGroupString(groupName, groupKey), true /*include meta data table*/);
-	std::map<std::string /*name*/, std::string /*alias*/> aliasMap;
-
-	if(progressBar)
-		progressBar->step();
-
-	// remove meta data table and extract info
-	auto metaTablePair = memberMap.find(groupMetadataTable_.getTableName());
-	if(metaTablePair != memberMap.end())
-	{
-		//only lock metadata table if metadata is needed
-		if(groupAliases || groupComment || 
-			groupAuthor || groupCreateTime)
-		{
-			std::lock_guard<std::mutex> lock(metaDataTableMutex_);
-				
-			// clear table
-			while(groupMetadataTable_.getView().getNumberOfRows())
-				groupMetadataTable_.getViewP()->deleteRow(0);		
-
-			// retrieve metadata from database
-			try
-			{
-				theInterface_->fill(&groupMetadataTable_, metaTablePair->second);
-			}
-			catch(const std::runtime_error& e)
-			{
-				__GEN_COUT_WARN__ << "Failed to load " << groupMetadataTable_.getTableName() <<
-					"-v" << metaTablePair->second << ". Metadata error: " << e.what() << __E__;
-			}
-			catch(...)
-			{
-				__GEN_COUT_WARN__ << "Failed to load " << groupMetadataTable_.getTableName() <<
-					"-v" << metaTablePair->second << ". Ignoring unknown metadata error. " << __E__;
-			}
-
-			// check that there is only 1 row
-			if(groupMetadataTable_.getView().getNumberOfRows() != 1)
-			{
-				groupMetadataTable_.print();
-				__GEN_COUT_ERR__ << "Ignoring that groupMetadataTable_ has wrong number of rows for '" << 
-					groupName << "(" << groupKey << ")!' Must "
-					"be 1. Going with anonymous defaults."  << __E__;
-
-				// fix metadata table
-				while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
-					groupMetadataTable_.getViewP()->deleteRow(0);
-				if(groupMetadataTable_.getViewP()->getNumberOfRows() == 0)
-					groupMetadataTable_.getViewP()->addRow();
-			}
-			else
-			{
-				// extract metadata fields
-				StringMacros::getMapFromString(groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_ALIASES), aliasMap);
-				if(groupAliases)
-					*groupAliases = aliasMap;
-				if(groupComment)
-					*groupComment = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_COMMENT);
-				if(groupAuthor)
-					*groupAuthor = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_AUTHOR);
-				if(groupCreateTime)
-					*groupCreateTime = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_TIMESTAMP);
-			}
-		}
-
-		memberMap.erase(metaTablePair);  // remove from member map that is returned
-		
-	}  // end metadata handling
-	else
-	{
-		__GEN_COUT_ERR__ << "Ignoring that groupMetadataTable_ is missing for group '" << 
-				groupName << "(" << groupKey << "). Going with anonymous defaults."
-				<< __E__;
-	}
-
-	// modify members based on aliases
-	{
-		std::map<std::string /*table*/, std::map<std::string /*alias*/, TableVersion>> versionAliases;
-		if(aliasMap.size())  // load version aliases
-		{
-			__GEN_COUTV__(StringMacros::mapToString(aliasMap));
-			versionAliases = ConfigurationManager::getVersionAliases();
-			__GEN_COUTV__(StringMacros::mapToString(versionAliases));
-		}
-
-		// convert alias to version
-		for(auto& aliasPair : aliasMap)
-		{
-			// check for alias table in member names
-			if(memberMap.find(aliasPair.first) != memberMap.end())
-			{
-				__GEN_COUT__ << "Group member '" << aliasPair.first << "' was found in group member map!" << __E__;
-				__GEN_COUT__ << "Looking for alias '" << aliasPair.second << "' in active version aliases..." << __E__;
-
-				if(versionAliases.find(aliasPair.first) == versionAliases.end() ||
-					versionAliases[aliasPair.first].find(aliasPair.second) == versionAliases[aliasPair.first].end())
-				{
-					__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
-							<< ",' which was not found in the active Backbone!" << __E__;
-					__SS_ONLY_THROW__;
-				}
-
-				memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
-				__GEN_COUT__ << "Version alias translated to " << aliasPair.first << __E__;
-			}
-		}
-	} // end modify members based on aliases
 	
-
-	if(groupMembers)
-		*groupMembers = memberMap;  // copy map for return
-
-	if(progressBar)
-		progressBar->step();
-
-	//__GEN_COUT__ << "memberMap loaded size = " << memberMap.size() << __E__;
-
-	ConfigurationManager::GroupType groupType = ConfigurationManager::GroupType::CONFIGURATION_TYPE;
 	try
 	{
-		if(groupTypeString)  // do before exit case
+		std::map<std::string /*name*/, std::string /*alias*/> aliasMap;
+
+		if(progressBar)
+			progressBar->step();
+
+		// remove meta data table and extract info
+		auto metaTablePair = memberMap.find(groupMetadataTable_.getTableName());
+		if(metaTablePair != memberMap.end())
 		{
-			groupType        = getTypeOfGroup(memberMap);
-			*groupTypeString = convertGroupTypeToName(groupType);
-		}
-
-		//	if(groupName == "defaultConfig")
-		//		{ //debug active versions
-		//			std::map<std::string, TableVersion> allActivePairs =
-		// getActiveVersions(); 			for(auto& activePair: allActivePairs)
-		//			{
-		//				__GEN_COUT__ << "Active table = " <<
-		//						activePair.first << "-v" <<
-		//						getTableByName(activePair.first)->getView().getVersion()
-		//<<  __E__;
-		//			}
-		//		}
-
-		//__GEN_COUTV__(doNotLoadMembers);
-		//__GEN_COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
-		if(doNotLoadMembers)
-			return;  // memberMap; //this is useful if just getting group metadata
-
-		// if not already done, determine the type configuration group
-		if(!groupTypeString)
-			groupType = getTypeOfGroup(memberMap);
-
-		if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES &&
-		   groupType != ConfigurationManager::GroupType::CONTEXT_TYPE && groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
-		{
-			__GEN_COUT__ << "Not loading group because it is not of type Context or "
-			                "Backbone (it is type '"
-			             << convertGroupTypeToName(groupType) << "')." << __E__;
-			return;
-		}
-		else if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE &&
-		        groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
-		{
-			__GEN_COUT__ << "Not loading group because it is not of type "
-			                "Backbone (it is type '"
-			             << convertGroupTypeToName(groupType) << "')." << __E__;
-			return;
-		}
-
-		if(doActivate)
-			__GEN_COUT__ << "------------------------------------- init start    \t [for all "
-			                "plug-ins in "
-			             << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
-			             << "']" << __E__;
-
-		if(doActivate)
-		{
-			std::string groupToDeactivate =
-			    groupType == ConfigurationManager::GroupType::CONTEXT_TYPE
-			        ? theContextTableGroup_
-			        : (groupType == ConfigurationManager::GroupType::BACKBONE_TYPE
-			               ? theBackboneTableGroup_
-			               : (groupType == ConfigurationManager::GroupType::ITERATE_TYPE ? theIterateTableGroup_ : theConfigurationTableGroup_));
-
-			//		deactivate all of that type (invalidate active view)
-			if(groupToDeactivate != "")  // deactivate only if pre-existing group
+			//only lock metadata table if metadata is needed
+			if(groupAliases || groupComment || 
+				groupAuthor || groupCreateTime)
 			{
-				//__GEN_COUT__ << "groupToDeactivate '" << groupToDeactivate << "'" <<
-				// __E__;
-				destroyTableGroup(groupToDeactivate, true);
-			}
-			//		else
-			//		{
-			//			//Getting here, is kind of strange:
-			//			//	- this group may have only been partially loaded before?
-			//		}
-		}
-		//	if(groupName == "defaultConfig")
-		//		{ //debug active versions
-		//			std::map<std::string, TableVersion> allActivePairs =
-		// getActiveVersions(); 			for(auto& activePair: allActivePairs)
-		//			{
-		//				__GEN_COUT__ << "Active table = " <<
-		//						activePair.first << "-v" <<
-		//						getTableByName(activePair.first)->getView().getVersion()
-		//<<  __E__;
-		//			}
-		//		}
+				std::lock_guard<std::mutex> lock(metaDataTableMutex_);
+					
+				// clear table
+				while(groupMetadataTable_.getView().getNumberOfRows())
+					groupMetadataTable_.getViewP()->deleteRow(0);		
 
-		if(progressBar)
-			progressBar->step();
-
-		//__GEN_COUT__ << "Loading member map..." << __E__;
-
-		loadMemberMap(memberMap, accumulatedWarnings);
-
-		//__GEN_COUT__ << "Member map loaded..." << __E__;
-
-		if(progressBar)
-			progressBar->step();
-
-		if(accumulatedWarnings)
-		{
-			//__GEN_COUT__ << "Checking chosen group for tree errors..." << __E__;
-
-			getChildren(&memberMap, accumulatedWarnings);
-			if(*accumulatedWarnings != "")
-			{
-				__GEN_COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Ignoring the following errors: "
-				                 << "\n"
-				                 << *accumulatedWarnings << __E__;
-			}
-		}
-
-		if(progressBar)
-			progressBar->step();
-
-		//	for each member
-		//		if doActivate, configBase->init()
-		if(doActivate)
-		{
-			const int numOfThreads = PROCESSOR_COUNT/2;
-			__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads for initializing tables." << __E__;
-			if(groupType != ConfigurationManager::GroupType::CONFIGURATION_TYPE ||
-				numOfThreads < 2) // no multi-threading			
-				for(auto& memberPair : memberMap)
+				// retrieve metadata from database
+				try
 				{
-					// do NOT allow activating Scratch versions if tracking is ON!
-					if(!ignoreVersionTracking && ConfigurationInterface::isVersionTrackingEnabled() && memberPair.second.isScratchVersion())
+					theInterface_->fill(&groupMetadataTable_, metaTablePair->second);
+				}
+				catch(const std::runtime_error& e)
+				{
+					__GEN_COUT_WARN__ << "Failed to load " << groupMetadataTable_.getTableName() <<
+						"-v" << metaTablePair->second << ". Metadata error: " << e.what() << __E__;
+				}
+				catch(...)
+				{
+					__GEN_COUT_WARN__ << "Failed to load " << groupMetadataTable_.getTableName() <<
+						"-v" << metaTablePair->second << ". Ignoring unknown metadata error. " << __E__;
+				}
+
+				// check that there is only 1 row
+				if(groupMetadataTable_.getView().getNumberOfRows() != 1)
+				{
+					groupMetadataTable_.print();
+					__GEN_COUT_ERR__ << "Ignoring that groupMetadataTable_ has wrong number of rows for '" << 
+						groupName << "(" << groupKey << ")!' Must "
+						"be 1. Going with anonymous defaults."  << __E__;
+
+					// fix metadata table
+					while(groupMetadataTable_.getViewP()->getNumberOfRows() > 1)
+						groupMetadataTable_.getViewP()->deleteRow(0);
+					if(groupMetadataTable_.getViewP()->getNumberOfRows() == 0)
+						groupMetadataTable_.getViewP()->addRow();
+				}
+				else
+				{
+					// extract metadata fields
+					StringMacros::getMapFromString(groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_ALIASES), aliasMap);
+					if(groupAliases)
+						*groupAliases = aliasMap;
+					if(groupComment)
+						*groupComment = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_COMMENT);
+					if(groupAuthor)
+						*groupAuthor = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_AUTHOR);
+					if(groupCreateTime)
+						*groupCreateTime = groupMetadataTable_.getView().getValueAsString(0, ConfigurationManager::METADATA_COL_TIMESTAMP);
+				}
+			}
+
+			memberMap.erase(metaTablePair);  // remove from member map that is returned
+			
+		}  // end metadata handling
+		else
+		{
+			__GEN_COUT_ERR__ << "Ignoring that groupMetadataTable_ is missing for group '" << 
+					groupName << "(" << groupKey << "). Going with anonymous defaults."
+					<< __E__;
+		}
+
+		// modify members based on aliases
+		{
+			std::map<std::string /*table*/, std::map<std::string /*alias*/, TableVersion>> versionAliases;
+			if(aliasMap.size())  // load version aliases
+			{
+				__GEN_COUTV__(StringMacros::mapToString(aliasMap));
+				versionAliases = ConfigurationManager::getVersionAliases();
+				__GEN_COUTV__(StringMacros::mapToString(versionAliases));
+			}
+
+			// convert alias to version
+			for(auto& aliasPair : aliasMap)
+			{
+				// check for alias table in member names
+				if(memberMap.find(aliasPair.first) != memberMap.end())
+				{
+					__GEN_COUT__ << "Group member '" << aliasPair.first << "' was found in group member map!" << __E__;
+					__GEN_COUT__ << "Looking for alias '" << aliasPair.second << "' in active version aliases..." << __E__;
+
+					if(versionAliases.find(aliasPair.first) == versionAliases.end() ||
+						versionAliases[aliasPair.first].find(aliasPair.second) == versionAliases[aliasPair.first].end())
 					{
-						__SS__ << "Error while activating member Table '" << nameToTableMap_[memberPair.first]->getTableName() << "-v" << memberPair.second
-							<< " for Table Group '" << groupName << "(" << groupKey << ")'. When version tracking is enabled, Scratch views"
-							<< " are not allowed! Please only use unique, persistent "
-								"versions when version tracking is enabled."
-							<< __E__;
+						__SS__ << "Group '" << groupName << "(" << groupKey << ")' requires table version alias '" << aliasPair.first << ":" << aliasPair.second
+								<< ",' which was not found in the active Backbone!" << __E__;
 						__SS_ONLY_THROW__;
 					}
 
-					// attempt to init using the configuration's specific init
-					//	this could be risky user code, try and catch
-					try
-					{
-						nameToTableMap_.at(memberPair.first)->init(this);
-					}
-					catch(std::runtime_error& e)
-					{
-						__SS__ << "Error detected calling " << memberPair.first << ".init()!\n\n " << e.what() << __E__;
-
-						if(accumulatedWarnings)
-						{
-							*accumulatedWarnings += ss.str();
-						}
-						else
-						{
-							ss << StringMacros::stackTrace();
-							__SS_ONLY_THROW__;
-						}
-					}
-					catch(...)
-					{
-						__SS__ << "Unknown Error detected calling " << memberPair.first << ".init()!\n\n " << __E__;
-						//__SS_THROW__;
-						if(accumulatedWarnings)
-						{
-							*accumulatedWarnings += ss.str();
-						}
-						else  // ignore error
-							__GEN_COUT_WARN__ << ss.str();
-					}
+					memberMap[aliasPair.first] = versionAliases[aliasPair.first][aliasPair.second];
+					__GEN_COUT__ << "Version alias translated to " << aliasPair.first << __E__;
 				}
-			else //multi-threading
+			}
+		} // end modify members based on aliases
+		
+
+		if(groupMembers)
+			*groupMembers = memberMap;  // copy map for return
+
+		if(progressBar)
+			progressBar->step();
+
+		//__GEN_COUT__ << "memberMap loaded size = " << memberMap.size() << __E__;
+
+		ConfigurationManager::GroupType groupType = ConfigurationManager::GroupType::CONFIGURATION_TYPE;
+		try
+		{
+			if(groupTypeString)  // do before exit case
 			{
-				int threadsLaunched = 0;
-				int foundThreadIndex = 0;
-				std::mutex threadMutex; // to protect accumulatedWarnings
-				std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
-				for(int i=0;i<numOfThreads;++i)
-					threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
-				
-				if(!ignoreVersionTracking && ConfigurationInterface::isVersionTrackingEnabled())
+				groupType        = getTypeOfGroup(memberMap);
+				*groupTypeString = convertGroupTypeToName(groupType);
+			}
+
+			//	if(groupName == "defaultConfig")
+			//		{ //debug active versions
+			//			std::map<std::string, TableVersion> allActivePairs =
+			// getActiveVersions(); 			for(auto& activePair: allActivePairs)
+			//			{
+			//				__GEN_COUT__ << "Active table = " <<
+			//						activePair.first << "-v" <<
+			//						getTableByName(activePair.first)->getView().getVersion()
+			//<<  __E__;
+			//			}
+			//		}
+
+			//__GEN_COUTV__(doNotLoadMembers);
+			//__GEN_COUT__ << "group '" << groupName << "(" << groupKey << ")' := " << StringMacros::mapToString(memberMap) << __E__;
+			if(doNotLoadMembers)
+				return;  // memberMap; //this is useful if just getting group metadata
+
+			// if not already done, determine the type configuration group
+			if(!groupTypeString)
+				groupType = getTypeOfGroup(memberMap);
+
+			if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_OR_CONTEXT_TYPES &&
+			groupType != ConfigurationManager::GroupType::CONTEXT_TYPE && groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+			{
+				__GEN_COUT__ << "Not loading group because it is not of type Context or "
+								"Backbone (it is type '"
+							<< convertGroupTypeToName(groupType) << "')." << __E__;
+				return;
+			}
+			else if(onlyLoadIfBackboneOrContext == ConfigurationManager::LoadGroupType::ONLY_BACKBONE_TYPE &&
+					groupType != ConfigurationManager::GroupType::BACKBONE_TYPE)
+			{
+				__GEN_COUT__ << "Not loading group because it is not of type "
+								"Backbone (it is type '"
+							<< convertGroupTypeToName(groupType) << "')." << __E__;
+				return;
+			}
+
+			if(doActivate)
+				__GEN_COUT__ << "------------------------------------- init start    \t [for all "
+								"plug-ins in "
+							<< convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
+							<< "']" << __E__;
+
+			if(doActivate)
+			{
+				std::string groupToDeactivate =
+					groupType == ConfigurationManager::GroupType::CONTEXT_TYPE
+						? theContextTableGroup_
+						: (groupType == ConfigurationManager::GroupType::BACKBONE_TYPE
+							? theBackboneTableGroup_
+							: (groupType == ConfigurationManager::GroupType::ITERATE_TYPE ? theIterateTableGroup_ : theConfigurationTableGroup_));
+
+				//		deactivate all of that type (invalidate active view)
+				if(groupToDeactivate != "")  // deactivate only if pre-existing group
+				{
+					//__GEN_COUT__ << "groupToDeactivate '" << groupToDeactivate << "'" <<
+					// __E__;
+					destroyTableGroup(groupToDeactivate, true);
+				}
+				//		else
+				//		{
+				//			//Getting here, is kind of strange:
+				//			//	- this group may have only been partially loaded before?
+				//		}
+			}
+			//	if(groupName == "defaultConfig")
+			//		{ //debug active versions
+			//			std::map<std::string, TableVersion> allActivePairs =
+			// getActiveVersions(); 			for(auto& activePair: allActivePairs)
+			//			{
+			//				__GEN_COUT__ << "Active table = " <<
+			//						activePair.first << "-v" <<
+			//						getTableByName(activePair.first)->getView().getVersion()
+			//<<  __E__;
+			//			}
+			//		}
+
+			if(progressBar)
+				progressBar->step();
+
+			//__GEN_COUT__ << "Loading member map..." << __E__;
+
+			loadMemberMap(memberMap, accumulatedWarnings);
+
+			//__GEN_COUT__ << "Member map loaded..." << __E__;
+
+			if(progressBar)
+				progressBar->step();
+
+			if(accumulatedWarnings)
+			{
+				//__GEN_COUT__ << "Checking chosen group for tree errors..." << __E__;
+
+				getChildren(&memberMap, accumulatedWarnings);
+				if(*accumulatedWarnings != "")
+				{
+					__GEN_COUT_ERR__ << "Errors detected while loading Table Group: " << groupName << "(" << groupKey << "). Ignoring the following errors: "
+									<< "\n"
+									<< *accumulatedWarnings << __E__;
+				}
+			}
+
+			if(progressBar)
+				progressBar->step();
+
+			//	for each member
+			//		if doActivate, configBase->init()
+			if(doActivate)
+			{
+				const int numOfThreads = PROCESSOR_COUNT/2;
+				__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads for initializing tables." << __E__;
+				if(groupType != ConfigurationManager::GroupType::CONFIGURATION_TYPE ||
+					numOfThreads < 2) // no multi-threading			
 					for(auto& memberPair : memberMap)
 					{
 						// do NOT allow activating Scratch versions if tracking is ON!
-						if(memberPair.second.isScratchVersion())
+						if(!ignoreVersionTracking && ConfigurationInterface::isVersionTrackingEnabled() && memberPair.second.isScratchVersion())
 						{
 							__SS__ << "Error while activating member Table '" << nameToTableMap_[memberPair.first]->getTableName() << "-v" << memberPair.second
 								<< " for Table Group '" << groupName << "(" << groupKey << ")'. When version tracking is enabled, Scratch views"
@@ -1680,132 +1629,218 @@ try
 								<< __E__;
 							__SS_ONLY_THROW__;
 						}
-					}
 
-				for(auto& memberPair : memberMap)
-				{
-					if(threadsLaunched >= numOfThreads)
-					{
-						//find availableThreadIndex
-						foundThreadIndex = -1;
-						while(foundThreadIndex == -1)
+						// attempt to init using the configuration's specific init
+						//	this could be risky user code, try and catch
+						try
 						{
-							for(int i=0;i<numOfThreads;++i)
-								if(*(threadDone[i]))
-								{
-									foundThreadIndex = i;
-									break;
-								}
-							if(foundThreadIndex == -1)
-							{
-								__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
-								usleep(10000);
-							}
-						} //end thread search loop
-						threadsLaunched = numOfThreads - 1;
-					}					
-					__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting init table thread... " << foundThreadIndex << " for " << memberPair.first << __E__;
-					*(threadDone[foundThreadIndex]) = false;
-
-					std::thread([](
-						ConfigurationManager* 					cfgMgr, 
-						ots::TableBase*							theTable,
-						std::string*		 					theAccumulatedWarnings,	
-						std::mutex* 							theThreadMutex,							
-						std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
-					ConfigurationManager::initTableThread(cfgMgr, theTable,
-									theAccumulatedWarnings, theThreadMutex, 
-									theThreadDone); },
-						this,
-						nameToTableMap_.at(memberPair.first),
-						accumulatedWarnings,
-						&threadMutex,
-						threadDone[foundThreadIndex])
-					.detach();
-					
-					++threadsLaunched;
-					++foundThreadIndex;					
-				} //end table init thread loop
-
-				//check for all threads done					
-				do
-				{
-					foundThreadIndex = -1;
-					for(int i=0;i<numOfThreads;++i)
-						if(!*(threadDone[i]))
-						{
-							foundThreadIndex = i;
-							break;
+							nameToTableMap_.at(memberPair.first)->init(this);
 						}
-					if(foundThreadIndex != -1)
-					{
-						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
-						usleep(10000);
+						catch(std::runtime_error& e)
+						{
+							__SS__ << "Error detected calling " << memberPair.first << ".init()!\n\n " << e.what() << __E__;
+
+							if(accumulatedWarnings)
+							{
+								*accumulatedWarnings += ss.str();
+							}
+							else
+							{
+								ss << StringMacros::stackTrace();
+								__SS_ONLY_THROW__;
+							}
+						}
+						catch(...)
+						{
+							__SS__ << "Unknown Error detected calling " << memberPair.first << ".init()!\n\n " << __E__;
+							//__SS_THROW__;
+							if(accumulatedWarnings)
+							{
+								*accumulatedWarnings += ss.str();
+							}
+							else  // ignore error
+								__GEN_COUT_WARN__ << ss.str();
+						}
 					}
-				} while(foundThreadIndex != -1); //end thread done search loop
+				else //multi-threading
+				{
+					int threadsLaunched = 0;
+					int foundThreadIndex = 0;
+					std::mutex threadMutex; // to protect accumulatedWarnings
+					std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
+					for(int i=0;i<numOfThreads;++i)
+						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
+					
+					if(!ignoreVersionTracking && ConfigurationInterface::isVersionTrackingEnabled())
+						for(auto& memberPair : memberMap)
+						{
+							// do NOT allow activating Scratch versions if tracking is ON!
+							if(memberPair.second.isScratchVersion())
+							{
+								__SS__ << "Error while activating member Table '" << nameToTableMap_[memberPair.first]->getTableName() << "-v" << memberPair.second
+									<< " for Table Group '" << groupName << "(" << groupKey << ")'. When version tracking is enabled, Scratch views"
+									<< " are not allowed! Please only use unique, persistent "
+										"versions when version tracking is enabled."
+									<< __E__;
+								__SS_ONLY_THROW__;
+							}
+						}
 
-			} //end multi-thread handling
-		} //end activate/init of member tables
+					for(auto& memberPair : memberMap)
+					{
+						if(threadsLaunched >= numOfThreads)
+						{
+							//find availableThreadIndex
+							foundThreadIndex = -1;
+							while(foundThreadIndex == -1)
+							{
+								for(int i=0;i<numOfThreads;++i)
+									if(*(threadDone[i]))
+									{
+										foundThreadIndex = i;
+										break;
+									}
+								if(foundThreadIndex == -1)
+								{
+									__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
+									usleep(10000);
+								}
+							} //end thread search loop
+							threadsLaunched = numOfThreads - 1;
+						}					
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting init table thread... " << foundThreadIndex << " for " << memberPair.first << __E__;
+						*(threadDone[foundThreadIndex]) = false;
 
-		if(progressBar)
-			progressBar->step();
+						std::thread([](
+							ConfigurationManager* 					cfgMgr, 
+							ots::TableBase*							theTable,
+							std::string*		 					theAccumulatedWarnings,	
+							std::mutex* 							theThreadMutex,							
+							std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
+						ConfigurationManager::initTableThread(cfgMgr, theTable,
+										theAccumulatedWarnings, theThreadMutex, 
+										theThreadDone); },
+							this,
+							nameToTableMap_.at(memberPair.first),
+							accumulatedWarnings,
+							&threadMutex,
+							threadDone[foundThreadIndex])
+						.detach();
+						
+						++threadsLaunched;
+						++foundThreadIndex;					
+					} //end table init thread loop
 
-		//	if doActivate
-		//		set theConfigurationTableGroup_, theContextTableGroup_, or
-		// theBackboneTableGroup_ on
-		// success
+					//check for all threads done					
+					do
+					{
+						foundThreadIndex = -1;
+						for(int i=0;i<numOfThreads;++i)
+							if(!*(threadDone[i]))
+							{
+								foundThreadIndex = i;
+								break;
+							}
+						if(foundThreadIndex != -1)
+						{
+							__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
+							usleep(10000);
+						}
+					} while(foundThreadIndex != -1); //end thread done search loop
 
-		if(doActivate)
+				} //end multi-thread handling
+			} //end activate/init of member tables
+
+			if(progressBar)
+				progressBar->step();
+
+			//	if doActivate
+			//		set theConfigurationTableGroup_, theContextTableGroup_, or
+			// theBackboneTableGroup_ on
+			// success
+
+			if(doActivate)
+			{
+				if(groupType == ConfigurationManager::GroupType::CONTEXT_TYPE)  //
+				{
+					//			__GEN_COUT_INFO__ << "Type=Context, Group loaded: " <<
+					// groupName
+					//<<
+					//					"(" << groupKey << ")" << __E__;
+					theContextTableGroup_    = groupName;
+					theContextTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				}
+				else if(groupType == ConfigurationManager::GroupType::BACKBONE_TYPE)
+				{
+					//			__GEN_COUT_INFO__ << "Type=Backbone, Group loaded: " <<
+					// groupName <<
+					//					"(" << groupKey << ")" << __E__;
+					theBackboneTableGroup_    = groupName;
+					theBackboneTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				}
+				else if(groupType == ConfigurationManager::GroupType::ITERATE_TYPE)
+				{
+					//			__GEN_COUT_INFO__ << "Type=Iterate, Group loaded: " <<
+					// groupName
+					//<<
+					//					"(" << groupKey << ")" << __E__;
+					theIterateTableGroup_    = groupName;
+					theIterateTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				}
+				else  // is theConfigurationTableGroup_
+				{
+					//			__GEN_COUT_INFO__ << "Type=Configuration, Group loaded: " <<
+					// groupName <<
+					//					"(" << groupKey << ")" << __E__;
+					theConfigurationTableGroup_    = groupName;
+					theConfigurationTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				}
+			}
+
+			if(progressBar)
+				progressBar->step();
+
+			if(doActivate)
+				__GEN_COUT__ << "------------------------------------- init complete \t [for all "
+								"plug-ins in "
+							<< convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
+							<< "']" << __E__;
+		}  // end failed group load try
+		catch(...)
 		{
-			if(groupType == ConfigurationManager::GroupType::CONTEXT_TYPE)  //
+			// save group name and key of failed load attempt
+			lastFailedGroupLoad_[convertGroupTypeToName(groupType)] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
+
+			try
 			{
-				//			__GEN_COUT_INFO__ << "Type=Context, Group loaded: " <<
-				// groupName
-				//<<
-				//					"(" << groupKey << ")" << __E__;
-				theContextTableGroup_    = groupName;
-				theContextTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				throw;
 			}
-			else if(groupType == ConfigurationManager::GroupType::BACKBONE_TYPE)
+			catch(const std::runtime_error& e)
 			{
-				//			__GEN_COUT_INFO__ << "Type=Backbone, Group loaded: " <<
-				// groupName <<
-				//					"(" << groupKey << ")" << __E__;
-				theBackboneTableGroup_    = groupName;
-				theBackboneTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
+
+				if(accumulatedWarnings)
+					*accumulatedWarnings += ss.str();
+				else
+					__SS_ONLY_THROW__;
 			}
-			else if(groupType == ConfigurationManager::GroupType::ITERATE_TYPE)
+			catch(...)
 			{
-				//			__GEN_COUT_INFO__ << "Type=Iterate, Group loaded: " <<
-				// groupName
-				//<<
-				//					"(" << groupKey << ")" << __E__;
-				theIterateTableGroup_    = groupName;
-				theIterateTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
-			}
-			else  // is theConfigurationTableGroup_
-			{
-				//			__GEN_COUT_INFO__ << "Type=Configuration, Group loaded: " <<
-				// groupName <<
-				//					"(" << groupKey << ")" << __E__;
-				theConfigurationTableGroup_    = groupName;
-				theConfigurationTableGroupKey_ = std::shared_ptr<TableGroupKey>(new TableGroupKey(groupKey));
+				__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
+
+				if(accumulatedWarnings)
+					*accumulatedWarnings += ss.str();
+				else
+					__SS_ONLY_THROW__;
 			}
 		}
 
-		if(progressBar)
-			progressBar->step();
-
-		if(doActivate)
-			__GEN_COUT__ << "------------------------------------- init complete \t [for all "
-			                "plug-ins in "
-			             << convertGroupTypeToName(groupType) << " group '" << groupName << "(" << groupKey << ")"
-			             << "']" << __E__;
-	}  // end failed group load try
+		return;
+	}
 	catch(...)
 	{
 		// save group name and key of failed load attempt
-		lastFailedGroupLoad_[convertGroupTypeToName(groupType)] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
+		lastFailedGroupLoad_[ConfigurationManager::ACTIVE_GROUP_NAME_UNKNOWN] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
 
 		try
 		{
@@ -1813,7 +1848,7 @@ try
 		}
 		catch(const std::runtime_error& e)
 		{
-			__SS__ << "Error occurred while loading table group '" << groupName << "(" << groupKey << ")': \n" << e.what() << __E__;
+			__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
 
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
@@ -1822,45 +1857,15 @@ try
 		}
 		catch(...)
 		{
-			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
+			__SS__ << "An unknown error occurred while loading table group." << __E__;
 
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
 			else
 				__SS_ONLY_THROW__;
 		}
-	}
-
-	return;
-}
-catch(...)
-{
-	// save group name and key of failed load attempt
-	lastFailedGroupLoad_[ConfigurationManager::ACTIVE_GROUP_NAME_UNKNOWN] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
-
-	try
-	{
-		throw;
-	}
-	catch(const std::runtime_error& e)
-	{
-		__SS__ << "Error occurred while loading table group: " << e.what() << __E__;
-
-		if(accumulatedWarnings)
-			*accumulatedWarnings += ss.str();
-		else
-			__SS_ONLY_THROW__;
-	}
-	catch(...)
-	{
-		__SS__ << "An unknown error occurred while loading table group." << __E__;
-
-		if(accumulatedWarnings)
-			*accumulatedWarnings += ss.str();
-		else
-			__SS_ONLY_THROW__;
-	}
-}  // end loadTableGroup()
+	} 
+} // end loadTableGroup()
 
 //==============================================================================
 // initTableThread()
