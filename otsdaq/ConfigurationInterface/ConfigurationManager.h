@@ -65,6 +65,8 @@ class ConfigurationManager
 	static const std::set<std::string> iterateMemberNames_;        // list of iterate members
 	std::set<std::string>              configurationMemberNames_;  // list of 'active' configuration members
 
+	static const std::string 			CONTEXT_SUBSYSTEM_OPTIONAL_TABLE;
+
 	enum class GroupType
 	{
 		CONTEXT_TYPE,
