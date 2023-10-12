@@ -46,6 +46,7 @@ class TableBase
 	void         				trimCache						(unsigned int trimSize = -1);
 	void         				trimTemporary					(TableVersion targetVersion = TableVersion());
 	TableVersion 				checkForDuplicate				(TableVersion needleVersion, TableVersion ignoreVersion = TableVersion()) const;
+	bool		 				diffTwoVersions					(TableVersion v1, TableVersion v2, std::stringstream* diffReport = 0) const;
 
 	// Getters
 	const std::string&     		getTableName					(void) const;

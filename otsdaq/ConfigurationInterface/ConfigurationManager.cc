@@ -55,6 +55,8 @@ const uint8_t ConfigurationManager::METADATA_COL_COMMENT   = 2;
 const uint8_t ConfigurationManager::METADATA_COL_AUTHOR    = 3;
 const uint8_t ConfigurationManager::METADATA_COL_TIMESTAMP = 4;
 
+
+const std::string ConfigurationManager::CONTEXT_SUBSYSTEM_OPTIONAL_TABLE = "SubsystemUserDataPathsTable";
 const std::set<std::string> ConfigurationManager::contextMemberNames_  = {ConfigurationManager::XDAQ_CONTEXT_TABLE_NAME,
                                                                           ConfigurationManager::XDAQ_APPLICATION_TABLE_NAME,
                                                                           "XDAQApplicationPropertyTable",
@@ -544,14 +546,20 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 		//__COUT__ << "Member name: = "<< memberPair.first << __E__;
 		////////////////////////////////////////
 		inGroup = false;  // check context
-		for(auto& contextMemberString : contextMemberNames_)
-			if(memberPair.first == contextMemberString)
-			{
-				inGroup   = true;
-				inContext = true;
-				++matchCount;
-				break;
-			}
+		if(memberPair.first == CONTEXT_SUBSYSTEM_OPTIONAL_TABLE)
+		{
+			inGroup   = true;
+			inContext = true;
+		}
+		else
+			for(auto& contextMemberString : contextMemberNames_)
+				if(memberPair.first == contextMemberString)
+				{
+					inGroup   = true;
+					inContext = true;
+					++matchCount;
+					break;
+				}
 		if(!inGroup)
 		{
 			isContext = false;
@@ -559,7 +567,7 @@ ConfigurationManager::GroupType ConfigurationManager::getTypeOfGroup(const std::
 			{
 				__SS__ << "This group is an incomplete match to a Context group.\n";
 				ss << "\nTo be a Context group, the members must exactly match "
-				   << "the following members:\n";
+				   << "the following members (w/ or wo/ the optional table " << CONTEXT_SUBSYSTEM_OPTIONAL_TABLE << "):\n";
 				int i = 0;
 				for(const auto& memberName : contextMemberNames_)
 					ss << ++i << ". " << memberName << "\n";
