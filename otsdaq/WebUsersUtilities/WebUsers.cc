@@ -278,9 +278,9 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc& /*cgi*/,
 
 	if(!userInfo.automatedCommand_)
 	{
-		__COUTT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
-		__COUTTV__((unsigned int)userInfo.permissionLevel_);
-		__COUTTV__((unsigned int)userInfo.permissionsThreshold_);
+		__COUT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
+		__COUTV__((unsigned int)userInfo.permissionLevel_);
+		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
 	}
 
 	// second, start check access -------
@@ -291,8 +291,10 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc& /*cgi*/,
 		return false;  // invalid cookie and present sequence, but not correct sequence
 	}
 
-	if(!userInfo.allowNoUser_ && (userInfo.permissionLevel_ == 0 ||  // reject inactive permission level
+	if(!userInfo.allowNoUser_ && (userInfo.permissionLevel_ == 0 ||  // reject inactive user permission level
+								  userInfo.permissionsThreshold_ == 0 || // reject inactive requests
 	                              userInfo.permissionLevel_ < userInfo.permissionsThreshold_))
+
 	{
 		*out << WebUsers::REQ_NO_PERMISSION_RESPONSE;
 		__COUT__ << "User (@" << userInfo.ip_ << ") has insufficient permissions for requestType '" << userInfo.requestType_
