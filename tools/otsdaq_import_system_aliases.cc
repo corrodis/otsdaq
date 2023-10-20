@@ -194,6 +194,18 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 	ConfigurationManagerRW* cfgMgr            = &cfgMgrInst;
 	bool                    importedDbInPlace = false;
 
+
+	{
+		std::string accumulatedWarnings;
+		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+					"" /*pathToActiveGroupsFile*/,
+					ConfigurationManager::LoadGroupType::ALL_TYPES,
+					&accumulatedWarnings
+				);
+
+		std::cout << __COUT_HDR_FL__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
+	}
+
 	__COUT__ << "Configuration manager initialized." << __E__;
 
 	std::string nowTime    = std::to_string(time(0));
