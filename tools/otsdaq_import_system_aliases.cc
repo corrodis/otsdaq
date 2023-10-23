@@ -203,7 +203,7 @@ void ImportSystemAliasTableGroups(int argc, char* argv[])
 					&accumulatedWarnings
 				);
 
-		std::cout << __COUT_HDR_FL__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
+		__COUT__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
 	}
 
 	__COUT__ << "Configuration manager initialized." << __E__;
