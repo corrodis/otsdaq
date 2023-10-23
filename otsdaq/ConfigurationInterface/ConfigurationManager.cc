@@ -1902,7 +1902,6 @@ void ConfigurationManager::fillTableThread(ConfigurationInterface* 					theInter
 											std::shared_ptr<std::atomic<bool>> 		threadDone)
 try
 {
-	std::cout << " HI " <<  tableName << "-v" << version << __E__;
 	// std::map<std::string, ots::TableBase *> n;
 	// std::map<std::string, ots::TableBase *>*nameToTableMap = &n;
 	// ots::TableBase*							table;
