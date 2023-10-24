@@ -278,9 +278,9 @@ bool WebUsers::checkRequestAccess(cgicc::Cgicc& /*cgi*/,
 
 	if(!userInfo.automatedCommand_)
 	{
-		__COUT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
-		__COUTV__((unsigned int)userInfo.permissionLevel_);
-		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+		__COUTT__ << "requestType ==========>>> " << userInfo.requestType_ << __E__;
+		__COUTTV__((unsigned int)userInfo.permissionLevel_);
+		__COUTTV__((unsigned int)userInfo.permissionsThreshold_);
 	}
 
 	// second, start check access -------

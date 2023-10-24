@@ -509,7 +509,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 {
 	checkSupervisorPropertySetup();
 
-	__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << __E__;
+	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << __E__;
 
 	userInfo.automatedCommand_ = StringMacros::inWildCardSet(userInfo.requestType_,
 	                                                         propertyStruct_.AutomatedRequestTypes);  // automatic commands should not refresh
@@ -541,11 +541,11 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 				             << "'... Defaulting to max threshold = " << (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
 
-		__COUTV__(userInfo.requestType_);
-		__COUTV__(userInfo.checkLock_);
-		__COUTV__(userInfo.requireLock_);
-		__COUTV__(userInfo.allowNoUser_);
-		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+		// __COUTV__(userInfo.requestType_);
+		// __COUTV__(userInfo.checkLock_);
+		// __COUTV__(userInfo.requireLock_);
+		// __COUTV__(userInfo.allowNoUser_);
+		// __COUTV__((unsigned int)userInfo.permissionsThreshold_);
 
 		try
 		{
