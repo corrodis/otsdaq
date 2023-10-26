@@ -169,12 +169,6 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 					ss << "\n\nPlease fix by disabling the Icon, enabling the App or fixing the link in the Configurate Tree." << __E__;
 					__SS_THROW__;
 				}
-				catch(const std::runtime_error& e)
-				{
-					__SS__ << "Error finding App origin which was linked to Desktop Icon '" << child.first << "': " << e.what() << __E__;
-					ss << "\n\nPlease fix by disabling the Icon, enabling the App, or fixing the link in the Configurate Tree." << __E__;
-					__SS_THROW__;
-				}
 			}  // end app origin check
 
 			// if last character is not '='
