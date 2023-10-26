@@ -67,6 +67,11 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__COUT__ << "Constructing" << __E__;
+	
+
+	readOnly_        		= getSupervisorProperty("ReadOnly","1") == "1"?true:false;
+    __SUP_COUTV__(readOnly_);
+
 
 	if(0)  // to test xdaq exception what
 	{
@@ -3353,6 +3358,15 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	                                                  "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
+
+	if(readOnly_)
+	{
+        CorePropertySupervisorBase::setSupervisorProperty(
+            CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
+            "*=0 | getSystemMessages=1 | getDesktopIcons=1");  // block users from writing if no write access
+		__COUT__ << "readOnly true in setSupervisorProperty" << __E__;
+
+	}
 }  // end forceSupervisorPropertyValues()
 
 //==============================================================================

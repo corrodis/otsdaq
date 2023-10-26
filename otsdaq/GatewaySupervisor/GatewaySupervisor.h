@@ -313,6 +313,7 @@ class WorkLoopManager;
 		char 				tmpStringForConversions_[100];
 
 		std::string        	securityType_;
+		bool				readOnly_;
 	};
 // clang-format on
 

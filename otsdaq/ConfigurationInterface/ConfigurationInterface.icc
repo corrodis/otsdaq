@@ -44,6 +44,7 @@ void get(TableBase*&                          table,
 		// try making table table plugin, if fails use TableBase
 		try
 		{
+			std::unique_lock<std::mutex> lock(tableReaderMutex_);
 			table = makeTable(tableName);
 		}
 		catch(...)
