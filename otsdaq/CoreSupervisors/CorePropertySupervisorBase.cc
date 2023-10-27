@@ -21,6 +21,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
+
+
 	__SUP_COUTV__(application->getApplicationContext()->getContextDescriptor()->getURL());
 	__SUP_COUTV__(application->getApplicationDescriptor()->getLocalId());
 	__SUP_COUTV__(supervisorClass_);
@@ -317,6 +319,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	//	only redo if Context configuration group changes
 	propertiesAreSetup_ = true;
 
+
 	CorePropertySupervisorBase::setSupervisorPropertyDefaults();  // calls base class
 	                                                              // version defaults
 
@@ -340,6 +343,10 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		                                                             // settings from
 		                                                             // configuration
 
+
+	readOnly_        		= getSupervisorProperty("ReadOnly","1") == "1"?true:false;
+    __SUP_COUTV__(readOnly_);
+	
 	//__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor..."
 	//<< __E__;
 	forceSupervisorPropertyValues();  // calls override forced values

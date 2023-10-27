@@ -151,7 +151,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 					// only prepend address if not same as gateway
 					if(contextUID != gatewayContextUID)
 					{
-						__COUTV__(contextUID);
+						// __COUTV__(contextUID);
 						ConfigurationTree contextNode = contextTableNode.getNode(contextUID);
 
 						std::string  contextAddress = contextNode.getNode(XDAQContextTable::colContext_.colAddress_).getValue<std::string>();

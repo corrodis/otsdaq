@@ -80,7 +80,9 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	virtual void        				universalWrite				(char* address, char* writeValue) = 0;
 	const unsigned int& 				getUniversalAddressSize		(void) { return universalAddressSize_; }
 	const unsigned int& 				getUniversalDataSize		(void) { return universalDataSize_; }
-
+	virtual void 						universalBlockRead			(char* address, char* returnValue, unsigned int numberOfBytes) { throw std::runtime_error("UNDEFINED BLOCK READ"); /* to make compiler happy, use params */ __COUTV__((void*)address); __COUTV__((void*)returnValue); __COUTV__(numberOfBytes); }
+	virtual void        				universalBlockWrite			(char* address, char* writeValue, unsigned int numberOfBytes) { throw std::runtime_error("UNDEFINED BLOCK WRITE"); /* to make compiler happy, use params */ __COUTV__((void*)address); __COUTV__((void*)writeValue); __COUTV__(numberOfBytes); }
+	
 	void 								runSequenceOfCommands		(const std::string& treeLinkName);
 
 	static void 						sendAsyncExceptionToGateway		(FEVInterface* fe, const std::string& errMsg, bool isPauseException, bool isStopException);
@@ -113,12 +115,11 @@ class FEVInterface : public WorkLoop, public Configurable, public VStateMachine
 	/////////===========================
 	// start Slow Controls
 	virtual void 						configureSlowControls		(void);
-	void								addSlowControlsChannels		(ConfigurationTree slowControlsGroupLink, const std::string& subInterfaceID, std::map<std::string /* ROC UID*/, FESlowControlsChannel>* mapOfSlowControlsChannels);
+	void								addSlowControlsChannels		(ConfigurationTree slowControlsGroupLink, std::map<std::string /* ROC UID*/, FESlowControlsChannel>* mapOfSlowControlsChannels);
 
 	virtual void						resetSlowControlsChannelIterator (void);
 	virtual FESlowControlsChannel*		getNextSlowControlsChannel	(void);
 	virtual unsigned int				getSlowControlsChannelCount	(void);
-	virtual void						getSlowControlsValue		(FESlowControlsChannel& channel, std::string& readValue);
 	bool 								slowControlsRunning			(void);  // slow controls workloop calls this
 	void 								startSlowControlsWorkLoop	(void) { slowControlsWorkLoop_.startWorkLoop(); }
 	void 								stopSlowControlsWorkLoop	(void) { slowControlsWorkLoop_.stopWorkLoop(); }

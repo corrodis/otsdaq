@@ -121,6 +121,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	static const std::string SHUTDOWN_TRANSITION_NAME;
 	static const std::string STARTUP_TRANSITION_NAME;
 	static const std::string ERROR_TRANSITION_NAME;
+	static const std::string CONFIGURE_TRANSITION_NAME;
 
 	unsigned int       getIterationIndex(void) { return iterationIndex_; }
 	unsigned int       getSubIterationIndex(void) { return subIterationIndex_; }
@@ -131,6 +132,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 	void               clearSubIterationWork(void) { subIterationWorkFlag_ = false; }
 	bool               getSubIterationWork(void) { return subIterationWorkFlag_; }
 	const std::string& getLastCommand(void) { return lastIterationCommand_; }
+	const std::string& getLastAttemptedConfigureGroup(void) { return lastAttemptedConfigureGroup_; }
 
   protected:
 	FiniteStateMachine theStateMachine_;
@@ -143,6 +145,7 @@ class RunControlStateMachine : public virtual toolbox::lang::Class
 
 	toolbox::fsm::State lastIterationState_;
 	std::string         lastIterationCommand_;
+	std::string         lastAttemptedConfigureGroup_;
 	std::string         lastIterationResult_;
 	unsigned int        lastIterationIndex_, lastSubIterationIndex_;
 

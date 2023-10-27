@@ -1204,6 +1204,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 	
 		int threadsLaunched = 0;
 		int foundThreadIndex = 0;
+		std::string threadErrors;
 		std::mutex threadMutex; // to protect accumulatedWarnings
 		std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
 		for(int i=0;i<numOfThreads;++i)
@@ -1253,7 +1254,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 				ots::TableBase*							theTable,
 				std::string								theTableName,
 				ots::TableVersion						version,
-				std::string*		 					theAccumulatedWarnings,	
+				std::string*		 					theThreadErrors,	
 				std::mutex* 							theThreadMutex,							
 				std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
 			ConfigurationManager::fillTableThread(theInterface, 
@@ -1261,7 +1262,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 							theTable, 
 							theTableName, 
 							version,
-							theAccumulatedWarnings, 
+							theThreadErrors, 
 							theThreadMutex, 
 							theThreadDone); },
 				theInterface_,
@@ -1269,7 +1270,7 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 				tmpTableBasePtrs[foundThreadIndex],
 				memberPair.first,
 				memberPair.second,
-				accumulatedWarnings,
+				&threadErrors,
 				&threadMutex,
 				threadDone[foundThreadIndex])
 			.detach();
@@ -1295,6 +1296,15 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 			}
 		} while(foundThreadIndex != -1); //end thread done search loop
 
+		if(threadErrors != "")
+		{
+			__SS__ << "Error identified in threads during loading of member map: \n" <<
+				 threadErrors << __E__;
+			if(accumulatedWarnings)
+				*accumulatedWarnings += ss.str();
+			else
+				__SS_THROW__;
+		} 
 	} //end multi-thread handling
 
 	if(accumulatedWarnings)
@@ -1827,6 +1837,8 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 		catch(...)
 		{
 			__SS__ << "An unknown error occurred while loading table group '" << groupName << "(" << groupKey << ")." << __E__;
+			
+			__GEN_COUT__ << StringMacros::stackTrace();
 
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
@@ -1897,7 +1909,7 @@ void ConfigurationManager::fillTableThread(ConfigurationInterface* 					theInter
 											ots::TableBase*							table, 
 											std::string								tableName,
 											ots::TableVersion						version,
-											std::string*		 					accumulatedWarnings,			
+											std::string*		 					threadErrors,			
 											std::mutex* 							threadMutex,	
 											std::shared_ptr<std::atomic<bool>> 		threadDone)
 try
@@ -1937,7 +1949,7 @@ try
 			<< __E__;
 
 		// if accumulating warnings and table view was created, then continue
-		if(accumulatedWarnings)
+		if(threadErrors)
 			getError = ss.str();
 		else
 			__SS_ONLY_THROW__;
@@ -1955,7 +1967,7 @@ try
 		<< __E__;
 
 		// if accumulating warnings and table view was created, then continue
-		if(accumulatedWarnings)
+		if(threadErrors)
 			getError = ss.str();
 		else
 			__SS_THROW__;
@@ -1970,9 +1982,9 @@ try
 		std::lock_guard<std::mutex> lock(*threadMutex);	
 		nameToTableMap->erase(tableName);
 
-		if(accumulatedWarnings)
+		if(threadErrors)
 		{
-			*accumulatedWarnings += ss.str();
+			*threadErrors += ss.str();
 			*(threadDone) = true;
 			return;
 		}
@@ -1990,12 +2002,12 @@ try
 		//__GEN_COUT__ << "Activated version: " <<
 		// nameToTableMap_[memberPair.first]->getViewVersion() << __E__;
 
-		if(accumulatedWarnings && getError != "")
+		if(threadErrors && getError != "")
 		{
 			__SS__ << "Error caught during '" << tableName << "' table retrieval: \n" << getError << __E__;
 			__COUT_ERR__ << ss.str();
 			std::lock_guard<std::mutex> lock(*threadMutex);	
-			*accumulatedWarnings += ss.str();
+			*threadErrors += ss.str();
 		}
 	}
 	else
@@ -2006,10 +2018,23 @@ try
 
 	*(threadDone) = true;
 } // end fillTableThread()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error occurred filling table '"
+		<< tableName << "-v" << version << "': " << e.what() << __E__;
+	__COUT_ERR__ << ss.str();
+	std::lock_guard<std::mutex> lock(*threadMutex);	
+	*threadErrors += ss.str();
+	
+	*(threadDone) = true;
+} 
 catch(...)
 {
-	__COUT_WARN__ << "Error occurred filling table '"
+	__SS__ << "Unknwon error occurred filling table '"
 		<< tableName << "-v" << version << "'..." << __E__;
+	__COUT_ERR__ << ss.str();
+	std::lock_guard<std::mutex> lock(*threadMutex);	
+	*threadErrors += ss.str();
 	
 	*(threadDone) = true;
 } // end fillTableThread catch
