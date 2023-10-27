@@ -650,37 +650,8 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 		echo "done" > ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd	
 	fi
 
-	#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
-	if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then
-	    out "Converting configuration to table for user data and databases..."
-	    
-	    #backup because we are scared
-	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
-	    cp -r ${USER_DATA} ${USER_DATA}bk12345
-	    
-	    otsdaq_convert_config_to_table	
-	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
-	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes. Marked complete at ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2"
-	    
-	    if [ $ISCONFIG == 0 ]; then		
-			exit
-	    fi
-	fi
-	if [ -d ${USER_DATA}/ConfigurationInfo ]; then
-	    out "Converting configuration to table for user data and databases..."
-	    
-	    #backup because we are scared
-	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
-	    cp -r ${USER_DATA} ${USER_DATA}bk12345
-	    
-	    otsdaq_convert_config_to_table
-	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
-	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
-	    
-	    if [ $ISCONFIG == 0 ]; then		
-			exit
-	    fi
-	fi
+	# As of 27-Oct-2023, no longer... check for somewhat-antiquated(pre-configuration-to-table) artdaq database
+
 else
 	ARTDAQ_DATABASE_FILESYSTEM_PATH=${USER_DATA}/ServiceData/artdaq_database_services
 	mkdir $ARTDAQ_DATABASE_FILESYSTEM_PATH &>/dev/null 2>&1 #hide output
