@@ -69,10 +69,6 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	__COUT__ << "Constructing" << __E__;
 	
 
-	readOnly_        		= getSupervisorProperty("ReadOnly","1") == "1"?true:false;
-    __SUP_COUTV__(readOnly_);
-
-
 	if(0)  // to test xdaq exception what
 	{
 		std::stringstream ss;

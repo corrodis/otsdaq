@@ -251,6 +251,7 @@ class CorePropertySupervisorBase
 	ITRACEController* 					theTRACEController_; //only define for an app that receives a command
   private:
 	std::string 						traceReturnString_, traceReturnHostString_;
+	bool								readOnly_;
 };
 
 // clang-format on
