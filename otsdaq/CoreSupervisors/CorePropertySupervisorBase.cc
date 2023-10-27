@@ -344,7 +344,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		                                                             // configuration
 
 
-	readOnly_        		= getSupervisorProperty("ReadOnly","1") == "1"?true:false;
+	readOnly_        		= getSupervisorProperty("ReadOnly","0") == "1"?true:false;
     __SUP_COUTV__(readOnly_);
 	
 	//__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor..."
