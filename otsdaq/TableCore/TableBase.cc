@@ -273,7 +273,6 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 	{
 		// else this is a persistent version!
 		__SS__ << "needleVersion does not exist: " << needleVersion << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 
@@ -305,7 +304,7 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 			continue;  // col mismatch
 
 		++potentialMatchCount;
-		__COUT__ << "Checking version... " << viewPairReverseIterator->first << __E__;
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Checking version... " << viewPairReverseIterator->first << __E__;
 
 		// viewPairReverseIterator->second.print();
 
@@ -375,6 +374,111 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 	__COUT__ << "No duplicates found in " << potentialMatchCount << " potential matches." << __E__;
 	return TableVersion();  // return invalid if no matches
 }  // end checkForDuplicate()
+
+
+//==============================================================================
+// diffTwoVersions
+//	return a report of differences among two versions
+bool TableBase::diffTwoVersions(TableVersion v1, TableVersion v2, std::stringstream* diffReport /* = 0 */) const
+{
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Diffing version... " << v1 << " vs " << v2 << __E__;
+	auto v1It = tableViews_.find(v1);
+	if(v1It == tableViews_.end())
+	{
+		// else this is a persistent version!
+		__SS__ << "Version v" << v1 << " does not exist." << __E__;		
+		__SS_THROW__;
+	}
+	auto v2It = tableViews_.find(v2);
+	if(v2It == tableViews_.end())
+	{
+		// else this is a persistent version!
+		__SS__ << "Version v" << v2 << " does not exist." << __E__;		
+		__SS_THROW__;
+	}
+
+	const TableView* view1 = &(v1It->second);
+	const TableView* view2 = &(v2It->second);
+	unsigned int     rows1       = view1->getNumberOfRows();
+	unsigned int     cols1       = view1->getNumberOfColumns();
+
+	bool         noDifference = true;
+
+	//	check each row,col
+
+	// if column source names do not match then note
+	//	source names are potentially different from
+	// getColumnsInfo()/getColumnStorageNames
+
+	if(view1->getSourceColumnNames().size() != view2->getSourceColumnNames().size())
+	{
+		__COUT__ << "Found column count mismatch for '" << view1->getSourceColumnNames().size() << 
+			" vs " << view2->getSourceColumnNames().size() << __E__;
+
+		if(diffReport) *diffReport << "<li>Found column count mismatch. The v" << v1 << " column count is <b>'" << view1->getSourceColumnNames().size() << 
+			"'</b> and the v" << v2 << " column count is <b>'" << view2->getSourceColumnNames().size() << "'</b>." << __E__;
+
+		noDifference = false;	
+		if(!diffReport) return noDifference; //do not need to continue to create report
+	}
+
+	for(auto& colName1 : view1->getSourceColumnNames())
+		if(view2->getSourceColumnNames().find(colName1) == view2->getSourceColumnNames().end())
+		{
+			__COUT__ << "Found column name mismatch for '" << colName1 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found column name mismatch. The v" << v1 << " column <b>'" << colName1 << 
+				"'</b> was not found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+	for(auto& colName2 : view2->getSourceColumnNames())
+		if(view1->getSourceColumnNames().find(colName2) == view1->getSourceColumnNames().end())
+		{
+			__COUT__ << "Found column name mismatch for '" << colName2 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found column name mismatch. The v" << v1 << " does not have column <b>'" << colName2 << 
+				"'</b> that was found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+
+	if(rows1 != view2->getNumberOfRows())
+	{
+		__COUT__ << "Found row count mismatch for '" << rows1 << 
+			" vs " << view2->getNumberOfRows() << __E__;
+
+		if(diffReport) *diffReport << "<li>Found row count mismatch. The v" << v1 << " row count is <b>'" << rows1 << 
+			"'</b> and the v" << v2 << " row count is <b>'" << view2->getNumberOfRows() << "'</b>." << __E__;
+
+		noDifference = false;	
+		if(!diffReport) return noDifference; //do not need to continue to create report
+	}
+
+	for(unsigned int row = 0; row < rows1 && row < view2->getNumberOfRows(); ++row)
+	{
+		for(unsigned int col = 0; col < cols1 - 2; ++col)  // do not consider author and timestamp
+			if(view1->getDataView()[row][col] != view2->getDataView()[row][col])
+			{
+				if(diffReport) *diffReport << "<li>Value mismatch at v" << v1 << " {UID,r,c}:{<b>" <<
+					view1->getDataView()[row][view1->getColUID()] << "</b>," <<
+					row << "," << col << "}: <b>'"
+					<<
+					view1->getDataView()[row][col]
+					<< "'</b> vs value at v" << v2 << ": <b>'" <<
+					view2->getDataView()[row][col] << "'</b>." << __E__;
+
+				noDifference = false;	
+				if(!diffReport) return noDifference; //do not need to continue to create report
+			}
+	}
+
+	if(noDifference && diffReport) *diffReport << "<li>No difference found between v" << v1 << " and v" << v2 << "." << __E__;
+
+	return noDifference;  
+}  // end diffTwoVersions()
 
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)

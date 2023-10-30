@@ -2685,6 +2685,7 @@ int TableView::fillFromJSON(const std::string& json)
 
 	if(!fillWithLooseColumnMatching_ && sourceColumnMissingCount_ > 0)
 	{
+		__COUTV__(sourceColumnMissingCount_);
 		__SS__ << "Can not ignore errors because not every column was found in the source data!"
 		       << ". Please see the details below:\n\n"
 		       << getMismatchColumnInfo() << StringMacros::stackTrace();

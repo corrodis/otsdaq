@@ -93,6 +93,17 @@ void FixNewTableFields(int argc, char* argv[])
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
 
+	{
+		std::string accumulatedWarnings;
+		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+					"" /*pathToActiveGroupsFile*/,
+					ConfigurationManager::LoadGroupType::ALL_TYPES,
+					&accumulatedWarnings
+				);
+
+		__COUT__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
+	}
+
 	// create set of groups to persist
 	//	include active context
 	//	include active backbone

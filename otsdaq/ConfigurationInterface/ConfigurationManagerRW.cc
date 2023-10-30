@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 
+
 using namespace ots;
 
 #undef __MF_SUBJECT__
@@ -158,15 +159,18 @@ ConfigurationManagerRW::ConfigurationManagerRW(const std::string& username) : Co
 }  // end constructor
 
 //==============================================================================
-// getAllTableInfo()
-//	Used by ConfigurationGUISupervisor to get all the info for the existing configurations
+// getAllTableInfo
+//	Used by ConfigurationGUISupervisor to get all the info for the existing tables.
+//	Can also be used to get and cache group info.
 //
 // if(accumulatedWarnings)
 //	this implies allowing column errors and accumulating such errors in given string
 const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(bool               refresh,
-                                                                                std::string*       accumulatedWarnings /*=0*/,
-                                                                                const std::string& errorFilterName /*=""*/,
-																				bool			   getGroupInfo /* = true */)
+                                                                                std::string*       accumulatedWarnings /* = 0 */,
+                                                                                const std::string& errorFilterName /* = "" */,
+																				bool			   getGroupKeys /* = false */,
+																				bool			   getGroupInfo /* = false */,
+																				bool			   initializeActiveGroups /* = false */)
 {
 	// allTableInfo_ is container to be returned
 
@@ -175,7 +179,6 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 	// else refresh!
 	allTableInfo_.clear();
-	allGroupInfo_.clear();
 
 	TableBase* table;
 
@@ -307,7 +310,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	}
 	__GEN_COUT__ << "Extracting list of tables complete." << __E__;
 
+
 	// call init to load active versions by default, activate with warnings allowed (assuming development going on)
+	if(initializeActiveGroups)
 	{ 
 		__GEN_COUT__ << "Now initializing..." << __E__;
 		// if there is a filter name, do not include init warnings (it just scares people in the table editor)
@@ -320,8 +325,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 	__GEN_COUT__ << "======================================================== getAllTableInfo end runtime=" << runTimeSeconds() << __E__;
 
 	// get Group Info too!
-	if(getGroupInfo)
+	if(getGroupKeys || getGroupInfo)
 	{
+		allGroupInfo_.clear();
 		try
 		{
 			// build allGroupInfo_ for the ConfigurationManagerRW
@@ -329,6 +335,8 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			std::set<std::string /*name*/> tableGroups = theInterface_->getAllTableGroupNames();
 			__GEN_COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
 
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Info start runtime=" << runTimeSeconds() << __E__;
+		
 			TableGroupKey key;
 			std::string   name;
 			for(const auto& fullName : tableGroups)
@@ -337,33 +345,109 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 				cacheGroupKey(name, key);
 			}
 
-			// for each group get member map & comment, author, time, and type for latest key
-			for(auto& groupInfo : allGroupInfo_)
-			{
-				try
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Keys end runtime=" << runTimeSeconds() << __E__;
+
+			// for each group get member map & comment, author, time, and type for latest key			
+			if(getGroupInfo)
+			{				
+				const int numOfThreads = PROCESSOR_COUNT/2;
+				__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads." << __E__;
+				if(numOfThreads < 2) // no multi-threading
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						try
+						{
+							loadTableGroup(groupInfo.first /*groupName*/,
+										groupInfo.second.getLatestKey(),
+										false /*doActivate*/,
+										&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+										0 /*progressBar*/,
+										0 /*accumulateErrors*/,
+										&groupInfo.second.latestKeyGroupComment_,
+										&groupInfo.second.latestKeyGroupAuthor_,
+										&groupInfo.second.latestKeyGroupCreationTime_,
+										true /*doNotLoadMember*/,
+										&groupInfo.second.latestKeyGroupTypeString_);
+						}
+						catch(...)
+						{
+							__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+											<< groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
+							groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
+							groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
+							groupInfo.second.latestKeyGroupCreationTime_ = "0";
+							groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
+						}
+					}  // end group info loop
+				else //multi-threading
 				{
-					loadTableGroup(groupInfo.first /*groupName*/,
-								groupInfo.second.getLatestKey(),
-								false /*doActivate*/,
-								&groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
-								0 /*progressBar*/,
-								0 /*accumulateErrors*/,
-								&groupInfo.second.latestKeyGroupComment_,
-								&groupInfo.second.latestKeyGroupAuthor_,
-								&groupInfo.second.latestKeyGroupCreationTime_,
-								true /*doNotLoadMember*/,
-								&groupInfo.second.latestKeyGroupTypeString_);
-				}
-				catch(...)
-				{
-					__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
-									<< "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
-					groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
-					groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
-					groupInfo.second.latestKeyGroupCreationTime_ = "0";
-					groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
-				}
-			}  // end group info loop
+					int threadsLaunched = 0;
+					int foundThreadIndex = 0;
+
+					std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
+					for(int i=0;i<numOfThreads;++i)
+						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
+
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						if(threadsLaunched >= numOfThreads)
+						{
+							//find availableThreadIndex
+							foundThreadIndex = -1;
+							while(foundThreadIndex == -1)
+							{
+								for(int i=0;i<numOfThreads;++i)
+									if(*(threadDone[i]))
+									{
+										foundThreadIndex = i;
+										break;
+									}
+								if(foundThreadIndex == -1)
+								{
+									__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
+									usleep(10000);
+								}
+							} //end thread search loop
+							threadsLaunched = numOfThreads - 1;
+						}					
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+						*(threadDone[foundThreadIndex]) = false;
+
+						std::thread([](
+							ConfigurationManagerRW* 				cfgMgr, 
+							std::string 							groupName, 
+							ots::GroupInfo*                       	theGroupInfo,
+		               		std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
+						ConfigurationManagerRW::loadTableGroupThread(cfgMgr, groupName, theGroupInfo, theThreadDone); },
+							this,
+							groupInfo.first,
+							&(groupInfo.second),
+							threadDone[foundThreadIndex])
+		    			.detach();
+
+						++threadsLaunched;
+						++foundThreadIndex;
+					} //end groupInfo thread loop
+
+					//check for all threads done					
+					do
+					{
+						foundThreadIndex = -1;
+						for(int i=0;i<numOfThreads;++i)
+							if(!*(threadDone[i]))
+							{
+								foundThreadIndex = i;
+								break;
+							}
+						if(foundThreadIndex != -1)
+						{
+							__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
+							usleep(10000);
+						}
+					} while(foundThreadIndex != -1); //end thread done search loop
+
+				} //end multi-thread handling
+			}
 		}      // end get group info
 		catch(const std::runtime_error& e)
 		{
@@ -383,11 +467,134 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 			else
 				throw;
 		}
-		__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
 	} //end getGroupInfo
+	else
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Table Info end runtime=" << runTimeSeconds() << __E__;
 
 	return allTableInfo_;
-}  // end getAllTableInfo
+}  // end getAllTableInfo()
+	
+//==============================================================================
+// loadTableGroupThread()
+void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
+													std::string 						groupName, 
+													ots::GroupInfo*  					groupInfo, 
+													std::shared_ptr<std::atomic<bool>> 	threadDone)
+try
+{
+	cfgMgr->loadTableGroup(groupName/*groupName*/,
+		groupInfo->getLatestKey(),
+		false /*doActivate*/,
+		&groupInfo->latestKeyMemberMap_ /*groupMembers*/,
+		0 /*progressBar*/,
+		0 /*accumulateErrors*/,
+		&groupInfo->latestKeyGroupComment_,
+		&groupInfo->latestKeyGroupAuthor_,
+		&groupInfo->latestKeyGroupCreationTime_,
+		true /*doNotLoadMember*/,
+		&groupInfo->latestKeyGroupTypeString_);
+
+	*(threadDone) = true;
+} // end loadTableGroupThread
+catch(...)
+{
+	__COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+		<< groupName << "(" << groupInfo->getLatestKey() << ")'..." << __E__;
+	groupInfo->latestKeyGroupComment_      = "UNKNOWN";
+	groupInfo->latestKeyGroupAuthor_       = "UNKNOWN";
+	groupInfo->latestKeyGroupCreationTime_ = "0";
+	groupInfo->latestKeyGroupTypeString_   = "UNKNOWN";
+	*(threadDone) = true;
+} // end loadTableGroupThread catch
+
+
+//==============================================================================
+// compareTableGroupThread()
+void ConfigurationManagerRW::compareTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
+													std::string 							groupName, 
+													ots::TableGroupKey 						groupKeyToCompare, 
+													const std::map<std::string, TableVersion>& groupMemberMap, 
+													const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,			
+													std::atomic<bool>* 						foundIdentical,
+													ots::TableGroupKey* 					identicalKey,			
+													std::mutex* 							threadMutex,	
+													std::shared_ptr<std::atomic<bool>> 		threadDone)
+try
+{
+	std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
+	std::map<std::string /*name*/, std::string /*alias*/>    compareToMemberTableAliases;
+	std::map<std::string /*name*/, std::string /*alias*/>* 	 compareToMemberTableAliasesPtr = nullptr;
+	if(memberTableAliases.size()) //only give pointer if necessary, without will load group faster
+		compareToMemberTableAliasesPtr = &compareToMemberTableAliases;
+
+	cfgMgr->loadTableGroup(
+		groupName,
+		groupKeyToCompare,
+		false /*doActivate*/,
+		&compareToMemberMap /*memberMap*/,
+		0, /*progressBar*/
+		0, /*accumulatedWarnings*/
+		0, /*groupComment*/
+		0,
+		0, /*null pointers*/
+		true /*doNotLoadMember*/,
+		0 /*groupTypeString*/,
+		compareToMemberTableAliasesPtr);
+	
+	bool isDifferent = false;
+	for(auto& memberPair : groupMemberMap)
+	{
+		if(memberTableAliases.find(memberPair.first) != memberTableAliases.end())
+		{
+			// handle this table as alias, not version
+			if(compareToMemberTableAliases.find(memberPair.first) == compareToMemberTableAliases.end() ||  // alias is missing
+			memberTableAliases.at(memberPair.first) != compareToMemberTableAliases.at(memberPair.first))
+			{  // then different
+				isDifferent = true;
+				break;
+			}
+			else
+				continue;
+		}  // else check if compareTo group is using an alias for table
+		else if(compareToMemberTableAliases.find(memberPair.first) != compareToMemberTableAliases.end())
+		{
+			// then different
+			isDifferent = true;
+			break;
+
+		}                                                                                 // else handle as table version comparison
+		else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
+				memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
+		{                                                                                
+			// then different
+			isDifferent = true;
+			break;
+		}
+	}
+
+	// check member size for exact match
+	if(!isDifferent && groupMemberMap.size() != compareToMemberMap.size())
+		isDifferent = true;  // different size, so not same (groupMemberMap is a subset of memberPairs)
+
+	if(!isDifferent) //found an exact match!
+	{
+		*foundIdentical = true;
+		__COUT__ << "=====> Found exact match with key: " << groupKeyToCompare << __E__;	
+		
+		std::lock_guard<std::mutex> lock(*threadMutex);	
+		*identicalKey = groupKeyToCompare;
+	}
+	
+	*(threadDone) = true;
+} // end compareTableGroupThread
+catch(...)
+{
+	__COUT_WARN__ << "Error occurred comparing group '"
+		<< groupName << "(" << groupKeyToCompare << ")'..." << __E__;
+	
+	*(threadDone) = true;
+} // end compareTableGroupThread catch
 
 //==============================================================================
 // getVersionAliases()
@@ -414,7 +621,8 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 // setActiveGlobalConfiguration
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
-void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors)
+void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, 
+	std::string* accumulatedTreeErrors, std::string* groupTypeString)
 {
 	try
 	{
@@ -424,7 +632,12 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 				true,                    // loads and activates
 				0,                       // no members needed
 				0,                       // no progress bar
-				accumulatedTreeErrors);  // accumulate warnings or not
+				accumulatedTreeErrors,  // accumulate warnings or not
+				0 /* groupComment */,
+				0 /* groupAuthor */,
+				0 /* groupCreateTime */,
+				false /* doNotLoadMember */,
+				groupTypeString);
 	}
 	catch(...)
 	{
@@ -799,7 +1012,7 @@ const GroupInfo& ConfigurationManagerRW::getGroupInfo(const std::string& groupNa
 // the 	most recent to check. )
 TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&                                           groupName,
                                                      const std::map<std::string, TableVersion>&                   groupMemberMap,
-                                                     const std::map<std::string /*name*/, std::string /*alias*/>& groupAliases)
+                                                     const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases)
 {
 	//	//NOTE: seems like this filter is taking the long amount of time
 	//	std::set<std::string /*name*/> fullGroupNames =
@@ -809,9 +1022,6 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 
 	// std::string name;
 	// TableGroupKey key;
-	std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
-	std::map<std::string /*name*/, std::string /*alias*/>    compareToGroupAliases;
-	bool                                                     isDifferent;
 
 	const unsigned int MAX_DEPTH_TO_CHECK = 20;
 	unsigned int       keyMinToCheck      = 0;
@@ -830,71 +1040,182 @@ TableGroupKey ConfigurationManagerRW::findTableGroup(const std::string&         
 	}
 
 	// have min key to check, now loop through and check groups
-	// std::string fullName;
-	for(const auto& key : groupInfo.keys_)
+	
+	const int numOfThreads = PROCESSOR_COUNT/2;
+	__GEN_COUT__ << " PROCESSOR_COUNT " << PROCESSOR_COUNT << " ==> " << numOfThreads << " threads." << __E__;
+	if(numOfThreads < 2) // no multi-threading
 	{
-		if(key.key() < keyMinToCheck)
-			continue;  // skip keys that are too old
+		std::map<std::string /*name*/, TableVersion /*version*/> compareToMemberMap;
+		std::map<std::string /*name*/, std::string /*alias*/>    compareToMemberTableAliases;
+		std::map<std::string /*name*/, std::string /*alias*/>* 	 compareToMemberTableAliasesPtr = nullptr;
+		if(memberTableAliases.size())
+			compareToMemberTableAliasesPtr = &compareToMemberTableAliases;
 
-		loadTableGroup(groupName,
-		               key,
-		               false /*doActivate*/,
-		               &compareToMemberMap /*memberMap*/,
-		               0, /*progressBar*/
-		               0, /*accumulatedWarnings*/
-		               0, /*groupComment*/
-		               0,
-		               0, /*null pointers*/
-		               true /*doNotLoadMember*/,
-		               0 /*groupTypeString*/,
-		               &compareToGroupAliases);
-
-		isDifferent = false;
-		for(auto& memberPair : groupMemberMap)
+		bool isDifferent;
+		for(const auto& key : groupInfo.keys_)
 		{
-			if(groupAliases.find(memberPair.first) != groupAliases.end())
+			if(key.key() < keyMinToCheck)
+				continue;  // skip keys that are too old
+
+			loadTableGroup(groupName,
+						key,
+						false /*doActivate*/,
+						&compareToMemberMap /*memberMap*/,
+						0, /*progressBar*/
+						0, /*accumulatedWarnings*/
+						0, /*groupComment*/
+						0, /*groupAuthor*/
+						0, /*groupCreateTime*/
+						true /*doNotLoadMember*/,
+						0 /*groupTypeString*/,
+						compareToMemberTableAliasesPtr);
+
+			isDifferent = false;
+			for(auto& memberPair : groupMemberMap)
 			{
-				// handle this table as alias, not version
-				if(compareToGroupAliases.find(memberPair.first) == compareToGroupAliases.end() ||  // alias is missing
-				   groupAliases.at(memberPair.first) != compareToGroupAliases.at(memberPair.first))
-				{  // then different
+				if(memberTableAliases.find(memberPair.first) != memberTableAliases.end())
+				{
+					// handle this table as alias, not version
+					if(compareToMemberTableAliases.find(memberPair.first) == compareToMemberTableAliases.end() ||  // alias is missing
+					memberTableAliases.at(memberPair.first) != compareToMemberTableAliases.at(memberPair.first))
+					{  // then different
+						isDifferent = true;
+						break;
+					}
+					else
+						continue;
+				}  // else check if compareTo group is using an alias for table
+				else if(compareToMemberTableAliases.find(memberPair.first) != compareToMemberTableAliases.end())
+				{
+					// then different
+					isDifferent = true;
+					break;
+
+				}                                                                                 // else handle as table version comparison
+				else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
+						memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
+				{                                                                                
+					// then different
 					isDifferent = true;
 					break;
 				}
-				else
-					continue;
-			}  // else check if compareTo group is using an alias for table
-			else if(compareToGroupAliases.find(memberPair.first) != compareToGroupAliases.end())
-			{
-				// then different
-				isDifferent = true;
-				break;
-
-			}                                                                                 // else handle as table version comparison
-			else if(compareToMemberMap.find(memberPair.first) == compareToMemberMap.end() ||  // name is missing
-			        memberPair.second != compareToMemberMap.at(memberPair.first))             // or version mismatch
-			{                                                                                
-				// then different
-				isDifferent = true;
-				break;
 			}
+			if(isDifferent)
+				continue;
+
+			// check member size for exact match
+			if(groupMemberMap.size() != compareToMemberMap.size())
+				continue;  // different size, so not same (groupMemberMap is a subset of
+						// memberPairs)
+
+			__GEN_COUT__ << "Found exact match with key: " << key << __E__;
+			// else found an exact match!
+			return key;
 		}
-		if(isDifferent)
-			continue;
-
-		// check member size for exact match
-		if(groupMemberMap.size() != compareToMemberMap.size())
-			continue;  // different size, so not same (groupMemberMap is a subset of
-			           // memberPairs)
-
-		__GEN_COUT__ << "Found exact match with key: " << key << __E__;
-		// else found an exact match!
-		return key;
+		__GEN_COUT__ << "No match found - this group is new!" << __E__;
+		// if here, then no match found
+		return TableGroupKey();  // return invalid key
 	}
-	__GEN_COUT__ << "No match found - this group is new!" << __E__;
-	// if here, then no match found
-	return TableGroupKey();  // return invalid key
-}
+	else //multi-threading
+	{
+		int threadsLaunched = 0;
+		int foundThreadIndex = 0;
+		std::atomic<bool> foundIdentical = false;
+		ots::TableGroupKey identicalKey;
+		std::mutex threadMutex;
+
+		std::vector<std::shared_ptr<std::atomic<bool>>> threadDone;
+		for(int i=0;i<numOfThreads;++i)
+			threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
+		
+		for(const auto& key : groupInfo.keys_)
+		{
+			if(foundIdentical) break;
+			if(key.key() < keyMinToCheck)
+				continue;  // skip keys that are too old
+				
+			if(threadsLaunched >= numOfThreads)
+			{
+				//find availableThreadIndex
+				foundThreadIndex = -1;
+				while(foundThreadIndex == -1)
+				{
+					if(foundIdentical) break;
+
+					for(int i=0;i<numOfThreads;++i)
+						if(*(threadDone[i]))
+						{
+							foundThreadIndex = i;
+							break;
+						}
+					if(foundThreadIndex == -1)
+					{
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for available thread..." << __E__;
+						usleep(10000);
+					}
+				} //end thread search loop
+				threadsLaunched = numOfThreads - 1;
+			}					
+			if(foundIdentical) break;
+
+			__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+			*(threadDone[foundThreadIndex]) = false;
+
+			std::thread([](
+				ConfigurationManagerRW* 				cfgMgr, 
+				std::string 							theGroupName, 
+				ots::TableGroupKey						groupKeyToCompare,
+				const std::map<std::string, TableVersion>&                   groupMemberMap,
+				const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,
+				std::atomic<bool>* 						theFoundIdentical,
+				ots::TableGroupKey* 					theIdenticalKey,	
+				std::mutex* 							theThreadMutex,							
+				std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
+			ConfigurationManagerRW::compareTableGroupThread(cfgMgr, theGroupName, groupKeyToCompare, groupMemberMap, memberTableAliases, 
+				theFoundIdentical, theIdenticalKey, theThreadMutex, 
+							theThreadDone); },
+				this,
+				groupName,
+				key,
+				groupMemberMap,
+				memberTableAliases,
+				&foundIdentical,
+				&identicalKey,
+				&threadMutex,
+				threadDone[foundThreadIndex])
+			.detach();
+
+			++threadsLaunched;
+			++foundThreadIndex;
+		} //end groupInfo thread loop
+
+		//check for all threads done					
+		do
+		{
+			foundThreadIndex = -1;
+			for(int i=0;i<numOfThreads;++i)
+				if(!*(threadDone[i]))
+				{
+					foundThreadIndex = i;
+					break;
+				}
+			if(foundThreadIndex != -1)
+			{
+				__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Waiting for thread to finish... " << foundThreadIndex << __E__;
+				usleep(10000);
+			}
+		} while(foundThreadIndex != -1); //end thread done search loop
+
+		if(foundIdentical)
+		{
+			__GEN_COUT__ << "Found exact match with key: " << identicalKey << __E__;
+			return identicalKey;
+		}
+		__GEN_COUT__ << "No match found - this group is new!" << __E__;
+		// if here, then no match found
+		return TableGroupKey();  // return invalid key
+	} //end multi-thread handling
+} // end findTableGroup()
 
 //==============================================================================
 // saveNewTableGroup
@@ -920,8 +1241,12 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 		__SS_THROW__;
 	}
 
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
+
 	// determine new group key
 	TableGroupKey newKey = TableGroupKey::getNextKey(theInterface_->findLatestGroupKey(groupName));
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	__GEN_COUT__ << "New Key for group: " << groupName << " found as " << newKey << __E__;
 
@@ -957,6 +1282,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 			__SS_THROW__;
 		}
 	}  // end verify members
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	// verify group aliases
 	if(groupAliases)
@@ -1003,6 +1330,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 
 		theInterface_->saveActiveVersion(&groupMetadataTable_);
 
+		__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
+
 		// force groupMetadataTable_ to be a member for the group
 		groupMembers[groupMetadataTable_.getTableName()] = groupMetadataTable_.getViewVersion();
 
@@ -1020,6 +1349,8 @@ TableGroupKey ConfigurationManagerRW::saveNewTableGroup(const std::string&      
 		__GEN_COUT_ERR__ << "Failed to create table group: " << groupName << ":" << newKey << __E__;
 		throw;
 	}
+
+	__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "saveNewTableGroup runtime=" << runTimeSeconds() << __E__;
 
 	// store cache of recent groups
 	cacheGroupKey(groupName, newKey);
@@ -1105,7 +1436,7 @@ TableVersion ConfigurationManagerRW::saveModifiedVersion(const std::string& tabl
 			for(; table->getNumberOfStoredViews() < table->MAX_VIEWS_IN_CACHE && versionReverseIterator != allTableInfo.at(tableName).versions_.rend();
 			    ++versionReverseIterator)
 			{
-				__GEN_COUT__ << "'" << tableName << "' versions in reverse order " << *versionReverseIterator << __E__;
+				__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "'" << tableName << "' versions in reverse order " << *versionReverseIterator << __E__;
 				try
 				{
 					getVersionedTableByName(tableName, *versionReverseIterator);  // load to cache

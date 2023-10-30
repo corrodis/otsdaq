@@ -84,7 +84,6 @@ void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion
 
 	auto versionstring = version.toString();
 
-	//__COUTV__(versionstring);
 	// configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
 
 	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
@@ -132,12 +131,12 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 {
 	auto versions = getVersions(table);
 
-	__COUT__ << "Table Name: " << table->getTableName() << __E__;
-	__SS__ << "All Versions: ";
-	for(auto& v : versions)
-		ss << v << " ";
-	ss << __E__;
-	__COUT__ << ss.str();
+	// __COUT__ << "Table Name: " << table->getTableName() << __E__;
+	// __SS__ << "All Versions: ";
+	// for(auto& v : versions)
+	// 	ss << v << " ";
+	// ss << __E__;
+	// __COUT__ << ss.str();
 
 	if(!versions.size())
 		return TableVersion();  // return INVALID

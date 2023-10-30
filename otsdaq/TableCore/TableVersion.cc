@@ -28,7 +28,7 @@ unsigned int TableVersion::version(void) const { return version_; }
 //==============================================================================
 // toString
 std::string TableVersion::toString(void) const
-{
+{	
 	// represent invalid/temporary versions as negative number strings
 	return (isTemporaryVersion() || isInvalid()) ? std::to_string((int)version_) : std::to_string(version_);
 }

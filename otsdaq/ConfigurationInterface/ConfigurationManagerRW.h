@@ -51,7 +51,12 @@ class ConfigurationManagerRW : public ConfigurationManager
 	const std::string&      					getUsername						(void) const { return username_; }
 	ConfigurationInterface* 					getConfigurationInterface		(void) const { return theInterface_; }
 
-	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, std::string* accumulatedWarnings = 0, const std::string& errorFilterName = "", bool getGroupInfo = true);
+	const std::map<std::string, TableInfo>& 	getAllTableInfo					(bool refresh = false, 
+																				std::string* accumulatedWarnings = 0, 
+																				const std::string& errorFilterName = "", 
+																				bool getGroupKeys = false,
+																				bool getGroupInfo = false,
+																				bool initializeActiveGroups = false);
 	std::map<std::string /*tableName*/,
 	         std::map<std::string /*aliasName*/, 
 	         TableVersion /*version*/> >		getVersionAliases				(void) const;
@@ -84,7 +89,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 
 	//==============================================================================
 	// modifiers of table groups
-	void 										activateTableGroup				(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors = 0);
+	void 										activateTableGroup				(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors = 0, std::string* groupTypeString = 0);
 
 	TableVersion 								createTemporaryBackboneView		(TableVersion sourceViewVersion = TableVersion());  //-1, from MockUp, else from valid backbone view version
 	TableVersion 								saveNewBackbone					(TableVersion temporaryVersion 	= TableVersion());
@@ -103,6 +108,18 @@ class ConfigurationManagerRW : public ConfigurationManager
 	void 										testXDAQContext					(void);  // for debugging
 
   private:
+	static void 								loadTableGroupThread			(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  theGroupInfo, std::shared_ptr<std::atomic<bool>> 		theThreadDone);
+	static void 								compareTableGroupThread			(ConfigurationManagerRW* 			cfgMgr, 
+																				std::string 						groupName, 
+																				ots::TableGroupKey 					groupKeyToCompare, 
+																				const std::map<std::string, TableVersion>& groupMemberMap, 
+																				const std::map<std::string /*name*/, std::string /*alias*/>& memberTableAliases,			
+																				std::atomic<bool>* 					theFoundIdentical,
+																				ots::TableGroupKey* 				theIdenticalKey,			
+																				std::mutex* 						theThreadMutex,	
+																				std::shared_ptr<std::atomic<bool>> 	theThreadDone);
+
+
 	//==============================================================================
 	// group cache handling
 	void 										cacheGroupKey					(const std::string& groupName, TableGroupKey key);

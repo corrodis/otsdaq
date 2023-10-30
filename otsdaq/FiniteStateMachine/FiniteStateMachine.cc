@@ -167,7 +167,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		std::map<std::string, toolbox::fsm::State> transitions = getTransitions(getCurrentState());
 		for(const auto& transitionPair : transitions)
 		{
-			__GEN_COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
+			__GEN_COUT__ << "Taking any transition to indirect failure.. found '" << transitionPair.first << "'" << __E__;
 			__GEN_COUT__ << "Taking fail transition from Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName()
 			             << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));

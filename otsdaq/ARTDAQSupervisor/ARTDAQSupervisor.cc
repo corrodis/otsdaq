@@ -166,6 +166,7 @@ ARTDAQSupervisor::ARTDAQSupervisor(xdaq::ApplicationStub* stub)
 	o << "fake_messagefacility: " << std::boolalpha << getSupervisorProperty("fake_messagefacility", false) << std::endl;
 	o << "kill_existing_processes: " << std::boolalpha << getSupervisorProperty("kill_existing_processes", true) << std::endl;
 	o << "advanced_memory_usage: " << std::boolalpha << getSupervisorProperty("advanced_memory_usage", false) << std::endl;
+	o << "strict_fragment_id_mode: " << std::boolalpha << getSupervisorProperty("strict_fragment_id_mode", false) << std::endl;
 	o << "disable_private_network_bookkeeping: " << std::boolalpha << getSupervisorProperty("disable_private_network_bookkeeping", false) << std::endl;
 	o << "allowed_processors: " << getSupervisorProperty("allowed_processors", "0-255")
 	  << std::endl;  // Note this sets a taskset for ALL processes, on all nodes (ex. "1,2,5-7")

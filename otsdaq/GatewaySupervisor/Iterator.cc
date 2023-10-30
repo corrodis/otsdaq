@@ -85,7 +85,12 @@ try
 
 	ConfigurationManagerRW theConfigurationManager(WebUsers::DEFAULT_ITERATOR_USERNAME);  // this is a restricted username
 	// theConfigurationManager.init();
-	theConfigurationManager.getAllTableInfo(true);  // to prep all info
+	theConfigurationManager.getAllTableInfo(true /* refresh */,  // to prep all info
+			0 /* accumulatedWarnings */,
+			"" /* errorFilterName */,
+			false /* getGroupKeys */,
+			false /* getGroupInfo */,
+			true /* initializeActiveGroups */);
 
 	IteratorWorkLoopStruct theIteratorStruct(iterator, &theConfigurationManager);
 
@@ -1240,13 +1245,22 @@ void Iterator::startCommandModifyActive(IteratorWorkLoopStruct* iteratorStruct)
 	const unsigned int stepIndex = iteratorStruct->stepIndexStack_.back();
 
 	__COUT__ << "doTrackGroupChanges " << (doTrackGroupChanges ? "yes" : "no") << std::endl;
-	__COUT__ << "stepIndex " << stepIndex << std::endl;
+	__COUTV__(startValueStr);
+	__COUTV__(stepSizeStr);
+	__COUTV__(stepIndex);	
 
 	ConfigurationInterface::setVersionTrackingEnabled(doTrackGroupChanges);
 
 	// two approaches: double or long handling
+	// OR TODO -- if step is 0 and startValue is NaN.. then handle as string
 
-	if(startValueStr.size() && (startValueStr[startValueStr.size() - 1] == 'f' || startValueStr.find('.') != std::string::npos))
+	if(((stepSizeStr.size() && stepSizeStr[0] == '0') || !stepSizeStr.size()) && 
+		!StringMacros::isNumber(startValueStr)) //if not a number and no step size, then interpret as string
+	{
+		__COUT__ << "Treating start value as string: " << startValueStr << __E__;
+		helpCommandModifyActive(iteratorStruct, startValueStr, doTrackGroupChanges);
+	}
+	else if(startValueStr.size() && (startValueStr[startValueStr.size() - 1] == 'f' || startValueStr.find('.') != std::string::npos))
 	{
 		// handle as double
 		double startValue = strtod(startValueStr.c_str(), 0);

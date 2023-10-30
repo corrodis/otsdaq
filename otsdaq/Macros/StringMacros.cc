@@ -358,6 +358,9 @@ bool StringMacros::isNumber(const std::string& s)
 	std::vector<std::string> numbers;
 	std::vector<char>        ops;
 
+	if(!s.size())
+		return false;
+
 	StringMacros::getVectorFromString(s,
 	                                  numbers,
 	                                  /*delimiter*/ std::set<char>({'+', '-', '*', '/'}),
@@ -924,7 +927,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 		{
 			if(i < wildcardBounds.first)
 			{
-				if(haystack[0][i] != haystack[1][j])
+				if(haystack[0][i] != haystack[n][j])
 				{
 					wildcardBounds.first = i;  // found lo side of wildcard
 					break;
@@ -951,7 +954,7 @@ bool StringMacros::extractCommonChunks(const std::vector<std::string>& haystack,
 				break;
 		}
 
-	// __COUT__ << "High sibbde = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
+	// __COUT__ << "High side = " << wildcardBounds.second << " " << haystack[0].substr(wildcardBounds.second) << __E__;
 
 	// add first common chunk
 	commonChunksToReturn.push_back(haystack[0].substr(0, wildcardBounds.first));

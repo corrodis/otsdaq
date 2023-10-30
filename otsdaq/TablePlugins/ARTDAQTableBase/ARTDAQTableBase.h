@@ -86,7 +86,7 @@ class ARTDAQTableBase : virtual public TableBase //virtual so future plugins can
 	static const std::string& 				getTypeString				(ARTDAQAppType type);
 	static std::string        				getFHICLFilename			(ARTDAQAppType type, const std::string& name);
 	static std::string        				getFlatFHICLFilename		(ARTDAQAppType type, const std::string& name);
-	static void               				flattenFHICL				(ARTDAQAppType type, const std::string& name);
+	static void        						flattenFHICL				(ARTDAQAppType type, const std::string& name);
 
 	static void        						insertParameters			(std::ostream&      out,
 	                   						                			 std::string&       tabStr,

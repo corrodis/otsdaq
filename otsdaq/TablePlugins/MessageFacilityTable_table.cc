@@ -29,6 +29,9 @@ using namespace ots;
 #define COL_QT_IP 							"QTViewerForwardingIPAddress"
 #define COL_QT_PORT 						"QTViewerForwardingPort"
 
+#undef __COUT__
+#define __COUT__ __COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__
+
 // clang-format on
 
 MessageFacilityTable::MessageFacilityTable(void) : TableBase("MessageFacilityTable")
@@ -180,7 +183,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 			fclSs << "\t"
 			      << "filename_delimit: \"/src\"\n";
 			fclSs << "\t"
-			      << "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
+			      << "format_string: \"|%L:%N: %f:%u |\t%m\"\n";
 
 			fclSs << "\n}\n";
 

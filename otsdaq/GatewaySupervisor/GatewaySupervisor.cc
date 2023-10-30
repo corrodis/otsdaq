@@ -67,6 +67,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__COUT__ << "Constructing" << __E__;
+	
 
 	if(0)  // to test xdaq exception what
 	{
@@ -1494,6 +1495,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	//__COUT__ << "Failed Message: " << failedException.message() << __E__;
 	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
+	bool asyncFailureIdentified = false;
 	__SS__;
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
@@ -1503,6 +1505,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 		   << failedException.message() << __E__;  // rbegin()->at("message") << __E__;
 		//<< failedEvent.getException().what() << __E__;
 		RunControlStateMachine::asyncFailureReceived_ = false;  // clear async error
+		asyncFailureIdentified = true;
 	}
 	else
 	{
@@ -1516,7 +1519,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	theStateMachine_.setErrorMessage(ss.str());
 
-	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+	if(!asyncFailureIdentified && theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
 	else 	// move everything else to Error!
 		broadcastMessage(SOAPUtilities::makeSOAPMessageReference(RunControlStateMachine::ERROR_TRANSITION_NAME));
@@ -2678,7 +2681,7 @@ void GatewaySupervisor::broadcastMessageThread(GatewaySupervisor* supervisorPtr,
 		usleep(1000 /* 1ms */);
 
 		// take lock for remainder of scope
-		std::lock_guard<std::mutex> lock(threadStruct->threadMutex);
+		std::lock_guard<std::mutex> lock(threadStruct->threadMutex_);
 		if(threadStruct->workToDo_)
 		{
 			__COUT__ << "Broadcast thread " << threadStruct->threadIndex_ << "\t"
@@ -2895,7 +2898,7 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 									assignedJob = true;
 									__COUT__ << "Giving work to thread " << k << ", command = " << command << __E__;
 
-									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k]->threadMutex);
+									std::lock_guard<std::mutex> lock(broadcastThreadStructs_[k]->threadMutex_);
 									broadcastThreadStructs_[k]->setMessage(appInfo, message, command, iteration, supervisorIterationsDone[i][j]);
 
 									break;
@@ -2951,6 +2954,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						{
 							std::stringstream waitSs;
 							waitSs << "Waiting on " << numOfThreadsWithWork << " of " << numberOfThreads << " threads to finish. Command = " << command;
+							if(command == RunControlStateMachine::CONFIGURE_TRANSITION_NAME)
+								waitSs << " w/" + RunControlStateMachine::getLastAttemptedConfigureGroup();
 							if(numOfThreadsWithWork == 1)
 							{
 								waitSs << ".. " << broadcastThreadStructs_[lastUnfinishedThread]->getAppInfo().getName() << ":"
@@ -3027,9 +3032,10 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 //      System logbook messages are generated for login and logout
 void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 {
+	std::chrono::steady_clock::time_point startClock = std::chrono::steady_clock::now();
 	cgicc::Cgicc cgi(in);
 	std::string  Command = CgiDataUtilities::getData(cgi, "RequestType");
-	__COUT__ << "*** Login RequestType = " << Command << " clock=" << clock() << __E__;
+	__COUT__ << "*** Login RequestType = " << Command << " time=" << time(0) << __E__;
 
 	// RequestType Commands:
 	// login
@@ -3267,7 +3273,7 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 		xmldoc.outputXmlDocument((std::ostringstream*)out, false /*dispStdOut*/, true /*allowWhiteSpace*/);
 	}
 
-	__COUT__ << "Done clock=" << clock() << __E__;
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Login end clock=" << artdaq::TimeUtils::GetElapsedTime(startClock) << __E__;
 }  // end loginRequest()
 
 //==============================================================================
@@ -3348,6 +3354,15 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	                                                  "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
+
+	if(readOnly_)
+	{
+        CorePropertySupervisorBase::setSupervisorProperty(
+            CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
+            "*=0 | getSystemMessages=1 | getDesktopIcons=1");  // block users from writing if no write access
+		__COUT__ << "readOnly true in setSupervisorProperty" << __E__;
+
+	}
 }  // end forceSupervisorPropertyValues()
 
 //==============================================================================
@@ -3522,7 +3537,7 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 			else
 				__COUT_INFO__ << "FSM Link disconnected." << __E__;
 
-			__COUT__ << "stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
+			__COUT__ << "For FSM '" << fsmName << ",' stateMachineAliasFilter  = " << stateMachineAliasFilter << __E__;
 
 			// filter list of aliases based on stateMachineAliasFilter
 			//  ! as first character means choose those that do NOT match filter
@@ -3865,6 +3880,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "getCurrentState")
 		{
 			xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
+			const std::string& gatewayStatus = allSupervisorInfo_.getGatewayInfo().getStatus();
+			if(gatewayStatus.size() > std::string(RunControlStateMachine::FAILED_STATE_NAME).length() && 
+				(gatewayStatus[0] == 'F' || gatewayStatus[0] == 'E')) //assume it is Failed or Error and send to state machine
+				xmlOut.addTextElementToData("current_error", gatewayStatus);
+
 			xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
 			if(theStateMachine_.isInTransition())
 				xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());

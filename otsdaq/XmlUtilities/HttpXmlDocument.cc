@@ -198,7 +198,7 @@ void HttpXmlDocument::removeDataElement(unsigned int dataChildIndex)
 	}
 
 	// here, then child doesnt exist
-}
+} // end removeDataElement()
 
 //==============================================================================
 // HttpXmlDocument::addXmlData
@@ -214,7 +214,7 @@ void HttpXmlDocument::copyDataChildren(HttpXmlDocument& document)
 
 		recursiveAddElementToParent((xercesc::DOMElement*)(nodeList->item(i)), dataElement_, true);
 	}
-}
+} // end copyDataChildren()
 
 //==============================================================================
 // HttpXmlDocument::outputXmlDocument
@@ -223,7 +223,7 @@ void HttpXmlDocument::copyDataChildren(HttpXmlDocument& document)
 void HttpXmlDocument::outputXmlDocument(std::ostringstream* out, bool dispStdOut, bool allowWhiteSpace)
 {
 	recursiveOutputXmlDocument(theDocument_->getDocumentElement(), out, dispStdOut, "", allowWhiteSpace);
-}
+} // end outputXmlDocument()
 
 //==============================================================================
 // HttpXmlDocument::recursiveOutputXmlDocument
@@ -233,7 +233,7 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 {
 	// open field tag
 	if(dispStdOut)
-		__COUT__ << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
+		std::cout << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
 	if(out)
 		*out << tabStr << "<" << XML_TO_CHAR(currEl->getNodeName());
 
@@ -291,15 +291,24 @@ void HttpXmlDocument::recursiveOutputXmlDocument(
 		if(nodeList->item(i)->getNodeType() != xercesc::DOMNode::TEXT_NODE)  // ignore text node children
 			recursiveOutputXmlDocument((xercesc::DOMElement*)(nodeList->item(i)), out, dispStdOut, newTabStr, allowWhiteSpace);
 
+	if(currEl == dataElement_ && 	//append the data string stream 
+			dataSs_.str().length()) //(for large data blocks that do not need to be escaped)
+	{
+		if(dispStdOut)
+			std::cout << dataSs_.str() << std::endl;
+		if(out)
+			*out << dataSs_.str() << std::endl;
+	}
+
 	// close tag if children
 	if(nodeList->getLength() > 1 || (nodeList->getLength() == 1 && currEl->getFirstChild()->getNodeType() != xercesc::DOMNode::TEXT_NODE))
 	{
 		if(dispStdOut)
-			__COUT__ << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
+			std::cout << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
 		if(out)
 			*out << tabStr << "</" << XML_TO_CHAR(currEl->getNodeName()) << ">" << std::endl;
 	}
-}
+} // end recursiveOutputXmlDocument()
 
 //==============================================================================
 // HttpXmlDocument::getMatchingValue

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+	<ROOT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="TableInfo.xsd">
+		<TABLE Name="SubsystemUserDataPathsTable">
+			<VIEW Name="SUBSYSTEM_USER_DATA_PATHS_TABLE" Type="File,Database,DatabaseTest" Description="The%20SubsystemUserDataPathsTable%20provides%20a%20mapping%20from%20Subsystem%20name%20to%20the%20associated%20Subsystem%20User%20Data%20path.%20In%20a%20multi-subsystem%20effort%2C%20it%20may%20be%20useful%20to%20inspect%2Fcopy%2Fcompare%20configurations%20of%20other%20subsystems.%20The%20mapping%20within%20this%20table%20provides%20the%20lookup%20information%20to%20find%20the%20active%20table%20groups%20of%20all%20subsystems%2C%20thus%20allowing%20for%20the%20lookup%20of%20their%20active%20Backbone%20group%20(i.e.%2C%20group%20and%20table%20aliases).">
+				<COLUMN Type="UID" 	 Name="SubsystemUID" 	 StorageName="SUBSYSTEM_UID" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SubsystemFullName" 	 StorageName="SUBSYSTEM_FULL_NAME" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Data" 	 Name="SubsystemUserDataPath" 	 StorageName="SUBSYSTEM_USER_DATA_PATH" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Comment" 	 Name="CommentDescription" 	 StorageName="COMMENT_DESCRIPTION" 		DataType="STRING" 		DefaultValue="DEFAULT" 		DataChoices=""/>
+				<COLUMN Type="Author" 	 Name="Author" 	 StorageName="AUTHOR" 		DataType="STRING" 		DataChoices=""/>
+				<COLUMN Type="Timestamp" 	 Name="RecordInsertionTime" 	 StorageName="RECORD_INSERTION_TIME" 		DataType="TIMESTAMP WITH TIMEZONE" 		DataChoices=""/>
+			</VIEW>
+		</TABLE>
+	</ROOT>

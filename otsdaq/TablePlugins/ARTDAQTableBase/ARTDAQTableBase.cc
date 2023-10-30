@@ -162,6 +162,7 @@ std::string ARTDAQTableBase::getFlatFHICLFilename(ARTDAQAppType type, const std:
 //==============================================================================
 void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 {
+	std::chrono::steady_clock::time_point startClock = std::chrono::steady_clock::now();
 	//__COUT__ << "flattenFHICL()" << __ENV__("FHICL_FILE_PATH") << __E__;
 
 	std::string inFile  = getFHICLFilename(type, name);
@@ -171,21 +172,20 @@ void ARTDAQTableBase::flattenFHICL(ARTDAQAppType type, const std::string& name)
 	//__COUTV__(outFile);
 
 	cet::filepath_lookup_nonabsolute policy("FHICL_FILE_PATH");
-
 	fhicl::ParameterSet pset;
 
 	try
 	{
-		TLOG(TLVL_INFO) << "parsing document:" << inFile;
+		TLOG(TLVL_INFO) << "parsing document: " << inFile;
 		// tbl = fhicl::parse_document(inFile, policy);
 		// pset = fhicl::ParameterSet::make(tbl);
 		pset = fhicl::ParameterSet::make(inFile, policy);
-		TLOG(TLVL_TRACE) << "document:" << inFile << " parsed";
-
+		TLOG(TLVL_TRACE) << "document: " << inFile << " parsed";
 		TLOG(TLVL_TRACE) << "got pset from table:";
 
 		std::ofstream ofs{outFile};
 		ofs << pset.to_indented_string(0);  // , fhicl::detail::print_mode::annotated); // Only really useful for debugging
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << name << " Flatten Clock time = " << artdaq::TimeUtils::GetElapsedTime(startClock) << __E__; 
 	}
 	catch(cet::exception const& e)
 	{
@@ -1966,7 +1966,6 @@ bool ARTDAQTableBase::isARTDAQEnabled(const ConfigurationManager* cfgMgr)
 		}
 	}
 	return false;
-
 }  // end isARTDAQEnabled()
 
 //==============================================================================
@@ -2270,13 +2269,18 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						std::vector<std::string> commonChunks;
 						std::vector<std::string> wildcards;
 
+						//can not change the order of wildcards for node names! or the names will not keep pairing with host
+
 						bool wildcardsNeeded = StringMacros::extractCommonChunks(multiNodeNames, commonChunks, wildcards, nodeFixedWildcardLength);
 
-						if(!wildcardsNeeded)
+						if(!wildcardsNeeded || wildcards.size() != multiNodeNames.size())
 						{
 							__SS__ << "Impossible extractCommonChunks result! Please notify admins or try to simplify record naming convention." << __E__;
 							__SS_THROW__;
 						}
+
+
+						__COUTV__(StringMacros::vectorToString(commonChunks));
 
 						nodeName   = "";
 						bool first = true;
@@ -2316,15 +2320,13 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						__COUTV__(allIntegers);
 						if(allIntegers)
 						{
-							std::set<unsigned int> intSortWildcards;
-							// unsigned int           tmpInt;
-							for(auto& wildcard : wildcards)
-								intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
 
+							__COUTV__(StringMacros::vectorToString(wildcards));
+														
 							// need ints in vector for random access to for hyphenating
 							std::vector<unsigned int> intWildcards;
-							for(auto& wildcard : intSortWildcards)
-								intWildcards.push_back(wildcard);
+							for(auto& wildcard : wildcards)
+								intWildcards.push_back(strtol(wildcard.c_str(), 0, 10));
 
 							__COUTV__(StringMacros::vectorToString(intWildcards));
 
@@ -2336,6 +2338,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 								{
 									if(i < hyphenLo)
 										hyphenLo = i;  // start hyphen
+									//else continue hyphen
 								}
 								else  // new comma
 								{
@@ -2346,9 +2349,13 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 									}
 									else
 									{
-										// hyphen numbers
-										multiNodeString +=
-										    (isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "-" + std::to_string(intWildcards[i]);
+										// if only 1 number apart, then comma
+										if(intWildcards[hyphenLo]+1 == intWildcards[i])
+											multiNodeString +=
+												(isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "," + std::to_string(intWildcards[i]);
+										else // else hyphen numbers
+											multiNodeString +=
+												(isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "-" + std::to_string(intWildcards[i]);
 										hyphenLo = -1;  // reset for next
 									}
 									isFirst = false;
@@ -2369,7 +2376,13 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 						std::vector<std::string> commonChunks;
 						std::vector<std::string> wildcards;
 
+						//can not change the order of wildcards for hostname! or the names will not keep pairing with host
+
 						bool wildcardsNeeded = StringMacros::extractCommonChunks(hostnameArray, commonChunks, wildcards, hostFixedWildcardLength);
+
+
+						__COUTV__(wildcardsNeeded);
+						__COUTV__(StringMacros::vectorToString(commonChunks));
 
 						hostname   = "";
 						bool first = true;
@@ -2405,15 +2418,12 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 
 							if(allIntegers)
 							{
-								std::set<unsigned int> intSortWildcards;
-								// unsigned int           tmpInt;
-								for(auto& wildcard : wildcards)
-									intSortWildcards.emplace(strtol(wildcard.c_str(), 0, 10));
+								__COUTV__(StringMacros::vectorToString(wildcards));
 
 								// need ints in vector for random access to for hyphenating
 								std::vector<unsigned int> intWildcards;
-								for(auto& wildcard : intSortWildcards)
-									intWildcards.push_back(wildcard);
+								for(auto& wildcard : wildcards)
+									intWildcards.push_back(strtol(wildcard.c_str(), 0, 10));
 
 								__COUTV__(StringMacros::vectorToString(intWildcards));
 
@@ -2425,6 +2435,7 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 									{
 										if(i < hyphenLo)
 											hyphenLo = i;  // start hyphen
+										//else continue hyphen
 									}
 									else  // new comma
 									{
@@ -2435,9 +2446,13 @@ const ARTDAQTableBase::ARTDAQInfo& ARTDAQTableBase::getARTDAQSystem(
 										}
 										else
 										{
-											// hyphen numbers
-											hostArrayString +=
-											    (isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "-" + std::to_string(intWildcards[i]);
+											// if only 1 number apart, then comma
+											if(intWildcards[hyphenLo]+1 == intWildcards[i])
+												hostArrayString +=
+													(isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "," + std::to_string(intWildcards[i]);
+											else // else hyphen numbers
+												hostArrayString +=
+													(isFirst ? "" : ",") + std::to_string(intWildcards[hyphenLo]) + "-" + std::to_string(intWildcards[i]);
 											hyphenLo = -1;  // reset for next
 										}
 										isFirst = false;
