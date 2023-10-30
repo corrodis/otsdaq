@@ -421,6 +421,8 @@ std::string CoreSupervisorBase::getStatusProgressDetail(void)
 	if(!detail.size() && RunControlStateMachine::getLastCommand() != "")
 	{
 		detail = "Last Command: " + RunControlStateMachine::getLastCommand();
+		if(RunControlStateMachine::getLastCommand() == RunControlStateMachine::CONFIGURE_TRANSITION_NAME)
+			detail += " w/" + RunControlStateMachine::getLastAttemptedConfigureGroup();
 	}
 
 	return detail;

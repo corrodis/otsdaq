@@ -89,10 +89,10 @@ defineColors ()
 defineColors
 
 SCRIPT_NAME=$1
-out() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}$@${RstClr}"; }
-info() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}${IBlue}$@${RstClr}"; }
-success() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}${IGreen}$@${RstClr}"; }
-error() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}${IRed}$@${RstClr}"; } >&2
-warning() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}${IYellow}$@${RstClr}"; } >&2
-die() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME} [${Cyan}${BASH_LINENO[0]}${RstClr}]${IBlack}\t${RstClr}${IRed}$@${RstClr}"; exit 1; }
+out() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}$@${RstClr}"; }
+info() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}${IBlue}$@${RstClr}"; }
+success() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}${IGreen}$@${RstClr}"; }
+error() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}${IRed}$@${RstClr}"; } >&2
+warning() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}${IYellow}$@${RstClr}"; } >&2
+die() { echo -e "${RstClr}${IRed}${STARTTIME}${RstClr}-${Green}$(date +'%d%h%y.%T') ${IBlue}${THIS_HOST}${RstClr} ${SCRIPT_NAME}:${Cyan}${BASH_LINENO[0]}${RstClr} |${IBlack}\t${RstClr}${IRed}$@${RstClr}"; exit 1; }
 

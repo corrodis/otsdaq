@@ -36,11 +36,11 @@
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(__ENV__("OTSDAQ_USING_MF")=="1"?
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 
-#define __COUT_HDR_F__ 		__SHORTFILE__ << "\t"
-#define __COUT_HDR_L__ 		"[" << std::dec        << __LINE__ << "]\t"
+#define __COUT_HDR_F__ 		__SHORTFILE__ << ""
+#define __COUT_HDR_L__ 		":" << std::dec        << __LINE__ << " |\t"
 #define __COUT_HDR_P__ 		__PRETTY_FUNCTION__    << "\t"
-#define __COUT_HDR_FL__ 	__SHORTFILE__ << " "   << __COUT_HDR_L__
-#define __COUT_HDR_FP__ 	__SHORTFILE__ << " : " << __COUT_HDR_P__
+#define __COUT_HDR_FL__ 	__SHORTFILE__ << ""  << __COUT_HDR_L__
+#define __COUT_HDR_FP__ 	__SHORTFILE__ << ":" << __COUT_HDR_P__
 #define __COUT_HDR__ 		""//__COUT_HDR_FL__
 #define __MF_HDR__ 			""//__COUT_HDR__
 
