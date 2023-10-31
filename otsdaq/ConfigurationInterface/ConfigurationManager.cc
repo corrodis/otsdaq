@@ -44,11 +44,14 @@ const std::string ConfigurationManager::ACTIVE_GROUPS_FILENAME =
 const std::string ConfigurationManager::ALIAS_VERSION_PREAMBLE = "ALIAS:";
 const std::string ConfigurationManager::SCRATCH_VERSION_ALIAS  = "Scratch";
 
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT       = "Context";
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE      = "Backbone";
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE       = "Iterate";
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION = "Configuration";
-const std::string ConfigurationManager::ACTIVE_GROUP_NAME_UNKNOWN       = "Unknown";
+const std::string ConfigurationManager::GROUP_TYPE_NAME_CONTEXT       = "Context";
+const std::string ConfigurationManager::GROUP_TYPE_NAME_BACKBONE      = "Backbone";
+const std::string ConfigurationManager::GROUP_TYPE_NAME_ITERATE       = "Iterate";
+const std::string ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION = "Configuration";
+const std::string ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN       = "UNKNOWN";
+
+const std::string ConfigurationManager::UNKNOWN_INFO 					= "UNKNOWN";
+const std::string ConfigurationManager::UNKNOWN_TIME 					= "0";
 
 const uint8_t ConfigurationManager::METADATA_COL_ALIASES   = 1;
 const uint8_t ConfigurationManager::METADATA_COL_COMMENT   = 2;
@@ -320,6 +323,9 @@ void ConfigurationManager::restoreActiveTableGroups(
 				break;
 			}
 
+		if(groupName.size() <= 3)
+			continue; //skip illegal group names
+
 		if(skip)
 			continue;
 
@@ -516,11 +522,14 @@ void ConfigurationManager::destroy(void)
 const std::string& ConfigurationManager::convertGroupTypeToName(const ConfigurationManager::GroupType& groupTypeId)
 {
 	return groupTypeId == ConfigurationManager::GroupType::CONTEXT_TYPE
-	           ? ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT
+	           ? ConfigurationManager::GROUP_TYPE_NAME_CONTEXT
 	           : (groupTypeId == ConfigurationManager::GroupType::BACKBONE_TYPE
-	                  ? ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE
-	                  : (groupTypeId == ConfigurationManager::GroupType::ITERATE_TYPE ? ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE
-	                                                                                  : ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION));
+					? ConfigurationManager::GROUP_TYPE_NAME_BACKBONE
+					: (groupTypeId == ConfigurationManager::GroupType::ITERATE_TYPE 
+						? ConfigurationManager::GROUP_TYPE_NAME_ITERATE
+	                  	: (groupTypeId == ConfigurationManager::GroupType::CONFIGURATION_TYPE 
+							? ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION
+							: ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN)));
 }  // end convertGroupTypeToName()
 
 //==============================================================================
@@ -1331,27 +1340,27 @@ void ConfigurationManager::loadMemberMap(const std::map<std::string /*name*/, Ta
 void ConfigurationManager::loadTableGroup(const std::string&                                     groupName,
                                           TableGroupKey                                          groupKey,
                                           bool                                                   doActivate 		/*=false*/,
-                                          std::map<std::string /*table name*/, TableVersion>*    groupMembers 		/*=0*/,
+                                          std::map<std::string /*table name*/, TableVersion>*    groupMembers 		/*=0 , note: db time intensive! */,
                                           ProgressBar*                                           progressBar  		/*=0*/,
                                           std::string*                                           accumulatedWarnings  /*=0*/,
-                                          std::string*                                           groupComment  		/*=0*/,
-                                          std::string*                                           groupAuthor  		/*=0*/,
-                                          std::string*                                           groupCreateTime  	/*=0*/,
+                                          std::string*                                           groupComment  		/*=0 , note: in metadata */,
+                                          std::string*                                           groupAuthor  		/*=0 , note: in metadata */,
+                                          std::string*                                           groupCreateTime  	/*=0 , note: in metadata */,
                                           bool                                                   doNotLoadMembers 	/*=false*/,
-                                          std::string*                                           groupTypeString  	/*=0*/,
-                                          std::map<std::string /*name*/, std::string /*alias*/>* groupAliases  		/*=0*/,
+                                          std::string*                                           groupTypeString  	/*=0 , note: db time intensive! */,
+                                          std::map<std::string /*name*/, std::string /*alias*/>* groupAliases  		/*=0 , note: in metadata */,
                                           ConfigurationManager::LoadGroupType onlyLoadIfBackboneOrContext /*=ConfigurationManager::LoadGroupType::ALL_TYPES*/,
 										  bool													 ignoreVersionTracking /*=false*/)
 {
 	// clear to defaults
 	if(groupComment)
-		*groupComment = "NO COMMENT FOUND";
+		*groupComment = ConfigurationManager::UNKNOWN_INFO;
 	if(groupAuthor)
-		*groupAuthor = "NO AUTHOR FOUND";
+		*groupAuthor = ConfigurationManager::UNKNOWN_INFO;
 	if(groupCreateTime)
-		*groupCreateTime = "0";
+		*groupCreateTime = ConfigurationManager::UNKNOWN_TIME;
 	if(groupTypeString)
-		*groupTypeString = "UNKNOWN";
+		*groupTypeString = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
 
 	//	if(groupName == "defaultConfig")
 	//	{ //debug active versions
@@ -1819,7 +1828,7 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 	catch(...)
 	{
 		// save group name and key of failed load attempt
-		lastFailedGroupLoad_[ConfigurationManager::ACTIVE_GROUP_NAME_UNKNOWN] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
+		lastFailedGroupLoad_[ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN] = std::pair<std::string, TableGroupKey>(groupName, TableGroupKey(groupKey));
 
 		try
 		{
@@ -2050,13 +2059,13 @@ std::map<std::string, std::pair<std::string, TableGroupKey>> ConfigurationManage
 	//   map<type,        pair     <groupName  , TableGroupKey> >
 	std::map<std::string, std::pair<std::string, TableGroupKey>> retMap;
 
-	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT] =
+	retMap[ConfigurationManager::GROUP_TYPE_NAME_CONTEXT] =
 	    std::pair<std::string, TableGroupKey>(theContextTableGroup_, theContextTableGroupKey_ ? *theContextTableGroupKey_ : TableGroupKey());
-	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE] =
+	retMap[ConfigurationManager::GROUP_TYPE_NAME_BACKBONE] =
 	    std::pair<std::string, TableGroupKey>(theBackboneTableGroup_, theBackboneTableGroupKey_ ? *theBackboneTableGroupKey_ : TableGroupKey());
-	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE] =
+	retMap[ConfigurationManager::GROUP_TYPE_NAME_ITERATE] =
 	    std::pair<std::string, TableGroupKey>(theIterateTableGroup_, theIterateTableGroupKey_ ? *theIterateTableGroupKey_ : TableGroupKey());
-	retMap[ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION] =
+	retMap[ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION] =
 	    std::pair<std::string, TableGroupKey>(theConfigurationTableGroup_, theConfigurationTableGroupKey_ ? *theConfigurationTableGroupKey_ : TableGroupKey());
 	return retMap;
 }  // end getActiveTableGroups()
