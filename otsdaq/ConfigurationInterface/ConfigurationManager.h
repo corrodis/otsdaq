@@ -43,11 +43,11 @@ class ConfigurationManager
 	static const std::string ARTDAQ_TOP_TABLE_NAME;
 	static const std::string DESKTOP_ICON_TABLE_NAME;
 
-	static const std::string ACTIVE_GROUP_NAME_CONTEXT;
-	static const std::string ACTIVE_GROUP_NAME_BACKBONE;
-	static const std::string ACTIVE_GROUP_NAME_ITERATE;
-	static const std::string ACTIVE_GROUP_NAME_CONFIGURATION;
-	static const std::string ACTIVE_GROUP_NAME_UNKNOWN;
+	static const std::string GROUP_TYPE_NAME_CONTEXT;
+	static const std::string GROUP_TYPE_NAME_BACKBONE;
+	static const std::string GROUP_TYPE_NAME_ITERATE;
+	static const std::string GROUP_TYPE_NAME_CONFIGURATION;
+	static const std::string GROUP_TYPE_NAME_UNKNOWN;
 
 	static const std::string LAST_TABLE_GROUP_SAVE_PATH;
 	static const std::string LAST_ACTIVATED_CONFIG_GROUP_FILE;
@@ -66,9 +66,12 @@ class ConfigurationManager
 	std::set<std::string>              configurationMemberNames_;  // list of 'active' configuration members
 
 	static const std::string 			CONTEXT_SUBSYSTEM_OPTIONAL_TABLE;
+	static const std::string 			UNKNOWN_INFO;
+	static const std::string 			UNKNOWN_TIME;
 
 	enum class GroupType
 	{
+		UNKNOWN_TYPE,
 		CONTEXT_TYPE,
 		BACKBONE_TYPE,
 		ITERATE_TYPE,
@@ -212,6 +215,7 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 																	std::string*		 					accumulatedWarnings,			
 																	std::mutex* 							threadMutex,	
 																	std::shared_ptr<std::atomic<bool>> 		threadDone);
+	
 
   protected: 
 	std::string 										mfSubject_;
