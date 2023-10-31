@@ -10,8 +10,7 @@ struct TableInfo
 	TableInfo()
 	    :  // constructor
 	    tablePtr_(0)
-	{
-	}
+	{}
 
 	std::set<TableVersion> versions_;
 	TableBase*             tablePtr_;
@@ -19,6 +18,14 @@ struct TableInfo
 
 struct GroupInfo
 {
+	GroupInfo()
+		: //constructor
+		latestKeyGroupAuthor_		(ConfigurationManager::UNKNOWN_INFO),
+		latestKeyGroupComment_		(ConfigurationManager::UNKNOWN_INFO),
+		latestKeyGroupCreationTime_	(ConfigurationManager::UNKNOWN_TIME),
+		latestKeyGroupTypeString_	(ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN)
+	{}
+
 	std::set<TableGroupKey> keys_;
 	std::string             latestKeyGroupAuthor_, latestKeyGroupComment_, latestKeyGroupCreationTime_, latestKeyGroupTypeString_;
 	std::map<std::string /*name*/, TableVersion /*version*/> latestKeyMemberMap_;
@@ -107,8 +114,12 @@ class ConfigurationManagerRW : public ConfigurationManager
 
 	void 										testXDAQContext					(void);  // for debugging
 
-  private:
-	static void 								loadTableGroupThread			(ConfigurationManagerRW* cfgMgr, std::string groupName, ots::GroupInfo*  theGroupInfo, std::shared_ptr<std::atomic<bool>> 		theThreadDone);
+  public:
+	static void 								loadTableGroupThread			(ConfigurationManagerRW* 			cfgMgr,
+																				std::string							groupName, 
+																				ots::TableGroupKey					groupKey,
+																				ots::GroupInfo*  					theGroupInfo, 
+																				std::shared_ptr<std::atomic<bool>> 	theThreadDone);
 	static void 								compareTableGroupThread			(ConfigurationManagerRW* 			cfgMgr, 
 																				std::string 						groupName, 
 																				ots::TableGroupKey 					groupKeyToCompare, 
@@ -118,7 +129,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 																				ots::TableGroupKey* 				theIdenticalKey,			
 																				std::mutex* 						theThreadMutex,	
 																				std::shared_ptr<std::atomic<bool>> 	theThreadDone);
-
+  private:
 
 	//==============================================================================
 	// group cache handling

@@ -161,7 +161,7 @@ bool WorkLoopManager::getRequestResult(cgicc::Cgicc& cgi, HttpXmlDocument& xmlDo
 		reportStream << "Can't find request " << requestNumber << " within the currently active " << workLoops_.size() << " requests!";
 		__COUT__ << "WARNING: " << reportStream.str() << std::endl;
 		xmlDocument.addTextElementToData("RequestStatus", "WARNING");
-		xmlDocument.addTextElementToData("RequestName", "Unknown");
+		xmlDocument.addTextElementToData("RequestName", "UNKNOWN");
 		xmlDocument.addTextElementToData("RequestNumber", requestNumberString);
 		xmlDocument.addTextElementToData("ErrorReport", reportStream.str());
 		return false;

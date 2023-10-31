@@ -878,8 +878,8 @@ try
 	//		save, activate, and modify alias
 	// just to match syntax in ConfiguratGUI
 	//	tmpCfgMgr.activateTableGroup(
-	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
-	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::GROUP_TYPE_NAME_CONTEXT),
+	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::GROUP_TYPE_NAME_CONTEXT)
 	//			);
 
 	cfgMgr->restoreActiveTableGroups(

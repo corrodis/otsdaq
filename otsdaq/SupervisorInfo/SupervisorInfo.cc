@@ -2,7 +2,7 @@
 
 using namespace ots;
 
-const std::string SupervisorInfo::APP_STATUS_UNKNOWN       = "Unknown";
+const std::string SupervisorInfo::APP_STATUS_UNKNOWN       = "UNKNOWN";
 const std::string SupervisorInfo::APP_STATUS_NOT_MONITORED = "Not Monitored";
 
 //=====================================================================================

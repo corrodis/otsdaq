@@ -1629,11 +1629,11 @@ try
 			true /*doNotLoadMember */,
 			&groupTypeString
 			);
-		if(groupTypeString != ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		if(groupTypeString != ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION)
 		{
 			__SS__ << "Illegal attempted configuration group type. The table group '" <<
 				theConfigurationTableGroup_.first << "(" << theConfigurationTableGroup_.second << ")' is of type " <<
-				groupTypeString << ". It must be " << ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION << "." << __E__;
+				groupTypeString << ". It must be " << ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION << "." << __E__;
 			__SS_THROW__;
 		}
 

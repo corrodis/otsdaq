@@ -159,22 +159,22 @@ void FixNewTableFields(int argc, char* argv[])
 		activeGroupKeys.insert(std::pair<std::string, std::pair<TableGroupKey, TableGroupKey>>(
 		    activeGroup.second.first, std::pair<TableGroupKey, TableGroupKey>(activeGroup.second.second, TableGroupKey())));
 
-		if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+		if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_BACKBONE)
 		{
 			activeBackboneGroupName = activeGroup.second.first;
 			__COUT__ << "found activeBackboneGroupName = " << activeBackboneGroupName << __E__;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_CONTEXT)
 		{
 			activeContextGroupName = activeGroup.second.first;
 			__COUT__ << "found activeContextGroupName = " << activeContextGroupName << __E__;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_ITERATE)
 		{
 			activeIterateGroupName = activeGroup.second.first;
 			__COUT__ << "found activeIterateGroupName = " << activeIterateGroupName << __E__;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION)
 		{
 			activeConfigGroupName = activeGroup.second.first;
 			__COUT__ << "found activeConfigGroupName = " << activeConfigGroupName << __E__;
@@ -549,7 +549,7 @@ void FixNewTableFields(int argc, char* argv[])
 	//			activeGroup.second.first << " => " << activeGroup.second.second << __E__;
 	//
 	//	__COUT__<< activeBackboneGroupName << " is the " <<
-	//			ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << __E__;
+	//			ConfigurationManager::GROUP_TYPE_NAME_BACKBONE << "." << __E__;
 	//	__COUT__  << "Resulting Active Groups end." << __E__;
 
 	// reload the active backbone (using activeGroupKeys)
@@ -792,7 +792,7 @@ void FixNewTableFields(int argc, char* argv[])
 	for(const auto& activeGroup : activeGroupKeys)
 		__COUT__ << "\t" << activeGroup.first << ": " << activeGroup.second.first << " => " << activeGroup.second.second << __E__;
 
-	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << __E__;
+	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::GROUP_TYPE_NAME_BACKBONE << "." << __E__;
 	__COUT__ << "Resulting Active Groups end." << __E__;
 
 CLEAN_UP:
