@@ -720,6 +720,12 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 	catch(...)
 	{
 		__SUP_SS__ << "Error occurred handling request." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << ss.str();
 		retParameters.addParameter("Error", ss.str());
 	}

@@ -119,14 +119,18 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 		{
 			__SUP_SS__ << "An error was encountered handling requestType '" << requestType << "':" << e.what() << __E__;
 			__SUP_COUT_ERR__ << "\n" << ss.str();
-			__SUP_MOUT_ERR__ << "\n" << ss.str();
 		}
 		catch(...)
 		{
 			__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 			           << "Please check the printouts to debug." << __E__;
+					   try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_COUT_ERR__ << "\n" << ss.str();
-			__SUP_MOUT_ERR__ << "\n" << ss.str();
 		}
 		return;
 	}
@@ -151,6 +155,12 @@ void CoreSupervisorBase::requestWrapper(xgi::Input* in, xgi::Output* out)
 	{
 		__SUP_SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 		           << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
@@ -619,6 +629,12 @@ void CoreSupervisorBase::transitionConfiguring(toolbox::Event::Reference /*event
 		catch(...)
 		{
 			__SS__ << "Unknown error loading table group '" << theGroup.first << "(" << theGroup.second << ")!" << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_COUT_ERR__ << ss.str();
 			// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
@@ -678,6 +694,12 @@ void CoreSupervisorBase::transitionConfiguringFSMs()
 	catch(...)
 	{
 		__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
@@ -750,6 +772,12 @@ void CoreSupervisorBase::transitionHalting(toolbox::Event::Reference /*event*/)
 		else  // if not previously in Failed state, then fail
 		{
 			__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_COUT_ERR__ << "\n" << ss.str();
 			theStateMachine_.setErrorMessage(ss.str());
 			throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
@@ -819,6 +847,12 @@ void CoreSupervisorBase::transitionPausing(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
@@ -870,6 +904,12 @@ void CoreSupervisorBase::transitionResuming(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
@@ -923,6 +963,12 @@ void CoreSupervisorBase::transitionStarting(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,
@@ -974,6 +1020,12 @@ void CoreSupervisorBase::transitionStopping(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SUP_SS__ << "Unknown error was caught while " << transitionName << ". Please checked the logs." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << "\n" << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 		throw toolbox::fsm::exception::Exception("Transition Error" /*name*/,

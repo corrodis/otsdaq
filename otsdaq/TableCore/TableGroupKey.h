@@ -41,8 +41,8 @@ class TableGroupKey
 	static unsigned int  getDefaultKey(void);
 	static unsigned int  getInvalidKey(void);
 
-  private:
 	static const unsigned int INVALID;
+  private:
 	static const unsigned int DEFAULT;
 	unsigned int              key_;
 };

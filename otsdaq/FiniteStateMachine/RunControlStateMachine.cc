@@ -435,6 +435,12 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	catch(...)
 	{
 		__GEN_SS__ << "Run Control Message Handling Failed  with command '" << command << "' and encountered an unknown error." << theStateMachine_.getErrorMessage() << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__GEN_COUT_ERR__ << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 

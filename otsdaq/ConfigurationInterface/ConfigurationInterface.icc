@@ -259,6 +259,12 @@ void get(TableBase*&                          table,
 	catch(...)
 	{
 		__SS__ << "Unknown error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SS_THROW__;
 	}
 

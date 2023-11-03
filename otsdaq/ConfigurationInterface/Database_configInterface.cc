@@ -196,6 +196,12 @@ catch(std::exception const& e)
 catch(...)
 {
 	__SS__ << "DBI Unknown exception.\n";
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SS_THROW__;
 }
 
@@ -225,6 +231,12 @@ catch(std::exception const& e)
 catch(...)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SS_THROW__;
 }
 
@@ -284,14 +296,18 @@ try
 }  // end getTableGroupMembers()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup << "':\n\n" << e.what() << "\n";
-	__COUT_ERR__ << ss.str();
+	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup << "':\n\n" << e.what() << "\n";	
 	__SS_THROW__;
 }
 catch(...)
 {
 	__SS__ << "DBI Unknown exception getting Group's member tables for '" << tableGroup << ".'\n";
-	__COUT_ERR__ << ss.str();
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SS_THROW__;
 }
 
@@ -321,13 +337,17 @@ try
 catch(std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";
-	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
 }
 catch(...)
 {
 	__SS__ << "DBI Unknown exception.\n";
-	__COUT_ERR__ << ss.str();
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SS_THROW__;
 }
 

@@ -121,6 +121,12 @@ void FEVInterfacesManager::createInterfaces(void)
 		{
 			__CFG_SS__ << "Failed to instantiate plugin named '" << interface.first << "' of type '"
 			           << interface.second.getNode(COL_NAME_fePlugin).getValue<std::string>() << "' due to an unknown error." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__MOUT_ERR__ << ss.str();
 			throw;  // if we do not throw, it is hard to tell what is happening..
 			        //__CFG_SS_THROW__;
@@ -993,6 +999,12 @@ void FEVInterfacesManager::startMacroMultiDimensional(const std::string& request
 		    catch(...)
 		    {
 			    __SS__ << "Unknown error executing multi-dimensional Macro. " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 			    statusResult = ss.str();
 		    }
 
@@ -1580,6 +1592,12 @@ void FEVInterfacesManager::startFEMacroMultiDimensional(const std::string& reque
 		    catch(...)
 		    {
 			    __SS__ << "Unknown error executing multi-dimensional FE Macro. " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 			    statusResult = ss.str();
 		    }
 
