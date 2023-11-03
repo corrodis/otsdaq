@@ -463,6 +463,12 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		catch(...)
 		{
 			__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__GEN_COUT_ERR__ << "\n" << ss.str();
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
