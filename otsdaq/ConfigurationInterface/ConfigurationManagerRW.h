@@ -118,7 +118,7 @@ class ConfigurationManagerRW : public ConfigurationManager
 	static void 								loadTableGroupThread			(ConfigurationManagerRW* 			cfgMgr,
 																				std::string							groupName, 
 																				ots::TableGroupKey					groupKey,
-																				ots::GroupInfo*  					theGroupInfo, 
+																				std::shared_ptr<ots::GroupInfo>		theGroupInfo, 
 																				std::shared_ptr<std::atomic<bool>> 	theThreadDone);
 	static void 								compareTableGroupThread			(ConfigurationManagerRW* 			cfgMgr, 
 																				std::string 						groupName, 
