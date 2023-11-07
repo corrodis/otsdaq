@@ -413,17 +413,18 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
 						*(threadDone[foundThreadIndex]) = false;
 
+						std::shared_ptr<ots::GroupInfo> shareGroupInfoPtr(&(groupInfo.second));
 						std::thread([](
 							ConfigurationManagerRW* 				theCfgMgr, 
 							std::string 							theGroupName, 
 							ots::TableGroupKey						theGroupKey,
-							ots::GroupInfo*                       	theGroupInfo,
+							std::shared_ptr<ots::GroupInfo>        	theGroupInfo,
 		               		std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
 						ConfigurationManagerRW::loadTableGroupThread(theCfgMgr, theGroupName, theGroupKey, theGroupInfo, theThreadDone); },
 							this,
 							groupInfo.first,
 							groupInfo.second.getLatestKey(),
-							&(groupInfo.second),
+							shareGroupInfoPtr,
 							threadDone[foundThreadIndex])
 		    			.detach();
 
@@ -482,21 +483,21 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
 													std::string 						groupName, 
 													ots::TableGroupKey					groupKey,
-													ots::GroupInfo*  					groupInfo, 
+													std::shared_ptr<ots::GroupInfo>		groupInfo, 
 													std::shared_ptr<std::atomic<bool>> 	threadDone)
 try
 {
 	cfgMgr->loadTableGroup(groupName/*groupName*/,
 		groupKey, //groupInfo->getLatestKey(),
 		false /*doActivate*/,
-		&groupInfo->latestKeyMemberMap_ /*groupMembers*/,
+		&(groupInfo->latestKeyMemberMap_) /*groupMembers*/,
 		0 /*progressBar*/,
 		0 /*accumulateErrors*/,
-		&groupInfo->latestKeyGroupComment_,
-		&groupInfo->latestKeyGroupAuthor_,
-		&groupInfo->latestKeyGroupCreationTime_,
+		&(groupInfo->latestKeyGroupComment_),
+		&(groupInfo->latestKeyGroupAuthor_),
+		&(groupInfo->latestKeyGroupCreationTime_),
 		true /*doNotLoadMember*/,
-		&groupInfo->latestKeyGroupTypeString_);
+		&(groupInfo->latestKeyGroupTypeString_));
 
 	*(threadDone) = true;
 } // end loadTableGroupThread
