@@ -33,7 +33,7 @@ const std::string DesktopIconTable::COL_PARAMETER_GID   = "windowParameterGroupI
 const std::string DesktopIconTable::COL_PARAMETER_KEY   = "windowParameterKey";
 const std::string DesktopIconTable::COL_PARAMETER_VALUE = "windowParameterValue";
 
-const std::string DesktopIconTable::ICON_TABLE      = "DesktopIconTable";
+const std::string DesktopIconTable::ICON_TABLE      = ConfigurationManager::DESKTOP_ICON_TABLE_NAME;
 const std::string DesktopIconTable::PARAMETER_TABLE = "DesktopWindowParameterTable";
 
 // #define COL_NAME "IconName"

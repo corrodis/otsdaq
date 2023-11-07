@@ -21,7 +21,7 @@ ConfigurationTree::ConfigurationTree()
     : configMgr_(0)
     , table_(0)
     , groupId_("")
-    , linkParentConfig_(0)
+    , linkParentTable_(0)
     , linkColName_("")
     , linkColValue_("")
     , linkBackRow_(0)
@@ -43,7 +43,7 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
     : ConfigurationTree(configMgr,
                         table,
                         "" /*groupId_*/,
-                        0 /*linkParentConfig_*/,
+                        0 /*linkParentTable_*/,
                         "" /*linkColName_*/,
                         "" /*linkColValue_*/,
                         TableView::INVALID /*linkBackRow_*/,
@@ -76,7 +76,7 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
     : configMgr_(configMgr)
     , table_(table)
     , groupId_(groupId)
-    , linkParentConfig_(linkParentConfig)
+    , linkParentTable_(linkParentConfig)
     , linkColName_(linkColName)
     , linkColValue_(linkColValue)
     , linkBackRow_(linkBackRow)
@@ -427,11 +427,11 @@ const std::string& ConfigurationTree::getTableName(void) const
 	{
 		__SS__ << "Can not get configuration name of node with no configuration pointer! "
 		       << "Is there a broken link? " << __E__;
-		if(linkParentConfig_)
+		if(linkParentTable_)
 		{
-			ss << "Error occurred traversing from " << linkParentConfig_->getTableName() << " UID '"
-			   << linkParentConfig_->getView().getValueAsString(linkBackRow_, linkParentConfig_->getView().getColUID()) << "' at row " << linkBackRow_
-			   << " col '" << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
+			ss << "Error occurred traversing from " << linkParentTable_->getTableName() << " UID '"
+			   << linkParentTable_->getView().getValueAsString(linkBackRow_, linkParentTable_->getView().getColUID()) << "' at row " << linkBackRow_
+			   << " col '" << linkParentTable_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
 
 			ss << StringMacros::stackTrace() << __E__;
 		}
@@ -442,6 +442,18 @@ const std::string& ConfigurationTree::getTableName(void) const
 }  // end getTableName()
 
 //==============================================================================
+// getParentTableName
+const std::string& ConfigurationTree::getParentTableName(void) const
+{
+	if(linkParentTable_)
+		return linkParentTable_->getTableName();
+
+	__SS__ << "Can not get parent table name of node with no parent table pointer! "
+			<< "Was this node initialized correctly? " << __E__;
+	__SS_ONLY_THROW__;
+}  // end getParentTableName()
+
+//==============================================================================
 // getNodeRow
 const unsigned int& ConfigurationTree::getNodeRow(void) const
 {
@@ -449,11 +461,11 @@ const unsigned int& ConfigurationTree::getNodeRow(void) const
 		return row_;
 
 	__SS__ << "Can only get row from a UID or value node!" << __E__;
-	if(linkParentConfig_)
+	if(linkParentTable_)
 	{
-		ss << "Error occurred traversing from " << linkParentConfig_->getTableName() << " UID '"
-		   << linkParentConfig_->getView().getValueAsString(linkBackRow_, linkParentConfig_->getView().getColUID()) << "' at row " << linkBackRow_ << " col '"
-		   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
+		ss << "Error occurred traversing from " << linkParentTable_->getTableName() << " UID '"
+		   << linkParentTable_->getView().getValueAsString(linkBackRow_, linkParentTable_->getView().getColUID()) << "' at row " << linkBackRow_ << " col '"
+		   << linkParentTable_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
 
 		ss << StringMacros::stackTrace() << __E__;
 	}
@@ -472,7 +484,7 @@ const std::string& ConfigurationTree::getFieldTableName(void) const
 	// if link node, need config name from parent
 	if(isLinkNode())
 	{
-		if(!linkParentConfig_)
+		if(!linkParentTable_)
 		{
 			__SS__ << "Can not get configuration name of link node field with no parent "
 			          "configuration pointer!"
@@ -480,7 +492,7 @@ const std::string& ConfigurationTree::getFieldTableName(void) const
 			ss << nodeDump() << __E__;
 			__SS_ONLY_THROW__;
 		}
-		return linkParentConfig_->getTableName();
+		return linkParentTable_->getTableName();
 	}
 	else
 		return getTableName();
@@ -582,7 +594,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 
 	if(isLinkNode())
 	{
-		if(!linkParentConfig_)
+		if(!linkParentTable_)
 		{
 			__SS__ << "Can not get fixed choices of node with no parent config view pointer!" << __E__;
 
@@ -596,7 +608,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 		// for links, col_ = -1, column c needs to change (to ChildLink column of pair)
 		// get column from parent config pointer
 
-		const TableView* parentView = &(linkParentConfig_->getView());
+		const TableView* parentView = &(linkParentTable_->getView());
 		int              c          = parentView->findCol(linkColName_);
 
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
@@ -991,7 +1003,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 			return recurse(ConfigurationTree(configMgr_,
 			                                 table_,
 			                                 "",  // no new groupId string, not a link
-			                                 0 /*linkParentConfig_*/,
+			                                 0 /*linkParentTable_*/,
 			                                 "",  // link node name, not a link
 			                                 "",  // link node value, not a link
 			                                 TableView::INVALID /*linkBackRow_*/,
@@ -1071,7 +1083,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 					return ConfigurationTree(configMgr_,
 					                         0,
 					                         "",
-					                         table_,  // linkParentConfig_
+					                         table_,  // linkParentTable_
 					                         nodeName,
 					                         tableView_->getDataView()[row_][c],  // this the link node field
 					                                                              // associated value (matches
@@ -1091,7 +1103,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				                   configMgr_,
 				                   childConfig,
 				                   "",                                  // no new groupId string
-				                   table_,                              // linkParentConfig_
+				                   table_,                              // linkParentTable_
 				                   nodeName,                            // this is a link node
 				                   tableView_->getDataView()[row_][c],  // this the link node field
 				                                                        // associated value (matches
@@ -1131,7 +1143,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 					return ConfigurationTree(configMgr_,
 					                         0,
 					                         tableView_->getDataView()[row_][linkPair.second],  // groupID
-					                         table_,                                            // linkParentConfig_
+					                         table_,                                            // linkParentTable_
 					                         nodeName,
 					                         tableView_->getDataView()[row_][c],  // this the link node field
 					                                                              // associated value (matches
@@ -1151,7 +1163,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				                   configMgr_,
 				                   childConfig,
 				                   tableView_->getDataView()[row_][linkPair.second],  // groupId string
-				                   table_,                                            // linkParentConfig_
+				                   table_,                                            // linkParentTable_
 				                   nodeName,                                          // this is a link node
 				                   tableView_->getDataView()[row_][c],                // this the link node field
 				                                                                      // associated value (matches
@@ -1172,7 +1184,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				return ConfigurationTree(configMgr_,
 				                         table_,
 				                         "",
-				                         0 /*linkParentConfig_*/,
+				                         0 /*linkParentTable_*/,
 				                         "",
 				                         "",
 				                         TableView::INVALID /*linkBackRow_*/,
@@ -1258,7 +1270,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	try
 	{
 		ss << "\t"
-		   << "Error occurred from node '" << getValueAsString() << "'..." << __E__;
+		   << "Node dump initiated from node '" << getValueAsString() << "'..." << __E__;
 	}
 	catch(...)
 	{
@@ -1266,7 +1278,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	try
 	{
 		ss << "\t"
-		   << "Error occurred from node '" << getValue() << "' in table '" << getTableName() << ".'" << __E__;
+		   << "Node dump initiated from node '" << getValue() << "' in table '" << getTableName() << ".'" << __E__;
 	}
 	catch(...)
 	{
@@ -1293,7 +1305,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	{
 	}  // ignore errors trying to show children
 
-	ss << "end ConfigurationTree::nodeDump() =====================================" << __E__;
+	ss << "\n\nend ConfigurationTree::nodeDump() =====================================" << __E__;
 
 	return ss.str();
 }  // end nodeDump()

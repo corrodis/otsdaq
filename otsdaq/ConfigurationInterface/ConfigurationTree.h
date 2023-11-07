@@ -194,6 +194,7 @@ class ConfigurationTree
 	// extracting information from node
 	const ConfigurationManager* 				getConfigurationManager		(void) const { return configMgr_; }
 	const std::string&          				getTableName				(void) const;
+	const std::string&          				getParentTableName			(void) const;
 	const std::string&          				getFieldTableName			(void) const;
 	const TableVersion&         				getTableVersion				(void) const;
 	const time_t&               				getTableCreationTime		(void) const;
@@ -334,7 +335,7 @@ class ConfigurationTree
 	const ConfigurationManager* 			configMgr_;  		// root node
 	const TableBase*            			table_;      		// config node
 	const std::string           			groupId_;    		// group config node
-	const TableBase* 						linkParentConfig_;  // link node parent config pointer (could be used
+	const TableBase* 						linkParentTable_;  // link node parent config pointer (could be used
 	                                     						// to traverse backwards through tree)
 	const std::string  						linkColName_;     	// link node field name
 	const std::string  						linkColValue_;    	// link node field value
