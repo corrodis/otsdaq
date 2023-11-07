@@ -70,6 +70,7 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 
 		// debug::registerUngracefullExitHandlers();
 		//  artdaq::database::useFakeTime(true);
+		artdaq::database::configuration::Multitasker();
 	}
 #endif
 }
@@ -80,13 +81,19 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion version) const
 
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
 	auto versionstring = version.toString();
 
 	// configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
-
 	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::fill(tableName=" << configuration->getTableName() << ", version=" << versionstring << ") "
+	         << duration << " milliseconds." << std::endl;
 
 	if(result.first)
 	{
@@ -105,8 +112,9 @@ void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion
 void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configuration, bool overwrite) const
 
 {
-	auto ifc = db::ConfigurationInterface{default_dbprovider};
+	auto start = std::chrono::high_resolution_clock::now();
 
+	auto ifc = db::ConfigurationInterface{default_dbprovider};
 	// configuration->getView().getUniqueStorageIdentifier()
 
 	auto versionstring = configuration->getView().getVersion().toString();
@@ -117,6 +125,11 @@ void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configur
 	// versionstring, default_entity);
 	auto result = overwrite ? ifc.template overwriteVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity)
 	                        : ifc.template storeVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveActiveVersion(tableName=" << configuration->getTableName()
+	         << ", versionstring=" << versionstring << ") " << duration << " milliseconds" << std::endl;
 
 	if(result.first)
 		return;
@@ -149,8 +162,15 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 std::set<TableVersion> DatabaseConfigurationInterface::getVersions(const TableBase* table) const noexcept
 try
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.template getVersions<decltype(table)>(table, default_entity);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getVersions(tableName=" << table->getTableName() << ") " << duration << " milliseconds."
+	         << std::endl;
 
 	auto resultSet = std::set<TableVersion>{};
 	for(std::string const& version : result)
@@ -173,7 +193,7 @@ try
 }
 catch(std::exception const& e)
 {
-	__COUT__ << "DBI Exception:" << e.what() << "\n";
+	__COUT_WARN__ << "DBI Exception:" << e.what() << "\n";
 	return {};
 }
 
@@ -182,11 +202,19 @@ catch(std::exception const& e)
 std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableNames() const
 try
 {
-	auto ifc = db::ConfigurationInterface{default_dbprovider};
+	auto start = std::chrono::high_resolution_clock::now();
 
+	auto ifc                    = db::ConfigurationInterface{default_dbprovider};
 	auto collection_name_prefix = std::string{};
 
-	return ifc.listCollections(collection_name_prefix);
+	auto result = ifc.listCollections(collection_name_prefix);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getAllTableNames(collection_name_prefix=" << collection_name_prefix << ") " << duration
+	         << " milliseconds." << std::endl;
+
+	return result;
 }
 catch(std::exception const& e)
 {
@@ -210,18 +238,28 @@ catch(...)
 std::set<std::string /*name*/> DatabaseConfigurationInterface::getAllTableGroupNames(std::string const& filterString) const
 try
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
+	auto result = std::set<std::string>();
+
 	if(filterString == "")
-		return ifc.findGlobalConfigurations("*");  // GConfig will return all GConfig*
-		                                           // with filesystem db.. for mongodb
-		                                           // would require reg expr
+		result = ifc.findGlobalConfigurations("*");  // GConfig will return all GConfig*
+		                                             // with filesystem db.. for mongodb
+		                                             // would require reg expr
 	else
-		return ifc.findGlobalConfigurations(filterString + "*");  // GConfig will return
-		                                                          // all GConfig* with
-		                                                          // filesystem db.. for
-		                                                          // mongodb would require
-		                                                          // reg expr
+		result = ifc.findGlobalConfigurations(filterString + "*");  // GConfig will return
+		                                                            // all GConfig* with
+		                                                            // filesystem db.. for
+		                                                            // mongodb would require
+		                                                            // reg expr
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getAllTableGroupNames(filterString=" << filterString << ") " << duration << " milliseconds."
+	         << std::endl;
+
+	return result;
 }
 catch(std::exception const& e)
 {
@@ -270,8 +308,15 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(const st
 config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable) const
 try
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(tableGroup);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getTableGroupMembers(tableGroup=" << tableGroup << ") " << duration << " milliseconds."
+	         << std::endl;
 
 	//	for(auto &item:result)
 	//		__COUT__ << "====================>" << item.configuration << ": " <<
@@ -316,6 +361,8 @@ catch(...)
 void DatabaseConfigurationInterface::saveTableGroup(config_version_map_t const& configurationMap, std::string const& configurationGroup) const
 try
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
 
 	auto to_list = [](auto const& inputMap) {
@@ -327,7 +374,12 @@ try
 		return resultList;
 	};
 
-	auto result = ifc.storeGlobalConfiguration(to_list(configurationMap), configurationGroup);
+	auto result = ifc.storeGlobalConfiguration_mt(to_list(configurationMap), configurationGroup);
+
+	auto end      = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveTableGroup(configurationGroup=" << configurationGroup << ") " << duration
+	         << " milliseconds." << std::endl;
 
 	if(result.first)
 		return;
