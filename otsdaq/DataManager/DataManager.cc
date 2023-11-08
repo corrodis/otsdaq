@@ -203,6 +203,12 @@ void DataManager::configure(void)
 					__CFG_SS__ << "Failed to instantiate producer plugin named '" << bufferConfigurationList[producerLocation].first << "' of type '"
 					           << bufferConfigurationList[producerLocation].second.getNode(COL_NAME_processorPlugin).getValue<std::string>()
 					           << "' due to an unknown error." << __E__;
+					try	{ throw; } //one more try to printout extra info
+					catch(const std::exception &e)
+					{
+						ss << "Exception message: " << e.what();
+					}
+					catch(...){}
 					__CFG_MOUT_ERR__ << ss.str();
 					throw;  // if we do not throw, it is hard to tell what is causing the
 					        // problem..
@@ -285,6 +291,12 @@ void DataManager::configure(void)
 					__CFG_SS__ << "Failed to instantiate consumer plugin named '" << bufferConfigurationList[consumerLocation].first << "' of type '"
 					           << bufferConfigurationList[consumerLocation].second.getNode(COL_NAME_processorPlugin).getValue<std::string>()
 					           << "' due to an unknown error." << __E__;
+					try	{ throw; } //one more try to printout extra info
+					catch(const std::exception &e)
+					{
+						ss << "Exception message: " << e.what();
+					}
+					catch(...){}
 					__CFG_MOUT_ERR__ << ss.str();
 					throw;  // if we do not throw, it is hard to tell what is happening..
 					        //__CFG_SS_THROW__;

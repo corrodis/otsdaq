@@ -247,6 +247,12 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 		           << ". There was an unknown error.";
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__GEN_COUT_ERR__ << ss.str() << __E__;
 		// diagService_->reportError(err.str(),DIAGERROR);
 

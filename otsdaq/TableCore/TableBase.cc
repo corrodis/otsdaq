@@ -379,7 +379,9 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 //==============================================================================
 // diffTwoVersions
 //	return a report of differences among two versions
-bool TableBase::diffTwoVersions(TableVersion v1, TableVersion v2, std::stringstream* diffReport /* = 0 */) const
+bool TableBase::diffTwoVersions(TableVersion v1, TableVersion v2, 
+	std::stringstream* diffReport /* = 0 */,
+	std::map<std::string /* uid */, std::vector<std::string /* colName */>>* v1ModifiedRecords /* = 0 */) const
 {
 	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Diffing version... " << v1 << " vs " << v2 << __E__;
 	auto v1It = tableViews_.find(v1);
@@ -457,22 +459,105 @@ bool TableBase::diffTwoVersions(TableVersion v1, TableVersion v2, std::stringstr
 		if(!diffReport) return noDifference; //do not need to continue to create report
 	}
 
+	//report on missing UIDs
+	std::set<std::string /*uid*/> uidSet1,uidSet2;
+	for(unsigned int row = 0; row < rows1; ++row)
+		uidSet1.insert(view1->getDataView()[row][view1->getColUID()]);
+	for(unsigned int row = 0; row < view2->getNumberOfRows(); ++row)
+		uidSet2.insert(view2->getDataView()[row][view2->getColUID()]);
+
+	for(auto& uid1 : uidSet1)
+		if(uidSet2.find(uid1) == uidSet2.end())
+		{
+			__COUT__ << "Found record name mismatch for '" << uid1 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found record name mismatch. The v" << v1 << " record <b>'" << uid1 << 
+				"'</b> was not found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+	for(auto& uid2 : uidSet2)
+		if(uidSet1.find(uid2) == uidSet1.end())
+		{
+			__COUT__ << "Found record name mismatch for '" << uid2 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found record name mismatch. v" << v1 << " does not have record <b>'" << uid2 << 
+				"'</b> that was found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+
+
+	unsigned int row2, col2;
 	for(unsigned int row = 0; row < rows1 && row < view2->getNumberOfRows(); ++row)
 	{
-		for(unsigned int col = 0; col < cols1 - 2; ++col)  // do not consider author and timestamp
-			if(view1->getDataView()[row][col] != view2->getDataView()[row][col])
+		//do not evaluate if UIDs do not match
+		row2 = row;
+		if(view1->getDataView()[row][view1->getColUID()] != 
+			view2->getDataView()[row2][view2->getColUID()])
+		{
+			bool foundUid2 = false;
+
+			for(row2 = 0; row2 < view2->getNumberOfRows(); ++row2)
+				if(view1->getDataView()[row][view1->getColUID()] == 
+					view2->getDataView()[row2][view2->getColUID()])
+				{
+					foundUid2 = true;
+					break;
+				}
+			__COUT__ << "Found row ? '" << foundUid2 << " " << row << "," << row2 << __E__;
+			if(!foundUid2) continue; //skip view1 record because no matching record found in view2
+		}
+		
+		__COUT__ << "Found row " << " " << row << "," << row2 << __E__;
+		for(unsigned int col = 0; col < cols1 - 2 && 
+			col < view2->getNumberOfColumns() - 2; ++col)  // do not consider author and timestamp
+		{
+			//do not evaluate if column names do not match
+			col2 = col;
+			if(view1->getColumnInfo(col).getName() != 
+				view2->getColumnInfo(col2).getName())
 			{
-				if(diffReport) *diffReport << "<li>Value mismatch at v" << v1 << " {UID,r,c}:{<b>" <<
+				bool foundCol2 = false;
+
+				for(col2 = 0; col2 < view2->getNumberOfColumns() - 2; ++col2)
+					if(view1->getColumnInfo(col).getName() == 
+						view2->getColumnInfo(col2).getName())
+					{
+						foundCol2 = true;
+						break;
+					}
+				
+				__COUT__ << "Found column ? '" << foundCol2 << " " << col << "," << col2 << __E__;
+				if(!foundCol2) continue; //skip view1 column because no matching column name was found in view2
+			}
+
+			__COUT__ << "Found column " << " " << col << "," << col2 << __E__;
+			if(view1->getDataView()[row][col] != view2->getDataView()[row2][col2])
+			{
+				__COUT__ << "Found column value mismatch for '" << row << "," << col << " " << 
+					view1->getDataView()[row][col] << __E__;
+
+				if(diffReport) *diffReport << "<li><b>" <<
+					view1->getColumnInfo(col).getName()
+					<< "</b> value mismatch at v" << v1 << " {UID,r,c}:{<b>" <<
 					view1->getDataView()[row][view1->getColUID()] << "</b>," <<
 					row << "," << col << "}: <b>'"
 					<<
 					view1->getDataView()[row][col]
-					<< "'</b> vs value at v" << v2 << ": <b>'" <<
-					view2->getDataView()[row][col] << "'</b>." << __E__;
+					<< "'</b> vs value in v" << v2 << ": <b>'" <<
+					view2->getDataView()[row2][col2] << "'</b>." << __E__;
 
 				noDifference = false;	
 				if(!diffReport) return noDifference; //do not need to continue to create report
+
+				if(v1ModifiedRecords) //add uid/colName difference
+					(*v1ModifiedRecords)[view1->getDataView()[row][view1->getColUID()]].push_back(
+						view1->getColumnInfo(col).getName());
 			}
+		}
 	}
 
 	if(noDifference && diffReport) *diffReport << "<li>No difference found between v" << v1 << " and v" << v2 << "." << __E__;
@@ -583,8 +668,20 @@ unsigned int TableBase::getNumberOfStoredViews(void) const
 }  // end getNumberOfStoredViews()
 
 //==============================================================================
-const TableView& TableBase::getView(void) const
+const TableView& TableBase::getView(TableVersion version /* = TableVersion::INVALID */) const
 {
+	try
+	{
+		if(version != TableVersion::INVALID)
+			return tableViews_.at(version);
+	}
+	catch(...)
+	{
+		__SS__ << "Table '" << tableName_ << "' does not have version v" << version << 
+			" in the cache." << __E__;
+		__SS_THROW__;
+	}
+
 	if(!activeTableView_)
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
@@ -594,8 +691,20 @@ const TableView& TableBase::getView(void) const
 }
 
 //==============================================================================
-TableView* TableBase::getViewP(void)
+TableView* TableBase::getViewP(TableVersion version /* = TableVersion::INVALID */)
 {
+	try
+	{
+		if(version != TableVersion::INVALID)
+			return &tableViews_.at(version);
+	}
+	catch(...)
+	{
+		__SS__ << "Table '" << tableName_ << "' does not have version v" << version << 
+			" in the cache." << __E__;
+		__SS_THROW__;
+	}
+
 	if(!activeTableView_)
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
@@ -1223,10 +1332,11 @@ TableVersion TableBase::mergeViews(
 //	if conflict, throw exception
 //
 //	Returns version of new temporary view that was created.
-TableVersion TableBase::copyView(const TableView& sourceView, TableVersion destinationVersion, const std::string& author)
+TableVersion TableBase::copyView(const TableView& sourceView, TableVersion destinationVersion, 
+	const std::string& author, bool looseColumnMatching /* = false */)
 {
 	// check that column sizes match
-	if(sourceView.getNumberOfColumns() != mockupTableView_.getNumberOfColumns())
+	if(!looseColumnMatching && sourceView.getNumberOfColumns() != mockupTableView_.getNumberOfColumns())
 	{
 		__SS__ << "Error! Number of Columns of source view must match destination "
 		          "mock-up view."

@@ -125,6 +125,12 @@ FESupervisor::FESupervisor(xdaq::ApplicationStub* stub) : CoreSupervisorBase(stu
 		catch(...)
 		{
 			__SUP_SS__ << "Unknown error was caught while configuring. Please checked the logs." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_COUT_ERR__ << "\n" << ss.str();
 			throw;
 		}
@@ -237,6 +243,12 @@ try
 		{
 			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << feMacroName
 			           << "' with target FE '" << targetInterfaceID << "' failed due to an unknown error." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_SS_THROW__;
 		}
 
@@ -318,6 +330,12 @@ try
 				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the Macro named '" << macroName << "' with target FE '"
 				           << targetInterfaceID << "' failed to start multi-dimensional launch "
 				           << "due to an unknown error." << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SUP_SS_THROW__;
 			}
 		}
@@ -341,6 +359,12 @@ try
 				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << macroName
 				           << "' with target FE '" << targetInterfaceID << "' failed to start multi-dimensional launch "
 				           << "due to an unknown error." << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SUP_SS_THROW__;
 			}
 		}
@@ -394,6 +418,12 @@ try
 			__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << macroName << "' with target FE '"
 			           << targetInterfaceID << "' failed to check multi-dimensional launch "
 			           << "due to an unknown error." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SUP_SS_THROW__;
 		}
 
@@ -424,6 +454,12 @@ catch(const std::runtime_error& e)
 catch(...)
 {
 	__SUP_SS__ << "Unknown error encountered processing FE communication request." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SUP_COUT_ERR__ << ss.str();
 
 	SOAPParameters parameters;
@@ -651,7 +687,6 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 			{
 				// do not allow read exception to crash everything when a macromaker
 				// command
-				__MOUT_ERR__ << "Exception caught during read: " << e.what() << __E__;
 				__SUP_COUT_ERR__ << "Exception caught during read: " << e.what() << __E__;
 				retParameters.addParameter("dataResult", "Time Out Error");
 				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa", retParameters);
@@ -660,7 +695,6 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 			{
 				// do not allow read exception to crash everything when a macromaker
 				// command
-				__MOUT_ERR__ << "Exception caught during read." << __E__;
 				__SUP_COUT_ERR__ << "Exception caught during read." << __E__;
 				retParameters.addParameter("dataResult", "Time Out Error");
 				return SOAPUtilities::makeSOAPMessageReference(supervisorClassNoNamespace_ + "aa", retParameters);
@@ -788,6 +822,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 			{
 				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the FE Macro named '" << feMacroName
 				           << "' with target FE '" << interfaceID << "' failed due to an unknown error." << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SUP_SS_THROW__;
 			}
 
@@ -835,6 +875,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 			{
 				__SUP_SS__ << "In Supervisor with LID=" << getApplicationDescriptor()->getLocalId() << " the MacroMaker Macro named '" << macroName
 				           << "' with target FE '" << interfaceID << "' failed due to an unknown error." << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SUP_SS_THROW__;
 			}
 
@@ -857,6 +903,12 @@ xoap::MessageReference FESupervisor::macroMakerSupervisorRequest(xoap::MessageRe
 	catch(...)
 	{
 		__SUP_SS__ << "Error occurred handling request." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << ss.str();
 		retParameters.addParameter("Error", ss.str());
 	}
@@ -955,6 +1007,12 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 			catch(...)
 			{
 				__SS__ << "Unknown error loading table group '" << theGroup.first << "(" << theGroup.second << ")!" << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SUP_COUT_ERR__ << ss.str();
 				// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
@@ -1033,6 +1091,12 @@ void FESupervisor::transitionConfiguring(toolbox::Event::Reference /*event*/)
 	catch(...)
 	{
 		__SS__ << "Error loading metrics in FESupervisor::transitionConfiguring()" << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << ss.str();
 		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 
@@ -1073,6 +1137,12 @@ void FESupervisor::transitionHalting(toolbox::Event::Reference event)
 	catch(...)
 	{
 		__SS__ << "Error shutting down metrics in FESupervisor::transitionHalting()" << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << ss.str();
 		// ExceptionHandler(ExceptionHandlerRethrow::no, ss.str());
 

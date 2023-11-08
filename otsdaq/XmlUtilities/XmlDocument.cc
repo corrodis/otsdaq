@@ -114,6 +114,12 @@ void XmlDocument::initDocument(void)
 		catch(...)
 		{
 			__SS__ << "An error occurred creating the theDocument_" << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}
 	}

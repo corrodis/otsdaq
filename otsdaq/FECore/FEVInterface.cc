@@ -99,6 +99,12 @@ catch(const std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Unknown error was caught while configuring slow controls." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__SS_THROW__;
 }
 
@@ -439,6 +445,12 @@ catch(...)  //
 	catch(...)
 	{
 		ss << "Caught an unknown error during slow controls running thread." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 	}
 
 	// At this point, an asynchronous error has occurred
@@ -570,6 +582,12 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		catch(...)
 		{
 			ss << "Caught an unknown error during running." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 		}
 
 		// At this point, an asynchronous error has occurred

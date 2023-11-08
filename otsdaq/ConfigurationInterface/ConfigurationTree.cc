@@ -21,7 +21,7 @@ ConfigurationTree::ConfigurationTree()
     : configMgr_(0)
     , table_(0)
     , groupId_("")
-    , linkParentConfig_(0)
+    , linkParentTable_(0)
     , linkColName_("")
     , linkColValue_("")
     , linkBackRow_(0)
@@ -39,11 +39,11 @@ ConfigurationTree::ConfigurationTree()
 }  // end empty constructor
 
 //==============================================================================
-ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr, const TableBase* const& config)
+ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr, const TableBase* const& table)
     : ConfigurationTree(configMgr,
-                        config,
+                        table,
                         "" /*groupId_*/,
-                        0 /*linkParentConfig_*/,
+                        0 /*linkParentTable_*/,
                         "" /*linkColName_*/,
                         "" /*linkColValue_*/,
                         TableView::INVALID /*linkBackRow_*/,
@@ -61,7 +61,7 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
 
 //==============================================================================
 ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMgr,
-                                     const TableBase* const&            config,
+                                     const TableBase* const&            table,
                                      const std::string&                 groupId,
                                      const TableBase* const&            linkParentConfig,
                                      const std::string&                 linkColName,
@@ -74,9 +74,9 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
                                      const unsigned int                 row,
                                      const unsigned int                 col)
     : configMgr_(configMgr)
-    , table_(config)
+    , table_(table)
     , groupId_(groupId)
-    , linkParentConfig_(linkParentConfig)
+    , linkParentTable_(linkParentConfig)
     , linkColName_(linkColName)
     , linkColValue_(linkColValue)
     , linkBackRow_(linkBackRow)
@@ -88,10 +88,7 @@ ConfigurationTree::ConfigurationTree(const ConfigurationManager* const& configMg
     , col_(col)
     , tableView_(0)
 {
-	//__COUT__ << __E__;
-	//__COUT__ << "FULL CONTRUCTOR ConfigManager: " << configMgr_ << " configuration: " <<
-	// table_ << __E__;
-	if(!configMgr_)  // || !table_ || !tableView_)
+	if(!configMgr_) 
 	{
 		__SS__ << "Invalid empty pointer given to tree!\n"
 		       << "\n\tconfigMgr_=" << configMgr_ << "\n\tconfiguration_=" << table_ << "\n\tconfigView_=" << tableView_ << __E__;
@@ -430,11 +427,11 @@ const std::string& ConfigurationTree::getTableName(void) const
 	{
 		__SS__ << "Can not get configuration name of node with no configuration pointer! "
 		       << "Is there a broken link? " << __E__;
-		if(linkParentConfig_)
+		if(linkParentTable_)
 		{
-			ss << "Error occurred traversing from " << linkParentConfig_->getTableName() << " UID '"
-			   << linkParentConfig_->getView().getValueAsString(linkBackRow_, linkParentConfig_->getView().getColUID()) << "' at row " << linkBackRow_
-			   << " col '" << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
+			ss << "Error occurred traversing from " << linkParentTable_->getTableName() << " UID '"
+			   << linkParentTable_->getView().getValueAsString(linkBackRow_, linkParentTable_->getView().getColUID()) << "' at row " << linkBackRow_
+			   << " col '" << linkParentTable_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
 
 			ss << StringMacros::stackTrace() << __E__;
 		}
@@ -445,6 +442,18 @@ const std::string& ConfigurationTree::getTableName(void) const
 }  // end getTableName()
 
 //==============================================================================
+// getParentTableName
+const std::string& ConfigurationTree::getParentTableName(void) const
+{
+	if(linkParentTable_)
+		return linkParentTable_->getTableName();
+
+	__SS__ << "Can not get parent table name of node with no parent table pointer! "
+			<< "Was this node initialized correctly? " << __E__;
+	__SS_ONLY_THROW__;
+}  // end getParentTableName()
+
+//==============================================================================
 // getNodeRow
 const unsigned int& ConfigurationTree::getNodeRow(void) const
 {
@@ -452,11 +461,11 @@ const unsigned int& ConfigurationTree::getNodeRow(void) const
 		return row_;
 
 	__SS__ << "Can only get row from a UID or value node!" << __E__;
-	if(linkParentConfig_)
+	if(linkParentTable_)
 	{
-		ss << "Error occurred traversing from " << linkParentConfig_->getTableName() << " UID '"
-		   << linkParentConfig_->getView().getValueAsString(linkBackRow_, linkParentConfig_->getView().getColUID()) << "' at row " << linkBackRow_ << " col '"
-		   << linkParentConfig_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
+		ss << "Error occurred traversing from " << linkParentTable_->getTableName() << " UID '"
+		   << linkParentTable_->getView().getValueAsString(linkBackRow_, linkParentTable_->getView().getColUID()) << "' at row " << linkBackRow_ << " col '"
+		   << linkParentTable_->getView().getColumnInfo(linkBackCol_).getName() << ".'" << __E__;
 
 		ss << StringMacros::stackTrace() << __E__;
 	}
@@ -475,7 +484,7 @@ const std::string& ConfigurationTree::getFieldTableName(void) const
 	// if link node, need config name from parent
 	if(isLinkNode())
 	{
-		if(!linkParentConfig_)
+		if(!linkParentTable_)
 		{
 			__SS__ << "Can not get configuration name of link node field with no parent "
 			          "configuration pointer!"
@@ -483,7 +492,7 @@ const std::string& ConfigurationTree::getFieldTableName(void) const
 			ss << nodeDump() << __E__;
 			__SS_ONLY_THROW__;
 		}
-		return linkParentConfig_->getTableName();
+		return linkParentTable_->getTableName();
 	}
 	else
 		return getTableName();
@@ -585,7 +594,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 
 	if(isLinkNode())
 	{
-		if(!linkParentConfig_)
+		if(!linkParentTable_)
 		{
 			__SS__ << "Can not get fixed choices of node with no parent config view pointer!" << __E__;
 
@@ -599,7 +608,7 @@ std::vector<std::string> ConfigurationTree::getFixedChoices(void) const
 		// for links, col_ = -1, column c needs to change (to ChildLink column of pair)
 		// get column from parent config pointer
 
-		const TableView* parentView = &(linkParentConfig_->getView());
+		const TableView* parentView = &(linkParentTable_->getView());
 		int              c          = parentView->findCol(linkColName_);
 
 		std::pair<unsigned int /*link col*/, unsigned int /*link id col*/> linkPair;
@@ -970,7 +979,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 	{
 		//__COUT__ << row_ << " " << col_ <<  " " << groupId_ << " " << tableView_ <<
 		// __E__;
-		if(!table_)
+		if(isRootNode())
 		{
 			// root node
 			// so return table node
@@ -994,7 +1003,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 			return recurse(ConfigurationTree(configMgr_,
 			                                 table_,
 			                                 "",  // no new groupId string, not a link
-			                                 0 /*linkParentConfig_*/,
+			                                 0 /*linkParentTable_*/,
 			                                 "",  // link node name, not a link
 			                                 "",  // link node value, not a link
 			                                 TableView::INVALID /*linkBackRow_*/,
@@ -1074,7 +1083,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 					return ConfigurationTree(configMgr_,
 					                         0,
 					                         "",
-					                         table_,  // linkParentConfig_
+					                         table_,  // linkParentTable_
 					                         nodeName,
 					                         tableView_->getDataView()[row_][c],  // this the link node field
 					                                                              // associated value (matches
@@ -1094,7 +1103,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				                   configMgr_,
 				                   childConfig,
 				                   "",                                  // no new groupId string
-				                   table_,                              // linkParentConfig_
+				                   table_,                              // linkParentTable_
 				                   nodeName,                            // this is a link node
 				                   tableView_->getDataView()[row_][c],  // this the link node field
 				                                                        // associated value (matches
@@ -1134,7 +1143,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 					return ConfigurationTree(configMgr_,
 					                         0,
 					                         tableView_->getDataView()[row_][linkPair.second],  // groupID
-					                         table_,                                            // linkParentConfig_
+					                         table_,                                            // linkParentTable_
 					                         nodeName,
 					                         tableView_->getDataView()[row_][c],  // this the link node field
 					                                                              // associated value (matches
@@ -1154,7 +1163,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				                   configMgr_,
 				                   childConfig,
 				                   tableView_->getDataView()[row_][linkPair.second],  // groupId string
-				                   table_,                                            // linkParentConfig_
+				                   table_,                                            // linkParentTable_
 				                   nodeName,                                          // this is a link node
 				                   tableView_->getDataView()[row_][c],                // this the link node field
 				                                                                      // associated value (matches
@@ -1175,7 +1184,7 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 				return ConfigurationTree(configMgr_,
 				                         table_,
 				                         "",
-				                         0 /*linkParentConfig_*/,
+				                         0 /*linkParentTable_*/,
 				                         "",
 				                         "",
 				                         TableView::INVALID /*linkBackRow_*/,
@@ -1205,7 +1214,12 @@ ConfigurationTree ConfigurationTree::recursiveGetNode(const std::string& nodeStr
 		       << "'\n\n"
 		       << __E__;
 		ss << "The original node search string was '" << originalNodeString << ".'" << __E__;
-
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		ss << nodeDump() << __E__;
 		__SS_ONLY_THROW__;
 	}
@@ -1256,7 +1270,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	try
 	{
 		ss << "\t"
-		   << "Error occurred from node '" << getValueAsString() << "'..." << __E__;
+		   << "Node dump initiated from node '" << getValueAsString() << "'..." << __E__;
 	}
 	catch(...)
 	{
@@ -1264,7 +1278,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	try
 	{
 		ss << "\t"
-		   << "Error occurred from node '" << getValue() << "' in table '" << getTableName() << ".'" << __E__;
+		   << "Node dump initiated from node '" << getValue() << "' in table '" << getTableName() << ".'" << __E__;
 	}
 	catch(...)
 	{
@@ -1291,7 +1305,7 @@ std::string ConfigurationTree::nodeDump(void) const
 	{
 	}  // ignore errors trying to show children
 
-	ss << "end ConfigurationTree::nodeDump() =====================================" << __E__;
+	ss << "\n\nend ConfigurationTree::nodeDump() =====================================" << __E__;
 
 	return ss.str();
 }  // end nodeDump()
@@ -1375,7 +1389,7 @@ const std::string ConfigurationTree::NODE_TYPE_ROOT        = "RootNode";
 
 std::string ConfigurationTree::getNodeType(void) const
 {
-	if(!table_)
+	if(isRootNode())
 		return ConfigurationTree::NODE_TYPE_ROOT;
 	if(isTableNode() && groupId_ != "")
 		return ConfigurationTree::NODE_TYPE_GROUP_TABLE;
@@ -2059,7 +2073,6 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 	//__COUT__ << "Children of node: " << getValueAsString() << __E__;
 
 	bool        filtering = filterMap.size();
-	bool        skip;
 	std::string fieldValue;
 
 	bool createContainer;
@@ -2074,67 +2087,9 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 		{
 			//__COUT__ << "\tChild: " << childName << __E__;
 
-			if(filtering)
-			{
-				// if all criteria are not met, then skip
-				skip = false;
-
-				// for each filter, check value
-				for(const auto& filterPair : filterMap)
-				{
-					std::string filterPath = childName + "/" + filterPair.first;
-					__COUTV__(filterPath);
-					try
-					{
-						// extract field value list
-						std::vector<std::string> fieldValues;
-						StringMacros::getVectorFromString(filterPair.second, fieldValues, std::set<char>({','}) /*delimiters*/);
-
-						__COUTV__(fieldValues.size());
-
-						skip = true;
-						// for each field check if any match
-						for(const auto& fieldValue : fieldValues)
-						{
-							// Note: that ConfigurationTree maps both fields associated
-							// with a link 	to the same node instance.  The behavior is
-							// likely not expected as response for this function.. 	so for
-							// links return actual value for field name specified 	i.e.
-							// if Table of link is requested give that; if linkID is
-							// requested give that.  use TRUE in getValueAsString for
-							// proper
-							// behavior
-
-							__COUT__ << "\t\tCheck: " << filterPair.first << " == " << fieldValue << " => " << StringMacros::decodeURIComponent(fieldValue)
-							         << " ??? " << this->getNode(filterPath).getValueAsString(true) << __E__;
-
-							if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), this->getNode(filterPath).getValueAsString(true)))
-							{
-								// found a match for the field/value pair
-								skip = false;
-								break;
-							}
-						}
-					}
-					catch(...)
-					{
-						__SS__ << "Failed to access filter path '" << filterPath << "' - aborting." << __E__;
-
-						ss << nodeDump() << __E__;
-						__SS_THROW__;
-					}
-
-					if(skip)
-						break;  // no match for this field, so stop checking and skip this
-						        // record
-				}
-
-				if(skip)
-					continue;  // skip this record
-
-				//__COUT__ << "\tChild accepted: " << childName << __E__;
-			}
-
+			if(filtering) // if all criteria are not met, then skip
+				if(!passFilterMap(childName,filterMap)) continue;			
+			
 			if(createContainer)
 			{
 				retVector.push_back(std::vector<std::pair<std::string, ConfigurationTree>>());
@@ -2150,6 +2105,99 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 }  // end getChildrenByPriority()
 
 //==============================================================================
+// passFilterMap
+//		returns true if childName meets all critera
+bool ConfigurationTree::passFilterMap(const std::string& childName, std::map<std::string /*relative-path*/, std::string /*value*/> filterMap) const
+{
+	// if all criteria are not met, then skip
+	bool skip = false;
+
+	// for each filter, check value
+	for(const auto& filterPair : filterMap)
+	{
+		std::string filterPath = childName + "/" + filterPair.first;
+		__COUTV__(filterPath);
+
+		ConfigurationTree childNode = this->getNode(filterPath);
+		try
+		{
+			// extract field value list
+			std::vector<std::string> fieldValues;
+			StringMacros::getVectorFromString(filterPair.second, fieldValues, std::set<char>({','}) /*delimiters*/);
+
+			__COUTV__(fieldValues.size());
+
+			skip = true;
+			// for each field check if any match
+			for(const auto& fieldValue : fieldValues)
+			{
+				// Note: that ConfigurationTree maps both fields associated with a
+				// link 	to the same node instance.  The behavior is likely not
+				// expected as response for this function.. 	so for links
+				// return
+				// actual value for field name specified 	i.e. if Table of link
+				// is requested give that; if linkID is requested give that.  use
+				// TRUE in getValueAsString for proper behavior
+
+				if(childNode.isGroupIDNode())
+				{
+					// handle groupID node special, check against set of groupIDs
+
+					bool                  groupIdFound  = false;
+					std::set<std::string> setOfGroupIDs = childNode.getSetOfGroupIDs();
+
+					for(auto& groupID : setOfGroupIDs)
+					{
+						__COUT__ << "\t\tGroupID Check: " << filterPair.first << " == " << fieldValue << " => "
+									<< StringMacros::decodeURIComponent(fieldValue) << " ??? " << groupID << __E__;
+
+						if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), groupID))
+						{
+							// found a match for the field/groupId pair
+							__COUT__ << "Found match" << __E__;
+							groupIdFound = true;
+							break;
+						}
+					}  // end groupID search
+
+					if(groupIdFound)
+					{
+						// found a match for the field/groupId-set pair
+						__COUT__ << "Found break match" << __E__;
+						skip = false;
+						break;
+					}
+				}
+				else  // normal child node, check against value
+				{
+					__COUT__ << "\t\tCheck: " << filterPair.first << " == " << fieldValue << " => " << StringMacros::decodeURIComponent(fieldValue)
+								<< " ??? " << childNode.getValueAsString(true) << __E__;
+
+					if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), childNode.getValueAsString(true)))
+					{
+						// found a match for the field/value pair
+						skip = false;
+						break;
+					}
+				}
+			}
+		}
+		catch(...)
+		{
+			__SS__ << "Failed to access filter path '" << filterPath << "' - aborting." << __E__;
+
+			ss << nodeDump() << __E__;
+			__SS_THROW__;
+		}
+
+		if(skip)
+			break;  // no match for this field, so stop checking and skip this
+					// record
+	}
+	return !skip;
+} //end passFilterMap()
+
+//==============================================================================
 // getChildren
 //	returns them in order encountered in the table
 //	if filterMap criteria, then rejects any that do not meet all criteria
@@ -2160,114 +2208,21 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 //
 std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChildren(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
                                                                                       bool                                                           byPriority,
-                                                                                      bool onlyStatusTrue) const
+                                                                                      bool 															 onlyStatusTrue) const
 {
 	std::vector<std::pair<std::string, ConfigurationTree>> retVector;
 
 	//__COUT__ << "Children of node: " << getValueAsString() << __E__;
 
 	bool        filtering = filterMap.size();
-	bool        skip;
+	// bool        skip;
 	std::string fieldValue;
 
 	std::vector<std::string> childrenNames = getChildrenNames(byPriority, onlyStatusTrue);
 	for(auto& childName : childrenNames)
 	{
-		//__COUT__ << "\tChild: " << childName << __E__;
-
-		if(filtering)
-		{
-			// if all criteria are not met, then skip
-			skip = false;
-
-			// for each filter, check value
-			for(const auto& filterPair : filterMap)
-			{
-				std::string filterPath = childName + "/" + filterPair.first;
-				__COUTV__(filterPath);
-
-				ConfigurationTree childNode = this->getNode(filterPath);
-				try
-				{
-					// extract field value list
-					std::vector<std::string> fieldValues;
-					StringMacros::getVectorFromString(filterPair.second, fieldValues, std::set<char>({','}) /*delimiters*/);
-
-					__COUTV__(fieldValues.size());
-
-					skip = true;
-					// for each field check if any match
-					for(const auto& fieldValue : fieldValues)
-					{
-						// Note: that ConfigurationTree maps both fields associated with a
-						// link 	to the same node instance.  The behavior is likely not
-						// expected as response for this function.. 	so for links
-						// return
-						// actual value for field name specified 	i.e. if Table of link
-						// is requested give that; if linkID is requested give that.  use
-						// TRUE in getValueAsString for proper behavior
-
-						if(childNode.isGroupIDNode())
-						{
-							// handle groupID node special, check against set of groupIDs
-
-							bool                  groupIdFound  = false;
-							std::set<std::string> setOfGroupIDs = childNode.getSetOfGroupIDs();
-
-							for(auto& groupID : setOfGroupIDs)
-							{
-								__COUT__ << "\t\tGroupID Check: " << filterPair.first << " == " << fieldValue << " => "
-								         << StringMacros::decodeURIComponent(fieldValue) << " ??? " << groupID << __E__;
-
-								if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), groupID))
-								{
-									// found a match for the field/groupId pair
-									__COUT__ << "Found match" << __E__;
-									groupIdFound = true;
-									break;
-								}
-							}  // end groupID search
-
-							if(groupIdFound)
-							{
-								// found a match for the field/groupId-set pair
-								__COUT__ << "Found break match" << __E__;
-								skip = false;
-								break;
-							}
-						}
-						else  // normal child node, check against value
-						{
-							__COUT__ << "\t\tCheck: " << filterPair.first << " == " << fieldValue << " => " << StringMacros::decodeURIComponent(fieldValue)
-							         << " ??? " << childNode.getValueAsString(true) << __E__;
-
-							if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), childNode.getValueAsString(true)))
-							{
-								// found a match for the field/value pair
-								skip = false;
-								break;
-							}
-						}
-					}
-				}
-				catch(...)
-				{
-					__SS__ << "Failed to access filter path '" << filterPath << "' - aborting." << __E__;
-
-					ss << nodeDump() << __E__;
-					__SS_THROW__;
-				}
-
-				if(skip)
-					break;  // no match for this field, so stop checking and skip this
-					        // record
-			}
-
-			if(skip)
-				continue;  // skip this record
-
-			//__COUT__ << "\tChild accepted: " << childName << __E__;
-		}
+		if(filtering && // if all criteria are not met, then skip
+			!passFilterMap(childName,filterMap)) continue;		
 
 		retVector.push_back(std::pair<std::string, ConfigurationTree>(childName, this->getNode(childName, true)));
 	}
@@ -2277,29 +2232,31 @@ std::vector<std::pair<std::string, ConfigurationTree>> ConfigurationTree::getChi
 }  // end getChildren()
 
 //==============================================================================
-// getChildren
-//	returns them in order encountered in the table
-std::map<std::string, ConfigurationTree> ConfigurationTree::getChildrenMap(void) const
+// getChildrenMap
+//	does not return them in order encountered in the table,
+//	instead, in alphabetical order of map
+std::map<std::string, ConfigurationTree> ConfigurationTree::getChildrenMap(std::map<std::string /*relative-path*/, std::string /*value*/> filterMap,
+																			bool onlyStatusTrue) const
 {
 	std::map<std::string, ConfigurationTree> retMap;
 
+	bool        filtering = filterMap.size();
+
 	//__COUT__ << "Children of node: " << getValueAsString() << __E__;
-	std::vector<std::string> childrenNames = getChildrenNames();
+	std::vector<std::string> childrenNames = getChildrenNames(false /* byPriority */, onlyStatusTrue);
 	for(auto& childName : childrenNames)
 	{
 		//__COUT__ << "\tChild: " << childName << __E__;
+
+		// if all criteria are not met, then skip
+		if(filtering && !passFilterMap(childName,filterMap)) continue;
+		
 		retMap.insert(std::pair<std::string, ConfigurationTree>(childName, this->getNode(childName)));
 	}
 
 	//__COUT__ << "Done w/Children of node: " << getValueAsString() << __E__;
 	return retMap;
 }  // end getChildrenMap()
-
-//==============================================================================
-inline bool ConfigurationTree::isRootNode(void) const { return (!table_); }
-
-//==============================================================================
-inline bool ConfigurationTree::isTableNode(void) const { return (table_ && row_ == TableView::INVALID && col_ == TableView::INVALID); }
 
 //==============================================================================
 // same as status()
@@ -2311,8 +2268,16 @@ bool ConfigurationTree::isEnabled(void) const
 		__SS_THROW__;
 	}
 
-	bool tmpStatus;
-	tableView_->getValue(tmpStatus, row_, tableView_->getColStatus());
+	bool tmpStatus = true;
+	try
+	{
+		tableView_->getValue(tmpStatus, row_, tableView_->getColStatus());
+	}
+	catch(const std::runtime_error& e)
+	{
+		//ignore error, assuming does not have a status column
+		//default to enabled if no status
+	}	
 	return tmpStatus;
 }  // end isEnabled()
 

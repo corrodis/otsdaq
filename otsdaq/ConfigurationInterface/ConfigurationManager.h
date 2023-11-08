@@ -26,6 +26,13 @@ class ConfigurationManager
 	friend class GatewaySupervisor;
 
   public:
+
+	typedef std::map<std::string,
+		std::pair< 
+			std::pair<std::string, TableGroupKey>,
+			std::map<std::string, TableVersion> /* memberMap */ 
+			>> lastGroupLoad_t;
+
 	//==============================================================================
 	// Static members
 	static const unsigned int PROCESSOR_COUNT;
@@ -117,7 +124,7 @@ class ConfigurationManager
 	
 	void 								loadTableGroup				(
 	    const std::string&                                     configGroupName,
-	    TableGroupKey                                          tableGroupKey,
+	    const TableGroupKey&                                   tableGroupKey,
 	    bool                                                   doActivate         = false,
 	    std::map<std::string, TableVersion>*                   groupMembers       = 0,
 	    ProgressBar*                                           progressBar        = 0,
@@ -130,6 +137,15 @@ class ConfigurationManager
 	    std::map<std::string /*name*/, std::string /*alias*/>* groupAliases       = 0,
 	    ConfigurationManager::LoadGroupType					   onlyLoadIfBackboneOrContext = ConfigurationManager::LoadGroupType::ALL_TYPES,
 		bool												   ignoreVersionTracking = false);
+	void 								copyTableGroupFromCache		(
+		const ConfigurationManager&								cacheConfigMgr, 	
+	    const std::map<std::string, TableVersion>&             	groupMembers,
+	    const std::string&                                      configGroupName 	= "",
+	    const TableGroupKey&                                    tableGroupKey		= TableGroupKey(TableGroupKey::INVALID),
+	    bool                                                   	doActivate        = false,
+		bool													ignoreVersionTracking = false);	
+	std::pair<std::string /* groupName */, TableGroupKey>
+										getGroupOfLoadedTable		(const std::string& tableName) const;
 	void 								loadMemberMap				(const std::map<std::string /*name*/, TableVersion /*version*/>& memberMap, std::string* accumulateWarnings = 0);
 	TableGroupKey 						loadConfigurationBackbone	(void);
 
@@ -161,6 +177,7 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 	const std::map<std::string /*groupType*/,
 		std::pair<std::string /*groupName*/,
 		TableGroupKey>>& 				getFailedTableGroups		(void) const {return lastFailedGroupLoad_;}
+	const lastGroupLoad_t& 				getLastTableGroups			(void) const {return lastGroupLoad_;}
 	const std::string& 					getActiveGroupName			(const ConfigurationManager::GroupType& type = ConfigurationManager::GroupType::CONFIGURATION_TYPE) const;
 	TableGroupKey      					getActiveGroupKey			(const ConfigurationManager::GroupType& type = ConfigurationManager::GroupType::CONFIGURATION_TYPE) const;
 
@@ -173,6 +190,8 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 
 	std::vector<std::pair<std::string /*childName*/,
 		ConfigurationTree>> 			getChildren					(std::map<std::string, TableVersion>* memberMap = 0, std::string* accumulatedTreeErrors = 0) const;
+	std::map<std::string /*childName*/,
+		ConfigurationTree>	 			getChildrenMap				(std::map<std::string, TableVersion>* memberMap = 0, std::string* accumulatedTreeErrors = 0) const;	
 	std::string 						getFirstPathToNode			(const ConfigurationTree& node, const std::string& startPath = "/") const;
 
 	std::map<std::string, TableVersion> getActiveVersions			(void) const;
@@ -227,6 +246,9 @@ const T* retPtr = dynamic_cast<const T*>(srcPtr); if(retPtr == nullptr) { __SS__
 
 	std::map<std::string, 
 		std::pair<std::string, TableGroupKey>> 			lastFailedGroupLoad_;
+	lastGroupLoad_t										lastGroupLoad_;
+
+
 
 	std::map<std::string, TableBase*> 					nameToTableMap_;
 

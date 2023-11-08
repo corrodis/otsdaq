@@ -229,6 +229,12 @@ catch(std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Error saving new table!" << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleCreateTableXML() catch
@@ -500,6 +506,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Failed to create table group: " << groupName << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		return;
@@ -530,15 +542,23 @@ try
 	}
 	catch(std::runtime_error& e)
 	{
-		__COUT_ERR__ << "Failed to create table group: " << groupName << __E__;
-		__COUT_ERR__ << "\n\n" << e.what() << __E__;
-		xmlOut.addTextElementToData("Error", "Failed to create table group: " + groupName + ".\n\n" + e.what());
+		__SS__ << "Failed to create table group: " << groupName << __E__;
+		ss << "\n\n" << e.what() << __E__;
+		__COUT_ERR__ << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 		return;
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "Failed to create table group: " << groupName << __E__;
-		xmlOut.addTextElementToData("Error", "Failed to create table group: " + groupName);
+		__SS__ << "Failed to create table group: " << groupName << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
+		__COUT_ERR__ << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 		return;
 	}
 
@@ -555,13 +575,19 @@ try
 catch(std::runtime_error& e)
 {
 	__SS__ << "Error saving table group!\n\n " << e.what() << __E__;
-	__COUT__ << "\n" << ss.str() << __E__;
+	__COUT_ERR__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
 	__SS__ << "Error saving table group!" << __E__;
-	__COUT__ << "\n" << ss.str() << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
+	__COUT_ERR__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleCreateTableGroupXML() catch
 
@@ -742,6 +768,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Table group \"" + groupName + "(" + groupKey.toString() + ")" + "\" members can not be loaded!" << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		// return;
@@ -829,13 +861,19 @@ try
 }  // end handleGetTableGroupXML()
 catch(std::runtime_error& e)
 {
-	__SS__ << ("Error!\n\n" + std::string(e.what())) << __E__;
+	__SS__ << ("Error getting table group!\n\n" + std::string(e.what())) << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 	xmlOut.addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
-	__SS__ << ("Error!\n\n") << __E__;
+	__SS__ << ("Error getting table group!\n\n") << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleGetTableGroupXML() catch
@@ -1584,6 +1622,12 @@ catch(std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Error adding Desktop Icon!" << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 	return false;
@@ -1717,6 +1761,12 @@ catch(...)
 	__SS__ << ("Error copying tree target '" + uidToCopy + "' at depth " + std::to_string(startingDepth - depth) + " in table '" + cfgView->getTableName() +
 	           ".' ")
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end recursiveCopyTreeUIDNode

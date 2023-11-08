@@ -33,7 +33,7 @@ const std::string DesktopIconTable::COL_PARAMETER_GID   = "windowParameterGroupI
 const std::string DesktopIconTable::COL_PARAMETER_KEY   = "windowParameterKey";
 const std::string DesktopIconTable::COL_PARAMETER_VALUE = "windowParameterValue";
 
-const std::string DesktopIconTable::ICON_TABLE      = "DesktopIconTable";
+const std::string DesktopIconTable::ICON_TABLE      = ConfigurationManager::DESKTOP_ICON_TABLE_NAME;
 const std::string DesktopIconTable::PARAMETER_TABLE = "DesktopWindowParameterTable";
 
 // #define COL_NAME "IconName"
@@ -94,7 +94,7 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 	{
 		if(!child.second.getNode(COL_STATUS).getValue<bool>())
 			continue;
-		__COUTV__(child.first);
+		// __COUTV__(child.first);
 
 		activeDesktopIcons_.push_back(DesktopIconTable::DesktopIcon());
 		icon = &(activeDesktopIcons_.back());
@@ -176,14 +176,14 @@ void DesktopIconTable::init(ConfigurationManager* configManager)
 			if(icon->windowContentURL_[icon->windowContentURL_.size() - 1] != '=')
 				icon->windowContentURL_ += "?urn=";
 
-			__COUT__ << "Following Application link." << std::endl;
+			// __COUT__ << "Following Application link." << std::endl;
 			appLink.getNode(COL_APP_ID).getValue(intVal);
 			icon->windowContentURL_ += std::to_string(intVal);
 
-			__COUT__ << "URN/LID=" << intVal << std::endl;
+			// __COUT__ << "URN/LID=" << intVal << std::endl;
 			addedAppId = true;
 		}
-		__COUTV__(icon->windowContentURL_);
+		// __COUTV__(icon->windowContentURL_);
 
 		// add parameters if link is given
 		if(!child.second.getNode(COL_PARAMETER_LINK).isDisconnected())

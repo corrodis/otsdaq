@@ -46,15 +46,16 @@ class TableBase
 	void         				trimCache						(unsigned int trimSize = -1);
 	void         				trimTemporary					(TableVersion targetVersion = TableVersion());
 	TableVersion 				checkForDuplicate				(TableVersion needleVersion, TableVersion ignoreVersion = TableVersion()) const;
-	bool		 				diffTwoVersions					(TableVersion v1, TableVersion v2, std::stringstream* diffReport = 0) const;
+	bool		 				diffTwoVersions					(TableVersion v1, TableVersion v2, std::stringstream* diffReport = 0, 
+																std::map<std::string /* uid */, std::vector<std::string /* colName */>>* v1ModifiedRecords = 0) const;
 
 	// Getters
 	const std::string&     		getTableName					(void) const;
 	const std::string&     		getTableDescription				(void) const;
 	std::set<TableVersion> 		getStoredVersions				(void) const;
 
-	const TableView&    		getView							(void) const;
-	TableView*          		getViewP						(void);
+	const TableView&    		getView							(TableVersion version = TableVersion(TableVersion::INVALID)) const;
+	TableView*          		getViewP						(TableVersion version = TableVersion(TableVersion::INVALID));
 	TableView*          		getMockupViewP					(void);
 	const TableVersion& 		getViewVersion					(void) const;  // always the active one
 
@@ -66,7 +67,7 @@ class TableBase
 	void         				setTableName					(const std::string& tableName);
 	void         				setTableDescription				(const std::string& tableDescription);
 	bool         				setActiveView					(TableVersion version);
-	TableVersion 				copyView						(const TableView& sourceView, TableVersion destinationVersion, const std::string& author);
+	TableVersion 				copyView						(const TableView& sourceView, TableVersion destinationVersion, const std::string& author, bool looseColumnMatching = false);
 	TableVersion 				mergeViews						(
 																const TableView&                          sourceViewA,
 																const TableView&                          sourceViewB,

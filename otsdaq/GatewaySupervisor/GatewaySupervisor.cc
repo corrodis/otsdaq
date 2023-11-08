@@ -739,6 +739,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}  // end stateMachineIterationBreakpoint() catch
@@ -754,6 +760,12 @@ catch(const std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << ss.str();
 }  // end stateMachineIterationBreakpoint() catch
 
@@ -1107,6 +1119,12 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 			{
 				// ERROR
 				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SS_THROW__;
 			}  // End write run info into db
 
@@ -1236,6 +1254,12 @@ void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO PAUSE TIME UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End update pause time into run info db
 	}      // end update Run Info handling
@@ -1290,6 +1314,12 @@ void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO RESUME TIME UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End update pause time into run info db
 	}      // end update Run Info handling
@@ -1350,6 +1380,12 @@ void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1410,6 +1446,12 @@ void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*
 		{
 			// ERROR
 			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1473,6 +1515,12 @@ void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1664,6 +1712,12 @@ try
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
 		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		ss << "\n\nTo help debug this problem, try activating this group in the Configuration "
 		      "GUI "
 		   << " and detailed errors will be shown." << __E__;
@@ -1746,6 +1800,12 @@ try
 				__SS__ << "\nTransition to Configuring interrupted! There was an error "
 				          "identified "
 				       << "during the configuration dump attempt.\n\n " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__COUT_ERR__ << "\n" << ss.str();
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				return;
@@ -1832,6 +1892,12 @@ catch(...)
 	__SS__ << "\nTransition to Configuring interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionConfiguring() catch
@@ -1873,6 +1939,12 @@ catch(...)
 	__SS__ << "\nTransition to Halting interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionHalting() catch
@@ -1930,6 +2002,12 @@ catch(...)
 	__SS__ << "\nTransition to Shutting Down interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionShuttingDown() catch
@@ -1984,6 +2062,12 @@ catch(...)
 	__SS__ << "\nTransition to Starting Up interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStartingUp() catch
@@ -2025,6 +2109,12 @@ catch(...)
 	__SS__ << "\nTransition to Initializing interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionInitializing() catch
@@ -2091,6 +2181,12 @@ catch(...)
 	__SS__ << "\nTransition to Pausing interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionPausing() catch
@@ -2147,6 +2243,12 @@ catch(...)
 	__SS__ << "\nTransition to Resuming interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionResuming() catch
@@ -2242,6 +2344,12 @@ try
 				__SS__ << "\nTransition to Running interrupted! There was an error "
 				          "identified "
 				       << "during the configuration dump attempt.\n\n " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__COUT_ERR__ << "\n" << ss.str();
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				return;
@@ -2296,6 +2404,12 @@ catch(...)
 	__SS__ << "\nTransition to Starting Run interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStarting() catch
@@ -2361,6 +2475,12 @@ catch(...)
 	__SS__ << "\nTransition to Stopping Run interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStopping() catch
@@ -3267,6 +3387,12 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 	{
 		__SS__ << "An unknown error was encountered handling Command '" << Command << ".' "
 		       << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT__ << "\n" << ss.str();
 		HttpXmlDocument xmldoc;
 		xmldoc.addTextElementToData("Error", ss.str());
@@ -4130,6 +4256,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	{
 		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 		       << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
