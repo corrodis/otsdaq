@@ -2073,7 +2073,6 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 	//__COUT__ << "Children of node: " << getValueAsString() << __E__;
 
 	bool        filtering = filterMap.size();
-	// bool        skip;
 	std::string fieldValue;
 
 	bool createContainer;
@@ -2088,68 +2087,9 @@ std::vector<std::vector<std::pair<std::string, ConfigurationTree>>> Configuratio
 		{
 			//__COUT__ << "\tChild: " << childName << __E__;
 
-			if(filtering)
-			{
-				// if all criteria are not met, then skip
-				if(!passFilterMap(childName,filterMap)) continue;
-				// skip = false;
-
-				// // for each filter, check value
-				// for(const auto& filterPair : filterMap)
-				// {
-				// 	std::string filterPath = childName + "/" + filterPair.first;
-				// 	__COUTV__(filterPath);
-				// 	try
-				// 	{
-				// 		// extract field value list
-				// 		std::vector<std::string> fieldValues;
-				// 		StringMacros::getVectorFromString(filterPair.second, fieldValues, std::set<char>({','}) /*delimiters*/);
-
-				// 		__COUTV__(fieldValues.size());
-
-				// 		skip = true;
-				// 		// for each field check if any match
-				// 		for(const auto& fieldValue : fieldValues)
-				// 		{
-				// 			// Note: that ConfigurationTree maps both fields associated
-				// 			// with a link 	to the same node instance.  The behavior is
-				// 			// likely not expected as response for this function.. 	so for
-				// 			// links return actual value for field name specified 	i.e.
-				// 			// if Table of link is requested give that; if linkID is
-				// 			// requested give that.  use TRUE in getValueAsString for
-				// 			// proper
-				// 			// behavior
-
-				// 			__COUT__ << "\t\tCheck: " << filterPair.first << " == " << fieldValue << " => " << StringMacros::decodeURIComponent(fieldValue)
-				// 			         << " ??? " << this->getNode(filterPath).getValueAsString(true) << __E__;
-
-				// 			if(StringMacros::wildCardMatch(StringMacros::decodeURIComponent(fieldValue), this->getNode(filterPath).getValueAsString(true)))
-				// 			{
-				// 				// found a match for the field/value pair
-				// 				skip = false;
-				// 				break;
-				// 			}
-				// 		}
-				// 	}
-				// 	catch(...)
-				// 	{
-				// 		__SS__ << "Failed to access filter path '" << filterPath << "' - aborting." << __E__;
-
-				// 		ss << nodeDump() << __E__;
-				// 		__SS_THROW__;
-				// 	}
-
-				// 	if(skip)
-				// 		break;  // no match for this field, so stop checking and skip this
-				// 		        // record
-				// }
-
-				// if(skip)
-				// 	continue;  // skip this record
-
-				//__COUT__ << "\tChild accepted: " << childName << __E__;
-			}
-
+			if(filtering) // if all criteria are not met, then skip
+				if(!passFilterMap(childName,filterMap)) continue;			
+			
 			if(createContainer)
 			{
 				retVector.push_back(std::vector<std::pair<std::string, ConfigurationTree>>());
