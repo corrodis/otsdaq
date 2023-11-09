@@ -382,8 +382,7 @@ catch(...)
 // create a new configuration group from the contents map
 table_version_map_t DatabaseConfigurationInterface::getCachedTableGroupMembers(std::string const& tableGroup) const
 try
-{
-	throw std::runtime_error("DONT load CONTINUE FOR NOW!");	
+{	
 	table_version_map_t retMap;
 
 	//Flow:
@@ -439,7 +438,6 @@ catch(...)
 void DatabaseConfigurationInterface::saveTableGroupMemberCache(table_version_map_t const& memberMap, std::string const& tableGroup) const
 try
 {
-	return;
 	//Flow:
 	//	when saveTableGroup() is called
 	//		saveDocument (collection: "GroupCache_" + tableGroup, version: groupKey)
@@ -518,9 +516,7 @@ try
 		return resultList;
 	};
 
-	// auto result = ifc.storeGlobalConfiguration_mt(to_list(memberMap), tableGroup);
-	auto result = ifc.storeGlobalConfiguration(to_list(memberMap), tableGroup);
-
+	auto result = ifc.storeGlobalConfiguration_mt(to_list(memberMap), tableGroup);
 
 	auto end      = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

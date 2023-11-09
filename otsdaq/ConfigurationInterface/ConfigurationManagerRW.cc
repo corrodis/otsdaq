@@ -377,6 +377,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 							groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 							groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+							groupInfo.second.latestKeyMemberMap_   	     = {};
 						}
 					}  // end group info loop
 				else //multi-threading
@@ -392,7 +393,9 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 
 					for(auto& groupInfo : allGroupInfo_)
 					{
-						sharedGroupInfoPtrs.push_back(std::shared_ptr<ots::GroupInfo>(&(groupInfo.second)));
+						//make temporary group info for thread
+						sharedGroupInfoPtrs.push_back(std::make_shared<ots::GroupInfo>());
+
 						if(threadsLaunched >= numOfThreads)
 						{
 							//find availableThreadIndex
@@ -452,6 +455,18 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							usleep(10000);
 						}
 					} while(foundThreadIndex != -1); //end thread done search loop
+
+					//threads done now, so copy group info
+					size_t i = 0;
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						groupInfo.second.latestKeyGroupComment_      = sharedGroupInfoPtrs[i]->latestKeyGroupComment_;
+						groupInfo.second.latestKeyGroupAuthor_       = sharedGroupInfoPtrs[i]->latestKeyGroupAuthor_;
+						groupInfo.second.latestKeyGroupCreationTime_ = sharedGroupInfoPtrs[i]->latestKeyGroupCreationTime_;
+						groupInfo.second.latestKeyGroupTypeString_   = sharedGroupInfoPtrs[i]->latestKeyGroupTypeString_;
+						groupInfo.second.latestKeyMemberMap_   	     = sharedGroupInfoPtrs[i]->latestKeyMemberMap_;
+						++i;
+					} //end copy group info loop
 
 				} //end multi-thread handling
 			}
@@ -522,6 +537,7 @@ catch(...)
 	groupInfo->latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 	groupInfo->latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 	groupInfo->latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+	groupInfo->latestKeyMemberMap_   	   = {};
 	*(threadDone) = true;
 } // end loadTableGroupThread catch
 
@@ -1936,6 +1952,7 @@ void ConfigurationManagerRW::testXDAQContext()
 				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
 			}
 			catch(...)
 			{
@@ -1946,6 +1963,7 @@ void ConfigurationManagerRW::testXDAQContext()
 				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
 			}
 		}  // end group info loop
 		__GEN_COUTV__(runTimeSeconds());
