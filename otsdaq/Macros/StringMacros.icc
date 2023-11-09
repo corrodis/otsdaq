@@ -167,11 +167,17 @@ bool StringMacros::getNumber(const std::string& s, T& retValue)
 			else
 				tmpValue = (T)strtol(number.c_str(), 0, 10);
 		}
-		else
+		else //just try!
 		{
-			__SS__ << "Invalid type '" << StringMacros::demangleTypeName(typeid(retValue).name()) << "' requested for a numeric string. Data was '" << number
-			       << "'" << __E__;
-			__SS_THROW__;
+			if(number.size() > 2 && number[1] == 'x')  // assume hex value
+				tmpValue = (T)strtol(number.c_str(), 0, 16);
+			else if(number.size() > 1 && number[0] == 'b')             // assume binary value
+				tmpValue = (T)strtol(number.substr(1).c_str(), 0, 2);  // skip first 'b' character
+			else
+				tmpValue = (T)strtol(number.c_str(), 0, 10);
+			// __SS__ << "Invalid type '" << StringMacros::demangleTypeName(typeid(retValue).name()) << "' requested for a numeric string. Data was '" << number
+			//        << "'" << __E__;
+			// __SS_THROW__;
 		}
 
 		// apply operation

@@ -17,8 +17,8 @@ const unsigned int TableView::INVALID = -1;
 
 //==============================================================================
 TableView::TableView(const std::string& tableName)
-    : uniqueStorageIdentifier_(tableName)  // hijack momentarily for convert to caps
-    , tableName_(TableBase::convertToCaps(uniqueStorageIdentifier_))
+    : storageData_(tableName)  // hijack momentarily for convert to caps
+    , tableName_(TableBase::convertToCaps(storageData_))
     , version_(TableVersion::INVALID)
     , comment_("")
     , author_("")
@@ -32,7 +32,7 @@ TableView::TableView(const std::string& tableName)
     , sourceColumnMismatchCount_(0)
     , sourceColumnMissingCount_(0)
 {
-	uniqueStorageIdentifier_ = "";  // unhijack
+	storageData_ = "";  // unhijack
 
 	if(tableName == "")
 	{
@@ -83,6 +83,17 @@ TableView& TableView::copy(const TableView& src, TableVersion destinationVersion
 	// RAR remove init() check, because usually copy() is only the first step
 	//	in a series of changes that result in another call to init()
 	// init();  // verify consistency
+
+	std::string tmpCachePrepend = TableBase::GROUP_CACHE_PREPEND;
+	tmpCachePrepend = TableBase::convertToCaps(tmpCachePrepend);
+	__COUT__ << " '" << tableName_ << "' vs "  << tmpCachePrepend << __E__;
+	//if special GROUP CACHE table, handle construction in a special way
+	if(tableName_.substr(0,tmpCachePrepend.length()) == tmpCachePrepend)
+	{
+		__COUT__ << "TableView copy for '" << tableName_ << "' done." << __E__;
+		return *this;
+	} //end special GROUP CACHE table construction
+
 
 	initColUID();  // setup UID column
 	initRowDefaults();
@@ -1703,30 +1714,7 @@ unsigned int TableView::findColByType(const std::string& type, int startingCol) 
 	return INVALID;
 }  // end findColByType()
 
-// Getters
-//==============================================================================
-const std::string& TableView::getUniqueStorageIdentifier(void) const { return uniqueStorageIdentifier_; }
-
-//==============================================================================
-const std::string& TableView::getTableName(void) const { return tableName_; }
-
-//==============================================================================
-const TableVersion& TableView::getVersion(void) const { return version_; }
-
-//==============================================================================
-const std::string& TableView::getComment(void) const { return comment_; }
-
-//==============================================================================
-const std::string& TableView::getAuthor(void) const { return author_; }
-
-//==============================================================================
-const time_t& TableView::getCreationTime(void) const { return creationTime_; }
-
-//==============================================================================
-const time_t& TableView::getLastAccessTime(void) const { return lastAccessTime_; }
-
-//==============================================================================
-const bool& TableView::getLooseColumnMatching(void) const { return fillWithLooseColumnMatching_; }
+// Getters:
 
 //==============================================================================
 // getDataColumnSize
@@ -1737,21 +1725,6 @@ unsigned int TableView::getDataColumnSize(void) const
 		return getNumberOfColumns();
 	return theDataView_[0].size();  // number of columns in first row of data
 }
-
-//==============================================================================
-// getSourceColumnMismatch
-//	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int& TableView::getSourceColumnMismatch(void) const { return sourceColumnMismatchCount_; }
-
-//==============================================================================
-// getSourceColumnMissing
-//	The source information is only valid after modifying the table with ::fillFromJSON
-const unsigned int& TableView::getSourceColumnMissing(void) const { return sourceColumnMissingCount_; }
-
-//==============================================================================
-// getSourceColumnNames
-//	The source information is only valid after modifying the table with ::fillFromJSON
-const std::set<std::string>& TableView::getSourceColumnNames(void) const { return sourceColumnNames_; }
 
 //==============================================================================
 std::set<std::string> TableView::getColumnNames(void) const
@@ -1780,9 +1753,6 @@ std::set<std::string> TableView::getColumnStorageNames(void) const
 		retSet.emplace(colInfo.getStorageName());
 	return retSet;
 }
-
-//==============================================================================
-const std::vector<std::string>& TableView::getDefaultRowValues(void) const { return rowDefaultValues_; }
 
 //==============================================================================
 const std::vector<std::string>& TableView::initRowDefaults(void)
@@ -1844,26 +1814,6 @@ const std::vector<std::string>& TableView::initRowDefaults(void)
 }  // end getDefaultRowValues()
 
 //==============================================================================
-unsigned int TableView::getNumberOfRows(void) const { return theDataView_.size(); }
-
-//==============================================================================
-unsigned int TableView::getNumberOfColumns(void) const { return columnsInfo_.size(); }
-
-//==============================================================================
-const TableView::DataView& TableView::getDataView(void) const { return theDataView_; }
-
-//==============================================================================
-// TableView::DataView* TableView::getDataViewP(void)
-//{
-//	return &theDataView_;
-//}
-
-//==============================================================================
-const std::vector<TableViewColumnInfo>& TableView::getColumnsInfo(void) const { return columnsInfo_; }
-
-//==============================================================================
-std::vector<TableViewColumnInfo>* TableView::getColumnsInfoP(void) { return &columnsInfo_; }
-//==============================================================================
 const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 {
 	if(column >= columnsInfo_.size())
@@ -1878,15 +1828,7 @@ const TableViewColumnInfo& TableView::getColumnInfo(unsigned int column) const
 	return columnsInfo_[column];
 }  // end getColumnInfo()
 
-// Setters
-//==============================================================================
-void TableView::setUniqueStorageIdentifier(const std::string& storageUID) { uniqueStorageIdentifier_ = storageUID; }
-
-//==============================================================================
-// void TableView::setTableName(const std::string& name) { tableName_ = name; }
-
-//==============================================================================
-void TableView::setComment(const std::string& comment) { comment_ = comment; }
+// Setters 
 
 //==============================================================================
 void TableView::setURIEncodedComment(const std::string& uriComment) { comment_ = StringMacros::decodeURIComponent(uriComment); }
@@ -1984,6 +1926,20 @@ void TableView::print(std::ostream& out) const
 //==============================================================================
 void TableView::printJSON(std::ostream& out) const
 {
+
+	{ //handle special GROUP CACHE table
+		std::string tmpCachePrepend = TableBase::GROUP_CACHE_PREPEND;
+		tmpCachePrepend = TableBase::convertToCaps(tmpCachePrepend);
+		__COUT__ << " '" << tableName_ << "' vs "  << tmpCachePrepend << __E__;
+		//if special GROUP CACHE table, handle construction in a special way
+		if(tableName_.substr(0,tmpCachePrepend.length()) == tmpCachePrepend)
+		{
+			out << getCustomStorageData();
+			return;
+		} //end special GROUP CACHE table construction
+	} //end handle special GROUP CACHE table
+
+
 	out << "{\n";
 	out << "\"NAME\" : \"" << tableName_ << "\",\n";
 
@@ -2113,6 +2069,28 @@ std::string restoreJSONStringEntities(const std::string& str)
 //		DATA_SET
 int TableView::fillFromJSON(const std::string& json)
 {
+	{
+		//handle special GROUP CACHE table
+		std::string tmpCachePrepend = TableBase::GROUP_CACHE_PREPEND;
+		tmpCachePrepend = TableBase::convertToCaps(tmpCachePrepend);
+		__COUT__ << " '" << tableName_ << "' vs "  << tmpCachePrepend << __E__;
+		//if special GROUP CACHE table, handle construction in a special way
+		if(tableName_.substr(0,tmpCachePrepend.length()) == tmpCachePrepend)
+		{
+			//remove json { } and all " characters
+			std::string jsonClean = "";
+			for(auto& c : json)
+				if(c == '{' || c == '}' || c == '"' || c == ' ') continue;
+				else jsonClean += c;
+
+			setCustomStorageData(jsonClean);
+			return 0; //success
+		} //end special GROUP CACHE table construction
+	} //end handle special GROUP CACHE table
+
+
+
+
 	bool dbg     = false;  // tableName_ == "ARTDAQEventBuilderTable" || tableName_ == "";
 	bool rawData = getSourceRawData_;
 	if(getSourceRawData_)

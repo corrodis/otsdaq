@@ -388,8 +388,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					for(int i=0;i<numOfThreads;++i)
 						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
 
+					std::vector<std::shared_ptr<ots::GroupInfo>> sharedGroupInfoPtrs;
+
 					for(auto& groupInfo : allGroupInfo_)
 					{
+						sharedGroupInfoPtrs.push_back(std::shared_ptr<ots::GroupInfo>(&(groupInfo.second)));
 						if(threadsLaunched >= numOfThreads)
 						{
 							//find availableThreadIndex
@@ -410,10 +413,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							} //end thread search loop
 							threadsLaunched = numOfThreads - 1;
 						}					
-						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << " for " << 
+							groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")" << __E__;
+
 						*(threadDone[foundThreadIndex]) = false;
 
-						std::shared_ptr<ots::GroupInfo> shareGroupInfoPtr(&(groupInfo.second));
 						std::thread([](
 							ConfigurationManagerRW* 				theCfgMgr, 
 							std::string 							theGroupName, 
@@ -424,7 +428,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							this,
 							groupInfo.first,
 							groupInfo.second.getLatestKey(),
-							shareGroupInfoPtr,
+							sharedGroupInfoPtrs.back(),
 							threadDone[foundThreadIndex])
 		    			.detach();
 
@@ -493,6 +497,9 @@ void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cf
 													std::shared_ptr<std::atomic<bool>> 	threadDone)
 try
 {
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Thread started... " << 
+		groupName << "(" << groupKey << ")" << __E__;
+
 	cfgMgr->loadTableGroup(groupName/*groupName*/,
 		groupKey, //groupInfo->getLatestKey(),
 		false /*doActivate*/,

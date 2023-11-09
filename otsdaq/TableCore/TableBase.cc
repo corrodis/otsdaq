@@ -12,6 +12,8 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<> ")
 
+const std::string TableBase::GROUP_CACHE_PREPEND = "GroupCache_";
+
 //==============================================================================
 // TableBase
 //	If a valid string pointer is passed in accumulatedExceptions
@@ -46,6 +48,13 @@ TableBase::TableBase(const std::string& tableName,
 		std::cout << "TableBase After traceTID=" << traceTID << __E__;
 		__COUT__ << "TableBase TRACE reinit and Constructed." << __E__;
 	}
+
+	//if special GROUP CACHE table, handle construction in a special way
+	if(tableName.substr(0,TableBase::GROUP_CACHE_PREPEND.length()) == TableBase::GROUP_CACHE_PREPEND)
+	{
+		__COUT__ << "TableBase for '" << tableName << "' constructed." << __E__;
+		return;
+	} //end special GROUP CACHE table construction
 
 	bool dbg = false;  // tableName == "ARTDAQEventBuilderTable";
 	if(dbg)
@@ -252,7 +261,6 @@ void TableBase::trimTemporary(TableVersion targetVersion)
 	{
 		// else this is a persistent version!
 		__SS__ << "Temporary trim target was a persistent version: " << targetVersion << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 }
@@ -572,13 +580,11 @@ void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, Tabl
 	if(tableViews_.find(temporaryVersion) == tableViews_.end())
 	{
 		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 	if(version.isInvalid())
 	{
 		__SS__ << "ERROR: Attempting to create an invalid version " << version << "! Did you really run out of versions? (this should never happen)" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 
@@ -1384,11 +1390,10 @@ TableVersion TableBase::copyView(const TableView& sourceView, TableVersion desti
 // 	returns new temporary version number (which is always negative)
 TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, TableVersion destTemporaryViewVersion)
 {
-	//__COUT__ << "Table: " << getTableName() << __E__;
-
-	//__COUT__ << "Num of Views: " << tableViews_.size()
-	//         << " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
-	//         << ")" << __E__;
+	__COUT_TYPE__(TLVL_DEBUG + 20) << __COUT_HDR__ << "Table: " << getTableName() << __E__ <<
+		 "Num of Views: " << tableViews_.size()
+		<< " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
+		<< ")" << __E__;
 
 	TableVersion tmpVersion = destTemporaryViewVersion;
 	if(tmpVersion.isInvalid())
@@ -1399,7 +1404,6 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 	if(isStored(tmpVersion) || tmpVersion.isInvalid())
 	{
 		__SS__ << "Invalid destination temporary version: " << destTemporaryViewVersion << ". Expected next temporary version < " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 
@@ -1412,10 +1416,9 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 			       << "Invalid source version. Version requested is not stored (yet?) or "
 			          "does not exist."
 			       << __E__;
-			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		//__COUT__ << "Using Mock-up view" << __E__;
+		__COUT_TYPE__(TLVL_DEBUG + 20) << __COUT_HDR__ << "Using Mock-up view" << __E__;
 		tableViews_.emplace(std::make_pair(tmpVersion, TableView(tableName_)));
 		tableViews_.at(tmpVersion).copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
 	}
@@ -1454,11 +1457,10 @@ TableVersion TableBase::getNextTemporaryVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || !tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination temporary version: " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return tmpVersion;
-}
+} //end getNextTemporaryVersion()
 
 //==============================================================================
 // getNextVersion
@@ -1478,11 +1480,10 @@ TableVersion TableBase::getNextVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination next version: " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return tmpVersion;
-}
+} //end getNextVersion()
 
 //==============================================================================
 // getTemporaryView
@@ -1494,11 +1495,10 @@ TableView* TableBase::getTemporaryView(TableVersion temporaryVersion)
 	if(!temporaryVersion.isTemporaryVersion() || !isStored(temporaryVersion))
 	{
 		__SS__ << getTableName() << ":: Error! Temporary version not found!" << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return &tableViews_.at(temporaryVersion);
-}
+} //end getTemporaryView()
 
 //==============================================================================
 // convertToCaps
@@ -1529,7 +1529,19 @@ std::string TableBase::convertToCaps(std::string& str, bool isTableName)
 		else if(str[c] >= '0' && str[c] <= '9')
 			capsStr += str[c];  // allow numbers
 		else                    // error! non-alpha
-			__THROW__(std::string("TableBase::convertToCaps::") + "Invalid character found in name (allowed: A-Z, a-z, 0-9):" + str);
+		{
+			//allow underscores for group cache document name
+			if(str.substr(0,TableBase::GROUP_CACHE_PREPEND.length()) == TableBase::GROUP_CACHE_PREPEND && str[c] == '_') 
+			{
+				capsStr += '-';
+				continue;
+			}
+
+			std::stringstream ss;
+			ss << __COUT_HDR_FL__ << "TableBase::convertToCaps: Invalid character found in name (allowed: A-Z, a-z, 0-9) '" << str << "'" << __E__;
+			TLOG(TLVL_ERROR) << ss.str();
+			__SS_ONLY_THROW__;
+		}
 
 	return capsStr;
-}
+} //end convertToCaps()
