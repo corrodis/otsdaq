@@ -93,6 +93,12 @@ class TableBase
 
 	unsigned int 				getNumberOfStoredViews			(void) const;
 
+
+  // ----- member variables
+
+  public:
+	static const std::string			GROUP_CACHE_PREPEND;	
+
   protected:
 	std::string 						tableName_;
 	std::string 						tableDescription_;
@@ -103,7 +109,8 @@ class TableBase
 	// Version and data associated to make it work like a cache.
 	// It will be very likely just 1 version
 	// NOTE: must be very careful to setVersion of view after manipulating (e.g. copy from different version view)
-	std::map<TableVersion, TableView> 	tableViews_;
+	std::map<TableVersion, TableView> 	tableViews_;	
+
 };
 // clang-format on
 }  // namespace ots

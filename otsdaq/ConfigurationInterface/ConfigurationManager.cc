@@ -1407,9 +1407,10 @@ void ConfigurationManager::loadTableGroup(const std::string&                    
 	//			"(" << groupKey << ")" << __E__;
 
 	//failing member map load should be an exception!
-
+	
 	std::map<std::string /*name*/, TableVersion /*version*/> memberMap =
-	    theInterface_->getTableGroupMembers(TableGroupKey::getFullGroupString(groupName, groupKey), true /*include meta data table*/);
+	    theInterface_->getTableGroupMembers(
+			TableGroupKey::getFullGroupString(groupName, groupKey), true /*include meta data table*/);
 	
 	try
 	{

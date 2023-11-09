@@ -58,6 +58,28 @@ unsigned int TableGroupKey::key(void) const { return key_; }
 bool TableGroupKey::operator==(unsigned int key) const { return (key_ == key); }
 bool TableGroupKey::operator==(const TableGroupKey& key) const { return (key_ == key.key_); }
 
+
+//==============================================================================
+// operator*=
+//	Only implemented to support StringMacros on TableGroupKey types (e.g. getMapFromString in StringMacros.icc)
+TableGroupKey& TableGroupKey::operator*=(const unsigned int a) { key_ *= a; return *this; }
+//==============================================================================
+// operator*=
+//	Only implemented to support StringMacros on TableGroupKey types (e.g. getMapFromString in StringMacros.icc)
+TableGroupKey& TableGroupKey::operator*=(const TableGroupKey a) { key_ *= a.key_; return *this; }
+//==============================================================================
+// operator+=
+//	Only implemented to support StringMacros on TableGroupKey types (e.g. getMapFromString in StringMacros.icc)
+TableGroupKey& TableGroupKey::operator+=(const TableGroupKey a) { key_ += a.key_; return *this; }
+//==============================================================================
+// operator+=
+//	Only implemented to support StringMacros on TableGroupKey types (e.g. getMapFromString in StringMacros.icc)
+TableGroupKey& TableGroupKey::operator-=(const TableGroupKey a) { key_ -= a.key_; return *this; }
+//==============================================================================
+// operator/=
+//	Only implemented to support StringMacros on TableGroupKey types (e.g. getMapFromString in StringMacros.icc)
+TableGroupKey& TableGroupKey::operator/=(const TableGroupKey a) { key_ /= a.key_; return *this; }
+
 //==============================================================================
 // toString
 std::string TableGroupKey::toString(void) const

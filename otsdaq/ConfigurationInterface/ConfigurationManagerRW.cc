@@ -377,6 +377,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 							groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 							groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+							groupInfo.second.latestKeyMemberMap_   	     = {};
 						}
 					}  // end group info loop
 				else //multi-threading
@@ -388,8 +389,13 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					for(int i=0;i<numOfThreads;++i)
 						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
 
+					std::vector<std::shared_ptr<ots::GroupInfo>> sharedGroupInfoPtrs;
+
 					for(auto& groupInfo : allGroupInfo_)
 					{
+						//make temporary group info for thread
+						sharedGroupInfoPtrs.push_back(std::make_shared<ots::GroupInfo>());
+
 						if(threadsLaunched >= numOfThreads)
 						{
 							//find availableThreadIndex
@@ -410,10 +416,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							} //end thread search loop
 							threadsLaunched = numOfThreads - 1;
 						}					
-						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << " for " << 
+							groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")" << __E__;
+
 						*(threadDone[foundThreadIndex]) = false;
 
-						std::shared_ptr<ots::GroupInfo> shareGroupInfoPtr(&(groupInfo.second));
 						std::thread([](
 							ConfigurationManagerRW* 				theCfgMgr, 
 							std::string 							theGroupName, 
@@ -424,7 +431,7 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							this,
 							groupInfo.first,
 							groupInfo.second.getLatestKey(),
-							shareGroupInfoPtr,
+							sharedGroupInfoPtrs.back(),
 							threadDone[foundThreadIndex])
 		    			.detach();
 
@@ -448,6 +455,18 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							usleep(10000);
 						}
 					} while(foundThreadIndex != -1); //end thread done search loop
+
+					//threads done now, so copy group info
+					size_t i = 0;
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						groupInfo.second.latestKeyGroupComment_      = sharedGroupInfoPtrs[i]->latestKeyGroupComment_;
+						groupInfo.second.latestKeyGroupAuthor_       = sharedGroupInfoPtrs[i]->latestKeyGroupAuthor_;
+						groupInfo.second.latestKeyGroupCreationTime_ = sharedGroupInfoPtrs[i]->latestKeyGroupCreationTime_;
+						groupInfo.second.latestKeyGroupTypeString_   = sharedGroupInfoPtrs[i]->latestKeyGroupTypeString_;
+						groupInfo.second.latestKeyMemberMap_   	     = sharedGroupInfoPtrs[i]->latestKeyMemberMap_;
+						++i;
+					} //end copy group info loop
 
 				} //end multi-thread handling
 			}
@@ -493,6 +512,9 @@ void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cf
 													std::shared_ptr<std::atomic<bool>> 	threadDone)
 try
 {
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Thread started... " << 
+		groupName << "(" << groupKey << ")" << __E__;
+
 	cfgMgr->loadTableGroup(groupName/*groupName*/,
 		groupKey, //groupInfo->getLatestKey(),
 		false /*doActivate*/,
@@ -515,6 +537,7 @@ catch(...)
 	groupInfo->latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 	groupInfo->latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 	groupInfo->latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+	groupInfo->latestKeyMemberMap_   	   = {};
 	*(threadDone) = true;
 } // end loadTableGroupThread catch
 
@@ -1929,6 +1952,7 @@ void ConfigurationManagerRW::testXDAQContext()
 				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
 			}
 			catch(...)
 			{
@@ -1939,6 +1963,7 @@ void ConfigurationManagerRW::testXDAQContext()
 				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
 				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
 				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
 			}
 		}  // end group info loop
 		__GEN_COUTV__(runTimeSeconds());

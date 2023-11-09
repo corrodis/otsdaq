@@ -23,7 +23,7 @@ using artdaq::database::basictypes::FhiclData;
 using artdaq::database::basictypes::JsonData;
 
 using ots::DatabaseConfigurationInterface;
-using config_version_map_t = ots::DatabaseConfigurationInterface::config_version_map_t;
+using table_version_map_t = ots::DatabaseConfigurationInterface::table_version_map_t;
 
 namespace db            = artdaq::database::configuration;
 using VersionInfoList_t = db::ConfigurationInterface::VersionInfoList_t;
@@ -76,9 +76,9 @@ DatabaseConfigurationInterface::DatabaseConfigurationInterface()
 }
 
 //==============================================================================
-// read configuration from database
+// read table from database
 // version = -1 means latest version
-void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion version) const
+void DatabaseConfigurationInterface::fill(TableBase* table, TableVersion version) const
 
 {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -87,56 +87,54 @@ void DatabaseConfigurationInterface::fill(TableBase* configuration, TableVersion
 
 	auto versionstring = version.toString();
 
-	// configuration->getViewP()->setUniqueStorageIdentifier(storageUID);
-	auto result = ifc.template loadVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
+	auto result = ifc.template loadVersion<decltype(table), JsonData>(table, versionstring, default_entity);
 
 	auto end      = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::fill(tableName=" << configuration->getTableName() << ", version=" << versionstring << ") "
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::fill(tableName=" << table->getTableName() << ", version=" << versionstring << ") "
 	         << duration << " milliseconds." << std::endl;
 
 	if(result.first)
 	{
 		// make sure version is set.. not clear it was happening in loadVersion
-		configuration->getViewP()->setVersion(version);
+		table->getViewP()->setVersion(version);
 		return;
 	}
-	__SS__ << "\n\nDBI Error while filling '" << configuration->getTableName() << "' version '" << versionstring << "' - are you sure this version exists?\n"
+	__SS__ << "\n\nDBI Error while filling '" << table->getTableName() << "' version '" << versionstring << "' - are you sure this version exists?\n"
 	       << "Here is the error:\n\n"
 	       << result.second << __E__;
 	__SS_ONLY_THROW__;
 }  // end fill()
 
 //==============================================================================
-// write configuration to database
-void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* configuration, bool overwrite) const
+// write table to database
+void DatabaseConfigurationInterface::saveActiveVersion(const TableBase* table, bool overwrite) const
 
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	auto ifc = db::ConfigurationInterface{default_dbprovider};
-	// configuration->getView().getUniqueStorageIdentifier()
 
-	auto versionstring = configuration->getView().getVersion().toString();
+	auto versionstring = table->getView().getVersion().toString();
 	//__COUT__ << "versionstring: " << versionstring << "\n";
 
 	// auto result =
 	//	ifc.template storeVersion<decltype(configuration), JsonData>(configuration,
 	// versionstring, default_entity);
-	auto result = overwrite ? ifc.template overwriteVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity)
-	                        : ifc.template storeVersion<decltype(configuration), JsonData>(configuration, versionstring, default_entity);
+	auto result = overwrite ? ifc.template overwriteVersion<decltype(table), JsonData>(table, versionstring, default_entity)
+	                        : ifc.template storeVersion<decltype(table), JsonData>(table, versionstring, default_entity);
 
 	auto end      = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveActiveVersion(tableName=" << configuration->getTableName()
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveActiveVersion(tableName=" << table->getTableName()
 	         << ", versionstring=" << versionstring << ") " << duration << " milliseconds" << std::endl;
 
 	if(result.first)
 		return;
 
-	__SS__ << "DBI Error:" << result.second << __E__;
+	__SS__ << "DBI saveActiveVersion Error:" << result.second << __E__;
 	__SS_THROW__;
-}
+} //end saveActiveVersion()
 
 //==============================================================================
 // find the latest configuration version by configuration type
@@ -155,7 +153,7 @@ TableVersion DatabaseConfigurationInterface::findLatestVersion(const TableBase* 
 		return TableVersion();  // return INVALID
 
 	return *(versions.rbegin());
-}
+} //end findLatestVersion()
 
 //==============================================================================
 // find all configuration versions by configuration type
@@ -190,12 +188,12 @@ try
 	//	__COUT__ << "\tversion " << v << __E__;
 
 	return resultSet;  // to_set(result);
-}
+} //end getVersions()
 catch(std::exception const& e)
 {
 	__COUT_WARN__ << "DBI Exception:" << e.what() << "\n";
 	return {};
-}
+} //end getVersions() catch
 
 //==============================================================================
 // returns a list of all configuration names
@@ -215,7 +213,7 @@ try
 	         << " milliseconds." << std::endl;
 
 	return result;
-}
+} //end getAllTableNames()
 catch(std::exception const& e)
 {
 	__SS__ << "DBI Exception:" << e.what() << "\n";
@@ -224,14 +222,8 @@ catch(std::exception const& e)
 catch(...)
 {
 	__SS__ << "DBI Unknown exception.\n";
-	try	{ throw; } //one more try to printout extra info
-	catch(const std::exception &e)
-	{
-		ss << "Exception message: " << e.what();
-	}
-	catch(...){}
 	__SS_THROW__;
-}
+} //end getAllTableNames() catch
 
 //==============================================================================
 // find all configuration groups in database
@@ -260,7 +252,7 @@ try
 	         << std::endl;
 
 	return result;
-}
+} //end getAllTableGroupNames()
 catch(std::exception const& e)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Exception:" << e.what() << "\n";
@@ -269,14 +261,8 @@ catch(std::exception const& e)
 catch(...)
 {
 	__SS__ << "Filter string '" << filterString << "' yielded DBI Unknown exception.\n";
-	try	{ throw; } //one more try to printout extra info
-	catch(const std::exception &e)
-	{
-		ss << "Exception message: " << e.what();
-	}
-	catch(...){}
 	__SS_THROW__;
-}
+} //end getAllTableGroupNames() catch
 
 //==============================================================================
 // find the latest configuration group key by group name
@@ -305,25 +291,54 @@ std::set<TableGroupKey /*key*/> DatabaseConfigurationInterface::getKeys(const st
 
 //==============================================================================
 // return the contents of a configuration group
-config_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable) const
+table_version_map_t DatabaseConfigurationInterface::getTableGroupMembers(std::string const& tableGroup, bool includeMetaDataTable /* = false */) const
 try
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
+	//Flow (motivation -- getTableGroupMembers() is super slow; can be 3 to 15 seconds):
+	//	when saveTableGroup() is called
+	//		saveDocument (collection: "GroupCache" + tableGroup, version: groupKey)
+	//			containing --> table group members
+	//	when getTableGroupMembers() is called
+	//		loadDocument (collection: "GroupCache" + tableGroup, version: groupKey)
+	// 			if succeeds, use that
+	//			else continue with db extended lookup
+	//				AND create cache file (in this way slowly populating the cache even without saves)
+
+	// format: groupName + "_v" + groupKey
+	try
+	{
+		table_version_map_t retMap = getCachedTableGroupMembers(tableGroup);
+
+		if(!includeMetaDataTable)
+		{
+			// remove special meta data table from member map
+			auto metaTable = retMap.find(GROUP_METADATA_TABLE_NAME);
+			if(metaTable != retMap.end())
+				retMap.erase(metaTable);
+		}
+
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
+		__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getTableGroupMembers(tableGroup=" << tableGroup << ") " << duration << " milliseconds."
+	         << std::endl;
+		return retMap;
+	}
+	catch(...) //ignore error and proceed with standard db access
+	{
+		__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Ignoring error DatabaseConfigurationInterface::getTableGroupMembers(tableGroup=" << tableGroup << ") " << __E__;
+	} 
+
 	auto ifc    = db::ConfigurationInterface{default_dbprovider};
 	auto result = ifc.loadGlobalConfiguration(tableGroup);
-
-	auto end      = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getTableGroupMembers(tableGroup=" << tableGroup << ") " << duration << " milliseconds."
-	         << std::endl;
 
 	//	for(auto &item:result)
 	//		__COUT__ << "====================>" << item.configuration << ": " <<
 	// item.version << __E__;
 
-	auto to_map = [](auto const& inputList, bool includeMetaDataTable) {
-		auto resultMap = config_version_map_t{};
+	auto to_map = [](auto const& inputList, bool includeMetaDataTable) 
+	{
+		auto resultMap = table_version_map_t{};
 
 		std::for_each(inputList.begin(), inputList.end(), [&resultMap](auto const& info) { resultMap[info.configuration] = std::stol(info.version, 0, 10); });
 
@@ -337,28 +352,155 @@ try
 		return resultMap;
 	};
 
-	return to_map(result, includeMetaDataTable);
+	table_version_map_t retMap = to_map(result, includeMetaDataTable);	
+
+	//now create cache for next time!
+	saveTableGroupMemberCache(retMap, tableGroup);
+
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Loaded db member map string " <<
+		StringMacros::mapToString(retMap) << __E__;
+
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::getTableGroupMembers(tableGroup=" << tableGroup << ") " << duration << " milliseconds."
+	         << std::endl;
+
+	return retMap;
 }  // end getTableGroupMembers()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup << "':\n\n" << e.what() << "\n";	
+	__SS__ << "DBI Exception getting Group's member tables for '" << tableGroup << "':\n\n" << e.what() << "\n";
 	__SS_THROW__;
 }
 catch(...)
 {
 	__SS__ << "DBI Unknown exception getting Group's member tables for '" << tableGroup << ".'\n";
-	try	{ throw; } //one more try to printout extra info
-	catch(const std::exception &e)
-	{
-		ss << "Exception message: " << e.what();
-	}
-	catch(...){}
+	__COUT_ERR__ << ss.str();
 	__SS_THROW__;
-}
+}  // end getTableGroupMembers() catch
 
 //==============================================================================
 // create a new configuration group from the contents map
-void DatabaseConfigurationInterface::saveTableGroup(config_version_map_t const& configurationMap, std::string const& configurationGroup) const
+table_version_map_t DatabaseConfigurationInterface::getCachedTableGroupMembers(std::string const& tableGroup) const
+try
+{	
+	table_version_map_t retMap;
+
+	//Flow:
+	//	when saveTableGroup() is called
+	//		saveDocument (collection: "GroupCache_" + tableGroup, version: groupKey)
+	//			containing --> table group members
+	//	when getTableGroupMembers() is called
+	//		loadDocument (collection: "GroupCache_" + tableGroup, version: groupKey)
+	// 			if succeeds, use that
+	//			else continue with db extended lookup
+	//				AND create cache file (in this way slowly populating the cache even without saves)
+
+	// tableGroup format: groupName + "_v" + groupKey
+
+	
+	std::size_t vi = tableGroup.rfind("_v");
+	std::string groupName = tableGroup.substr(0,vi);
+	std::string groupKey = tableGroup.substr(vi+2);
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Getting cache for " << groupName << "(" << groupKey << ")" << __E__;
+
+
+	TableBase localGroupMemberCacheSaver("GroupCache_" + groupName);
+	TableVersion localVersion(atoi(groupKey.c_str()));
+	localGroupMemberCacheSaver.changeVersionAndActivateView(
+		localGroupMemberCacheSaver.createTemporaryView(), 
+		localVersion);
+
+	fill(&localGroupMemberCacheSaver,localVersion);
+
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Loaded cache member map string " <<
+		localGroupMemberCacheSaver.getViewP()->getCustomStorageData() << __E__;
+	
+	StringMacros::getMapFromString(localGroupMemberCacheSaver.getViewP()->getCustomStorageData(),retMap);
+
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Loaded cache member map string " <<
+		StringMacros::mapToString(retMap) << __E__;
+		
+	return retMap;
+} //end getCachedTableGroupMembers()
+catch(std::exception const& e)
+{
+	__SS__ << "DBI Exception getCachedTableGroupMembers for '" << tableGroup << "':\n\n" << e.what() << "\n";
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "DBI Unknown exception getCachedTableGroupMembers for '" << tableGroup << ".'\n";
+	__SS_THROW__;
+} //end getCachedTableGroupMembers() catch
+
+//==============================================================================
+// create a new configuration group from the contents map
+void DatabaseConfigurationInterface::saveTableGroupMemberCache(table_version_map_t const& memberMap, std::string const& tableGroup) const
+try
+{
+	//Flow:
+	//	when saveTableGroup() is called
+	//		saveDocument (collection: "GroupCache_" + tableGroup, version: groupKey)
+	//			containing --> table group members
+	//	when getTableGroupMembers() is called
+	//		loadDocument (collection: "GroupCache_" + tableGroup, version: groupKey)
+	// 			if succeeds, use that
+	//			else continue with db extended lookup
+	//				AND create cache file (in this way slowly populating the cache even without saves)
+
+	// tableGroup format: groupName + "_v" + groupKey
+
+
+	
+	std::size_t vi = tableGroup.rfind("_v");
+	std::string groupName = tableGroup.substr(0,vi);
+	std::string groupKey = tableGroup.substr(vi+2);
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Saving cache for " << groupName << "(" << groupKey << ")" << __E__;
+
+	TableBase localGroupMemberCacheSaver("GroupCache_" + groupName);
+	localGroupMemberCacheSaver.changeVersionAndActivateView(
+		localGroupMemberCacheSaver.createTemporaryView(), 
+		TableVersion(atoi(groupKey.c_str())));
+
+	{ //set custom storage data
+		std::stringstream groupCacheData;
+		groupCacheData << "{ ";
+		for(const auto& member : memberMap)
+			groupCacheData << (member.first == memberMap.begin()->first?"":", ") << //skip comma on first 
+				"\"" << member.first << "\" : \"" << member.second << "\"";
+		groupCacheData << "}";
+
+		localGroupMemberCacheSaver.getViewP()->setCustomStorageData(groupCacheData.str());
+	} //end set custom storage data
+
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Saving member map string " <<
+		localGroupMemberCacheSaver.getViewP()->getCustomStorageData() << __E__;
+
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Saving cache table " <<
+		localGroupMemberCacheSaver.getView().getTableName() << "(" <<
+		localGroupMemberCacheSaver.getView().getVersion().toString() << ")" << __E__;
+
+ 
+	// save to db, and do not allow overwrite
+	saveActiveVersion(&localGroupMemberCacheSaver, false /* overwrite */);
+	
+} //end saveTableGroupMemberCache()
+catch(std::exception const& e)
+{
+	__SS__ << "DBI Exception saveTableGroupMemberCache for '" << tableGroup << "':\n\n" << e.what() << "\n";
+	__COUT_ERR__ << ss.str();
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "DBI Unknown exception saveTableGroupMemberCache for '" << tableGroup << ".'\n";
+	__COUT_ERR__ << ss.str();
+	__SS_THROW__;
+} //end saveTableGroupMemberCache() catch
+
+//==============================================================================
+// create a new configuration group from the contents map
+void DatabaseConfigurationInterface::saveTableGroup(table_version_map_t const& memberMap, std::string const& tableGroup) const
 try
 {
 	auto start = std::chrono::high_resolution_clock::now();
@@ -374,33 +516,39 @@ try
 		return resultList;
 	};
 
-	auto result = ifc.storeGlobalConfiguration_mt(to_list(configurationMap), configurationGroup);
+	auto result = ifc.storeGlobalConfiguration_mt(to_list(memberMap), tableGroup);
 
 	auto end      = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveTableGroup(configurationGroup=" << configurationGroup << ") " << duration
+	__COUT_TYPE__(TLVL_DEBUG+20) << __COUT_HDR__ << "Time taken to call DatabaseConfigurationInterface::saveTableGroup(tableGroup=" << tableGroup << ") " << duration
 	         << " milliseconds." << std::endl;
 
 	if(result.first)
+	{
+		//now save to db cache for reverse index lookup of group members
+		try
+		{
+			saveTableGroupMemberCache(memberMap,tableGroup);
+		}
+		catch(...)
+		{
+			__COUT_WARN__ << "Ignoring errors during saveTableGroupMemberCache()" << __E__;
+		}
+		
 		return;
+	}
 
 	__THROW__(result.second);
 }  // end saveTableGroup()
 catch(std::exception const& e)
 {
-	__SS__ << "DBI Exception:" << e.what() << "\n";
+	__SS__ << "DBI Exception saveTableGroup for '" << tableGroup << "':\n\n" << e.what() << "\n";
 	__SS_THROW__;
 }
 catch(...)
 {
-	__SS__ << "DBI Unknown exception.\n";
-	try	{ throw; } //one more try to printout extra info
-	catch(const std::exception &e)
-	{
-		ss << "Exception message: " << e.what();
-	}
-	catch(...){}
+	__SS__ << "DBI Unknown exception saveTableGroup for '" << tableGroup << ".'\n";
 	__SS_THROW__;
-}
+} //end saveTableGroup() catch
 
 DEFINE_OTS_CONFIGURATION_INTERFACE(DatabaseConfigurationInterface)
