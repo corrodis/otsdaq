@@ -24,6 +24,7 @@ UDPDataStreamerBase.cc
         PRIVATE
         otsdaq::MessageFacility
         Boost::regex
+        Threads::Threads
 )
 
 install_headers()

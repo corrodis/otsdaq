@@ -92,6 +92,7 @@ link_directories($ENV{XDAQ_LIB})
    toolbox
    xerces-c
    cgicc
+   Threads::Threads
  )
  set(XDAQ_XERCES-C xerces-c)
 
