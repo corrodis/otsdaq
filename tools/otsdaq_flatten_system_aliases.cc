@@ -107,9 +107,17 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	std::cout << "\n\n\n" << __COUT_HDR_FL__ << "Loading active Aliases..." << std::endl;
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
+	{
+        std::string accumulatedWarnings;
+        cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+                    "" /*pathToActiveGroupsFile*/,
+                    ConfigurationManager::LoadGroupType::ALL_TYPES,
+                    &accumulatedWarnings
+                );
 
-	std::cout << __COUT_HDR_FL__ << "Done Loading active Aliases." << std::endl;
-	// return;
+        std::cout << __COUT_HDR_FL__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
+    }
+	// return;		
 
 	// create set of groups to persist
 	//	include active context

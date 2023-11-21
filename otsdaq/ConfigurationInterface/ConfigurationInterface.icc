@@ -42,13 +42,14 @@ void get(TableBase*&                          table,
 	if(table == 0)
 	{
 		// try making table table plugin, if fails use TableBase
-		try
-		{
-			table = makeTable(tableName);
-		}
-		catch(...)
-		{
-		}
+        try
+        {
+            std::unique_lock<std::mutex> lock(tableReaderMutex_);
+            table = makeTable(tableName);
+        }
+        catch(...)
+        {
+        }
 
 		if(table == 0)
 		{
