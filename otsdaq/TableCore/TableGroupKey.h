@@ -28,6 +28,13 @@ class TableGroupKey
 	bool           operator!=(const TableGroupKey& key) const;
 	bool           operator<(const TableGroupKey& key) const;
 	bool           operator>(const TableGroupKey& key) const;
+	bool           operator<=(const TableGroupKey& key) const { return !operator>(key); }
+	bool           operator>=(const TableGroupKey& key) const { return !operator<(key); }
+	TableGroupKey&  operator*=(const unsigned int a);  //to support StringMacros on TableGroupKey types
+	TableGroupKey&  operator*=(const TableGroupKey a); //to support StringMacros on TableGroupKey types
+	TableGroupKey&  operator+=(const TableGroupKey a); //to support StringMacros on TableGroupKey types
+	TableGroupKey&  operator-=(const TableGroupKey a); //to support StringMacros on TableGroupKey types
+	TableGroupKey&  operator/=(const TableGroupKey a); //to support StringMacros on TableGroupKey types
 
 	friend std::ostream& operator<<(std::ostream& out, const TableGroupKey& key)
 	{
@@ -41,8 +48,8 @@ class TableGroupKey
 	static unsigned int  getDefaultKey(void);
 	static unsigned int  getInvalidKey(void);
 
-  private:
 	static const unsigned int INVALID;
+  private:
 	static const unsigned int DEFAULT;
 	unsigned int              key_;
 };

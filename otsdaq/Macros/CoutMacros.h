@@ -36,11 +36,11 @@
 //#define __MF_TYPE__(X)	FIXME ?? how to do this ...(__ENV__("OTSDAQ_USING_MF")=="1"?
 // mf::X (__MF_SUBJECT__) : std::cout << QUOTE(X) << ":" << __MF_SUBJECT__ << ":")
 
-#define __COUT_HDR_F__ 		__SHORTFILE__ << "\t"
-#define __COUT_HDR_L__ 		"[" << std::dec        << __LINE__ << "]\t"
+#define __COUT_HDR_F__ 		__SHORTFILE__ << ""
+#define __COUT_HDR_L__ 		":" << std::dec        << __LINE__ << " |\t"
 #define __COUT_HDR_P__ 		__PRETTY_FUNCTION__    << "\t"
-#define __COUT_HDR_FL__ 	__SHORTFILE__ << " "   << __COUT_HDR_L__
-#define __COUT_HDR_FP__ 	__SHORTFILE__ << " : " << __COUT_HDR_P__
+#define __COUT_HDR_FL__ 	__SHORTFILE__ << ""  << __COUT_HDR_L__
+#define __COUT_HDR_FP__ 	__SHORTFILE__ << ":" << __COUT_HDR_P__
 #define __COUT_HDR__ 		""//__COUT_HDR_FL__
 #define __MF_HDR__ 			""//__COUT_HDR__
 
@@ -51,7 +51,7 @@
 #ifndef __COUT_TO_STD__
 #define __COUT_TYPE__(X) 	__MF_TYPE__(X)
 #else
-#define __COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_DECOR__ << ":" << __COUT_HDR_FL__
+#define __COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __MF_DECOR__ << ": " << __COUT_HDR_FL__
 #endif
 
 #define __MOUT_ERR__ 		__MF_TYPE__(TLVL_ERROR) 	<< __MF_HDR__
@@ -81,7 +81,7 @@
 
 //////// ==============================================================
 
-#define __SS__            	std::stringstream ss; ss << ":" << __MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __SS__            	std::stringstream ss; ss << "|" << __MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #define __SS_THROW__        { __COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); } //put in {}'s to prevent surprises, e.g. if ... else __SS_THROW__;
 #define __SS_ONLY_THROW__ 	throw std::runtime_error(ss.str())
 #define __SSV__(X) 			__SS__ << QUOTE(X) << " = " << X
@@ -94,7 +94,7 @@
 #ifndef __COUT_TO_STD__
 #define __CFG_COUT_TYPE__(X) 	__CFG_MF_TYPE__(X)
 #else
-#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __CFG_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __CFG_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __CFG_MOUT_ERR__ 		__CFG_MF_TYPE__(TLVL_ERROR) 	<< __COUT_HDR__
@@ -114,7 +114,7 @@
 #define __CFG_MCOUT__(X)   		{ __CFG_MOUT__  << X;} 		//causes duplicate with mf improvements: { __CFG_MOUT__ 		<< X; __CFG_COUT__ 		<< X; }
 #define __CFG_MCOUTV__(X) 		{ __CFG_MOUTV__(X);} 		//causes duplicate with mf improvements: { __CFG_MOUTV__(X); __CFG_COUTV__(X); }
 
-#define __CFG_SS__  			std::stringstream ss; ss << ":" << __CFG_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __CFG_SS__  			std::stringstream ss; ss << "|" << __CFG_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #define __CFG_SS_THROW__        { __CFG_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
@@ -126,7 +126,7 @@
 #ifndef __COUT_TO_STD__
 #define __FE_COUT_TYPE__(X) 	__FE_MF_TYPE__(X)
 #else
-#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __FE_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __FE_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __FE_MOUT_ERR__ 		__FE_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
@@ -146,7 +146,7 @@
 #define __FE_MCOUT__(X)   		{ __FE_MOUT__  << X;} 		//causes duplicate with mf improvements: { __FE_MOUT__ 		<< X; __FE_COUT__ 		<< X; }
 #define __FE_MCOUTV__(X) 		{ __FE_MOUTV__(X);} 		//causes duplicate with mf improvements: { __FE_MOUTV__(X); __FE_COUTV__(X); }
 
-#define __FE_SS__          		std::stringstream ss; ss << ":" << __FE_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __FE_SS__          		std::stringstream ss; ss << "|" << __FE_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #define __FE_SS_THROW__         { __FE_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
@@ -158,7 +158,7 @@
 #ifndef __COUT_TO_STD__
 #define __GEN_COUT_TYPE__(X) 	__GEN_MF_TYPE__(X)
 #else
-#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __GEN_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __GEN_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __GEN_MOUT_ERR__ 		__GEN_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
@@ -178,7 +178,7 @@
 #define __GEN_MCOUT__(X)   		{ __GEN_MOUT__  << X;} 		//causes duplicate with mf improvements: { __GEN_MOUT__ 		<< X; __GEN_COUT__ 		<< X; }
 #define __GEN_MCOUTV__(X) 		{ __GEN_MOUTV__(X);} 		//causes duplicate with mf improvements: { __GEN_MOUTV__(X); __GEN_COUTV__(X); }
 
-#define __GEN_SS__        		std::stringstream ss; ss << ":" << __GEN_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __GEN_SS__        		std::stringstream ss; ss << "|" << __GEN_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #define __GEN_SS_THROW__        { __GEN_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //////// ==============================================================
@@ -191,7 +191,7 @@
 #ifndef __COUT_TO_STD__
 #define __SUP_COUT_TYPE__(X) 	__SUP_MF_TYPE__(X)
 #else
-#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __SUP_COUT_TYPE__(X) 	std::cout << QUOTE(X) << ":" << __SUP_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #endif
 
 #define __SUP_MOUT_ERR__ 		__SUP_MF_TYPE__(TLVL_ERROR) 		<< __COUT_HDR__
@@ -212,7 +212,7 @@
 #define __SUP_MCOUT__(X)   		{ __SUP_MOUT__  << X;} 		//causes duplicate with mf improvements: { __SUP_MOUT__ << X; __SUP_COUT__ << X; }
 #define __SUP_MCOUTV__(X) 		{ __SUP_MOUTV__(X);} 		//causes duplicate with mf improvements: { __SUP_MOUTV__(X); __SUP_COUTV__(X); }
 
-#define __SUP_SS__              std::stringstream ss; ss << ":" << __SUP_MF_DECOR__ << ":" << __COUT_HDR_FL__ << __COUT_HDR__
+#define __SUP_SS__              std::stringstream ss; ss << "|" << __SUP_MF_DECOR__ << ": " << __COUT_HDR_FL__ << __COUT_HDR__
 #define __SUP_SS_THROW__        { __SUP_COUT_ERR__ << "\n" << ss.str(); throw std::runtime_error(ss.str()); }
 
 //To use __ENV__, will need to include #include "otsdaq/Macros/StringMacros.h"

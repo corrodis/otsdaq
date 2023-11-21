@@ -229,6 +229,12 @@ catch(std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Error saving new table!" << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleCreateTableXML() catch
@@ -500,6 +506,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Failed to create table group: " << groupName << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		return;
@@ -530,15 +542,23 @@ try
 	}
 	catch(std::runtime_error& e)
 	{
-		__COUT_ERR__ << "Failed to create table group: " << groupName << __E__;
-		__COUT_ERR__ << "\n\n" << e.what() << __E__;
-		xmlOut.addTextElementToData("Error", "Failed to create table group: " + groupName + ".\n\n" + e.what());
+		__SS__ << "Failed to create table group: " << groupName << __E__;
+		ss << "\n\n" << e.what() << __E__;
+		__COUT_ERR__ << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 		return;
 	}
 	catch(...)
 	{
-		__COUT_ERR__ << "Failed to create table group: " << groupName << __E__;
-		xmlOut.addTextElementToData("Error", "Failed to create table group: " + groupName);
+		__SS__ << "Failed to create table group: " << groupName << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
+		__COUT_ERR__ << ss.str();
+		xmlOut.addTextElementToData("Error", ss.str());
 		return;
 	}
 
@@ -555,13 +575,19 @@ try
 catch(std::runtime_error& e)
 {
 	__SS__ << "Error saving table group!\n\n " << e.what() << __E__;
-	__COUT__ << "\n" << ss.str() << __E__;
+	__COUT_ERR__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
 	__SS__ << "Error saving table group!" << __E__;
-	__COUT__ << "\n" << ss.str() << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
+	__COUT_ERR__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleCreateTableGroupXML() catch
 
@@ -620,17 +646,22 @@ try
 		const GroupInfo&               groupInfo  = cfgMgr->getGroupInfo(groupName);
 		const std::set<TableGroupKey>& sortedKeys = groupInfo.keys_;  // rename
 
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << groupName << " keys: " << StringMacros::setToString(groupInfo.keys_) << __E__;
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Active groups: " << StringMacros::mapToString(cfgMgr->getActiveTableGroups()) << __E__;
+		__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Active tables: " << StringMacros::mapToString(cfgMgr->getActiveVersions()) << __E__;
+
 		if(groupKey.isInvalid() ||  // if invalid or not found, get latest
 		   sortedKeys.find(groupKey) == sortedKeys.end())
 		{
 			// report error if group key not found
-			if(!groupKey.isInvalid())
+			if(!groupKey.isInvalid() || sortedKeys.size() == 0)
 			{
 				// attempt to reload all group info and power through
 				std::string accumulatedWarnings;
+				__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Attempting full table refresh (assuming cache not yet established)." << __E__;
 				/*const std::map<std::string, TableInfo>& allTableInfo = */ cfgMgr->getAllTableInfo(true /* refresh */, 
-					&accumulatedWarnings, "" /* errorFilterName */, true /* getGroupKeys*/);
-				__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Attempting full table refresh. Assuming cache not yet established so ignoring these errors: " << accumulatedWarnings << __E__;
+					&accumulatedWarnings, "" /* errorFilterName */, true /* getGroupKeys*/, false /* getGroupInfo */, true /* initializeActiveGroups */);
+				__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "After full table refresh (assuming cache not yet established) so ignoring these errors: " << accumulatedWarnings << __E__;
 
 				// xmlOut.addTextElementToData("Error", ss.str());
 
@@ -642,12 +673,12 @@ try
 					__SS__ << "Group key " << groupKey << " was not found for group '" << groupName << "!'" << __E__;
 					ss << "Her are the found " << sortedKeys2.size() << " '" << groupName << "' keys: " << __E__;
 					for(auto& keyInOrder : sortedKeys2)
-					{
-						xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 						ss << "\t" << keyInOrder << __E__;
-					}
 					__COUT_WARN__ << "\n" << ss.str() << __E__;
 				}
+				
+				for(auto& keyInOrder : sortedKeys2)
+					xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 			}
 			else
 			{
@@ -666,7 +697,18 @@ try
 			for(auto& keyInOrder : sortedKeys)
 				xmlOut.addTextElementToData("HistoricalTableGroupKey", keyInOrder.toString());
 		}
+
+		if(cfgMgr->getActiveVersions().size() == 0)
+		{
+			__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "There are no active tables. Attempting to initialize active groups." << __E__;
+			//if no active tables, attempt to init active groups (it should prevent confusing warnings to users complaining about a partially loaded configuration)
+			std::string tmpAccumulateWarnings;
+			cfgMgr->init(0 /*accumulatedErrors*/, false /*initForWriteAccess*/, &tmpAccumulateWarnings); 
+			__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Now Active tables: " << StringMacros::mapToString(cfgMgr->getActiveVersions()) << __E__;
+			__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Ingoring warnings during init of active groups: " << tmpAccumulateWarnings << __E__;
+		}
 	}
+	
 
 	xmlOut.addTextElementToData("TableGroupName", groupName);
 	xmlOut.addTextElementToData("TableGroupKey", groupKey.toString());
@@ -726,6 +768,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Table group \"" + groupName + "(" + groupKey.toString() + ")" + "\" members can not be loaded!" << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 		// return;
@@ -813,13 +861,19 @@ try
 }  // end handleGetTableGroupXML()
 catch(std::runtime_error& e)
 {
-	__SS__ << ("Error!\n\n" + std::string(e.what())) << __E__;
+	__SS__ << ("Error getting table group!\n\n" + std::string(e.what())) << __E__;
 	__COUT_ERR__ << "\n" << ss.str();
 	xmlOut.addTextElementToData("Error", ss.str());
 }
 catch(...)
 {
-	__SS__ << ("Error!\n\n") << __E__;
+	__SS__ << ("Error getting table group!\n\n") << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end handleGetTableGroupXML() catch
@@ -862,8 +916,8 @@ try
 	//		save, activate, and modify alias
 	// just to match syntax in ConfiguratGUI
 	//	tmpCfgMgr.activateTableGroup(
-	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT),
-	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+	//			tmpCfgMgr.getActiveGroupName(ConfigurationManager::GROUP_TYPE_NAME_CONTEXT),
+	//			tmpCfgMgr.getActiveGroupKey(ConfigurationManager::GROUP_TYPE_NAME_CONTEXT)
 	//			);
 
 	cfgMgr->restoreActiveTableGroups(
@@ -1568,6 +1622,12 @@ catch(std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Error adding Desktop Icon!" << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 	return false;
@@ -1701,6 +1761,12 @@ catch(...)
 	__SS__ << ("Error copying tree target '" + uidToCopy + "' at depth " + std::to_string(startingDepth - depth) + " in table '" + cfgView->getTableName() +
 	           ".' ")
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT__ << "\n" << ss.str() << __E__;
 	xmlOut.addTextElementToData("Error", ss.str());
 }  // end recursiveCopyTreeUIDNode

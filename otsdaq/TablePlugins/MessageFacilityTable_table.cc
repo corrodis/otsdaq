@@ -183,7 +183,7 @@ void MessageFacilityTable::init(ConfigurationManager* configManager)
 			fclSs << "\t"
 			      << "filename_delimit: \"/src\"\n";
 			fclSs << "\t"
-			      << "format_string: \"|%L:%N:%f [%u]\t%m\"\n";
+			      << "format_string: \"|%L:%N: %f:%u |\t%m\"\n";
 
 			fclSs << "\n}\n";
 

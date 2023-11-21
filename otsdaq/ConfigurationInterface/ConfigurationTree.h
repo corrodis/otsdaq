@@ -45,7 +45,7 @@ class ConfigurationTree
 	//	}
 
 	ConfigurationTree(const ConfigurationManager* const& configMgr,
-	                  const TableBase* const&            config);
+	                  const TableBase* const&            table);
 	~ConfigurationTree(void);
 
 	ConfigurationTree(ConfigurationTree const& a) = default;
@@ -194,6 +194,7 @@ class ConfigurationTree
 	// extracting information from node
 	const ConfigurationManager* 				getConfigurationManager		(void) const { return configMgr_; }
 	const std::string&          				getTableName				(void) const;
+	const std::string&          				getParentTableName			(void) const;
 	const std::string&          				getFieldTableName			(void) const;
 	const TableVersion&         				getTableVersion				(void) const;
 	const time_t&               				getTableCreationTime		(void) const;
@@ -208,7 +209,10 @@ class ConfigurationTree
 																				std::string /*value*/> filterMap 	= std::map<std::string /*relative-path*/, std::string /*value*/>(),
 																			    bool byPriority     				= false,
 																			    bool onlyStatusTrue 				= false) const;
-	std::map<std::string, ConfigurationTree> 	getChildrenMap				(void) const;
+	std::map<std::string, ConfigurationTree> 	getChildrenMap				(std::map<std::string /*relative-path*/, 
+																				std::string /*value*/> filterMap 	= std::map<std::string /*relative-path*/, std::string /*value*/>(),
+																			    bool onlyStatusTrue 				= false) const;
+	bool 										passFilterMap				(const std::string& childName, std::map<std::string /*relative-path*/, std::string /*value*/> filterMap) const;
 	std::string                              	getEscapedValue				(void) const;
 	const std::string&       					getValueAsString			(bool returnLinkTableValue = false) const;
 	const std::string&       					getUIDAsString				(void) const;
@@ -228,8 +232,8 @@ class ConfigurationTree
   public:
 	// boolean info
 	bool 										isDefaultValue				(void) const;
-	inline bool									isRootNode					(void) const;
-	inline bool									isTableNode					(void) const;
+	inline bool									isRootNode					(void) const { return (!isLinkNode() && !table_); }
+	inline bool									isTableNode					(void) const { return (table_ && row_ == TableView::INVALID && col_ == TableView::INVALID); }
 	bool 										isValueNode					(void) const;
 	bool 										isValueBoolType				(void) const;
 	bool 										isValueNumberDataType		(void) const;
@@ -331,7 +335,7 @@ class ConfigurationTree
 	const ConfigurationManager* 			configMgr_;  		// root node
 	const TableBase*            			table_;      		// config node
 	const std::string           			groupId_;    		// group config node
-	const TableBase* 						linkParentConfig_;  // link node parent config pointer (could be used
+	const TableBase* 						linkParentTable_;  // link node parent config pointer (could be used
 	                                     						// to traverse backwards through tree)
 	const std::string  						linkColName_;     	// link node field name
 	const std::string  						linkColValue_;    	// link node field value

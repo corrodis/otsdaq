@@ -1,6 +1,7 @@
 #include "otsdaq/FECore/FESlowControlsChannel.h"
 #include "otsdaq/Macros/BinaryStringMacros.h"
 #include "otsdaq/Macros/CoutMacros.h"
+#include "otsdaq/FECore/FEVInterface.h"
 
 #include <iostream>
 #include <sstream>
@@ -10,7 +11,7 @@ using namespace ots;
 
 #undef __MF_SUBJECT__
 #define __MF_SUBJECT__ "SlowControls"
-#define mfSubject_ (interfaceUID_ + "-" + channelName_)
+#define mfSubject_ (interface_->getInterfaceUID() + "-" + channelName_)
 
 ////////////////////////////////////
 // Packet Types sent in txBuffer:
@@ -28,11 +29,9 @@ using namespace ots;
 ////////////////////////////////////
 
 //==============================================================================
-FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
+FESlowControlsChannel::FESlowControlsChannel(FEVInterface* interface,
                                              const std::string& channelName,
                                              const std::string& dataType,
-                                             unsigned int       universalDataSize,
-                                             unsigned int       universalAddressSize,
                                              const std::string& universalAddress,
                                              unsigned int       universalDataBitOffset,
                                              bool               readAccess,
@@ -50,10 +49,10 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
                                              const std::string& lo,
                                              const std::string& hi,
                                              const std::string& hihi)
-    : interfaceUID_(interfaceUID)
+    : interface_(interface)
     , channelName_(channelName)
-    //, fullChannelName_(interfaceUID_ + "/" + channelName_)
-    , fullChannelName_(interfaceUID_ + ":" + channelName_)
+    //, fullChannelName_(interface->getInterfaceUID() + "/" + channelName_)
+    , fullChannelName_(interface->getInterfaceUID() + ":" + channelName_)
     , dataType_(dataType)
     , universalDataBitOffset_(universalDataBitOffset)
     , txPacketSequenceNumber_(0)
@@ -77,8 +76,16 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
                         (saveBinaryFormat_ ? ".dat" : ".txt"))
 {
 	__GEN_COUTV__(dataType_);
-	__GEN_COUT__ << "universalAddressSize = " << universalAddressSize << __E__;
-	__GEN_COUT__ << "universalAddress = " << universalAddress << __E__;
+	__GEN_COUTV__(interface->getUniversalAddressSize());
+	__GEN_COUTV__(universalAddress);
+
+	if(interface->getUniversalAddressSize() == 0 || 
+		interface->getUniversalDataSize() == 0)
+	{
+		__GEN_SS__ << "The front-end interface must have a non-zero universal address and data size. Current address size = " 
+			<< interface->getUniversalAddressSize() << ", data size = " << interface->getUniversalDataSize() << __E__;
+		__GEN_SS_THROW__;
+	}
 
 	sizeOfReadBytes_ = 0;
 
@@ -142,39 +149,51 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 		(sizeOfDataTypeBits_) / 8 + 
 		(((sizeOfDataTypeBits_) % 8) ? 1 : 0));
 
-	if(sizeOfReadBytes_ > 8)
-	{
-		//TODO: check if FE supports Block Reads
-		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (offset:" <<
-					universalDataBitOffset_ << " + " << sizeOfDataTypeBits_
-		           << "-bits) = " << sizeOfReadBytes_ <<
-		              "-bytes. Size in bytes must be less than or equal to 8-bytes."
-		           << __E__;
-		__GEN_COUT_ERR__ << "\n" << ss.str();
-		__GEN_SS_THROW__;
-	}
 
-	if(universalDataSize < sizeOfReadBytes_)
-	{
-		__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (offset:" <<
-					universalDataBitOffset_ << " + " << sizeOfDataTypeBits_
-		           << "-bits) = " << sizeOfReadBytes_ <<
-		              "-bytes. Data Type size must be less than or equal to Universal Data Size = " << 
-					  universalDataSize << "-bytes." << __E__;
-		__GEN_COUT_ERR__ << "\n" << ss.str();
-		__GEN_SS_THROW__;
-	}
-
-	universalAddress_.resize(universalAddressSize);
+	universalAddress_.resize(interface->getUniversalAddressSize());
 	try
 	{
 		convertStringToBuffer(universalAddress, universalAddress_);
+		__GEN_COUTV__(BinaryStringMacros::binaryNumberToHexString(universalAddress_, "0x", " "));
 	}
 	catch(const std::runtime_error& e)
 	{
 		__GEN_SS__ << "Failed to extract universalAddress '" << universalAddress << "'..." << __E__;
 		ss << e.what();
 		__GEN_SS_THROW__;
+	}
+
+	__GEN_COUTV__(sizeOfReadBytes_);
+	__GEN_COUTV__(interface->getUniversalDataSize());
+	if(sizeOfReadBytes_ > interface->getUniversalDataSize())
+	{
+		//check if FE supports Block Reads by using a test read (because the compiler does not allow this)
+		// if(interface->*(&FEVInterface::universalBlockRead) != (&FEVInterface::universalBlockRead))
+		// {
+		// 	__GEN_COUT__ << "This FE interface does implement block reads." << __E__;
+		// }		
+		try //check if FE supports Block Reads by using a test read
+		{
+			std::string readValue;
+			readValue.resize(sizeOfReadBytes_);
+			interface->universalBlockRead(&universalAddress_[0], &readValue[0],sizeOfReadBytes_);
+		}
+		catch(const std::runtime_error& e)
+		{
+			__GEN_COUTV__(StringMacros::demangleTypeName(typeid(*interface).name()));
+			if(strcmp(e.what(),"UNDEFINED BLOCK READ") == 0)
+			{
+				__GEN_SS__ << "Invalid Data Type '" << dataType_ << "' (offset:" <<
+					universalDataBitOffset_ << " + " << sizeOfDataTypeBits_
+		           << "-bits) = " << sizeOfReadBytes_ <<
+		              "-bytes. Data Type size must be less than or equal to Universal Data Size = " << 
+					  interface->getUniversalDataSize() << "-bytes. (Or the FEInterface must implement the virtual function universalBlockRead() for larger read sizes)" << __E__;
+				__GEN_COUT_ERR__ << "\n" << ss.str();
+				__GEN_SS_THROW__;
+			}
+			// else ignore  error for test read (assume things are not setup yet)
+		}
+		__GEN_COUT__ << "Block read was found to be implemented!" << __E__;
 	}
 
 	
@@ -239,10 +258,28 @@ FESlowControlsChannel::FESlowControlsChannel(const std::string& interfaceUID,
 //==============================================================================
 FESlowControlsChannel::~FESlowControlsChannel(void) {}
 
+
+//==============================================================================
+// virtual in case read should be different than universalread
+void FESlowControlsChannel::getSample(std::string& readValue)
+{
+	if(getReadSizeBytes() > interface_->getUniversalDataSize())
+	{
+		//block read!
+		readValue.resize(getReadSizeBytes());
+		interface_->universalBlockRead(&universalAddress_[0], &readValue[0], getReadSizeBytes());
+	}
+	else //normal read
+	{
+		readValue.resize(interface_->getUniversalDataSize());
+		interface_->universalRead(&universalAddress_[0], &readValue[0]);
+	}
+}  // end getSample()
+
 //==============================================================================
 void FESlowControlsChannel::print(std::ostream& out) const
 {
-	out << "Slow Controls Channel for Interface '" << interfaceUID_ << "': " << channelName_ << __E__;
+	out << "Slow Controls Channel '" << mfSubject_ << "'" << __E__;
 
 	out << "\t"
 	    << "dataType_: " << dataType_ << __E__;

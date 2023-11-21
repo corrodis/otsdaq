@@ -28,6 +28,7 @@ const std::string RunControlStateMachine::RUNNING_STATE_NAME = "Running";
 const std::string RunControlStateMachine::SHUTDOWN_TRANSITION_NAME = "Shutdown";
 const std::string RunControlStateMachine::STARTUP_TRANSITION_NAME  = "Startup";
 const std::string RunControlStateMachine::ERROR_TRANSITION_NAME  = "Error";
+const std::string RunControlStateMachine::CONFIGURE_TRANSITION_NAME  = "Configure";
 
 //==============================================================================
 RunControlStateMachine::RunControlStateMachine(const std::string& name)
@@ -58,11 +59,12 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	RunControlStateMachine::addStateTransition('F', 'H', "Halt", "Halting", this, &RunControlStateMachine::transitionHalting);
 	RunControlStateMachine::addStateTransition(
 	    'F', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
-	RunControlStateMachine::addStateTransition('F', 'F', "Error", "Erroring", this, &RunControlStateMachine::transitionShuttingDown);
+	RunControlStateMachine::addStateTransition(
+		'F', 'F', RunControlStateMachine::ERROR_TRANSITION_NAME, "Erroring", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition('F', 'F', "Fail", "Failing", this, &RunControlStateMachine::transitionShuttingDown);
 
 	RunControlStateMachine::addStateTransition(
-	    'H', 'C', "Configure", "Configuring", "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
+	    'H', 'C', RunControlStateMachine::CONFIGURE_TRANSITION_NAME, "Configuring", "ConfigurationAlias", this, &RunControlStateMachine::transitionConfiguring);
 	RunControlStateMachine::addStateTransition(
 	    'H', 'X', RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, "Shutting Down", this, &RunControlStateMachine::transitionShuttingDown);
 	RunControlStateMachine::addStateTransition(
@@ -85,7 +87,7 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	// NOTE!! There must be a defined message handler for each transition name created
 	// above
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Initialize", XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Configure", XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::CONFIGURE_TRANSITION_NAME, XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Start", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Stop", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Pause", XDAQ_NS_URI);
@@ -95,7 +97,7 @@ RunControlStateMachine::RunControlStateMachine(const std::string& name)
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::SHUTDOWN_TRANSITION_NAME, XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::STARTUP_TRANSITION_NAME, XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Fail", XDAQ_NS_URI);
-	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "Error", XDAQ_NS_URI);
+	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, RunControlStateMachine::ERROR_TRANSITION_NAME, XDAQ_NS_URI);
 
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncError", XDAQ_NS_URI);
 	xoap::bind(this, &RunControlStateMachine::runControlMessageHandler, "AsyncPauseException", XDAQ_NS_URI);
@@ -387,6 +389,18 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 			// of additional iterations
 			lastIterationState_   = theStateMachine_.getCurrentState();
 			lastIterationCommand_ = command;
+			if(command == RunControlStateMachine::CONFIGURE_TRANSITION_NAME)
+			{
+				lastAttemptedConfigureGroup_ = SOAPUtilities::translate(message).getParameters().getValue("ConfigurationAlias"); 
+
+				//all entities but Gateway will have alias group name and key translation:
+				try
+				{
+					lastAttemptedConfigureGroup_ += " " + SOAPUtilities::translate(message).getParameters().getValue("ConfigurationTableGroupName") + 
+						"(" +  SOAPUtilities::translate(message).getParameters().getValue("ConfigurationTableGroupKey") + ")";
+				}
+				catch(...) { /* ignore missing parameters */ }
+			}
 
 			theStateMachine_.execTransition(command, message);
 		}
@@ -402,9 +416,17 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 			result = command + "Iterate";  // indicate another iteration back to Gateway
 		}
 	}
+	catch(const std::runtime_error& e)
+	{
+		__GEN_SS__ << "Run Control Message Handling Failed with command '" << command << "': " << e.what() << " " << theStateMachine_.getErrorMessage() << __E__;
+		__GEN_COUT_ERR__ << ss.str();
+		theStateMachine_.setErrorMessage(ss.str());
+
+		result = command + RunControlStateMachine::FAILED_STATE_NAME;
+	}
 	catch(toolbox::fsm::exception::Exception& e)
 	{
-		__GEN_SS__ << "Run Control Message Handling Failed: " << e.what() << " " << theStateMachine_.getErrorMessage() << __E__;
+		__GEN_SS__ << "Run Control Message Handling Failed with command '" << command << "': " << e.what() << " " << theStateMachine_.getErrorMessage() << __E__;
 		__GEN_COUT_ERR__ << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 
@@ -412,7 +434,13 @@ xoap::MessageReference RunControlStateMachine::runControlMessageHandler(xoap::Me
 	}
 	catch(...)
 	{
-		__GEN_SS__ << "Run Control Message Handling encountered an unknown error." << theStateMachine_.getErrorMessage() << __E__;
+		__GEN_SS__ << "Run Control Message Handling Failed  with command '" << command << "' and encountered an unknown error." << theStateMachine_.getErrorMessage() << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__GEN_COUT_ERR__ << ss.str();
 		theStateMachine_.setErrorMessage(ss.str());
 

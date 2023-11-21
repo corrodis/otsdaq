@@ -68,26 +68,26 @@ class TableView
 	unsigned int 								findColByType				(const std::string& type, int startingCol = 0) const;
 
 	// Getters
-	const std::string&                          getUniqueStorageIdentifier	(void) const;
-	const std::string&                          getTableName				(void) const;
-	const TableVersion&                         getVersion					(void) const;
-	const std::string&                          getComment					(void) const;
-	const std::string&                          getAuthor					(void) const;
-	const time_t&                               getCreationTime				(void) const;
-	const time_t&                               getLastAccessTime			(void) const;
-	const bool&                                 getLooseColumnMatching		(void) const;
+	const std::string&                          getCustomStorageData		(void) const { return storageData_; }
+	const std::string&                          getTableName				(void) const { return tableName_; }
+	const TableVersion&                         getVersion					(void) const { return version_; }
+	const std::string&                          getComment					(void) const { return comment_; }
+	const std::string&                          getAuthor					(void) const { return author_; }
+	const time_t&                               getCreationTime				(void) const { return creationTime_; }
+	const time_t&                               getLastAccessTime			(void) const { return lastAccessTime_; }
+	const bool&                                 getLooseColumnMatching		(void) const { return fillWithLooseColumnMatching_; }
 	unsigned int                          		getDataColumnSize			(void) const;
-	const unsigned int&                         getSourceColumnMismatch		(void) const;
-	const unsigned int&                         getSourceColumnMissing		(void) const;
-	const std::set<std::string /*col name*/>&   getSourceColumnNames		(void) const;
+	const unsigned int&                         getSourceColumnMismatch		(void) const { return sourceColumnMismatchCount_; }
+	const unsigned int&                         getSourceColumnMissing		(void) const { return sourceColumnMissingCount_; }
+	const std::set<std::string /*col name*/>&   getSourceColumnNames		(void) const { return sourceColumnNames_; }
 	std::set<std::string /*col name*/>          getColumnNames				(void) const;
 	std::map<std::string, unsigned int /*col*/> getColumnNamesMap			(void) const;
 	std::set<std::string /*storage name*/>      getColumnStorageNames		(void) const;
-	const std::vector<std::string /*per col*/>& getDefaultRowValues			(void) const;
+	const std::vector<std::string /*per col*/>& getDefaultRowValues			(void) const { return rowDefaultValues_; }
 	std::string									getMismatchColumnInfo		(void) const;
 
-	unsigned int       							getNumberOfRows				(void) const;
-	unsigned int       							getNumberOfColumns			(void) const;
+	unsigned int       							getNumberOfRows				(void) const { return theDataView_.size(); }
+	unsigned int       							getNumberOfColumns			(void) const { return columnsInfo_.size(); }
 	unsigned int 								getColUID					(void) const;
 	unsigned int 								getColStatus				(void) const;
 	unsigned int 								getColPriority				(void) const;
@@ -157,16 +157,15 @@ public:
 	            								                       		 bool convertEnvironmentVariables = true) const;
 	bool        								isURIEncodedCommentTheSame	(const std::string& comment) const;
 
-	const DataView&                         	getDataView					(void) const;
-	const std::vector<TableViewColumnInfo>& 	getColumnsInfo				(void) const;
-	std::vector<TableViewColumnInfo>*       	getColumnsInfoP				(void);
+	const DataView&                         	getDataView					(void) const { return theDataView_; }
+	const std::vector<TableViewColumnInfo>& 	getColumnsInfo				(void) const { return columnsInfo_; }
+	std::vector<TableViewColumnInfo>*       	getColumnsInfoP				(void)  	 { return &columnsInfo_; }
 	const TableViewColumnInfo&             		getColumnInfo				(unsigned int column) const;
 
 	// Setters
 
-	void 										setUniqueStorageIdentifier	(const std::string& storageUID);
-	//void 										setTableName				(const std::string& name);
-	void 										setComment					(const std::string& comment);
+	void 										setCustomStorageData		(const std::string& storageData) 	{ storageData_ = storageData; }
+	void 										setComment					(const std::string& comment)		{ comment_ = comment; }
 	void 										setURIEncodedComment		(const std::string& uriComment);
 	void 										setAuthor					(const std::string& author);
 	void 										setCreationTime				(time_t t);
@@ -230,7 +229,7 @@ public:
 														                                            // private (DO NOT USE IT!) - should use
 														                                            // TableView::copy()
 
-	std::string 													uniqueStorageIdentifier_;  	// starts empty "", used to implement re-writable views ("temporary views") in artdaq db
+	std::string 													storageData_;  				// starts empty "", used to implement re-writable views ("temporary views") in artdaq db
 	const std::string												tableName_;               	// View name (extensionTableName in xml)
 	TableVersion 													version_;                 	// Table version
 	std::string  													comment_;                 	// Table version comment

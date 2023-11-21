@@ -38,36 +38,81 @@ FEVInterface::~FEVInterface(void)
 
 //==============================================================================
 void FEVInterface::configureSlowControls(void)
+try
 {
-	__COUT__ << "configureSlowControls" << __E__;
+	//do not use __GEN_COUT__ as mfSubject may not be setup
+	__COUT__ << "configureSlowControls path=" << theConfigurationPath_ << __E__;
 
 	// Start artdaq metric manager here, if possible
 	if(metricMan && !metricMan->Running() && metricMan->Initialized())
 	{
-		__GEN_COUT__ << "Metric manager starting..." << __E__;
+		__COUT__ << "Metric manager starting..." << __E__;
 		metricMan->do_start();
-		__GEN_COUT__ << "Metric manager started." << __E__;
+		__COUT__ << "Metric manager started." << __E__;
 	}
 	else if(!metricMan || !metricMan->Initialized())
-		__GEN_COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan ? metricMan->Initialized() : 0)
+		__COUT__ << "Metric manager could not be started! metricMan: " << metricMan << " Initialized()= " << (metricMan ? metricMan->Initialized() : 0)
 		             << __E__;
 	else
-		__GEN_COUT__ << "Metric manager already started." << __E__;
+		__COUT__ << "Metric manager already started." << __E__;
 
 	mapOfSlowControlsChannels_.clear();  // reset
 
-	addSlowControlsChannels(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("LinkToSlowControlsChannelTable"),
-	                        "" /*subInterfaceID*/,
+	//allow to possible position for link "LinkToSlowControlsChannelTable"
+	//	1. back 1 node (e.g. at generic FEInterface table)
+	// 	2. at the config path (e.g. for special FE children cases)
+
+	bool type1 = true;
+	std::string errMessage;
+	try
+	{
+		ConfigurationTree testNode = theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode("LinkToSlowControlsChannelTable");
+		__COUTV__(testNode.isDisconnected());
+		type1 = false;
+	}
+	catch(...) { /* ignore */ }
+	
+	if(type1)
+		addSlowControlsChannels(theXDAQContextConfigTree_.getBackNode(theConfigurationPath_).getNode("LinkToSlowControlsChannelTable"),
 	                        &mapOfSlowControlsChannels_);
+	else
+	{
+		try
+		{
+			addSlowControlsChannels(theXDAQContextConfigTree_.getNode(theConfigurationPath_).getNode("LinkToSlowControlsChannelTable"),
+	                        &mapOfSlowControlsChannels_);	
+		}
+		catch(const std::runtime_error& e)
+		{
+			__SS__ << "Configuring slow controls channels encountered an error: " << e.what();			
+			__SS_THROW__;
+		}
+		
+	}
 
 }  // end configureSlowControls()
+catch(const std::runtime_error& e)
+{
+	__SS__ << "Error was caught while configuring slow controls: " << e.what() << __E__;
+	__SS_THROW__;
+}
+catch(...)
+{
+	__SS__ << "Unknown error was caught while configuring slow controls." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
+	__SS_THROW__;
+}
 
 //==============================================================================
 // addSlowControlsChannels
 //	Usually subInterfaceID = "" and mapOfSlowControlsChannels =
 //&mapOfSlowControlsChannels_
 void FEVInterface::addSlowControlsChannels(ConfigurationTree                                          slowControlsGroupLink,
-                                           const std::string&                                         subInterfaceID,
                                            std::map<std::string /* ROC UID*/, FESlowControlsChannel>* mapOfSlowControlsChannels)
 {
 	if(slowControlsGroupLink.isDisconnected())
@@ -84,16 +129,15 @@ void FEVInterface::addSlowControlsChannels(ConfigurationTree                    
 		if(!(groupLinkChild.second.getNode(TableViewColumnInfo::COL_NAME_STATUS).getValue<bool>()))
 			continue;
 
-		__FE_COUT__ << "Channel:" << getInterfaceUID() << subInterfaceID << "/" << groupLinkChild.first
+		__FE_COUT__ << "Channel:" << slowControlsGroupLink.getTableName() << "/" << 
+						getInterfaceUID() << "/" << groupLinkChild.first
 		            << "\t Type:" << groupLinkChild.second.getNode("ChannelDataType") << __E__;
 
 		mapOfSlowControlsChannels->insert(std::pair<std::string, FESlowControlsChannel>(
 		    groupLinkChild.first,
-		    FESlowControlsChannel(getInterfaceUID() + subInterfaceID,
+		    FESlowControlsChannel(this,
 		                          groupLinkChild.first,
 		                          groupLinkChild.second.getNode("ChannelDataType").getValue<std::string>(),
-		                          universalDataSize_,
-		                          universalAddressSize_,
 		                          groupLinkChild.second.getNode("UniversalInterfaceAddress").getValue<std::string>(),
 		                          groupLinkChild.second.getNode("UniversalDataBitOffset").getValue<unsigned int>(),
 		                          groupLinkChild.second.getNode("ReadAccess").getValue<bool>(),
@@ -112,6 +156,8 @@ void FEVInterface::addSlowControlsChannels(ConfigurationTree                    
 		                          groupLinkChild.second.getNode("HighThreshold").getValue<std::string>(),
 		                          groupLinkChild.second.getNode("HighHighThreshold").getValue<std::string>())));
 	}
+	__FE_COUT__ << "Added " << mapOfSlowControlsChannels->size() << " slow controls channels." << __E__;
+
 }  // end addSlowControlsChannels()
 
 //==============================================================================
@@ -129,14 +175,6 @@ FESlowControlsChannel* FEVInterface::getNextSlowControlsChannel(void)
 		return nullptr;
 
 	return &((slowControlsChannelsIterator_++)->second);  // return iterator, then increment
-}  // end getNextSlowControlsChannel()
-
-//==============================================================================
-// virtual in case read should be different than universalread
-void FEVInterface::getSlowControlsValue(FESlowControlsChannel& channel, std::string& readValue)
-{
-	readValue.resize(universalDataSize_);
-	universalRead(&channel.universalAddress_[0], &readValue[0]);
 }  // end getNextSlowControlsChannel()
 
 //==============================================================================
@@ -302,7 +340,7 @@ try
 			}
 
 			if(!usingBufferedValue)
-				getSlowControlsValue(*channel, readVal);
+				channel->getSample(readVal);
 
 			// have sample
 			channel->handleSample(readVal, txBuffer, fp, aggregateFileIsBinaryFormat);
@@ -407,6 +445,12 @@ catch(...)  //
 	catch(...)
 	{
 		ss << "Caught an unknown error during slow controls running thread." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 	}
 
 	// At this point, an asynchronous error has occurred
@@ -538,6 +582,12 @@ bool FEVInterface::workLoopThread(toolbox::task::WorkLoop* /*workLoop*/)
 		catch(...)
 		{
 			ss << "Caught an unknown error during running." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 		}
 
 		// At this point, an asynchronous error has occurred
@@ -626,11 +676,18 @@ const std::string& FEVInterface::getFEMacroConstArgument(frontEndMacroConstArgs_
 // getFEMacroConstArgumentValue
 //	helper function for getting the copy of the value of an argument
 template<>
-std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEndMacroConstArgs_t& args, const std::string& argName)
+std::string ots::getFEMacroConstArgumentValue<std::string>(FEVInterface::frontEndMacroConstArgs_t& args, 
+														   const std::string& argName,
+														   const std::string& defaultValue)
 {
-	return FEVInterface::getFEMacroConstArgument(args, argName);
-}
+	const std::string& data = FEVInterface::getFEMacroConstArgument(args, argName);
 
+	// default value is used only if the user leave "Default"
+	if (data == "Default")
+		return defaultValue;
+	
+	return data;
+}
 //==============================================================================
 // getFEMacroArgumentValue
 //	helper function for getting the copy of the value of an argument

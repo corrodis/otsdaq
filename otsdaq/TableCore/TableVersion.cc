@@ -42,6 +42,27 @@ TableVersion& TableVersion::operator=(const unsigned int version)
 }
 
 //==============================================================================
+// operator*=
+//	Only implemented to support StringMacros on TableVersion types (e.g. getMapFromString in StringMacros.icc)
+TableVersion& TableVersion::operator*=(const unsigned int a) { version_ *= a; return *this; }
+//==============================================================================
+// operator*=
+//	Only implemented to support StringMacros on TableVersion types (e.g. getMapFromString in StringMacros.icc)
+TableVersion& TableVersion::operator*=(const TableVersion a) { version_ *= a.version_; return *this; }
+//==============================================================================
+// operator+=
+//	Only implemented to support StringMacros on TableVersion types (e.g. getMapFromString in StringMacros.icc)
+TableVersion& TableVersion::operator+=(const TableVersion a) { version_ += a.version_; return *this; }
+//==============================================================================
+// operator+=
+//	Only implemented to support StringMacros on TableVersion types (e.g. getMapFromString in StringMacros.icc)
+TableVersion& TableVersion::operator-=(const TableVersion a) { version_ -= a.version_; return *this; }
+//==============================================================================
+// operator/=
+//	Only implemented to support StringMacros on TableVersion types (e.g. getMapFromString in StringMacros.icc)
+TableVersion& TableVersion::operator/=(const TableVersion a) { version_ /= a.version_; return *this; }
+
+//==============================================================================
 // operator==
 bool TableVersion::operator==(unsigned int version) const { return (version_ == version); }
 bool TableVersion::operator==(const TableVersion& version) const { return (version_ == version.version_); }

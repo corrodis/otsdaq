@@ -167,7 +167,7 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		std::map<std::string, toolbox::fsm::State> transitions = getTransitions(getCurrentState());
 		for(const auto& transitionPair : transitions)
 		{
-			__GEN_COUT__ << "Taking transition to indirect failure: " << transitionPair.first << __E__;
+			__GEN_COUT__ << "Taking any transition to indirect failure.. found '" << transitionPair.first << "'" << __E__;
 			__GEN_COUT__ << "Taking fail transition from Current state: " << getStateName(getCurrentState()) << " last state: " << getProvenanceStateName()
 			             << __E__;
 			toolbox::Event::Reference event(new toolbox::Event(transitionPair.first, this));
@@ -247,6 +247,12 @@ bool FiniteStateMachine::execTransition(const std::string& transition, const xoa
 		transitionSuccessful = false;
 		__GEN_SS__ << "Transition " << transition << " was not executed from current state " << getStateName(getCurrentState())
 		           << ". There was an unknown error.";
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__GEN_COUT_ERR__ << ss.str() << __E__;
 		// diagService_->reportError(err.str(),DIAGERROR);
 

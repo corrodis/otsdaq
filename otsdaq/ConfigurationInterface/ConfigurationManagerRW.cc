@@ -373,10 +373,11 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 						{
 							__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
 											<< groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
-							groupInfo.second.latestKeyGroupComment_      = "UNKNOWN";
-							groupInfo.second.latestKeyGroupAuthor_       = "UNKNOWN";
-							groupInfo.second.latestKeyGroupCreationTime_ = "0";
-							groupInfo.second.latestKeyGroupTypeString_   = "UNKNOWN";
+							groupInfo.second.latestKeyGroupComment_      = ConfigurationManager::UNKNOWN_INFO;
+							groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
+							groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
+							groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+							groupInfo.second.latestKeyMemberMap_   	     = {};
 						}
 					}  // end group info loop
 				else //multi-threading
@@ -388,8 +389,13 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 					for(int i=0;i<numOfThreads;++i)
 						threadDone.push_back(std::make_shared<std::atomic<bool>>(true));
 
+					std::vector<std::shared_ptr<ots::GroupInfo>> sharedGroupInfoPtrs;
+
 					for(auto& groupInfo : allGroupInfo_)
 					{
+						//make temporary group info for thread
+						sharedGroupInfoPtrs.push_back(std::make_shared<ots::GroupInfo>());
+
 						if(threadsLaunched >= numOfThreads)
 						{
 							//find availableThreadIndex
@@ -410,18 +416,22 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 							} //end thread search loop
 							threadsLaunched = numOfThreads - 1;
 						}					
-						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << __E__;
+						__GEN_COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Starting thread... " << foundThreadIndex << " for " << 
+							groupInfo.first << "(" << groupInfo.second.getLatestKey() << ")" << __E__;
+
 						*(threadDone[foundThreadIndex]) = false;
 
 						std::thread([](
-							ConfigurationManagerRW* 				cfgMgr, 
-							std::string 							groupName, 
-							ots::GroupInfo*                       	theGroupInfo,
+							ConfigurationManagerRW* 				theCfgMgr, 
+							std::string 							theGroupName, 
+							ots::TableGroupKey						theGroupKey,
+							std::shared_ptr<ots::GroupInfo>        	theGroupInfo,
 		               		std::shared_ptr<std::atomic<bool>> 		theThreadDone) { 
-						ConfigurationManagerRW::loadTableGroupThread(cfgMgr, groupName, theGroupInfo, theThreadDone); },
+						ConfigurationManagerRW::loadTableGroupThread(theCfgMgr, theGroupName, theGroupKey, theGroupInfo, theThreadDone); },
 							this,
 							groupInfo.first,
-							&(groupInfo.second),
+							groupInfo.second.getLatestKey(),
+							sharedGroupInfoPtrs.back(),
 							threadDone[foundThreadIndex])
 		    			.detach();
 
@@ -446,6 +456,18 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 						}
 					} while(foundThreadIndex != -1); //end thread done search loop
 
+					//threads done now, so copy group info
+					size_t i = 0;
+					for(auto& groupInfo : allGroupInfo_)
+					{
+						groupInfo.second.latestKeyGroupComment_      = sharedGroupInfoPtrs[i]->latestKeyGroupComment_;
+						groupInfo.second.latestKeyGroupAuthor_       = sharedGroupInfoPtrs[i]->latestKeyGroupAuthor_;
+						groupInfo.second.latestKeyGroupCreationTime_ = sharedGroupInfoPtrs[i]->latestKeyGroupCreationTime_;
+						groupInfo.second.latestKeyGroupTypeString_   = sharedGroupInfoPtrs[i]->latestKeyGroupTypeString_;
+						groupInfo.second.latestKeyMemberMap_   	     = sharedGroupInfoPtrs[i]->latestKeyMemberMap_;
+						++i;
+					} //end copy group info loop
+
 				} //end multi-thread handling
 			}
 		}      // end get group info
@@ -461,6 +483,12 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 		catch(...)
 		{
 			__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__GEN_COUT_ERR__ << "\n" << ss.str();
 			if(accumulatedWarnings)
 				*accumulatedWarnings += ss.str();
@@ -479,21 +507,25 @@ const std::map<std::string, TableInfo>& ConfigurationManagerRW::getAllTableInfo(
 // loadTableGroupThread()
 void ConfigurationManagerRW::loadTableGroupThread(ConfigurationManagerRW* 				cfgMgr, 
 													std::string 						groupName, 
-													ots::GroupInfo*  					groupInfo, 
+													ots::TableGroupKey					groupKey,
+													std::shared_ptr<ots::GroupInfo>		groupInfo, 
 													std::shared_ptr<std::atomic<bool>> 	threadDone)
 try
 {
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Thread started... " << 
+		groupName << "(" << groupKey << ")" << __E__;
+
 	cfgMgr->loadTableGroup(groupName/*groupName*/,
-		groupInfo->getLatestKey(),
+		groupKey, //groupInfo->getLatestKey(),
 		false /*doActivate*/,
-		&groupInfo->latestKeyMemberMap_ /*groupMembers*/,
+		&(groupInfo->latestKeyMemberMap_) /*groupMembers*/,
 		0 /*progressBar*/,
 		0 /*accumulateErrors*/,
-		&groupInfo->latestKeyGroupComment_,
-		&groupInfo->latestKeyGroupAuthor_,
-		&groupInfo->latestKeyGroupCreationTime_,
+		&(groupInfo->latestKeyGroupComment_),
+		&(groupInfo->latestKeyGroupAuthor_),
+		&(groupInfo->latestKeyGroupCreationTime_),
 		true /*doNotLoadMember*/,
-		&groupInfo->latestKeyGroupTypeString_);
+		&(groupInfo->latestKeyGroupTypeString_));
 
 	*(threadDone) = true;
 } // end loadTableGroupThread
@@ -501,10 +533,11 @@ catch(...)
 {
 	__COUT_WARN__ << "Error occurred loading latest group info into cache for '"
 		<< groupName << "(" << groupInfo->getLatestKey() << ")'..." << __E__;
-	groupInfo->latestKeyGroupComment_      = "UNKNOWN";
-	groupInfo->latestKeyGroupAuthor_       = "UNKNOWN";
-	groupInfo->latestKeyGroupCreationTime_ = "0";
-	groupInfo->latestKeyGroupTypeString_   = "UNKNOWN";
+	groupInfo->latestKeyGroupComment_      = ConfigurationManager::UNKNOWN_INFO;
+	groupInfo->latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
+	groupInfo->latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
+	groupInfo->latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+	groupInfo->latestKeyMemberMap_   	   = {};
 	*(threadDone) = true;
 } // end loadTableGroupThread catch
 
@@ -621,7 +654,8 @@ std::map<std::string /*table name*/, std::map<std::string /*version alias*/, Tab
 // setActiveGlobalConfiguration
 //	load table group and activate
 //	deactivates previous table group of same type if necessary
-void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, std::string* accumulatedTreeErrors)
+void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupName, TableGroupKey tableGroupKey, 
+	std::string* accumulatedTreeErrors, std::string* groupTypeString)
 {
 	try
 	{
@@ -631,7 +665,12 @@ void ConfigurationManagerRW::activateTableGroup(const std::string& tableGroupNam
 				true,                    // loads and activates
 				0,                       // no members needed
 				0,                       // no progress bar
-				accumulatedTreeErrors);  // accumulate warnings or not
+				accumulatedTreeErrors,  // accumulate warnings or not
+				0 /* groupComment */,
+				0 /* groupAuthor */,
+				0 /* groupCreateTime */,
+				false /* doNotLoadMember */,
+				groupTypeString);
 	}
 	catch(...)
 	{
@@ -1863,6 +1902,94 @@ void GroupEditStruct::saveChanges(const std::string& groupNameToSave,
 //Used for debugging Configuration calls during development
 void ConfigurationManagerRW::testXDAQContext()
 {
+	if(1) return; //if 0 to debug
+	__GEN_COUTV__(runTimeSeconds());
+
+	std::string accumulatedWarningsStr;
+	std::string* accumulatedWarnings = &accumulatedWarningsStr;
+
+	// get Group Info too!
+	try
+	{
+		// build allGroupInfo_ for the ConfigurationManagerRW
+
+		std::set<std::string /*name*/> tableGroups = theInterface_->getAllTableGroupNames();
+		__GEN_COUT__ << "Number of Groups: " << tableGroups.size() << __E__;
+
+		__GEN_COUTV__(runTimeSeconds());
+		TableGroupKey key;
+		std::string   name;
+		for(const auto& fullName : tableGroups)
+		{
+			TableGroupKey::getGroupNameAndKey(fullName, name, key);
+			cacheGroupKey(name, key);
+		}
+		__GEN_COUTV__(runTimeSeconds());
+		// for each group get member map & comment, author, time, and type for latest key
+		for(auto& groupInfo : allGroupInfo_)
+		{
+			try
+			{
+				loadTableGroup(groupInfo.first /*groupName*/,
+				               groupInfo.second.getLatestKey(),
+				               false /*doActivate*/,
+				               &groupInfo.second.latestKeyMemberMap_ /*groupMembers*/,
+				               0 /*progressBar*/,
+				               0 /*accumulateErrors*/,
+				               &groupInfo.second.latestKeyGroupComment_,
+				               &groupInfo.second.latestKeyGroupAuthor_,
+				               &groupInfo.second.latestKeyGroupCreationTime_,
+				               true /*doNotLoadMember*/,
+				               &groupInfo.second.latestKeyGroupTypeString_);
+			}
+			catch(const std::runtime_error& e)
+			{
+				__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+								 << groupInfo.first
+				                  << "(" << groupInfo.second.getLatestKey() << ")': \n" << e.what() << __E__;
+
+				groupInfo.second.latestKeyGroupComment_      = ConfigurationManager::UNKNOWN_INFO;
+				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
+				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
+				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
+			}
+			catch(...)
+			{
+				__GEN_COUT_WARN__ << "Error occurred loading latest group info into cache for '"
+								 << groupInfo.first
+				                  << "(" << groupInfo.second.getLatestKey() << ")'..." << __E__;
+				groupInfo.second.latestKeyGroupComment_      = ConfigurationManager::UNKNOWN_INFO;
+				groupInfo.second.latestKeyGroupAuthor_       = ConfigurationManager::UNKNOWN_INFO;
+				groupInfo.second.latestKeyGroupCreationTime_ = ConfigurationManager::UNKNOWN_TIME;
+				groupInfo.second.latestKeyGroupTypeString_   = ConfigurationManager::GROUP_TYPE_NAME_UNKNOWN;
+				groupInfo.second.latestKeyMemberMap_   	     = {};
+			}
+		}  // end group info loop
+		__GEN_COUTV__(runTimeSeconds());
+	}      // end get group info
+	catch(const std::runtime_error& e)
+	{
+		__SS__ << "A fatal error occurred reading the info for all table groups. Error: " << e.what() << __E__;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
+		else
+			throw;
+	}
+	catch(...)
+	{
+		__SS__ << "An unknown fatal error occurred reading the info for all table groups." << __E__;
+		__GEN_COUT_ERR__ << "\n" << ss.str();
+		if(accumulatedWarnings)
+			*accumulatedWarnings += ss.str();
+		else
+			throw;
+	}
+	__GEN_COUT__ << "Group Info end runtime=" << runTimeSeconds() << __E__;
+	
+
+	return;
 	try
 	{
 		__GEN_COUT__ << "Loading table..." << __E__;

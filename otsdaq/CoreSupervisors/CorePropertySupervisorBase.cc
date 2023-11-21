@@ -21,6 +21,8 @@ CorePropertySupervisorBase::CorePropertySupervisorBase(xdaq::Application* applic
 {
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
+
+
 	__SUP_COUTV__(application->getApplicationContext()->getContextDescriptor()->getURL());
 	__SUP_COUTV__(application->getApplicationDescriptor()->getLocalId());
 	__SUP_COUTV__(supervisorClass_);
@@ -317,6 +319,7 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 	//	only redo if Context configuration group changes
 	propertiesAreSetup_ = true;
 
+
 	CorePropertySupervisorBase::setSupervisorPropertyDefaults();  // calls base class
 	                                                              // version defaults
 
@@ -340,6 +343,10 @@ void CorePropertySupervisorBase::checkSupervisorPropertySetup()
 		                                                             // settings from
 		                                                             // configuration
 
+
+	readOnly_        		= getSupervisorProperty("ReadOnly","0") == "1"?true:false;
+    __SUP_COUTV__(readOnly_);
+	
 	//__SUP_COUT__ << "Setting up supervisor specific FORCED properties for supervisor..."
 	//<< __E__;
 	forceSupervisorPropertyValues();  // calls override forced values
@@ -509,8 +516,7 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 {
 	checkSupervisorPropertySetup();
 
-	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << " files: " <<
-	// cgiIn.getFiles().size() << __E__;
+	//__SUP_COUT__ << "userInfo.requestType_ " << userInfo.requestType_ << __E__;
 
 	userInfo.automatedCommand_ = StringMacros::inWildCardSet(userInfo.requestType_,
 	                                                         propertyStruct_.AutomatedRequestTypes);  // automatic commands should not refresh
@@ -542,11 +548,11 @@ void CorePropertySupervisorBase::getRequestUserInfo(WebUsers::RequestUserInfo& u
 				             << "'... Defaulting to max threshold = " << (unsigned int)userInfo.permissionsThreshold_ << __E__;
 		}
 
-		//		__COUTV__(userInfo.requestType_);
-		//		__COUTV__(userInfo.checkLock_);
-		//		__COUTV__(userInfo.requireLock_);
-		//		__COUTV__(userInfo.allowNoUser_);
-		//		__COUTV__((unsigned int)userInfo.permissionsThreshold_);
+		// __COUTV__(userInfo.requestType_);
+		// __COUTV__(userInfo.checkLock_);
+		// __COUTV__(userInfo.requireLock_);
+		// __COUTV__(userInfo.allowNoUser_);
+		// __COUTV__((unsigned int)userInfo.permissionsThreshold_);
 
 		try
 		{
@@ -714,6 +720,12 @@ xoap::MessageReference CorePropertySupervisorBase::TRACESupervisorRequest(xoap::
 	catch(...)
 	{
 		__SUP_SS__ << "Error occurred handling request." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SUP_COUT_ERR__ << ss.str();
 		retParameters.addParameter("Error", ss.str());
 	}

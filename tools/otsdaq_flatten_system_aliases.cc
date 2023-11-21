@@ -104,11 +104,20 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	// get prepared with initial source db
 
 	// ConfigurationManager instance immediately loads active groups
-	std::cout << "\n\n\n" << __COUT_HDR_FL__ << "Loading active Aliases..." << std::endl;
+	__COUT__ << "Loading active Aliases..." << std::endl;
 	ConfigurationManagerRW  cfgMgrInst("flatten_admin");
 	ConfigurationManagerRW* cfgMgr = &cfgMgrInst;
 
-	std::cout << __COUT_HDR_FL__ << "Done Loading active Aliases." << std::endl;
+	{
+		std::string accumulatedWarnings;
+		cfgMgr->restoreActiveTableGroups(false /*throwErrors*/,
+					"" /*pathToActiveGroupsFile*/,
+					ConfigurationManager::LoadGroupType::ALL_TYPES,
+					&accumulatedWarnings
+				);
+
+		__COUT__ << "Done Loading active groups: \n" << accumulatedWarnings << std::endl;
+	}
 	// return;
 
 	// create set of groups to persist
@@ -171,25 +180,25 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 		activeGroupKeys.insert(std::pair<std::string, std::pair<TableGroupKey, TableGroupKey>>(
 		    activeGroup.second.first, std::pair<TableGroupKey, TableGroupKey>(activeGroup.second.second, TableGroupKey())));
 
-		if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE)
+		if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_BACKBONE)
 		{
 			activeBackboneGroupName = activeGroup.second.first;
 			__COUT__ << "found activeBackboneGroupName = " << activeBackboneGroupName << std::endl;
 			foundAnyActiveGroups = true;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONTEXT)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_CONTEXT)
 		{
 			activeContextGroupName = activeGroup.second.first;
 			__COUT__ << "found activeContextGroupName = " << activeContextGroupName << std::endl;
 			foundAnyActiveGroups = true;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_ITERATE)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_ITERATE)
 		{
 			activeIterateGroupName = activeGroup.second.first;
 			__COUT__ << "found activeIterateGroupName = " << activeIterateGroupName << std::endl;
 			foundAnyActiveGroups = true;
 		}
-		else if(activeGroup.first == ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		else if(activeGroup.first == ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION)
 		{
 			activeConfigGroupName = activeGroup.second.first;
 			__COUT__ << "found activeConfigGroupName = " << activeConfigGroupName << std::endl;
@@ -609,7 +618,7 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	// std::endl;
 	//
 	//	__COUT__<< activeBackboneGroupName << " is the " <<
-	//			ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
+	//			ConfigurationManager::GROUP_TYPE_NAME_BACKBONE << "." << std::endl;
 	//	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." <<
 	// std::endl;
 
@@ -812,7 +821,7 @@ void FlattenActiveSystemAliasTableGroups(int argc, char* argv[])
 	for(const auto& activeGroup : activeGroupKeys)
 		__COUT__ << "------------ " << activeGroup.first << ": " << activeGroup.second.first << " => " << activeGroup.second.second << std::endl;
 
-	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::ACTIVE_GROUP_NAME_BACKBONE << "." << std::endl;
+	__COUT__ << activeBackboneGroupName << " is the " << ConfigurationManager::GROUP_TYPE_NAME_BACKBONE << "." << std::endl;
 	std::cout << "\n\n" << __COUT_HDR_FL__ << "Resulting Active Groups end." << std::endl;
 
 CLEAN_UP:

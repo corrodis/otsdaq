@@ -54,9 +54,9 @@ void ConfigurationInterface::setVersionTrackingEnabled(bool setValue) { Configur
 //		save using the interface, and return the new version number
 //	If newVersion is non 0, attempt to save as given newVersion number, else throw
 // exception. 	return TableVersion::INVALID on failure
-TableVersion ConfigurationInterface::saveNewVersion(TableBase* configuration, TableVersion temporaryVersion, TableVersion newVersion)
+TableVersion ConfigurationInterface::saveNewVersion(TableBase* table, TableVersion temporaryVersion, TableVersion newVersion)
 {
-	if(!temporaryVersion.isTemporaryVersion() || !configuration->isStored(temporaryVersion))
+	if(!temporaryVersion.isTemporaryVersion() || !table->isStored(temporaryVersion))
 	{
 		std::cout << __COUT_HDR_FL__ << "Invalid temporary version number: " << temporaryVersion << std::endl;
 		return TableVersion();  // return INVALID
@@ -68,7 +68,7 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase* configuration, Ta
 
 	bool rewriteableExists = false;
 
-	std::set<TableVersion> versions = getVersions(configuration);
+	std::set<TableVersion> versions = getVersions(table);
 	if(newVersion == TableVersion::INVALID)
 	{
 		if(versions.size() &&  // 1 more than last version, if any non-scratch versions exist
@@ -81,7 +81,7 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase* configuration, Ta
 		std::cout << __COUT_HDR_FL__ << "Next available version number is " << newVersion << std::endl;
 		//
 		//		//for sanity check, compare with config's idea of next version
-		//		TableVersion baseNextVersion = configuration->getNextVersion();
+		//		TableVersion baseNextVersion = table->getNextVersion();
 		//		if(newVersion <= baseNextVersion)
 		//			newVersion = TableVersion::getNextVersion(baseNextVersion);
 		//
@@ -106,12 +106,12 @@ TableVersion ConfigurationInterface::saveNewVersion(TableBase* configuration, Ta
 	std::cout << __COUT_HDR_FL__ << "Version number to save is " << newVersion << std::endl;
 
 	// copy to new version
-	configuration->changeVersionAndActivateView(temporaryVersion, newVersion);
+	table->changeVersionAndActivateView(temporaryVersion, newVersion);
 
 	// save to disk
 	//	only allow overwrite if version tracking is disabled AND the rewriteable version
 	//		already exists.
-	saveActiveVersion(configuration, !ConfigurationInterface::isVersionTrackingEnabled() && rewriteableExists);
+	saveActiveVersion(table, !ConfigurationInterface::isVersionTrackingEnabled() && rewriteableExists);
 
 	return newVersion;
-}
+} //end saveNewVersion()

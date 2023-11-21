@@ -650,37 +650,8 @@ if [ $ARTDAQ_DATABASE_TYPE == "filesystemdb" ]; then
 		echo "done" > ${USER_DATA}/ServiceData/.updateDB_nov9_2019a.cmd	
 	fi
 
-	#check for somewhat-antiquated(pre-configuration-to-table) artdaq database
-	if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2 ]; then
-	    out "Converting configuration to table for user data and databases..."
-	    
-	    #backup because we are scared
-	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
-	    cp -r ${USER_DATA} ${USER_DATA}bk12345
-	    
-	    otsdaq_convert_config_to_table	
-	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2
-	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes. Marked complete at ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion2"
-	    
-	    if [ $ISCONFIG == 0 ]; then		
-			exit
-	    fi
-	fi
-	if [ -d ${USER_DATA}/ConfigurationInfo ]; then
-	    out "Converting configuration to table for user data and databases..."
-	    
-	    #backup because we are scared
-	    cp -r ${ARTDAQ_DATABASE_FILESYSTEM_PATH} ${ARTDAQ_DATABASE_FILESYSTEM_PATH}bk12345
-	    cp -r ${USER_DATA} ${USER_DATA}bk12345
-	    
-	    otsdaq_convert_config_to_table
-	    echo "converted" > ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/fromConfigurationToTableConversion
-	    out "Conversion complete. You must run wiz mode once now to activate the configuration changes."
-	    
-	    if [ $ISCONFIG == 0 ]; then		
-			exit
-	    fi
-	fi
+	# As of 27-Oct-2023, no longer... check for somewhat-antiquated(pre-configuration-to-table) artdaq database
+
 else
 	ARTDAQ_DATABASE_FILESYSTEM_PATH=${USER_DATA}/ServiceData/artdaq_database_services
 	mkdir $ARTDAQ_DATABASE_FILESYSTEM_PATH &>/dev/null 2>&1 #hide output
@@ -704,7 +675,7 @@ if [ ! -e ${ARTDAQ_DATABASE_FILESYSTEM_PATH}/artdaqDaqTableConversion ]; then
 fi
 
 export TABLE_INFO_PATH=${USER_DATA}/TableInfo
-export SERVICE_DATA_PATH=${USER_DATA}/ServiceData
+export SERVICE_DATA_PATH=${USER_DATA}/ServiceData #it is not recommended that the SERVICE_DATA_PATH environment variable be changed by the user, it may break some features.
 export XDAQ_CONFIGURATION_DATA_PATH=${USER_DATA}/XDAQConfigurations
 export LOGIN_DATA_PATH=${USER_DATA}/ServiceData/LoginData
 export LOGBOOK_DATA_PATH=${USER_DATA}/ServiceData/LogbookData
@@ -834,17 +805,16 @@ launchOTSMacromaker() {
 	
 	
 	#check for mm xml file, if missing download it	
-	#FIXME after move to github
-	# if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml ]; then
-	# 	out "Downloading MacroMaker mode context configuration..."
-	# 	wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/XDAQConfigurations/otsConfiguration_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
-	# fi
+	if [ ! -e ${XDAQ_CONFIGURATION_DATA_PATH}/otsConfiguration_MacroMaker_CMake.xml ]; then
+		out "Downloading MacroMaker mode context configuration..."
+		wget https://github.com/art-daq/otsdaq/raw/develop/data-core/XDAQConfigurations/otsConfiguration_MacroMaker_CMake.xml -P ${XDAQ_CONFIGURATION_DATA_PATH} --no-check-certificate	
+	fi
 	
-	# #check for message facility file, if missing download it	
-	# if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
-	# 	out "Downloading MacroMaker mode context configuration..."
-	# 	wget https://cdcvs.fnal.gov/redmine/projects/otsdaq/repository/revisions/develop/raw/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate	
-	# fi
+	#check for message facility file, if missing download it	
+	if [ ! -e ${USER_DATA}/MessageFacilityConfigurations/MessageFacilityWithCout.fcl ]; then
+		out "Downloading MacroMaker mode context configuration..."
+		wget https://github.com/art-daq/otsdaq/raw/develop/data-core/MessageFacilityConfigurations/MessageFacilityWithCout.fcl -P ${USER_DATA}/MessageFacilityConfigurations --no-check-certificate
+	fi
 	
 		
 	#substitute environment variables into template wiz-mode xdaq config xml
@@ -2115,9 +2085,9 @@ launchOTSLogFind() {
 
 	fn="otsdaq_quiet_run-gateway-${gatewayHostname[$i]}-${gatewayPort}"
 	if [[ ${gatewayHostname[$i]} != ${THIS_HOST} ]]; then
-		out "   vless_mu2e.sh ${gatewayHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		out " '${Bold}${gatewayUID}${RstClr}'\t vless_mu2e.sh ${gatewayHostname[$i]} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 	else
-		out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+		out " '${Bold}${gatewayUID}${RstClr}'\t less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 	fi
 
 	#non-gateway contexts
@@ -2131,9 +2101,9 @@ launchOTSLogFind() {
 		# out "[$i] == $fn - ${xdaqHost[$i]} - ${PORT} - $gatewayHostname : $gatewayPort"
 
 		if [[ ${xdaqHost[$i]} != ${THIS_HOST} ]]; then
-			out "   vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out " '${Bold}${xdaqContextUID[$i]}${RstClr}'\t vless_mu2e.sh ${Bold}${xdaqHost[$i]}${RstClr} ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		else
-			out "   less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
+			out " '${Bold}${xdaqContextUID[$i]}${RstClr}'\t less ${OTSDAQ_LOG_DIR}/${fn}.txt${RstClr}"			
 		fi
 		i=$(( $i + 1 ))
 	done

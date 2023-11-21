@@ -53,4 +53,4 @@ std::string DOMTreeErrorReporter::reportParseException(const xercesc::SAXParseEx
 	       << "\n\n";
 	__COUT__ << "\n" << ss.str() << std::endl;
 	return ss.str();
-}
+} //end reportParseException()

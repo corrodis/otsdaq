@@ -12,6 +12,8 @@ using namespace ots;
 #undef __COUT_HDR__
 #define __COUT_HDR__ ("TableBase-" + getTableName() + "\t<> ")
 
+const std::string TableBase::GROUP_CACHE_PREPEND = "GroupCache_";
+
 //==============================================================================
 // TableBase
 //	If a valid string pointer is passed in accumulatedExceptions
@@ -46,6 +48,13 @@ TableBase::TableBase(const std::string& tableName,
 		std::cout << "TableBase After traceTID=" << traceTID << __E__;
 		__COUT__ << "TableBase TRACE reinit and Constructed." << __E__;
 	}
+
+	//if special GROUP CACHE table, handle construction in a special way
+	if(tableName.substr(0,TableBase::GROUP_CACHE_PREPEND.length()) == TableBase::GROUP_CACHE_PREPEND)
+	{
+		__COUT__ << "TableBase for '" << tableName << "' constructed." << __E__;
+		return;
+	} //end special GROUP CACHE table construction
 
 	bool dbg = false;  // tableName == "ARTDAQEventBuilderTable";
 	if(dbg)
@@ -252,7 +261,6 @@ void TableBase::trimTemporary(TableVersion targetVersion)
 	{
 		// else this is a persistent version!
 		__SS__ << "Temporary trim target was a persistent version: " << targetVersion << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 }
@@ -273,7 +281,6 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 	{
 		// else this is a persistent version!
 		__SS__ << "needleVersion does not exist: " << needleVersion << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 
@@ -376,6 +383,196 @@ TableVersion TableBase::checkForDuplicate(TableVersion needleVersion, TableVersi
 	return TableVersion();  // return invalid if no matches
 }  // end checkForDuplicate()
 
+
+//==============================================================================
+// diffTwoVersions
+//	return a report of differences among two versions
+bool TableBase::diffTwoVersions(TableVersion v1, TableVersion v2, 
+	std::stringstream* diffReport /* = 0 */,
+	std::map<std::string /* uid */, std::vector<std::string /* colName */>>* v1ModifiedRecords /* = 0 */) const
+{
+	__COUT_TYPE__(TLVL_DEBUG+12) << __COUT_HDR__ << "Diffing version... " << v1 << " vs " << v2 << __E__;
+	auto v1It = tableViews_.find(v1);
+	if(v1It == tableViews_.end())
+	{
+		// else this is a persistent version!
+		__SS__ << "Version v" << v1 << " does not exist." << __E__;		
+		__SS_THROW__;
+	}
+	auto v2It = tableViews_.find(v2);
+	if(v2It == tableViews_.end())
+	{
+		// else this is a persistent version!
+		__SS__ << "Version v" << v2 << " does not exist." << __E__;		
+		__SS_THROW__;
+	}
+
+	const TableView* view1 = &(v1It->second);
+	const TableView* view2 = &(v2It->second);
+	unsigned int     rows1       = view1->getNumberOfRows();
+	unsigned int     cols1       = view1->getNumberOfColumns();
+
+	bool         noDifference = true;
+
+	//	check each row,col
+
+	// if column source names do not match then note
+	//	source names are potentially different from
+	// getColumnsInfo()/getColumnStorageNames
+
+	if(view1->getSourceColumnNames().size() != view2->getSourceColumnNames().size())
+	{
+		__COUT__ << "Found column count mismatch for '" << view1->getSourceColumnNames().size() << 
+			" vs " << view2->getSourceColumnNames().size() << __E__;
+
+		if(diffReport) *diffReport << "<li>Found column count mismatch. The v" << v1 << " column count is <b>'" << view1->getSourceColumnNames().size() << 
+			"'</b> and the v" << v2 << " column count is <b>'" << view2->getSourceColumnNames().size() << "'</b>." << __E__;
+
+		noDifference = false;	
+		if(!diffReport) return noDifference; //do not need to continue to create report
+	}
+
+	for(auto& colName1 : view1->getSourceColumnNames())
+		if(view2->getSourceColumnNames().find(colName1) == view2->getSourceColumnNames().end())
+		{
+			__COUT__ << "Found column name mismatch for '" << colName1 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found column name mismatch. The v" << v1 << " column <b>'" << colName1 << 
+				"'</b> was not found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+	for(auto& colName2 : view2->getSourceColumnNames())
+		if(view1->getSourceColumnNames().find(colName2) == view1->getSourceColumnNames().end())
+		{
+			__COUT__ << "Found column name mismatch for '" << colName2 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found column name mismatch. The v" << v1 << " does not have column <b>'" << colName2 << 
+				"'</b> that was found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+
+	if(rows1 != view2->getNumberOfRows())
+	{
+		__COUT__ << "Found row count mismatch for '" << rows1 << 
+			" vs " << view2->getNumberOfRows() << __E__;
+
+		if(diffReport) *diffReport << "<li>Found row count mismatch. The v" << v1 << " row count is <b>'" << rows1 << 
+			"'</b> and the v" << v2 << " row count is <b>'" << view2->getNumberOfRows() << "'</b>." << __E__;
+
+		noDifference = false;	
+		if(!diffReport) return noDifference; //do not need to continue to create report
+	}
+
+	//report on missing UIDs
+	std::set<std::string /*uid*/> uidSet1,uidSet2;
+	for(unsigned int row = 0; row < rows1; ++row)
+		uidSet1.insert(view1->getDataView()[row][view1->getColUID()]);
+	for(unsigned int row = 0; row < view2->getNumberOfRows(); ++row)
+		uidSet2.insert(view2->getDataView()[row][view2->getColUID()]);
+
+	for(auto& uid1 : uidSet1)
+		if(uidSet2.find(uid1) == uidSet2.end())
+		{
+			__COUT__ << "Found record name mismatch for '" << uid1 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found record name mismatch. The v" << v1 << " record <b>'" << uid1 << 
+				"'</b> was not found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+	for(auto& uid2 : uidSet2)
+		if(uidSet1.find(uid2) == uidSet1.end())
+		{
+			__COUT__ << "Found record name mismatch for '" << uid2 << __E__;
+
+			if(diffReport) *diffReport << "<li>Found record name mismatch. v" << v1 << " does not have record <b>'" << uid2 << 
+				"'</b> that was found in v" << v2 << "." << __E__;
+
+			noDifference = false;	
+			if(!diffReport) return noDifference; //do not need to continue to create report
+		}
+
+
+	unsigned int row2, col2;
+	for(unsigned int row = 0; row < rows1 && row < view2->getNumberOfRows(); ++row)
+	{
+		//do not evaluate if UIDs do not match
+		row2 = row;
+		if(view1->getDataView()[row][view1->getColUID()] != 
+			view2->getDataView()[row2][view2->getColUID()])
+		{
+			bool foundUid2 = false;
+
+			for(row2 = 0; row2 < view2->getNumberOfRows(); ++row2)
+				if(view1->getDataView()[row][view1->getColUID()] == 
+					view2->getDataView()[row2][view2->getColUID()])
+				{
+					foundUid2 = true;
+					break;
+				}
+			__COUT__ << "Found row ? '" << foundUid2 << " " << row << "," << row2 << __E__;
+			if(!foundUid2) continue; //skip view1 record because no matching record found in view2
+		}
+		
+		__COUT__ << "Found row " << " " << row << "," << row2 << __E__;
+		for(unsigned int col = 0; col < cols1 - 2 && 
+			col < view2->getNumberOfColumns() - 2; ++col)  // do not consider author and timestamp
+		{
+			//do not evaluate if column names do not match
+			col2 = col;
+			if(view1->getColumnInfo(col).getName() != 
+				view2->getColumnInfo(col2).getName())
+			{
+				bool foundCol2 = false;
+
+				for(col2 = 0; col2 < view2->getNumberOfColumns() - 2; ++col2)
+					if(view1->getColumnInfo(col).getName() == 
+						view2->getColumnInfo(col2).getName())
+					{
+						foundCol2 = true;
+						break;
+					}
+				
+				__COUT__ << "Found column ? '" << foundCol2 << " " << col << "," << col2 << __E__;
+				if(!foundCol2) continue; //skip view1 column because no matching column name was found in view2
+			}
+
+			__COUT__ << "Found column " << " " << col << "," << col2 << __E__;
+			if(view1->getDataView()[row][col] != view2->getDataView()[row2][col2])
+			{
+				__COUT__ << "Found column value mismatch for '" << row << "," << col << " " << 
+					view1->getDataView()[row][col] << __E__;
+
+				if(diffReport) *diffReport << "<li><b>" <<
+					view1->getColumnInfo(col).getName()
+					<< "</b> value mismatch at v" << v1 << " {UID,r,c}:{<b>" <<
+					view1->getDataView()[row][view1->getColUID()] << "</b>," <<
+					row << "," << col << "}: <b>'"
+					<<
+					view1->getDataView()[row][col]
+					<< "'</b> vs value in v" << v2 << ": <b>'" <<
+					view2->getDataView()[row2][col2] << "'</b>." << __E__;
+
+				noDifference = false;	
+				if(!diffReport) return noDifference; //do not need to continue to create report
+
+				if(v1ModifiedRecords) //add uid/colName difference
+					(*v1ModifiedRecords)[view1->getDataView()[row][view1->getColUID()]].push_back(
+						view1->getColumnInfo(col).getName());
+			}
+		}
+	}
+
+	if(noDifference && diffReport) *diffReport << "<li>No difference found between v" << v1 << " and v" << v2 << "." << __E__;
+
+	return noDifference;  
+}  // end diffTwoVersions()
+
 //==============================================================================
 void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, TableVersion version)
 {
@@ -383,13 +580,11 @@ void TableBase::changeVersionAndActivateView(TableVersion temporaryVersion, Tabl
 	if(tableViews_.find(temporaryVersion) == tableViews_.end())
 	{
 		__SS__ << "ERROR: Temporary view version " << temporaryVersion << " doesn't exists!" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 	if(version.isInvalid())
 	{
 		__SS__ << "ERROR: Attempting to create an invalid version " << version << "! Did you really run out of versions? (this should never happen)" << __E__;
-		__COUT_ERR__ << "\n" << ss.str();
 		__SS_THROW__;
 	}
 
@@ -479,8 +674,20 @@ unsigned int TableBase::getNumberOfStoredViews(void) const
 }  // end getNumberOfStoredViews()
 
 //==============================================================================
-const TableView& TableBase::getView(void) const
+const TableView& TableBase::getView(TableVersion version /* = TableVersion::INVALID */) const
 {
+	try
+	{
+		if(version != TableVersion::INVALID)
+			return tableViews_.at(version);
+	}
+	catch(...)
+	{
+		__SS__ << "Table '" << tableName_ << "' does not have version v" << version << 
+			" in the cache." << __E__;
+		__SS_THROW__;
+	}
+
 	if(!activeTableView_)
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
@@ -490,8 +697,20 @@ const TableView& TableBase::getView(void) const
 }
 
 //==============================================================================
-TableView* TableBase::getViewP(void)
+TableView* TableBase::getViewP(TableVersion version /* = TableVersion::INVALID */)
 {
+	try
+	{
+		if(version != TableVersion::INVALID)
+			return &tableViews_.at(version);
+	}
+	catch(...)
+	{
+		__SS__ << "Table '" << tableName_ << "' does not have version v" << version << 
+			" in the cache." << __E__;
+		__SS_THROW__;
+	}
+
 	if(!activeTableView_)
 	{
 		__SS__ << "There is no active table view setup! Please check your system configuration." << __E__;
@@ -1119,10 +1338,11 @@ TableVersion TableBase::mergeViews(
 //	if conflict, throw exception
 //
 //	Returns version of new temporary view that was created.
-TableVersion TableBase::copyView(const TableView& sourceView, TableVersion destinationVersion, const std::string& author)
+TableVersion TableBase::copyView(const TableView& sourceView, TableVersion destinationVersion, 
+	const std::string& author, bool looseColumnMatching /* = false */)
 {
 	// check that column sizes match
-	if(sourceView.getNumberOfColumns() != mockupTableView_.getNumberOfColumns())
+	if(!looseColumnMatching && sourceView.getNumberOfColumns() != mockupTableView_.getNumberOfColumns())
 	{
 		__SS__ << "Error! Number of Columns of source view must match destination "
 		          "mock-up view."
@@ -1170,11 +1390,10 @@ TableVersion TableBase::copyView(const TableView& sourceView, TableVersion desti
 // 	returns new temporary version number (which is always negative)
 TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, TableVersion destTemporaryViewVersion)
 {
-	//__COUT__ << "Table: " << getTableName() << __E__;
-
-	//__COUT__ << "Num of Views: " << tableViews_.size()
-	//         << " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
-	//         << ")" << __E__;
+	__COUT_TYPE__(TLVL_DEBUG + 20) << __COUT_HDR__ << "Table: " << getTableName() << __E__ <<
+		 "Num of Views: " << tableViews_.size()
+		<< " (Temporary Views: " << (tableViews_.size() - getNumberOfStoredViews())
+		<< ")" << __E__;
 
 	TableVersion tmpVersion = destTemporaryViewVersion;
 	if(tmpVersion.isInvalid())
@@ -1185,7 +1404,6 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 	if(isStored(tmpVersion) || tmpVersion.isInvalid())
 	{
 		__SS__ << "Invalid destination temporary version: " << destTemporaryViewVersion << ". Expected next temporary version < " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 
@@ -1198,10 +1416,9 @@ TableVersion TableBase::createTemporaryView(TableVersion sourceViewVersion, Tabl
 			       << "Invalid source version. Version requested is not stored (yet?) or "
 			          "does not exist."
 			       << __E__;
-			__COUT_ERR__ << ss.str();
 			__SS_THROW__;
 		}
-		//__COUT__ << "Using Mock-up view" << __E__;
+		__COUT_TYPE__(TLVL_DEBUG + 20) << __COUT_HDR__ << "Using Mock-up view" << __E__;
 		tableViews_.emplace(std::make_pair(tmpVersion, TableView(tableName_)));
 		tableViews_.at(tmpVersion).copy(mockupTableView_, tmpVersion, mockupTableView_.getAuthor());
 	}
@@ -1240,11 +1457,10 @@ TableVersion TableBase::getNextTemporaryVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || !tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination temporary version: " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return tmpVersion;
-}
+} //end getNextTemporaryVersion()
 
 //==============================================================================
 // getNextVersion
@@ -1264,11 +1480,10 @@ TableVersion TableBase::getNextVersion() const
 	if(isStored(tmpVersion) || tmpVersion.isInvalid() || tmpVersion.isTemporaryVersion())
 	{
 		__SS__ << "Invalid destination next version: " << tmpVersion << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return tmpVersion;
-}
+} //end getNextVersion()
 
 //==============================================================================
 // getTemporaryView
@@ -1280,11 +1495,10 @@ TableView* TableBase::getTemporaryView(TableVersion temporaryVersion)
 	if(!temporaryVersion.isTemporaryVersion() || !isStored(temporaryVersion))
 	{
 		__SS__ << getTableName() << ":: Error! Temporary version not found!" << __E__;
-		__COUT_ERR__ << ss.str();
 		__SS_THROW__;
 	}
 	return &tableViews_.at(temporaryVersion);
-}
+} //end getTemporaryView()
 
 //==============================================================================
 // convertToCaps
@@ -1315,7 +1529,19 @@ std::string TableBase::convertToCaps(std::string& str, bool isTableName)
 		else if(str[c] >= '0' && str[c] <= '9')
 			capsStr += str[c];  // allow numbers
 		else                    // error! non-alpha
-			__THROW__(std::string("TableBase::convertToCaps::") + "Invalid character found in name (allowed: A-Z, a-z, 0-9):" + str);
+		{
+			//allow underscores for group cache document name
+			if(str.substr(0,TableBase::GROUP_CACHE_PREPEND.length()) == TableBase::GROUP_CACHE_PREPEND && str[c] == '_') 
+			{
+				capsStr += '-';
+				continue;
+			}
+
+			std::stringstream ss;
+			ss << __COUT_HDR_FL__ << "TableBase::convertToCaps: Invalid character found in name (allowed: A-Z, a-z, 0-9) '" << str << "'" << __E__;
+			TLOG(TLVL_ERROR) << ss.str();
+			__SS_ONLY_THROW__;
+		}
 
 	return capsStr;
-}
+} //end convertToCaps()

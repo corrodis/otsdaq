@@ -98,23 +98,36 @@ void XmlDocument::initDocument(void)
 		}
 		catch(const xercesc::OutOfMemoryException&)
 		{
-			XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
+			__SS__ << "OutOfMemoryException" << __E__;
+			__SS_THROW__;
 		}
 		catch(const xercesc::DOMException& e)
 		{
-			XERCES_STD_QUALIFIER cerr << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
+			__SS__ << "DOMException code is:  " << e.code << __E__;
+			__SS_THROW__;
 		}
 		catch(const xercesc::XMLException& e)
 		{
-			__COUT__ << "Error Message: " << XML_TO_CHAR(e.getMessage()) << std::endl;
+			__SS__ << "Error Message: " << XML_TO_CHAR(e.getMessage()) << __E__;
+			__SS_THROW__;
 		}
 		catch(...)
 		{
-			XERCES_STD_QUALIFIER cerr << "An error occurred creating the theDocument_" << XERCES_STD_QUALIFIER endl;
+			__SS__ << "An error occurred creating the theDocument_" << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
+			__SS_THROW__;
 		}
 	}
 	else
-		XERCES_STD_QUALIFIER cerr << "Requested theImplementation_ is not supported" << XERCES_STD_QUALIFIER endl;
+	{
+		__SS__ << "Requested theImplementation_ is not supported" << __E__;
+		__SS_THROW__;
+	}
 	darioXMLStyle_  = false;
 	isALeaf_[true]  = "true";
 	isALeaf_[false] = "false";

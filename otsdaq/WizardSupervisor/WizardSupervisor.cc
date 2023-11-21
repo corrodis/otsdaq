@@ -606,6 +606,12 @@ void WizardSupervisor::request(xgi::Input* in, xgi::Output* out)
 	{
 		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 		       << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}

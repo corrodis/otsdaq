@@ -46,14 +46,16 @@ class TableBase
 	void         				trimCache						(unsigned int trimSize = -1);
 	void         				trimTemporary					(TableVersion targetVersion = TableVersion());
 	TableVersion 				checkForDuplicate				(TableVersion needleVersion, TableVersion ignoreVersion = TableVersion()) const;
+	bool		 				diffTwoVersions					(TableVersion v1, TableVersion v2, std::stringstream* diffReport = 0, 
+																std::map<std::string /* uid */, std::vector<std::string /* colName */>>* v1ModifiedRecords = 0) const;
 
 	// Getters
 	const std::string&     		getTableName					(void) const;
 	const std::string&     		getTableDescription				(void) const;
 	std::set<TableVersion> 		getStoredVersions				(void) const;
 
-	const TableView&    		getView							(void) const;
-	TableView*          		getViewP						(void);
+	const TableView&    		getView							(TableVersion version = TableVersion(TableVersion::INVALID)) const;
+	TableView*          		getViewP						(TableVersion version = TableVersion(TableVersion::INVALID));
 	TableView*          		getMockupViewP					(void);
 	const TableVersion& 		getViewVersion					(void) const;  // always the active one
 
@@ -65,7 +67,7 @@ class TableBase
 	void         				setTableName					(const std::string& tableName);
 	void         				setTableDescription				(const std::string& tableDescription);
 	bool         				setActiveView					(TableVersion version);
-	TableVersion 				copyView						(const TableView& sourceView, TableVersion destinationVersion, const std::string& author);
+	TableVersion 				copyView						(const TableView& sourceView, TableVersion destinationVersion, const std::string& author, bool looseColumnMatching = false);
 	TableVersion 				mergeViews						(
 																const TableView&                          sourceViewA,
 																const TableView&                          sourceViewB,
@@ -91,6 +93,12 @@ class TableBase
 
 	unsigned int 				getNumberOfStoredViews			(void) const;
 
+
+  // ----- member variables
+
+  public:
+	static const std::string			GROUP_CACHE_PREPEND;	
+
   protected:
 	std::string 						tableName_;
 	std::string 						tableDescription_;
@@ -101,7 +109,8 @@ class TableBase
 	// Version and data associated to make it work like a cache.
 	// It will be very likely just 1 version
 	// NOTE: must be very careful to setVersion of view after manipulating (e.g. copy from different version view)
-	std::map<TableVersion, TableView> 	tableViews_;
+	std::map<TableVersion, TableView> 	tableViews_;	
+
 };
 // clang-format on
 }  // namespace ots

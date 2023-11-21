@@ -422,6 +422,12 @@ catch(const std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Encountered unknown error in Iterator thread." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << ss.str();
 
 	// lockout the messages array for the remainder of the scope

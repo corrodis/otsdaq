@@ -41,6 +41,7 @@ void get(TableBase*&                          table,
 
 	if(table == 0)
 	{
+		std::unique_lock<std::mutex> lock(tableReaderMutex_);
 		// try making table table plugin, if fails use TableBase
 		try
 		{
@@ -59,7 +60,6 @@ void get(TableBase*&                          table,
 			//	if it fails, then probably something wrong with Info file
 			try
 			{
-				std::unique_lock<std::mutex> lock(tableReaderMutex_);
 				table = new TableBase(tableName);
 			}
 			catch(...)  // failure so cleanup any halfway complete table work
@@ -258,6 +258,12 @@ void get(TableBase*&                          table,
 	catch(...)
 	{
 		__SS__ << "Unknown error occurred while getting and filling Table \"" << tableName << "\" version:" << version << std::endl;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__SS_THROW__;
 	}
 

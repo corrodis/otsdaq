@@ -67,6 +67,7 @@ GatewaySupervisor::GatewaySupervisor(xdaq::ApplicationStub* s)
 	INIT_MF("." /*directory used is USER_DATA/LOG/.*/);
 
 	__COUT__ << "Constructing" << __E__;
+	
 
 	if(0)  // to test xdaq exception what
 	{
@@ -738,6 +739,12 @@ try
 	catch(...)
 	{
 		__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT_ERR__ << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}  // end stateMachineIterationBreakpoint() catch
@@ -753,6 +760,12 @@ catch(const std::runtime_error& e)
 catch(...)
 {
 	__SS__ << "Unknown error caught handling iteration breakpoint command." << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << ss.str();
 }  // end stateMachineIterationBreakpoint() catch
 
@@ -1106,6 +1119,12 @@ std::string GatewaySupervisor::attemptStateMachineTransition(HttpXmlDocument*   
 			{
 				// ERROR
 				__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__SS_THROW__;
 			}  // End write run info into db
 
@@ -1235,6 +1254,12 @@ void GatewaySupervisor::statePaused(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO PAUSE TIME UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End update pause time into run info db
 	}      // end update Run Info handling
@@ -1289,6 +1314,12 @@ void GatewaySupervisor::stateRunning(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO RESUME TIME UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End update pause time into run info db
 	}      // end update Run Info handling
@@ -1349,6 +1380,12 @@ void GatewaySupervisor::stateHalted(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1409,6 +1446,12 @@ void GatewaySupervisor::stateConfigured(toolbox::fsm::FiniteStateMachine& /*fsm*
 		{
 			// ERROR
 			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1472,6 +1515,12 @@ void GatewaySupervisor::inError(toolbox::fsm::FiniteStateMachine& /*fsm*/)
 		{
 			// ERROR
 			__SS__ << "RUN INFO INSERT OR UPDATE INTO DATABASE FAILED!!! " << __E__;
+			try	{ throw; } //one more try to printout extra info
+			catch(const std::exception &e)
+			{
+				ss << "Exception message: " << e.what();
+			}
+			catch(...){}
 			__SS_THROW__;
 		}  // End write run info into db
 	}      // end update Run Info handling
@@ -1494,6 +1543,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 	//__COUT__ << "Failed Message: " << failedException.message() << __E__;
 	//__COUT__ << "Failed Message: " << failedException.what() << __E__;
 
+	bool asyncFailureIdentified = false;
 	__SS__;
 	// handle async error message differently
 	if(RunControlStateMachine::asyncFailureReceived_)
@@ -1503,6 +1553,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 		   << failedException.message() << __E__;  // rbegin()->at("message") << __E__;
 		//<< failedEvent.getException().what() << __E__;
 		RunControlStateMachine::asyncFailureReceived_ = false;  // clear async error
+		asyncFailureIdentified = true;
 	}
 	else
 	{
@@ -1516,7 +1567,7 @@ void GatewaySupervisor::enteringError(toolbox::Event::Reference e)
 
 	theStateMachine_.setErrorMessage(ss.str());
 
-	if(theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
+	if(!asyncFailureIdentified && theStateMachine_.getCurrentStateName() == RunControlStateMachine::FAILED_STATE_NAME)
 		__COUT__ << "Already in failed state, so not broadcasting Error transition again." << __E__;
 	else 	// move everything else to Error!
 		broadcastMessage(SOAPUtilities::makeSOAPMessageReference(RunControlStateMachine::ERROR_TRANSITION_NAME));
@@ -1626,11 +1677,11 @@ try
 			true /*doNotLoadMember */,
 			&groupTypeString
 			);
-		if(groupTypeString != ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION)
+		if(groupTypeString != ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION)
 		{
 			__SS__ << "Illegal attempted configuration group type. The table group '" <<
 				theConfigurationTableGroup_.first << "(" << theConfigurationTableGroup_.second << ")' is of type " <<
-				groupTypeString << ". It must be " << ConfigurationManager::ACTIVE_GROUP_NAME_CONFIGURATION << "." << __E__;
+				groupTypeString << ". It must be " << ConfigurationManager::GROUP_TYPE_NAME_CONFIGURATION << "." << __E__;
 			__SS_THROW__;
 		}
 
@@ -1661,6 +1712,12 @@ try
 	{
 		__SS__ << "\nTransition to Configuring interrupted! System Alias " << systemAlias << " was translated to " << theConfigurationTableGroup_.first << " ("
 		       << theConfigurationTableGroup_.second << ") but could not be loaded and initialized." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		ss << "\n\nTo help debug this problem, try activating this group in the Configuration "
 		      "GUI "
 		   << " and detailed errors will be shown." << __E__;
@@ -1743,6 +1800,12 @@ try
 				__SS__ << "\nTransition to Configuring interrupted! There was an error "
 				          "identified "
 				       << "during the configuration dump attempt.\n\n " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__COUT_ERR__ << "\n" << ss.str();
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				return;
@@ -1829,6 +1892,12 @@ catch(...)
 	__SS__ << "\nTransition to Configuring interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionConfiguring() catch
@@ -1870,6 +1939,12 @@ catch(...)
 	__SS__ << "\nTransition to Halting interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionHalting() catch
@@ -1927,6 +2002,12 @@ catch(...)
 	__SS__ << "\nTransition to Shutting Down interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionShuttingDown() catch
@@ -1981,6 +2062,12 @@ catch(...)
 	__SS__ << "\nTransition to Starting Up interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStartingUp() catch
@@ -2022,6 +2109,12 @@ catch(...)
 	__SS__ << "\nTransition to Initializing interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionInitializing() catch
@@ -2088,6 +2181,12 @@ catch(...)
 	__SS__ << "\nTransition to Pausing interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionPausing() catch
@@ -2144,6 +2243,12 @@ catch(...)
 	__SS__ << "\nTransition to Resuming interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionResuming() catch
@@ -2239,6 +2344,12 @@ try
 				__SS__ << "\nTransition to Running interrupted! There was an error "
 				          "identified "
 				       << "during the configuration dump attempt.\n\n " << __E__;
+				try	{ throw; } //one more try to printout extra info
+				catch(const std::exception &e)
+				{
+					ss << "Exception message: " << e.what();
+				}
+				catch(...){}
 				__COUT_ERR__ << "\n" << ss.str();
 				XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 				return;
@@ -2293,6 +2404,12 @@ catch(...)
 	__SS__ << "\nTransition to Starting Run interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStarting() catch
@@ -2358,6 +2475,12 @@ catch(...)
 	__SS__ << "\nTransition to Stopping Run interrupted! There was an unknown error "
 	          "identified. "
 	       << __E__;
+	try	{ throw; } //one more try to printout extra info
+	catch(const std::exception &e)
+	{
+		ss << "Exception message: " << e.what();
+	}
+	catch(...){}
 	__COUT_ERR__ << "\n" << ss.str();
 	XCEPT_RAISE(toolbox::fsm::exception::Exception, ss.str());
 }  // end transitionStopping() catch
@@ -2951,6 +3074,8 @@ void GatewaySupervisor::broadcastMessage(xoap::MessageReference message)
 						{
 							std::stringstream waitSs;
 							waitSs << "Waiting on " << numOfThreadsWithWork << " of " << numberOfThreads << " threads to finish. Command = " << command;
+							if(command == RunControlStateMachine::CONFIGURE_TRANSITION_NAME)
+								waitSs << " w/" + RunControlStateMachine::getLastAttemptedConfigureGroup();
 							if(numOfThreadsWithWork == 1)
 							{
 								waitSs << ".. " << broadcastThreadStructs_[lastUnfinishedThread]->getAppInfo().getName() << ":"
@@ -3262,6 +3387,12 @@ void GatewaySupervisor::loginRequest(xgi::Input* in, xgi::Output* out)
 	{
 		__SS__ << "An unknown error was encountered handling Command '" << Command << ".' "
 		       << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT__ << "\n" << ss.str();
 		HttpXmlDocument xmldoc;
 		xmldoc.addTextElementToData("Error", ss.str());
@@ -3349,6 +3480,15 @@ void GatewaySupervisor::forceSupervisorPropertyValues()
 	                                                  "gatewayLaunchOTS | gatewayLaunchWiz");
 	//	CorePropertySupervisorBase::setSupervisorProperty(CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.NeedUsernameRequestTypes,
 	//			"StateMachine*"); //for all stateMachineXgiHandler requests
+
+	if(readOnly_)
+	{
+        CorePropertySupervisorBase::setSupervisorProperty(
+            CorePropertySupervisorBase::SUPERVISOR_PROPERTIES.UserPermissionsThreshold,
+            "*=0 | getSystemMessages=1 | getDesktopIcons=1");  // block users from writing if no write access
+		__COUT__ << "readOnly true in setSupervisorProperty" << __E__;
+
+	}
 }  // end forceSupervisorPropertyValues()
 
 //==============================================================================
@@ -3866,6 +4006,11 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 		else if(requestType == "getCurrentState")
 		{
 			xmlOut.addTextElementToData("current_state", theStateMachine_.getCurrentStateName());
+			const std::string& gatewayStatus = allSupervisorInfo_.getGatewayInfo().getStatus();
+			if(gatewayStatus.size() > std::string(RunControlStateMachine::FAILED_STATE_NAME).length() && 
+				(gatewayStatus[0] == 'F' || gatewayStatus[0] == 'E')) //assume it is Failed or Error and send to state machine
+				xmlOut.addTextElementToData("current_error", gatewayStatus);
+
 			xmlOut.addTextElementToData("in_transition", theStateMachine_.isInTransition() ? "1" : "0");
 			if(theStateMachine_.isInTransition())
 				xmlOut.addTextElementToData("transition_progress", RunControlStateMachine::theProgressBar_.readPercentageString());
@@ -4111,6 +4256,12 @@ void GatewaySupervisor::request(xgi::Input* in, xgi::Output* out)
 	{
 		__SS__ << "An unknown error was encountered handling requestType '" << requestType << ".' "
 		       << "Please check the printouts to debug." << __E__;
+		try	{ throw; } //one more try to printout extra info
+		catch(const std::exception &e)
+		{
+			ss << "Exception message: " << e.what();
+		}
+		catch(...){}
 		__COUT__ << "\n" << ss.str();
 		xmlOut.addTextElementToData("Error", ss.str());
 	}
