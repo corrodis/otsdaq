@@ -636,14 +636,26 @@ void GatewaySupervisor::makeSystemLogEntry(std::string entryText)
 //==============================================================================
 void GatewaySupervisor::Default(xgi::Input* /*in*/, xgi::Output* out)
 {
+	ConfigurationTree configLinkNode = CorePropertySupervisorBase::theConfigurationManager_->getSupervisorTableNode(supervisorContextUID_, supervisorApplicationUID_);
+
+	std::string baseHTML = "Desktop.html";
+	try {
+	    baseHTML = configLinkNode.getNode("DesktopHTML").getValue<std::string>();
+	} catch(...) {
+		__COUT__ << "No 'DesktopHTML' setting found, using default '" << baseHTML << "'" << __E__;
+	} 
+
 	if(!supervisorGuiHasBeenLoaded_ && (supervisorGuiHasBeenLoaded_ = true))  // make system logbook entry that ots has been started
-		makeSystemLogEntry("ots started.");
+		makeSystemLogEntry("ots started, using '"+baseHTML+"'");
+
+
 
 	*out << "<!DOCTYPE HTML><html lang='en'><head><title>ots</title>" << GatewaySupervisor::getIconHeaderString() <<
 	    // end show ots icon
 	    "</head>"
 	     << "<frameset col='100%' row='100%'>"
-	     << "<frame src='/WebPath/html/Desktop.html?urn=" << this->getApplicationDescriptor()->getLocalId() << "&securityType=" << securityType_
+	     << "<frame src='/WebPath/html/" << baseHTML 
+		 << "?urn=" << this->getApplicationDescriptor()->getLocalId() << "&securityType=" << securityType_
 	     << "'></frameset></html>";
 }  // end Default()
 
